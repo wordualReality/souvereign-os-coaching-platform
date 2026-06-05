@@ -1,0 +1,7 @@
+aggregate,description,owned_by,key_relations,notes
+cohort,Group container for clients moving through same program,Project B,"tenant, program, coaches, members",Can be fixed-start or rolling.
+cohort_program,Published journey/program attached to cohort,Project B,"journey_version, schedule, content plan",May instantiate from template.
+cohort_membership,Client membership in cohort,Project B,"client, cohort, enrollment","Can be active, paused, removed, completed."
+cohort_schedule,Time-based delivery schedule,Project B,"cohort, step availability",Supports week/day/specific date unlock.
+cohort_message_thread,Group message context,Project B,"cohort, messages",Optional feature-gated.
+cohort_progress_projection,Aggregated cohort progress,Project B projection,"membership, completion, reflection",No medical/state truth.

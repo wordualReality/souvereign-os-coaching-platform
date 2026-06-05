@@ -1,0 +1,14 @@
+order,execution_id,title,source,required_before,output
+1,PB-V11-READ-001,Read v1.1 executive start here,00_START_HERE/00_EXECUTIVE_START_HERE_V1_1.md,all implementation,shared current truth
+2,PB-V11-READ-002,Read v1.1 delta and merge decisions,01_V1_1_DELTA/ProjectB_v1_1_Delta_and_Merge_Decisions.md,Cursor execution,hardening precedence understood
+3,PB-V11-HARD-001,Apply manual client provisioning model,40_.../01_Manual_Client_Provisioning_Wizard,client setup implementation,client provisioning API/UI/data tasks
+4,PB-V11-HARD-002,Apply coach ownership model,40_.../02_Coach_Assignment_Client_Ownership,coach admin/client assignment,coach/client permissions
+5,PB-V11-HARD-003,Apply journey template model,40_.../03_Journey_Template_Model,journey authoring,template and clone semantics
+6,PB-V11-HARD-004,Apply cohort/group program model,40_.../04_Cohort_Group_Program_Model,group delivery,cohort scheduling and membership
+7,PB-V11-HARD-005,Apply conditional branching rules,40_.../05_Conditional_Branching_Rules,dynamic journeys,branch rule model and validation
+8,PB-V11-HARD-006,Apply journey builder interaction model,40_.../06_Journey_Builder_Interaction_Model,frontend build,builder screens/states
+9,PB-V11-HARD-007,Apply client app integration states,40_.../07_Client_App_Integration_States,client app build,member app journey states
+10,PB-V11-HARD-008,Apply API/Event/Data patches,40_.../08_API_Event_Data_Patch,repo contracts,patched API/event/data backlog
+11,PB-V11-HARD-009,Apply hardening tests and stories,40_.../09_User_Stories_Acceptance_Tests,test build,hardening test coverage
+12,PB-V11-HARD-010,Run hardening Cursor prompts,40_.../10_Cursor_Prompts,implementation,scoped Cursor output
+13,PB-V10-BASE-001,Continue baseline v1.0 execution order,30_BASELINE_FINAL_V1_0_EXTRACTS/ProjectB_Cursor_Execution_Order_v1_0.csv,after hardening precedence,full platform implementation

@@ -1,0 +1,4140 @@
+openapi: 3.1.0
+info:
+  title: Project B Coach Studio / Tenant Journey Platform API
+  version: 1.0.0
+  summary: Final OpenAPI 3.1 contract seed for Project B dev handoff.
+  description: Project B owns Coach Studio, tenant journey delivery, governed commerce,
+    branded client delivery, projections, audit, and support surfaces. Project A/Core
+    and DB/Canonical remain external truth providers. This contract is implementation-grade
+    seed and must be reconciled with final DDL and event schema packs before freeze.
+servers:
+- url: https://api.sovereign-os.example.com
+  description: Production placeholder
+- url: https://staging-api.sovereign-os.example.com
+  description: Staging placeholder
+- url: http://localhost:3000
+  description: Local development
+tags:
+- name: System
+- name: Tenants
+- name: Access
+- name: Blueprints
+- name: Branding
+- name: Coach Studio
+- name: Journey Publication
+- name: Content
+- name: Canonical Adapter
+- name: Commercial
+- name: Payments
+- name: Enrollment
+- name: Member Delivery
+- name: Progress
+- name: Messaging
+- name: Notifications
+- name: Community
+- name: Analytics
+- name: Audit
+- name: Support
+security:
+- bearerAuth: []
+paths:
+  /project-b/v1/health:
+    get:
+      tags:
+      - System
+      operationId: getHealth
+      summary: Health check
+      description: 'Owner module: M-017. Actor: system. Produced event: none. All
+        tenant-scoped operations must enforce Project B tenant boundary and Core access
+        checks where applicable.'
+      x-owner-module: M-017
+      x-actor: system
+      x-event-produced: none
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security: []
+  /project-b/v1/tenants:
+    post:
+      tags:
+      - Tenants
+      operationId: createTenant
+      summary: Create tenant shell and boundary context
+      description: 'Owner module: M-001. Actor: platform_operator. Produced event:
+        project_b.tenant.created.v1. All tenant-scoped operations must enforce Project
+        B tenant boundary and Core access checks where applicable.'
+      x-owner-module: M-001
+      x-actor: platform_operator
+      x-event-produced: project_b.tenant.created.v1
+      parameters:
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantResponse'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantRequest'
+    get:
+      tags:
+      - Tenants
+      operationId: listTenants
+      summary: List tenants visible to platform operator
+      description: 'Owner module: M-001. Actor: platform_operator. Produced event:
+        none. All tenant-scoped operations must enforce Project B tenant boundary
+        and Core access checks where applicable.'
+      x-owner-module: M-001
+      x-actor: platform_operator
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/cursor'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/context:
+    get:
+      tags:
+      - Tenants
+      operationId: getTenantContext
+      summary: Resolve tenant execution context
+      description: 'Owner module: M-001. Actor: tenant_admin,support. Produced event:
+        none. All tenant-scoped operations must enforce Project B tenant boundary
+        and Core access checks where applicable.'
+      x-owner-module: M-001
+      x-actor: tenant_admin,support
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantContextResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/status:
+    patch:
+      tags:
+      - Tenants
+      operationId: updateTenantStatus
+      summary: Update tenant operational status
+      description: 'Owner module: M-001. Actor: platform_operator. Produced event:
+        project_b.tenant.status_changed.v1. All tenant-scoped operations must enforce
+        Project B tenant boundary and Core access checks where applicable.'
+      x-owner-module: M-001
+      x-actor: platform_operator
+      x-event-produced: project_b.tenant.status_changed.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTenantStatusRequest'
+  /project-b/v1/tenants/{tenant_id}/roles:
+    post:
+      tags:
+      - Access
+      operationId: assignTenantRole
+      summary: Assign tenant role
+      description: 'Owner module: M-002. Actor: tenant_admin. Produced event: project_b.role.assigned.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-002
+      x-actor: tenant_admin
+      x-event-produced: project_b.role.assigned.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id001
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantRoleAssignmentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id001
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignTenantRoleRequest'
+  /project-b/v1/tenants/{tenant_id}/roles/{role_assignment_id}:
+    delete:
+      tags:
+      - Access
+      operationId: revokeTenantRole
+      summary: Revoke tenant role
+      description: 'Owner module: M-002. Actor: tenant_admin. Produced event: project_b.role.revoked.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-002
+      x-actor: tenant_admin
+      x-event-produced: project_b.role.revoked.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/role_assignment_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandAcceptedResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/access/check:
+    post:
+      tags:
+      - Access
+      operationId: checkProjectBAccess
+      summary: Evaluate Project B permission using Core decision envelope
+      description: 'Owner module: M-002. Actor: system. Produced event: project_b.access.checked.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-002
+      x-actor: system
+      x-event-produced: project_b.access.checked.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id002
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessCheckResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id002
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessCheckRequest'
+  /project-b/v1/tenants/{tenant_id}/blueprints/drafts:
+    post:
+      tags:
+      - Blueprints
+      operationId: createBlueprintDraft
+      summary: Create tenant app blueprint draft
+      description: 'Owner module: M-003. Actor: tenant_admin. Produced event: none.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-003
+      x-actor: tenant_admin
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlueprintDraftResponse'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBlueprintDraftRequest'
+  /project-b/v1/tenants/{tenant_id}/blueprints/drafts/{blueprint_id}:
+    patch:
+      tags:
+      - Blueprints
+      operationId: updateBlueprintDraft
+      summary: Update tenant app blueprint draft
+      description: 'Owner module: M-003. Actor: tenant_admin. Produced event: none.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-003
+      x-actor: tenant_admin
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/blueprint_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlueprintDraftResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBlueprintDraftRequest'
+  /project-b/v1/tenants/{tenant_id}/blueprints/{blueprint_id}/publish:
+    post:
+      tags:
+      - Blueprints
+      operationId: publishBlueprintVersion
+      summary: Publish blueprint version
+      description: 'Owner module: M-003. Actor: tenant_admin. Produced event: project_b.blueprint.version_published.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-003
+      x-actor: tenant_admin
+      x-event-produced: project_b.blueprint.version_published.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/blueprint_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id003
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlueprintVersionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id003
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishBlueprintRequest'
+  /project-b/v1/tenants/{tenant_id}/blueprints/active:
+    get:
+      tags:
+      - Blueprints
+      operationId: getActiveBlueprint
+      summary: Get active tenant blueprint
+      description: 'Owner module: M-003. Actor: tenant_admin,coach,client. Produced
+        event: none. All tenant-scoped operations must enforce Project B tenant boundary
+        and Core access checks where applicable.'
+      x-owner-module: M-003
+      x-actor: tenant_admin,coach,client
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlueprintVersionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/branding/theme:
+    get:
+      tags:
+      - Branding
+      operationId: resolveThemeForTenant
+      summary: Resolve theme tokens for tenant surface
+      description: 'Owner module: M-004. Actor: client,coach. Produced event: none.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-004
+      x-actor: client,coach
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingThemeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+    put:
+      tags:
+      - Branding
+      operationId: upsertBrandingTheme
+      summary: Create or update branding theme
+      description: 'Owner module: M-004. Actor: tenant_admin. Produced event: project_b.branding_theme.published.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-004
+      x-actor: tenant_admin
+      x-event-produced: project_b.branding_theme.published.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingThemeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertBrandingThemeRequest'
+  /project-b/v1/tenants/{tenant_id}/journeys/drafts:
+    post:
+      tags:
+      - Coach Studio
+      operationId: createJourneyDraft
+      summary: Create journey draft
+      description: 'Owner module: M-005. Actor: coach,admin. Produced event: project_b.journey_draft.created.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-005
+      x-actor: coach,admin
+      x-event-produced: project_b.journey_draft.created.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JourneyDraftResponse'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateJourneyDraftRequest'
+    get:
+      tags:
+      - Coach Studio
+      operationId: listJourneyDrafts
+      summary: List journey drafts
+      description: 'Owner module: M-005. Actor: coach,admin. Produced event: none.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-005
+      x-actor: coach,admin
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/cursor'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JourneyDraftListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/journeys/drafts/{draft_id}:
+    get:
+      tags:
+      - Coach Studio
+      operationId: getJourneyDraft
+      summary: Get journey draft
+      description: 'Owner module: M-005. Actor: coach,admin. Produced event: none.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-005
+      x-actor: coach,admin
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/draft_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JourneyDraftResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - Coach Studio
+      operationId: updateJourneyDraft
+      summary: Update journey draft
+      description: 'Owner module: M-005. Actor: coach,admin. Produced event: project_b.journey_draft.updated.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-005
+      x-actor: coach,admin
+      x-event-produced: project_b.journey_draft.updated.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/draft_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JourneyDraftResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateJourneyDraftRequest'
+  /project-b/v1/tenants/{tenant_id}/journeys/drafts/{draft_id}/validate:
+    post:
+      tags:
+      - Coach Studio
+      operationId: validateJourneyDraft
+      summary: Validate draft composition and canonical references
+      description: 'Owner module: M-005/M-007. Actor: coach,admin. Produced event:
+        project_b.journey_draft.validation_requested.v1. All tenant-scoped operations
+        must enforce Project B tenant boundary and Core access checks where applicable.'
+      x-owner-module: M-005/M-007
+      x-actor: coach,admin
+      x-event-produced: project_b.journey_draft.validation_requested.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/draft_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id004
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResultResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id004
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateJourneyDraftRequest'
+  /project-b/v1/tenants/{tenant_id}/journeys/drafts/{draft_id}/publish:
+    post:
+      tags:
+      - Journey Publication
+      operationId: publishJourneyVersion
+      summary: Publish immutable journey version
+      description: 'Owner module: M-008. Actor: coach,admin. Produced event: project_b.journey.version_published.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-008
+      x-actor: coach,admin
+      x-event-produced: project_b.journey.version_published.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/draft_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id005
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JourneyVersionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id005
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishJourneyRequest'
+  /project-b/v1/tenants/{tenant_id}/journeys/versions/{journey_version_id}:
+    get:
+      tags:
+      - Journey Publication
+      operationId: getJourneyVersion
+      summary: Get published immutable journey version
+      description: 'Owner module: M-008. Actor: coach,admin,system. Produced event:
+        none. All tenant-scoped operations must enforce Project B tenant boundary
+        and Core access checks where applicable.'
+      x-owner-module: M-008
+      x-actor: coach,admin,system
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/journey_version_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JourneyVersionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/content/assets:
+    post:
+      tags:
+      - Content
+      operationId: uploadContentAsset
+      summary: Create content asset metadata and upload intent
+      description: 'Owner module: M-006. Actor: coach,admin. Produced event: project_b.content_asset.uploaded.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-006
+      x-actor: coach,admin
+      x-event-produced: project_b.content_asset.uploaded.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id006
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentAssetResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id006
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContentAssetRequest'
+    get:
+      tags:
+      - Content
+      operationId: listContentAssets
+      summary: List tenant content assets
+      description: 'Owner module: M-006. Actor: coach,admin. Produced event: none.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-006
+      x-actor: coach,admin
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/cursor'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentAssetListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/content/assets/{asset_id}/manifest:
+    get:
+      tags:
+      - Content
+      operationId: getContentAssetManifest
+      summary: Get delivery manifest for asset
+      description: 'Owner module: M-006. Actor: coach,client,system. Produced event:
+        none. All tenant-scoped operations must enforce Project B tenant boundary
+        and Core access checks where applicable.'
+      x-owner-module: M-006
+      x-actor: coach,client,system
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/asset_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentAssetManifestResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/canonical/ref-validations:batch:
+    post:
+      tags:
+      - Canonical Adapter
+      operationId: validateCanonicalRefsBatch
+      summary: Validate canonical references through DB Canonical adapter
+      description: 'Owner module: M-007. Actor: coach,admin,system. Produced event:
+        project_b.canonical_binding.validated.v1. All tenant-scoped operations must
+        enforce Project B tenant boundary and Core access checks where applicable.'
+      x-owner-module: M-007
+      x-actor: coach,admin,system
+      x-event-produced: project_b.canonical_binding.validated.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id007
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CanonicalRefValidationBatchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id007
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CanonicalRefValidationBatchRequest'
+  /project-b/v1/tenants/{tenant_id}/leads:
+    post:
+      tags:
+      - Commercial
+      operationId: createLead
+      summary: Create lead or prospect
+      description: 'Owner module: M-009. Actor: public,coach. Produced event: project_b.lead.created.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-009
+      x-actor: public,coach
+      x-event-produced: project_b.lead.created.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadResponse'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLeadRequest'
+    get:
+      tags:
+      - Commercial
+      operationId: listLeads
+      summary: List tenant leads
+      description: 'Owner module: M-009. Actor: coach,admin. Produced event: none.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-009
+      x-actor: coach,admin
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/cursor'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/leads/{lead_id}/stage:
+    patch:
+      tags:
+      - Commercial
+      operationId: updateLeadStage
+      summary: Move lead pipeline stage
+      description: 'Owner module: M-009. Actor: coach,admin. Produced event: project_b.lead.stage_changed.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-009
+      x-actor: coach,admin
+      x-event-produced: project_b.lead.stage_changed.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/lead_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLeadStageRequest'
+  /project-b/v1/tenants/{tenant_id}/discovery-calls:
+    post:
+      tags:
+      - Commercial
+      operationId: scheduleDiscoveryCall
+      summary: Book discovery call
+      description: 'Owner module: M-009. Actor: prospect,coach. Produced event: project_b.discovery_call.booked.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-009
+      x-actor: prospect,coach
+      x-event-produced: project_b.discovery_call.booked.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoveryCallResponse'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleDiscoveryCallRequest'
+  /project-b/v1/tenants/{tenant_id}/offers:
+    post:
+      tags:
+      - Commercial
+      operationId: createOffer
+      summary: Create offer draft
+      description: 'Owner module: M-009. Actor: coach,admin. Produced event: project_b.offer.created.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-009
+      x-actor: coach,admin
+      x-event-produced: project_b.offer.created.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferResponse'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOfferRequest'
+  /project-b/v1/tenants/{tenant_id}/offers/{offer_id}:
+    get:
+      tags:
+      - Commercial
+      operationId: getOffer
+      summary: Get offer
+      description: 'Owner module: M-009. Actor: prospect,coach,admin. Produced event:
+        none. All tenant-scoped operations must enforce Project B tenant boundary
+        and Core access checks where applicable.'
+      x-owner-module: M-009
+      x-actor: prospect,coach,admin
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/offer_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/offers/{offer_id}/checkout-sessions:
+    post:
+      tags:
+      - Payments
+      operationId: createCheckoutSession
+      summary: Start checkout session
+      description: 'Owner module: M-010. Actor: prospect,member. Produced event: project_b.checkout.started.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-010
+      x-actor: prospect,member
+      x-event-produced: project_b.checkout.started.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/offer_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutSessionResponse'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCheckoutSessionRequest'
+  /project-b/v1/payments/webhooks/{provider}:
+    post:
+      tags:
+      - Payments
+      operationId: ingestPaymentWebhook
+      summary: Ingest payment webhook idempotently
+      description: 'Owner module: M-010. Actor: provider. Produced event: project_b.payment.succeeded.v1/project_b.payment.failed.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-010
+      x-actor: provider
+      x-event-produced: project_b.payment.succeeded.v1/project_b.payment.failed.v1
+      parameters:
+      - $ref: '#/components/parameters/provider'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id008
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookAcceptedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id008
+      security:
+      - webhookSignature: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentWebhookEnvelope'
+  /project-b/v1/tenants/{tenant_id}/clients/{client_id}/onboarding/start:
+    post:
+      tags:
+      - Enrollment
+      operationId: startOnboarding
+      summary: Start onboarding
+      description: 'Owner module: M-011. Actor: client,coach. Produced event: project_b.onboarding.started.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-011
+      x-actor: client,coach
+      x-event-produced: project_b.onboarding.started.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/client_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingSessionResponse'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartOnboardingRequest'
+  /project-b/v1/tenants/{tenant_id}/clients/{client_id}/assignments:
+    post:
+      tags:
+      - Enrollment
+      operationId: createClientAssignment
+      summary: Assign journey or offer to client
+      description: 'Owner module: M-011. Actor: coach,admin. Produced event: project_b.client_assignment.created.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-011
+      x-actor: coach,admin
+      x-event-produced: project_b.client_assignment.created.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/client_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientAssignmentResponse'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClientAssignmentRequest'
+    get:
+      tags:
+      - Enrollment
+      operationId: listClientAssignments
+      summary: List client assignments
+      description: 'Owner module: M-011. Actor: coach,admin,client. Produced event:
+        none. All tenant-scoped operations must enforce Project B tenant boundary
+        and Core access checks where applicable.'
+      x-owner-module: M-011
+      x-actor: coach,admin,client
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/client_id'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/cursor'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientAssignmentListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/enrollments/{enrollment_id}/activate:
+    post:
+      tags:
+      - Enrollment
+      operationId: activateEnrollment
+      summary: Activate enrollment if payment, agreement and Core gates pass
+      description: 'Owner module: M-011/M-010/M-002. Actor: coach,admin,system. Produced
+        event: project_b.enrollment.activated.v1. All tenant-scoped operations must
+        enforce Project B tenant boundary and Core access checks where applicable.'
+      x-owner-module: M-011/M-010/M-002
+      x-actor: coach,admin,system
+      x-event-produced: project_b.enrollment.activated.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/enrollment_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id009
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id009
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivateEnrollmentRequest'
+  /project-b/v1/tenants/{tenant_id}/enrollments/{enrollment_id}:
+    get:
+      tags:
+      - Enrollment
+      operationId: getEnrollment
+      summary: Get enrollment
+      description: 'Owner module: M-011. Actor: coach,admin,client. Produced event:
+        none. All tenant-scoped operations must enforce Project B tenant boundary
+        and Core access checks where applicable.'
+      x-owner-module: M-011
+      x-actor: coach,admin,client
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/enrollment_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/members/{member_id}/home:
+    get:
+      tags:
+      - Member Delivery
+      operationId: getMemberHome
+      summary: Get member home projection
+      description: 'Owner module: M-012. Actor: client. Produced event: none. All
+        tenant-scoped operations must enforce Project B tenant boundary and Core access
+        checks where applicable.'
+      x-owner-module: M-012
+      x-actor: client
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/member_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberHomeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/enrollments/{enrollment_id}/steps/next:
+    get:
+      tags:
+      - Member Delivery
+      operationId: getNextStep
+      summary: Get next available step
+      description: 'Owner module: M-012. Actor: client. Produced event: none. All
+        tenant-scoped operations must enforce Project B tenant boundary and Core access
+        checks where applicable.'
+      x-owner-module: M-012
+      x-actor: client
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/enrollment_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NextStepResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/enrollments/{enrollment_id}/steps/{step_id}/complete:
+    post:
+      tags:
+      - Progress
+      operationId: completeJourneyStep
+      summary: Complete journey step
+      description: 'Owner module: M-013. Actor: client. Produced event: project_b.step.completed.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-013
+      x-actor: client
+      x-event-produced: project_b.step.completed.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/enrollment_id'
+      - $ref: '#/components/parameters/step_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id010
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StepCompletionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id010
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteJourneyStepRequest'
+  /project-b/v1/tenants/{tenant_id}/enrollments/{enrollment_id}/reflections:
+    post:
+      tags:
+      - Progress
+      operationId: submitReflection
+      summary: Submit reflection or practice log
+      description: 'Owner module: M-013. Actor: client. Produced event: project_b.reflection.submitted.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-013
+      x-actor: client
+      x-event-produced: project_b.reflection.submitted.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/enrollment_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id011
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReflectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id011
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitReflectionRequest'
+  /project-b/v1/tenants/{tenant_id}/enrollments/{enrollment_id}/progress:
+    get:
+      tags:
+      - Progress
+      operationId: getEnrollmentProgress
+      summary: Get enrollment progress
+      description: 'Owner module: M-013/M-016. Actor: client,coach,admin. Produced
+        event: none. All tenant-scoped operations must enforce Project B tenant boundary
+        and Core access checks where applicable.'
+      x-owner-module: M-013/M-016
+      x-actor: client,coach,admin
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/enrollment_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentProgressResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/messages:
+    post:
+      tags:
+      - Messaging
+      operationId: sendMessage
+      summary: Send coach/client message
+      description: 'Owner module: M-014. Actor: coach,client. Produced event: project_b.message.sent.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-014
+      x-actor: coach,client
+      x-event-produced: project_b.message.sent.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id012
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id012
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+  /project-b/v1/tenants/{tenant_id}/message-threads:
+    get:
+      tags:
+      - Messaging
+      operationId: listMessageThreads
+      summary: List message threads
+      description: 'Owner module: M-014. Actor: coach,client. Produced event: none.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-014
+      x-actor: coach,client
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/cursor'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageThreadListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/interventions:
+    post:
+      tags:
+      - Messaging
+      operationId: createIntervention
+      summary: Create coach intervention
+      description: 'Owner module: M-014. Actor: coach. Produced event: project_b.intervention.created.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-014
+      x-actor: coach
+      x-event-produced: project_b.intervention.created.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterventionResponse'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInterventionRequest'
+  /project-b/v1/tenants/{tenant_id}/notifications/schedules:
+    post:
+      tags:
+      - Notifications
+      operationId: scheduleNotification
+      summary: Schedule notification
+      description: 'Owner module: M-014. Actor: coach,admin,system. Produced event:
+        project_b.notification.scheduled.v1. All tenant-scoped operations must enforce
+        Project B tenant boundary and Core access checks where applicable.'
+      x-owner-module: M-014
+      x-actor: coach,admin,system
+      x-event-produced: project_b.notification.scheduled.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationScheduleResponse'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleNotificationRequest'
+  /project-b/v1/tenants/{tenant_id}/community/posts:
+    post:
+      tags:
+      - Community
+      operationId: createCommunityPost
+      summary: Create community post
+      description: 'Owner module: M-015. Actor: member,coach. Produced event: project_b.community_post.created.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-015
+      x-actor: member,coach
+      x-event-produced: project_b.community_post.created.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPostResponse'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityPostRequest'
+  /project-b/v1/tenants/{tenant_id}/community/feed:
+    get:
+      tags:
+      - Community
+      operationId: getCommunityFeed
+      summary: Get community feed
+      description: 'Owner module: M-015. Actor: member,coach. Produced event: none.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-015
+      x-actor: member,coach
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/cursor'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityFeedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/community/reports:
+    post:
+      tags:
+      - Community
+      operationId: reportCommunityContent
+      summary: Report community content
+      description: 'Owner module: M-015. Actor: member,coach. Produced event: project_b.community_content.reported.v1.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-015
+      x-actor: member,coach
+      x-event-produced: project_b.community_content.reported.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id013
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityReportResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id013
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportCommunityContentRequest'
+  /project-b/v1/tenants/{tenant_id}/community/moderation-actions:
+    post:
+      tags:
+      - Community
+      operationId: moderateCommunityContent
+      summary: Moderate community content
+      description: 'Owner module: M-015. Actor: tenant_admin,moderator. Produced event:
+        project_b.community_content.moderated.v1. All tenant-scoped operations must
+        enforce Project B tenant boundary and Core access checks where applicable.'
+      x-owner-module: M-015
+      x-actor: tenant_admin,moderator
+      x-event-produced: project_b.community_content.moderated.v1
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '200': &id014
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModerationActionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201': *id014
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerationActionRequest'
+  /project-b/v1/tenants/{tenant_id}/dashboards/business:
+    get:
+      tags:
+      - Analytics
+      operationId: getBusinessDashboard
+      summary: Business dashboard
+      description: 'Owner module: M-016. Actor: coach,admin. Produced event: none.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-016
+      x-actor: coach,admin
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessDashboardResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/dashboards/coach:
+    get:
+      tags:
+      - Analytics
+      operationId: getCoachDashboard
+      summary: Coach progress and risk dashboard
+      description: 'Owner module: M-016. Actor: coach. Produced event: none. All tenant-scoped
+        operations must enforce Project B tenant boundary and Core access checks where
+        applicable.'
+      x-owner-module: M-016
+      x-actor: coach
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachDashboardResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/analytics/revenue:
+    get:
+      tags:
+      - Analytics
+      operationId: getRevenueAnalytics
+      summary: Revenue analytics
+      description: 'Owner module: M-016. Actor: coach,admin. Produced event: none.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-016
+      x-actor: coach,admin
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevenueAnalyticsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/audit:
+    get:
+      tags:
+      - Audit
+      operationId: getAuditTrail
+      summary: Query audit trail
+      description: 'Owner module: M-017. Actor: support,admin. Produced event: none.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-017
+      x-actor: support,admin
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/cursor'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditEventListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/tenants/{tenant_id}/outbox/events:
+    get:
+      tags:
+      - Audit
+      operationId: listOutboxEvents
+      summary: List outbox events for support/replay
+      description: 'Owner module: M-017. Actor: support,admin. Produced event: none.
+        All tenant-scoped operations must enforce Project B tenant boundary and Core
+        access checks where applicable.'
+      x-owner-module: M-017
+      x-actor: support,admin
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/cursor'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OutboxEventListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+  /project-b/v1/support/cases:
+    post:
+      tags:
+      - Support
+      operationId: createSupportCase
+      summary: Create support case
+      description: 'Owner module: M-018. Actor: support,client,coach. Produced event:
+        project_b.support_case.created.v1. All tenant-scoped operations must enforce
+        Project B tenant boundary and Core access checks where applicable.'
+      x-owner-module: M-018
+      x-actor: support,client,coach
+      x-event-produced: project_b.support_case.created.v1
+      parameters:
+      - $ref: '#/components/parameters/X-Correlation-Id'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportCaseResponse'
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSupportCaseRequest'
+  /project-b/v1/support/cases/{case_id}:
+    get:
+      tags:
+      - Support
+      operationId: getSupportCase
+      summary: Get support case
+      description: 'Owner module: M-018. Actor: support. Produced event: none. All
+        tenant-scoped operations must enforce Project B tenant boundary and Core access
+        checks where applicable.'
+      x-owner-module: M-018
+      x-actor: support
+      x-event-produced: none
+      parameters:
+      - $ref: '#/components/parameters/case_id'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportCaseResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT/OIDC
+    serviceToken:
+      type: http
+      scheme: bearer
+      bearerFormat: service-token
+    webhookSignature:
+      type: apiKey
+      in: header
+      name: X-Webhook-Signature
+  parameters:
+    tenant_id:
+      name: tenant_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Project B tenant boundary identifier.
+    blueprint_id:
+      name: blueprint_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    draft_id:
+      name: draft_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    journey_version_id:
+      name: journey_version_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    asset_id:
+      name: asset_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    lead_id:
+      name: lead_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    offer_id:
+      name: offer_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    provider:
+      name: provider
+      in: path
+      required: true
+      schema:
+        type: string
+        enum:
+        - stripe
+        - mollie
+        - adyen
+        - manual
+    client_id:
+      name: client_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    enrollment_id:
+      name: enrollment_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    member_id:
+      name: member_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    step_id:
+      name: step_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    role_assignment_id:
+      name: role_assignment_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    case_id:
+      name: case_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    cursor:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+    X-Correlation-Id:
+      name: X-Correlation-Id
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+      description: Correlation ID; generated by server if absent.
+    Idempotency-Key:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+        minLength: 12
+        maxLength: 128
+      description: Idempotency key for commands; required by implementation for payment/activation/commands.
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Unauthorized:
+      description: Authentication required or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Forbidden:
+      description: Access denied by tenant/Core policy
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Resource not found or hidden by tenant boundary
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Conflict:
+      description: State/version conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Unprocessable:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    RateLimited:
+      description: Rate limited
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    InternalError:
+      description: Internal error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  schemas:
+    Uuid:
+      type: string
+      format: uuid
+    Timestamp:
+      type: string
+      format: date-time
+    Money:
+      type: object
+      required:
+      - currency
+      - amount_minor
+      properties:
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+        amount_minor:
+          type: integer
+          minimum: 0
+    ErrorEnvelope:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          - correlation_id
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
+            correlation_id:
+              type: string
+              format: uuid
+            retryable:
+              type: boolean
+              default: false
+    PageInfo:
+      type: object
+      required:
+      - limit
+      - has_more
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 200
+        next_cursor:
+          type:
+          - string
+          - 'null'
+        has_more:
+          type: boolean
+    CommandAcceptedResponse:
+      type: object
+      required:
+      - status
+      - correlation_id
+      properties:
+        status:
+          type: string
+          enum:
+          - accepted
+        correlation_id:
+          type: string
+          format: uuid
+    WebhookAcceptedResponse:
+      type: object
+      required:
+      - status
+      - event_id
+      properties:
+        status:
+          type: string
+          enum:
+          - accepted
+          - duplicate
+        event_id:
+          type: string
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - ok
+          - degraded
+        version:
+          type: string
+        time:
+          $ref: '#/components/schemas/Timestamp'
+    AuditMeta:
+      type: object
+      properties:
+        correlation_id:
+          type: string
+          format: uuid
+        causation_id:
+          type: string
+          format: uuid
+        actor_id:
+          type: string
+        actor_type:
+          type: string
+          enum:
+          - platform_operator
+          - tenant_admin
+          - coach
+          - client
+          - prospect
+          - support
+          - system
+          - provider
+          - public
+    Tenant:
+      type: object
+      required:
+      - tenant_id
+      - slug
+      - name
+      - status
+      - created_at
+      properties:
+        tenant_id:
+          $ref: '#/components/schemas/Uuid'
+        slug:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+          - draft
+          - active
+          - suspended
+          - archived
+        region:
+          type: string
+        policy_profile:
+          type: string
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+    TenantContext:
+      type: object
+      required:
+      - tenant
+      - features
+      properties:
+        tenant:
+          $ref: '#/components/schemas/Tenant'
+        features:
+          type: object
+          additionalProperties:
+            type: boolean
+        active_blueprint_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+    CreateTenantRequest:
+      type: object
+      required:
+      - slug
+      - name
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        region:
+          type: string
+        policy_profile:
+          type: string
+    UpdateTenantStatusRequest:
+      type: object
+      required:
+      - status
+      properties:
+        status:
+          type: string
+          enum:
+          - active
+          - suspended
+          - archived
+        reason:
+          type: string
+    TenantResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/Tenant'
+    TenantListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tenant'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+    TenantContextResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/TenantContext'
+    AssignTenantRoleRequest:
+      type: object
+      required:
+      - actor_ref
+      - role
+      properties:
+        actor_ref:
+          type: string
+        role:
+          type: string
+          enum:
+          - tenant_admin
+          - coach
+          - moderator
+          - support_viewer
+          - client
+        scope:
+          type: string
+    TenantRoleAssignment:
+      type: object
+      properties:
+        role_assignment_id:
+          $ref: '#/components/schemas/Uuid'
+        actor_ref:
+          type: string
+        role:
+          type: string
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+    TenantRoleAssignmentResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/TenantRoleAssignment'
+    AccessCheckRequest:
+      type: object
+      required:
+      - actor_ref
+      - action
+      - resource
+      properties:
+        actor_ref:
+          type: string
+        action:
+          type: string
+        resource:
+          type: string
+        context:
+          type: object
+          additionalProperties: true
+    AccessCheckResponse:
+      type: object
+      required:
+      - allowed
+      - decision_source
+      properties:
+        allowed:
+          type: boolean
+        decision_source:
+          type: string
+          enum:
+          - core
+          - cache
+          - deny_by_default
+        reason_code:
+          type:
+          - string
+          - 'null'
+        expires_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    BlueprintDraft:
+      type: object
+      properties:
+        blueprint_id:
+          $ref: '#/components/schemas/Uuid'
+        status:
+          type: string
+          enum:
+          - draft
+          - published
+          - superseded
+        feature_config:
+          type: object
+          additionalProperties: true
+        navigation:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    CreateBlueprintDraftRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        feature_config:
+          type: object
+          additionalProperties: true
+        navigation:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    UpdateBlueprintDraftRequest:
+      type: object
+      properties:
+        feature_config:
+          type: object
+          additionalProperties: true
+        navigation:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    PublishBlueprintRequest:
+      type: object
+      properties:
+        publish_note:
+          type: string
+    BlueprintDraftResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/BlueprintDraft'
+    BlueprintVersionResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/BlueprintDraft'
+    BrandingTheme:
+      type: object
+      properties:
+        theme_id:
+          $ref: '#/components/schemas/Uuid'
+        tokens:
+          type: object
+          additionalProperties: true
+        copy_set:
+          type: object
+          additionalProperties:
+            type: string
+        published_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    UpsertBrandingThemeRequest:
+      type: object
+      properties:
+        tokens:
+          type: object
+          additionalProperties: true
+        copy_set:
+          type: object
+          additionalProperties:
+            type: string
+    BrandingThemeResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/BrandingTheme'
+    JourneyDraft:
+      type: object
+      properties:
+        draft_id:
+          $ref: '#/components/schemas/Uuid'
+        title:
+          type: string
+        status:
+          type: string
+          enum:
+          - draft
+          - submitted
+          - validating
+          - ready_to_publish
+          - blocked
+          - published
+        phases:
+          type: array
+          items:
+            $ref: '#/components/schemas/JourneyPhaseDraft'
+        updated_at:
+          $ref: '#/components/schemas/Timestamp'
+    JourneyPhaseDraft:
+      type: object
+      properties:
+        phase_id:
+          $ref: '#/components/schemas/Uuid'
+        title:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/JourneyStepDraft'
+    JourneyStepDraft:
+      type: object
+      properties:
+        step_id:
+          $ref: '#/components/schemas/Uuid'
+        title:
+          type: string
+        content_refs:
+          type: array
+          items:
+            type: string
+        canonical_refs:
+          type: array
+          items:
+            $ref: '#/components/schemas/CanonicalRef'
+        unlock_rule:
+          type: object
+          additionalProperties: true
+    CreateJourneyDraftRequest:
+      type: object
+      required:
+      - title
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        template_ref:
+          type: string
+    UpdateJourneyDraftRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        phases:
+          type: array
+          items:
+            $ref: '#/components/schemas/JourneyPhaseDraft'
+    JourneyDraftResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/JourneyDraft'
+    JourneyDraftListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/JourneyDraft'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+    ValidateJourneyDraftRequest:
+      type: object
+      properties:
+        strict:
+          type: boolean
+          default: true
+        include_canonical_refs:
+          type: boolean
+          default: true
+    ValidationResult:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              message:
+                type: string
+              path:
+                type: string
+        warnings:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    ValidationResultResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ValidationResult'
+    PublishJourneyRequest:
+      type: object
+      properties:
+        expected_draft_version:
+          type: integer
+        publish_note:
+          type: string
+    JourneyVersion:
+      type: object
+      properties:
+        journey_version_id:
+          $ref: '#/components/schemas/Uuid'
+        source_draft_id:
+          $ref: '#/components/schemas/Uuid'
+        version:
+          type: integer
+        status:
+          type: string
+          enum:
+          - published
+          - unpublished
+          - revoked
+        published_at:
+          $ref: '#/components/schemas/Timestamp'
+    JourneyVersionResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/JourneyVersion'
+    ContentAsset:
+      type: object
+      properties:
+        asset_id:
+          $ref: '#/components/schemas/Uuid'
+        title:
+          type: string
+        mime_type:
+          type: string
+        status:
+          type: string
+          enum:
+          - draft
+          - uploaded
+          - published
+          - archived
+        storage_ref:
+          type: string
+    CreateContentAssetRequest:
+      type: object
+      required:
+      - title
+      - mime_type
+      properties:
+        title:
+          type: string
+        mime_type:
+          type: string
+        size_bytes:
+          type: integer
+        metadata:
+          type: object
+          additionalProperties: true
+    ContentAssetResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ContentAsset'
+        upload_url:
+          type:
+          - string
+          - 'null'
+          format: uri
+    ContentAssetListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentAsset'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+    ContentAssetManifestResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            asset:
+              $ref: '#/components/schemas/ContentAsset'
+            delivery_url:
+              type: string
+              format: uri
+            expires_at:
+              $ref: '#/components/schemas/Timestamp'
+    CanonicalRef:
+      type: object
+      required:
+      - ref_type
+      - ref_id
+      properties:
+        ref_type:
+          type: string
+          enum:
+          - knowledge_domain
+          - topic
+          - protocol
+          - source
+          - life_area
+          - os_module
+        ref_id:
+          type: string
+        version:
+          type:
+          - string
+          - 'null'
+    CanonicalRefValidationBatchRequest:
+      type: object
+      required:
+      - refs
+      properties:
+        refs:
+          type: array
+          items:
+            $ref: '#/components/schemas/CanonicalRef'
+          minItems: 1
+          maxItems: 100
+    CanonicalRefValidationResult:
+      type: object
+      properties:
+        ref:
+          $ref: '#/components/schemas/CanonicalRef'
+        status:
+          type: string
+          enum:
+          - valid
+          - deprecated
+          - replaced
+          - restricted
+          - not_found
+          - unsupported
+          - unavailable
+        replacement_ref:
+          oneOf:
+          - $ref: '#/components/schemas/CanonicalRef'
+          - type: 'null'
+        provenance:
+          type: object
+          additionalProperties: true
+    CanonicalRefValidationBatchResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CanonicalRefValidationResult'
+    Lead:
+      type: object
+      properties:
+        lead_id:
+          $ref: '#/components/schemas/Uuid'
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        stage:
+          type: string
+          enum:
+          - new
+          - qualified
+          - discovery_booked
+          - offer_sent
+          - won
+          - lost
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+    CreateLeadRequest:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        source:
+          type: string
+        notes:
+          type: string
+    LeadResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Lead'
+    LeadListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lead'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+    UpdateLeadStageRequest:
+      type: object
+      required:
+      - stage
+      properties:
+        stage:
+          type: string
+        reason:
+          type: string
+    ScheduleDiscoveryCallRequest:
+      type: object
+      required:
+      - lead_id
+      - start_time
+      properties:
+        lead_id:
+          $ref: '#/components/schemas/Uuid'
+        start_time:
+          $ref: '#/components/schemas/Timestamp'
+        timezone:
+          type: string
+    DiscoveryCallResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            discovery_call_id:
+              $ref: '#/components/schemas/Uuid'
+            status:
+              type: string
+            start_time:
+              $ref: '#/components/schemas/Timestamp'
+    Offer:
+      type: object
+      properties:
+        offer_id:
+          $ref: '#/components/schemas/Uuid'
+        lead_id:
+          $ref: '#/components/schemas/Uuid'
+        title:
+          type: string
+        price:
+          $ref: '#/components/schemas/Money'
+        status:
+          type: string
+          enum:
+          - draft
+          - sent
+          - accepted
+          - expired
+          - cancelled
+    CreateOfferRequest:
+      type: object
+      required:
+      - title
+      - price
+      properties:
+        lead_id:
+          $ref: '#/components/schemas/Uuid'
+        title:
+          type: string
+        price:
+          $ref: '#/components/schemas/Money'
+        terms:
+          type: string
+        journey_version_id:
+          type: string
+          format: uuid
+    OfferResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Offer'
+    CreateCheckoutSessionRequest:
+      type: object
+      properties:
+        success_url:
+          type: string
+          format: uri
+        cancel_url:
+          type: string
+          format: uri
+        agreement_required:
+          type: boolean
+          default: true
+    CheckoutSessionResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            checkout_session_id:
+              type: string
+            provider:
+              type: string
+            checkout_url:
+              type: string
+              format: uri
+            expires_at:
+              $ref: '#/components/schemas/Timestamp'
+    PaymentWebhookEnvelope:
+      type: object
+      additionalProperties: true
+      description: Provider-specific signed webhook payload. Handler must verify signature
+        before parsing.
+    StartOnboardingRequest:
+      type: object
+      properties:
+        offer_id:
+          type: string
+          format: uuid
+        journey_version_id:
+          type: string
+          format: uuid
+    OnboardingSessionResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            onboarding_session_id:
+              $ref: '#/components/schemas/Uuid'
+            status:
+              type: string
+    CreateClientAssignmentRequest:
+      type: object
+      required:
+      - journey_version_id
+      properties:
+        journey_version_id:
+          $ref: '#/components/schemas/Uuid'
+        offer_id:
+          type: string
+          format: uuid
+        starts_at:
+          type: string
+          format: date-time
+    ClientAssignment:
+      type: object
+      properties:
+        assignment_id:
+          $ref: '#/components/schemas/Uuid'
+        client_id:
+          $ref: '#/components/schemas/Uuid'
+        journey_version_id:
+          $ref: '#/components/schemas/Uuid'
+        status:
+          type: string
+          enum:
+          - pending
+          - active
+          - paused
+          - revoked
+          - completed
+    ClientAssignmentResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ClientAssignment'
+    ClientAssignmentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientAssignment'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+    ActivateEnrollmentRequest:
+      type: object
+      properties:
+        assignment_id:
+          type: string
+          format: uuid
+        activation_reason:
+          type: string
+    Enrollment:
+      type: object
+      properties:
+        enrollment_id:
+          $ref: '#/components/schemas/Uuid'
+        assignment_id:
+          $ref: '#/components/schemas/Uuid'
+        status:
+          type: string
+          enum:
+          - pending
+          - active
+          - paused
+          - revoked
+          - completed
+        activated_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    EnrollmentResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Enrollment'
+    MemberHomeResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            member_id:
+              $ref: '#/components/schemas/Uuid'
+            next_actions:
+              type: array
+              items:
+                $ref: '#/components/schemas/NextStep'
+            progress_summary:
+              type: object
+              additionalProperties: true
+            messages_summary:
+              type: object
+              additionalProperties: true
+    NextStep:
+      type: object
+      properties:
+        step_id:
+          $ref: '#/components/schemas/Uuid'
+        title:
+          type: string
+        journey_version_id:
+          $ref: '#/components/schemas/Uuid'
+        available:
+          type: boolean
+    NextStepResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/NextStep'
+    CompleteJourneyStepRequest:
+      type: object
+      properties:
+        completion_note:
+          type: string
+        client_time:
+          type: string
+          format: date-time
+    StepCompletionResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            step_completion_id:
+              $ref: '#/components/schemas/Uuid'
+            step_id:
+              $ref: '#/components/schemas/Uuid'
+            completed_at:
+              $ref: '#/components/schemas/Timestamp'
+    SubmitReflectionRequest:
+      type: object
+      required:
+      - body
+      properties:
+        step_id:
+          type: string
+          format: uuid
+        body:
+          type: string
+        visibility:
+          type: string
+          enum:
+          - coach_visible
+          - private_if_policy_allows
+        state_tags:
+          type: array
+          items:
+            type: string
+    ReflectionResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            reflection_id:
+              $ref: '#/components/schemas/Uuid'
+            visibility:
+              type: string
+            created_at:
+              $ref: '#/components/schemas/Timestamp'
+    EnrollmentProgressResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            enrollment_id:
+              $ref: '#/components/schemas/Uuid'
+            completion_ratio:
+              type: number
+              minimum: 0
+              maximum: 1
+            completed_steps:
+              type: integer
+            total_steps:
+              type: integer
+    SendMessageRequest:
+      type: object
+      required:
+      - recipient_ref
+      - body
+      properties:
+        thread_id:
+          type: string
+          format: uuid
+        recipient_ref:
+          type: string
+        body:
+          type: string
+        attachments:
+          type: array
+          items:
+            type: string
+    MessageResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            message_id:
+              $ref: '#/components/schemas/Uuid'
+            thread_id:
+              $ref: '#/components/schemas/Uuid'
+            sent_at:
+              $ref: '#/components/schemas/Timestamp'
+    MessageThreadListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              thread_id:
+                $ref: '#/components/schemas/Uuid'
+              last_message_at:
+                $ref: '#/components/schemas/Timestamp'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+    CreateInterventionRequest:
+      type: object
+      required:
+      - client_id
+      - body
+      properties:
+        client_id:
+          type: string
+          format: uuid
+        body:
+          type: string
+        risk_signal_id:
+          type: string
+          format: uuid
+    InterventionResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            intervention_id:
+              $ref: '#/components/schemas/Uuid'
+            created_at:
+              $ref: '#/components/schemas/Timestamp'
+    ScheduleNotificationRequest:
+      type: object
+      required:
+      - recipient_ref
+      - template_key
+      - scheduled_at
+      properties:
+        recipient_ref:
+          type: string
+        template_key:
+          type: string
+        scheduled_at:
+          $ref: '#/components/schemas/Timestamp'
+        payload:
+          type: object
+          additionalProperties: true
+    NotificationScheduleResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            notification_schedule_id:
+              $ref: '#/components/schemas/Uuid'
+            status:
+              type: string
+    CreateCommunityPostRequest:
+      type: object
+      required:
+      - space_id
+      - body
+      properties:
+        space_id:
+          type: string
+          format: uuid
+        body:
+          type: string
+        attachments:
+          type: array
+          items:
+            type: string
+    CommunityPostResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            post_id:
+              $ref: '#/components/schemas/Uuid'
+            created_at:
+              $ref: '#/components/schemas/Timestamp'
+    CommunityFeedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              post_id:
+                $ref: '#/components/schemas/Uuid'
+              body_excerpt:
+                type: string
+              author_ref:
+                type: string
+              created_at:
+                $ref: '#/components/schemas/Timestamp'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+    ReportCommunityContentRequest:
+      type: object
+      required:
+      - target_ref
+      - reason
+      properties:
+        target_ref:
+          type: string
+        reason:
+          type: string
+        details:
+          type: string
+    CommunityReportResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            report_id:
+              $ref: '#/components/schemas/Uuid'
+            status:
+              type: string
+    ModerationActionRequest:
+      type: object
+      required:
+      - target_ref
+      - action
+      properties:
+        target_ref:
+          type: string
+        action:
+          type: string
+          enum:
+          - hide
+          - restore
+          - lock
+          - delete_soft
+        reason:
+          type: string
+    ModerationActionResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            moderation_action_id:
+              $ref: '#/components/schemas/Uuid'
+            status:
+              type: string
+    BusinessDashboardResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            pipeline:
+              type: object
+              additionalProperties: true
+            revenue:
+              type: object
+              additionalProperties: true
+            conversion:
+              type: object
+              additionalProperties: true
+    CoachDashboardResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            active_clients:
+              type: integer
+            risk_signals:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+            progress_overview:
+              type: object
+              additionalProperties: true
+    RevenueAnalyticsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            gross_revenue:
+              $ref: '#/components/schemas/Money'
+            mrr:
+              $ref: '#/components/schemas/Money'
+            open_offers:
+              type: integer
+    AuditEvent:
+      type: object
+      properties:
+        audit_event_id:
+          $ref: '#/components/schemas/Uuid'
+        tenant_id:
+          $ref: '#/components/schemas/Uuid'
+        event_type:
+          type: string
+        actor_ref:
+          type: string
+        occurred_at:
+          $ref: '#/components/schemas/Timestamp'
+        correlation_id:
+          type: string
+          format: uuid
+        payload_minimized:
+          type: object
+          additionalProperties: true
+    AuditEventListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditEvent'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+    OutboxEvent:
+      type: object
+      properties:
+        outbox_event_id:
+          $ref: '#/components/schemas/Uuid'
+        event_type:
+          type: string
+        status:
+          type: string
+          enum:
+          - pending
+          - published
+          - failed
+          - dead_letter
+        occurred_at:
+          $ref: '#/components/schemas/Timestamp'
+    OutboxEventListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OutboxEvent'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+    CreateSupportCaseRequest:
+      type: object
+      required:
+      - subject
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+        subject:
+          type: string
+        description:
+          type: string
+        severity:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          - critical
+        related_refs:
+          type: array
+          items:
+            type: string
+    SupportCaseResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            case_id:
+              $ref: '#/components/schemas/Uuid'
+            status:
+              type: string
+              enum:
+              - open
+              - in_progress
+              - resolved
+              - closed
+            created_at:
+              $ref: '#/components/schemas/Timestamp'
+x-contract-boundaries:
+  project_b_owns:
+  - tenant delivery
+  - coach studio
+  - journeys
+  - commerce overlays
+  - projections
+  - audit/outbox
+  - support surfaces
+  project_b_does_not_own:
+  - core identity truth
+  - consent truth
+  - entitlement truth
+  - canonical taxonomy/protocol/source truth
+  - payment ledger truth
+  adapter_contracts:
+  - Core access and entitlement adapter
+  - DB Canonical reference validation adapter
+  - Payment provider webhook adapter

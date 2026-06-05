@@ -1,0 +1,8 @@
+Gap,Severity,Status,Recommendation
+"Provider ADRs: payment, agreement, calendar, notifications",P1,Open implementation decision,Close provider-neutral adapter contracts before real integration tests.
+Mobile implementation decision: native vs Flutter/KMP/PWA,P1,Open decision,Do not block web/backend; choose before native app build.
+Quiz/assessment engine,P2,Not in current scope,Add only if coaching journeys require scored assessments beyond reflection/tasks.
+Real-time live chat SLA routing,P2,Not core yet,Current messaging/intervention sufficient; extend later if support desk becomes product pillar.
+Design system tokens / component library,P1,Partially modeled,Create Figma/Storybook-style tokens/components in repo cut.
+Rendered diagrams in docs site,P2,Not rendered yet,Convert Mermaid to docs pages during repo bootstrap.
+CI enforcement for OpenAPI/JSON Schema/RLS/security controls,P0 for implementation,Planned but not executed,Make validation commands blocking in CI before first implementation slice merge.

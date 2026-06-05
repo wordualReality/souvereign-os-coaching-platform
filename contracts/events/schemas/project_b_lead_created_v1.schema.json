@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.sovereign-os.local/project-b/events/project_b.lead.created.v1.schema.json",
+  "title": "project_b.lead.created.v1",
+  "description": "Create lead or prospect",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tenant_id",
+    "aggregate_type",
+    "aggregate_id",
+    "occurred_at",
+    "source_operation",
+    "metadata"
+  ],
+  "properties": {
+    "tenant_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "aggregate_type": {
+      "type": "string",
+      "const": "lead"
+    },
+    "aggregate_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_operation": {
+      "type": "string",
+      "const": "createLead"
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

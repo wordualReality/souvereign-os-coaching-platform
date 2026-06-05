@@ -1,0 +1,7 @@
+rule_type,description,input_sources,operators,output,example
+intake_answer,Branch based on onboarding/intake answer,intake_response,"eq,in,contains,score_gt,score_lt","step_variant,journey_path,protocol_ref",If stress_level > 7 route to nervous_system_stabilization_path
+completion_status,Branch based on prior completion,"step_completion,task_completion","completed,not_completed,late","unlock,hold,repeat_step","If breathwork_basics not completed, hold advanced practice"
+reflection_signal,Branch based on reflection metadata,reflection_entry,"tag_contains,sentiment_flag,risk_flag","coach_review,alternate_step","If reflection contains overwhelm flag, request coach review"
+cohort_schedule,Branch based on cohort timing,cohort_schedule,"before,on,after,window","available_step,locked_step",Unlock week 2 content on cohort day 8
+entitlement_level,Branch based on plan/tier,entitlement_snapshot,"eq,in,not_in","content_variant,locked_content",Premium tier unlocks deeper protocol module
+coach_override,Manual branch override,coach_action,"set_path,set_step,hold",path_override,Coach moves client to integration week

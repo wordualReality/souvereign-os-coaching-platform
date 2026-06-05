@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sovereign-os.local/project-b/journey-condition-rule.v1.schema.json",
+  "title": "Project B Journey Condition Rule v1",
+  "type": "object",
+  "required": [
+    "rule_id",
+    "tenant_id",
+    "rule_type",
+    "input",
+    "operator",
+    "effect",
+    "status"
+  ],
+  "properties": {
+    "rule_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "tenant_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "journey_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "rule_type": {
+      "enum": [
+        "intake_answer",
+        "completion_status",
+        "reflection_signal",
+        "cohort_schedule",
+        "entitlement_level",
+        "coach_override"
+      ]
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "operator": {
+      "enum": [
+        "eq",
+        "in",
+        "not_in",
+        "contains",
+        "score_gt",
+        "score_lt",
+        "completed",
+        "not_completed",
+        "late",
+        "tag_contains",
+        "risk_flag",
+        "before",
+        "on",
+        "after",
+        "window",
+        "set_path",
+        "set_step",
+        "hold"
+      ]
+    },
+    "effect": {
+      "type": "object",
+      "required": [
+        "effect_type"
+      ],
+      "properties": {
+        "effect_type": {
+          "enum": [
+            "unlock_step",
+            "lock_step",
+            "route_path",
+            "request_coach_review",
+            "assign_variant",
+            "hold_delivery",
+            "show_content_variant"
+          ]
+        }
+      }
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "active",
+        "disabled",
+        "archived"
+      ]
+    },
+    "audit_label": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

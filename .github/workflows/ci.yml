@@ -1,0 +1,32 @@
+name: project-b-contract-validation
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install validation deps
+        run: pip install pyyaml jsonschema
+      - name: Validate repository structure
+        run: python scripts/validate_repo.py
+      - name: Validate OpenAPI contracts
+        run: python scripts/validate_openapi.py
+      - name: Validate JSON schemas and AsyncAPI parse
+        run: python scripts/validate_json_schemas.py
+      - name: Validate SQL migrations static fallback
+        run: python scripts/validate_sql_static.py
+      - name: Validate RLS static fallback
+        run: python scripts/validate_rls_static.py
+      - name: Validate MVP Slice 01 skeleton
+        run: python scripts/validate_mvp_slice_01.py

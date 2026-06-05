@@ -1,0 +1,13 @@
+event_name,producer,consumers,payload_required_fields,audit_required,notes
+client.provisioning_draft_created.v1,Provisioning Service,"Audit, Admin Projection","tenant_id, client_id, provisioning_session_id, actor_ref",yes,Start manual provisioning.
+client.coach_assigned.v1,Client Ownership Service,"Coach Dashboard, Audit","tenant_id, client_id, coach_ref, assignment_type",yes,Primary/support coach assignment.
+client.commercial_gate_set.v1,Provisioning Service,"Core Access Adapter, Audit","tenant_id, client_id, gate_type, reason_ref",yes,Manual gate state.
+client.invite_sent.v1,Invite Service,"Notification, Audit","tenant_id, client_id, invite_id, channel",yes,Client invite sent.
+client.provisioning_verified.v1,Provisioning Service,"Admin Projection, Audit","tenant_id, client_id, status, verified_by",yes,Setup health confirmed.
+journey_template.version_published.v1,Template Service,"Template Catalog, Audit","tenant_id, template_id, version_id",yes,Template published.
+journey_template.cloned.v1,Template Service,"Journey Authoring, Audit","tenant_id, template_id, target_journey_draft_id",yes,Clone to draft/cohort.
+cohort.created.v1,Cohort Service,"Coach Dashboard, Audit","tenant_id, cohort_id, program_ref",yes,Cohort created.
+cohort.member_added.v1,Cohort Service,"Delivery, Audit","tenant_id, cohort_id, client_id",yes,Client added to cohort.
+journey.branch_rule_activated.v1,Journey Builder,"Delivery Projection, Audit","tenant_id, journey_version_id, rule_id",yes,Branch rule active.
+journey.branch_rule_evaluated.v1,Delivery Runtime,"Rule Trace Inspector, Audit","tenant_id, client_id, rule_id, effect",yes,Runtime branch trace.
+delivery.path_changed.v1,Delivery Runtime,"Member Home, Coach Dashboard, Audit","tenant_id, client_id, assignment_id, path_id",yes,Dynamic path update.

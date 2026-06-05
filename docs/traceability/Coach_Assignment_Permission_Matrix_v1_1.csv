@@ -1,0 +1,7 @@
+ownership_scope,actor,can_create_client,can_assign_coach,can_assign_journey,can_view_progress,can_send_intervention,can_override_commercial_gate,requires_audit,notes
+Platform Owner,platform_owner,yes,yes,yes,yes,yes,yes,always,Full platform control across tenants only through platform-admin context.
+Platform Support,platform_support,conditional,conditional,conditional,conditional,no,no,always,Support actions require incident/support case context.
+Tenant Admin,tenant_admin,yes,yes,yes,yes,yes,conditional,always,Tenant-scoped only.
+Lead Coach,lead_coach,yes,conditional,yes,yes,yes,no,always,Can provision clients for own tenant/cohort depending on tenant policy.
+Support Coach,support_coach,no,no,conditional,limited,yes,no,always,Can support assigned clients only.
+Client,client,no,no,no,own,no,no,security telemetry,Can see own assignment and progress.

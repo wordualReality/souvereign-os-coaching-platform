@@ -1,0 +1,11 @@
+object,field,type,required,description
+journey_template,template_id,uuid,yes,Immutable template id.
+journey_template,owner_scope,"enum(platform,tenant,coach)",yes,Determines who owns and edits template.
+journey_template,template_type,"enum(journey,program,cohort_program,onboarding)",yes,Template family.
+journey_template,canonical_ref_policy,"enum(lock,allow_override,tenant_bind)",yes,How canonical references behave when cloned.
+journey_template_version,version_id,uuid,yes,Published template version id.
+journey_template_version,semantic_version,string,yes,Human-readable version.
+journey_template_clone,clone_id,uuid,yes,Clone operation id.
+journey_template_clone,target_tenant_id,uuid,yes,Target tenant.
+journey_template_clone,target_journey_draft_id,uuid,yes,Created journey draft.
+journey_template_clone,clone_mode,"enum(copy,link_with_update_notice)",yes,Clone semantics.

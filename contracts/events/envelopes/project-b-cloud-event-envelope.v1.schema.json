@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.sovereign-os.local/project-b/envelopes/project-b-cloud-event-envelope.v1.schema.json",
+  "title": "Project B CloudEvents Envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "specversion",
+    "id",
+    "source",
+    "type",
+    "subject",
+    "time",
+    "datacontenttype",
+    "data",
+    "tenant_id",
+    "correlation_id",
+    "causation_id",
+    "producer",
+    "schema_version"
+  ],
+  "properties": {
+    "specversion": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Globally unique event id."
+    },
+    "source": {
+      "type": "string",
+      "pattern": "^urn:sovereign-os:project-b:[a-z0-9-]+(:[a-z0-9-]+)*$"
+    },
+    "type": {
+      "type": "string",
+      "pattern": "^project_b\\.[a-z0-9_]+(\\.[a-z0-9_]+)*\\.v[0-9]+$"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Aggregate subject in form aggregate_type/aggregate_id."
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "datacontenttype": {
+      "const": "application/json"
+    },
+    "dataschema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "tenant_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "actor_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "External user or service actor reference. No PII."
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "causation_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "idempotency_key": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 180
+    },
+    "producer": {
+      "type": "object",
+      "required": [
+        "module_id",
+        "service",
+        "operation_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "module_id": {
+          "type": "string"
+        },
+        "service": {
+          "const": "project-b-api"
+        },
+        "operation_id": {
+          "type": "string"
+        }
+      }
+    },
+    "trace": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "trace_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "span_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "schema_version": {
+      "const": "v1"
+    },
+    "data": {
+      "type": "object"
+    }
+  }
+}

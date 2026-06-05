@@ -1,0 +1,2034 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract": "project-b-runtime-state-machine-registry.v1",
+  "version": "1.0.0",
+  "created": "2026-05-31",
+  "boundary": {
+    "project_b_owns": "tenant delivery, commerce, authoring, projections, Project-B audit/outbox",
+    "project_b_does_not_own": [
+      "Core entitlement truth",
+      "consent truth",
+      "deterministic routing truth",
+      "canonical taxonomy/protocol/source truth",
+      "payment provider ledger truth"
+    ]
+  },
+  "state_machines": [
+    {
+      "id": "SM-001",
+      "name": "Tenant Lifecycle",
+      "aggregate": "tenant",
+      "owner_module": "PB-M01",
+      "initial": "draft",
+      "terminal": "archived",
+      "states": [
+        "draft",
+        "active",
+        "suspended",
+        "archived"
+      ],
+      "description": "Controls tenant availability and write access. Tenant status gates every tenant-scoped Project B operation.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-001",
+          "from_state": "draft",
+          "to_state": "active",
+          "trigger": "tenant_created_and_activated",
+          "guard_policy": "platform_operator_allowed",
+          "event_emitted": "project_b.tenant.created.v1",
+          "api_or_command": "POST /project-b/v1/tenants",
+          "failure_mode": "validation_error keeps draft"
+        },
+        {
+          "state_machine_id": "SM-001",
+          "from_state": "active",
+          "to_state": "suspended",
+          "trigger": "suspend_tenant",
+          "guard_policy": "platform_operator_allowed",
+          "event_emitted": "project_b.tenant.status_changed.v1",
+          "api_or_command": "PATCH /project-b/v1/tenants/{tenant_id}/status",
+          "failure_mode": "active writes blocked"
+        },
+        {
+          "state_machine_id": "SM-001",
+          "from_state": "suspended",
+          "to_state": "active",
+          "trigger": "reactivate_tenant",
+          "guard_policy": "platform_operator_allowed",
+          "event_emitted": "project_b.tenant.status_changed.v1",
+          "api_or_command": "PATCH /project-b/v1/tenants/{tenant_id}/status",
+          "failure_mode": "requires audit reason"
+        },
+        {
+          "state_machine_id": "SM-001",
+          "from_state": "suspended",
+          "to_state": "archived",
+          "trigger": "archive_tenant",
+          "guard_policy": "platform_operator_allowed",
+          "event_emitted": "project_b.tenant.status_changed.v1",
+          "api_or_command": "PATCH /project-b/v1/tenants/{tenant_id}/status",
+          "failure_mode": "irreversible without migration"
+        }
+      ]
+    },
+    {
+      "id": "SM-002",
+      "name": "Tenant Blueprint Version Lifecycle",
+      "aggregate": "tenant_app_blueprint_version",
+      "owner_module": "PB-M03",
+      "initial": "draft",
+      "terminal": "archived",
+      "states": [
+        "draft",
+        "validated",
+        "published",
+        "deprecated",
+        "archived"
+      ],
+      "description": "Controls tenant app blueprint packaging and version publication.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-002",
+          "from_state": "draft",
+          "to_state": "validated",
+          "trigger": "validate_blueprint",
+          "guard_policy": "tenant_active + schema_valid",
+          "event_emitted": "project_b.blueprint_version.validated.v1",
+          "api_or_command": "POST /blueprints/{id}/validate",
+          "failure_mode": "validation_failed"
+        },
+        {
+          "state_machine_id": "SM-002",
+          "from_state": "validated",
+          "to_state": "published",
+          "trigger": "publish_blueprint",
+          "guard_policy": "tenant_active + feature_config_valid",
+          "event_emitted": "project_b.blueprint_version_published.v1",
+          "api_or_command": "POST /blueprints/{id}/publish",
+          "failure_mode": "publish_denied"
+        },
+        {
+          "state_machine_id": "SM-002",
+          "from_state": "published",
+          "to_state": "deprecated",
+          "trigger": "deprecate_blueprint",
+          "guard_policy": "tenant_admin_allowed",
+          "event_emitted": "project_b.blueprint_version_deprecated.v1",
+          "api_or_command": "",
+          "failure_mode": "existing sessions unaffected"
+        },
+        {
+          "state_machine_id": "SM-002",
+          "from_state": "deprecated",
+          "to_state": "archived",
+          "trigger": "archive_blueprint",
+          "guard_policy": "no_active_assignments",
+          "event_emitted": "project_b.blueprint_version_archived.v1",
+          "api_or_command": "",
+          "failure_mode": "archive_denied"
+        }
+      ]
+    },
+    {
+      "id": "SM-003",
+      "name": "Branding Theme Lifecycle",
+      "aggregate": "branding_theme",
+      "owner_module": "PB-M04",
+      "initial": "draft",
+      "terminal": "archived",
+      "states": [
+        "draft",
+        "preview",
+        "published",
+        "superseded",
+        "archived"
+      ],
+      "description": "Controls tenant branding and surface composition rollout.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-003",
+          "from_state": "draft",
+          "to_state": "preview",
+          "trigger": "preview_branding",
+          "guard_policy": "tenant_active",
+          "event_emitted": "project_b.branding_theme_previewed.v1",
+          "api_or_command": "",
+          "failure_mode": "invalid assets"
+        },
+        {
+          "state_machine_id": "SM-003",
+          "from_state": "preview",
+          "to_state": "published",
+          "trigger": "publish_branding",
+          "guard_policy": "tenant_admin_allowed",
+          "event_emitted": "project_b.branding_theme_published.v1",
+          "api_or_command": "",
+          "failure_mode": "publish_denied"
+        },
+        {
+          "state_machine_id": "SM-003",
+          "from_state": "published",
+          "to_state": "superseded",
+          "trigger": "publish_new_branding",
+          "guard_policy": "tenant_admin_allowed",
+          "event_emitted": "project_b.branding_theme_superseded.v1",
+          "api_or_command": "",
+          "failure_mode": "cache_refresh_required"
+        },
+        {
+          "state_machine_id": "SM-003",
+          "from_state": "superseded",
+          "to_state": "archived",
+          "trigger": "archive_branding",
+          "guard_policy": "no_active_reference",
+          "event_emitted": "project_b.branding_theme_archived.v1",
+          "api_or_command": "",
+          "failure_mode": "archive_denied"
+        }
+      ]
+    },
+    {
+      "id": "SM-004",
+      "name": "Journey Draft Lifecycle",
+      "aggregate": "journey_draft",
+      "owner_module": "PB-M05",
+      "initial": "draft",
+      "terminal": "archived",
+      "states": [
+        "draft",
+        "in_review",
+        "validation_failed",
+        "ready_to_publish",
+        "archived"
+      ],
+      "description": "Controls mutable coach authoring workflow before version publication.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-004",
+          "from_state": "draft",
+          "to_state": "in_review",
+          "trigger": "submit_journey_draft",
+          "guard_policy": "coach_or_admin_allowed",
+          "event_emitted": "project_b.journey_draft_validation_requested.v1",
+          "api_or_command": "POST /journey-drafts/{id}/validate",
+          "failure_mode": "validation queued"
+        },
+        {
+          "state_machine_id": "SM-004",
+          "from_state": "in_review",
+          "to_state": "validation_failed",
+          "trigger": "validation_failed",
+          "guard_policy": "canonical_or_structure_invalid",
+          "event_emitted": "project_b.journey_draft_validation_failed.v1",
+          "api_or_command": "",
+          "failure_mode": "draft editable"
+        },
+        {
+          "state_machine_id": "SM-004",
+          "from_state": "validation_failed",
+          "to_state": "draft",
+          "trigger": "revise_after_failure",
+          "guard_policy": "coach_allowed",
+          "event_emitted": "project_b.journey_draft_updated.v1",
+          "api_or_command": "PATCH /journey-drafts/{id}",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-004",
+          "from_state": "in_review",
+          "to_state": "ready_to_publish",
+          "trigger": "validation_passed",
+          "guard_policy": "all_guards_pass",
+          "event_emitted": "project_b.journey_draft_ready_to_publish.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-004",
+          "from_state": "ready_to_publish",
+          "to_state": "archived",
+          "trigger": "archive_draft",
+          "guard_policy": "no_publish_in_progress",
+          "event_emitted": "project_b.journey_draft_archived.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-005",
+      "name": "Canonical Binding Validation Lifecycle",
+      "aggregate": "canonical_ref_binding",
+      "owner_module": "PB-M07",
+      "initial": "pending_validation",
+      "terminal": "replaced_or_removed",
+      "states": [
+        "pending_validation",
+        "valid",
+        "deprecated_warning",
+        "replacement_required",
+        "invalid",
+        "restricted",
+        "service_unavailable",
+        "replaced_or_removed"
+      ],
+      "description": "Controls DB/Canonical dependency result and publishability of references.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-005",
+          "from_state": "pending_validation",
+          "to_state": "valid",
+          "trigger": "canonical_validation_ok",
+          "guard_policy": "db_canonical_available",
+          "event_emitted": "project_b.canonical_binding_validated.v1",
+          "api_or_command": "POST /canonical-ref-validations:batch",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-005",
+          "from_state": "pending_validation",
+          "to_state": "invalid",
+          "trigger": "canonical_validation_invalid",
+          "guard_policy": "db_canonical_available",
+          "event_emitted": "project_b.canonical_ref_validation_failed.v1",
+          "api_or_command": "POST /canonical-ref-validations:batch",
+          "failure_mode": "publish_blocked"
+        },
+        {
+          "state_machine_id": "SM-005",
+          "from_state": "pending_validation",
+          "to_state": "restricted",
+          "trigger": "canonical_validation_restricted",
+          "guard_policy": "db_canonical_available",
+          "event_emitted": "project_b.canonical_ref_validation_failed.v1",
+          "api_or_command": "",
+          "failure_mode": "publish_blocked"
+        },
+        {
+          "state_machine_id": "SM-005",
+          "from_state": "pending_validation",
+          "to_state": "service_unavailable",
+          "trigger": "canonical_unavailable",
+          "guard_policy": "timeout_or_5xx",
+          "event_emitted": "project_b.canonical_ref_validation_unavailable.v1",
+          "api_or_command": "",
+          "failure_mode": "review_or_retry"
+        },
+        {
+          "state_machine_id": "SM-005",
+          "from_state": "valid",
+          "to_state": "deprecated_warning",
+          "trigger": "canonical_deprecated",
+          "guard_policy": "canonical_lifecycle_event",
+          "event_emitted": "project_b.canonical_ref_deprecated_detected.v1",
+          "api_or_command": "",
+          "failure_mode": "warn_not_block"
+        },
+        {
+          "state_machine_id": "SM-005",
+          "from_state": "valid",
+          "to_state": "replacement_required",
+          "trigger": "canonical_replaced",
+          "guard_policy": "canonical_lifecycle_event",
+          "event_emitted": "project_b.canonical_ref_replacement_detected.v1",
+          "api_or_command": "",
+          "failure_mode": "publish_blocked_until_resolved"
+        },
+        {
+          "state_machine_id": "SM-005",
+          "from_state": "replacement_required",
+          "to_state": "replaced_or_removed",
+          "trigger": "binding_updated",
+          "guard_policy": "coach_or_admin_allowed",
+          "event_emitted": "project_b.canonical_binding_replaced.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-006",
+      "name": "Journey Version Publication Lifecycle",
+      "aggregate": "journey_version",
+      "owner_module": "PB-M08",
+      "initial": "draft_snapshot",
+      "terminal": "archived",
+      "states": [
+        "draft_snapshot",
+        "validating",
+        "validation_failed",
+        "published",
+        "unpublished",
+        "deprecated",
+        "archived"
+      ],
+      "description": "Controls immutable deliverable journey versions.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-006",
+          "from_state": "draft_snapshot",
+          "to_state": "validating",
+          "trigger": "publish_requested",
+          "guard_policy": "ready_to_publish",
+          "event_emitted": "project_b.journey_version_validation_started.v1",
+          "api_or_command": "POST /journey-versions/{id}/publish",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-006",
+          "from_state": "validating",
+          "to_state": "validation_failed",
+          "trigger": "publish_validation_failed",
+          "guard_policy": "canonical_or_core_gate_failed",
+          "event_emitted": "project_b.journey_version_validation_failed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-006",
+          "from_state": "validating",
+          "to_state": "published",
+          "trigger": "publish_validation_passed",
+          "guard_policy": "all_guards_pass",
+          "event_emitted": "project_b.journey_version_published.v1",
+          "api_or_command": "POST /journey-versions/{id}/publish",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-006",
+          "from_state": "published",
+          "to_state": "unpublished",
+          "trigger": "unpublish_requested",
+          "guard_policy": "tenant_admin_allowed",
+          "event_emitted": "project_b.journey_version_unpublished.v1",
+          "api_or_command": "",
+          "failure_mode": "active assignments may continue by policy"
+        },
+        {
+          "state_machine_id": "SM-006",
+          "from_state": "published",
+          "to_state": "deprecated",
+          "trigger": "deprecate_version",
+          "guard_policy": "admin_allowed",
+          "event_emitted": "project_b.journey_version_deprecated.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-006",
+          "from_state": "deprecated",
+          "to_state": "archived",
+          "trigger": "archive_version",
+          "guard_policy": "no_active_assignment",
+          "event_emitted": "project_b.journey_version_archived.v1",
+          "api_or_command": "",
+          "failure_mode": "archive_denied"
+        }
+      ]
+    },
+    {
+      "id": "SM-007",
+      "name": "Lead Pipeline Lifecycle",
+      "aggregate": "lead",
+      "owner_module": "PB-M09",
+      "initial": "new",
+      "terminal": "lost_or_archived",
+      "states": [
+        "new",
+        "qualified",
+        "discovery_booked",
+        "discovery_completed",
+        "offer_pending",
+        "offer_sent",
+        "converted",
+        "lost_or_archived"
+      ],
+      "description": "Controls commercial funnel before client activation.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-007",
+          "from_state": "new",
+          "to_state": "qualified",
+          "trigger": "qualify_lead",
+          "guard_policy": "coach_or_sales_allowed",
+          "event_emitted": "project_b.lead_stage_changed.v1",
+          "api_or_command": "PATCH /leads/{id}/stage",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-007",
+          "from_state": "qualified",
+          "to_state": "discovery_booked",
+          "trigger": "book_call",
+          "guard_policy": "calendar_slot_available",
+          "event_emitted": "project_b.discovery_call_booked.v1",
+          "api_or_command": "POST /discovery-calls",
+          "failure_mode": "booking_failed"
+        },
+        {
+          "state_machine_id": "SM-007",
+          "from_state": "discovery_booked",
+          "to_state": "discovery_completed",
+          "trigger": "complete_call",
+          "guard_policy": "coach_allowed",
+          "event_emitted": "project_b.discovery_call_completed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-007",
+          "from_state": "discovery_completed",
+          "to_state": "offer_pending",
+          "trigger": "prepare_offer",
+          "guard_policy": "coach_allowed",
+          "event_emitted": "project_b.lead_stage_changed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-007",
+          "from_state": "offer_pending",
+          "to_state": "offer_sent",
+          "trigger": "send_offer",
+          "guard_policy": "offer_valid",
+          "event_emitted": "project_b.offer_created.v1",
+          "api_or_command": "POST /offers",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-007",
+          "from_state": "offer_sent",
+          "to_state": "converted",
+          "trigger": "offer_accepted_and_paid",
+          "guard_policy": "payment_succeeded",
+          "event_emitted": "project_b.lead_converted.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-007",
+          "from_state": "new",
+          "to_state": "lost_or_archived",
+          "trigger": "disqualify",
+          "guard_policy": "coach_allowed",
+          "event_emitted": "project_b.lead_stage_changed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-008",
+      "name": "Offer Lifecycle",
+      "aggregate": "offer",
+      "owner_module": "PB-M09",
+      "initial": "draft",
+      "terminal": "closed",
+      "states": [
+        "draft",
+        "sent",
+        "viewed",
+        "accepted",
+        "declined",
+        "expired",
+        "cancelled",
+        "closed"
+      ],
+      "description": "Controls commercial offer readiness and acceptance.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-008",
+          "from_state": "draft",
+          "to_state": "sent",
+          "trigger": "send_offer",
+          "guard_policy": "offer_has_price_and_scope",
+          "event_emitted": "project_b.offer_created.v1",
+          "api_or_command": "POST /offers",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-008",
+          "from_state": "sent",
+          "to_state": "viewed",
+          "trigger": "prospect_viewed",
+          "guard_policy": "public_token_valid",
+          "event_emitted": "project_b.offer_viewed.v1",
+          "api_or_command": "GET /offers/{id}/public",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-008",
+          "from_state": "viewed",
+          "to_state": "accepted",
+          "trigger": "accept_offer",
+          "guard_policy": "not_expired",
+          "event_emitted": "project_b.offer_accepted.v1",
+          "api_or_command": "POST /offers/{id}/accept",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-008",
+          "from_state": "sent",
+          "to_state": "expired",
+          "trigger": "ttl_elapsed",
+          "guard_policy": "system_clock",
+          "event_emitted": "project_b.offer_expired.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-008",
+          "from_state": "sent",
+          "to_state": "cancelled",
+          "trigger": "cancel_offer",
+          "guard_policy": "coach_allowed",
+          "event_emitted": "project_b.offer_cancelled.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-008",
+          "from_state": "accepted",
+          "to_state": "closed",
+          "trigger": "checkout_started",
+          "guard_policy": "checkout_created",
+          "event_emitted": "project_b.checkout_started.v1",
+          "api_or_command": "POST /checkout-sessions",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-009",
+      "name": "Checkout Payment Lifecycle",
+      "aggregate": "checkout_session",
+      "owner_module": "PB-M10",
+      "initial": "created",
+      "terminal": "closed",
+      "states": [
+        "created",
+        "pending_provider",
+        "succeeded",
+        "failed",
+        "expired",
+        "refunded",
+        "closed"
+      ],
+      "description": "Controls provider checkout reference. Payment provider remains ledger truth.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-009",
+          "from_state": "created",
+          "to_state": "pending_provider",
+          "trigger": "create_provider_session",
+          "guard_policy": "provider_available",
+          "event_emitted": "project_b.checkout_started.v1",
+          "api_or_command": "POST /checkout-sessions",
+          "failure_mode": "provider_error"
+        },
+        {
+          "state_machine_id": "SM-009",
+          "from_state": "pending_provider",
+          "to_state": "succeeded",
+          "trigger": "payment_webhook_succeeded",
+          "guard_policy": "valid_webhook_signature",
+          "event_emitted": "project_b.payment_succeeded.v1",
+          "api_or_command": "POST /webhooks/payment",
+          "failure_mode": "duplicate ignored"
+        },
+        {
+          "state_machine_id": "SM-009",
+          "from_state": "pending_provider",
+          "to_state": "failed",
+          "trigger": "payment_webhook_failed",
+          "guard_policy": "valid_webhook_signature",
+          "event_emitted": "project_b.payment_failed.v1",
+          "api_or_command": "POST /webhooks/payment",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-009",
+          "from_state": "pending_provider",
+          "to_state": "expired",
+          "trigger": "provider_session_expired",
+          "guard_policy": "provider_event_valid",
+          "event_emitted": "project_b.payment_expired.v1",
+          "api_or_command": "POST /webhooks/payment",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-009",
+          "from_state": "succeeded",
+          "to_state": "refunded",
+          "trigger": "provider_refund_event",
+          "guard_policy": "provider_event_valid",
+          "event_emitted": "project_b.payment_refunded.v1",
+          "api_or_command": "POST /webhooks/payment",
+          "failure_mode": "access review"
+        },
+        {
+          "state_machine_id": "SM-009",
+          "from_state": "succeeded",
+          "to_state": "closed",
+          "trigger": "activate_delivery_gate",
+          "guard_policy": "agreement_gate_checked",
+          "event_emitted": "project_b.payment_closed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-010",
+      "name": "Agreement Lifecycle",
+      "aggregate": "agreement_status",
+      "owner_module": "PB-M10",
+      "initial": "not_required_or_pending",
+      "terminal": "closed",
+      "states": [
+        "not_required_or_pending",
+        "required_pending_signature",
+        "signed",
+        "declined",
+        "expired",
+        "waived",
+        "closed"
+      ],
+      "description": "Controls agreement gate before enrollment activation where configured.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-010",
+          "from_state": "not_required_or_pending",
+          "to_state": "required_pending_signature",
+          "trigger": "agreement_required",
+          "guard_policy": "offer_policy_requires_agreement",
+          "event_emitted": "project_b.agreement_required.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-010",
+          "from_state": "required_pending_signature",
+          "to_state": "signed",
+          "trigger": "agreement_signed",
+          "guard_policy": "signature_provider_valid",
+          "event_emitted": "project_b.agreement_signed.v1",
+          "api_or_command": "POST /agreements/{id}/signed",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-010",
+          "from_state": "required_pending_signature",
+          "to_state": "declined",
+          "trigger": "agreement_declined",
+          "guard_policy": "signature_provider_valid",
+          "event_emitted": "project_b.agreement_declined.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-010",
+          "from_state": "required_pending_signature",
+          "to_state": "expired",
+          "trigger": "agreement_expired",
+          "guard_policy": "ttl_elapsed",
+          "event_emitted": "project_b.agreement_expired.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-010",
+          "from_state": "not_required_or_pending",
+          "to_state": "waived",
+          "trigger": "agreement_waived",
+          "guard_policy": "tenant_policy_allows",
+          "event_emitted": "project_b.agreement_waived.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-010",
+          "from_state": "signed",
+          "to_state": "closed",
+          "trigger": "agreement_gate_complete",
+          "guard_policy": "payment_succeeded_or_waived",
+          "event_emitted": "project_b.agreement_closed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-011",
+      "name": "Client Lifecycle",
+      "aggregate": "client_profile_ref",
+      "owner_module": "PB-M11",
+      "initial": "lead",
+      "terminal": "archived",
+      "states": [
+        "lead",
+        "prospect",
+        "onboarding_pending",
+        "onboarding_started",
+        "active_client",
+        "renewal_due",
+        "renewed",
+        "churned",
+        "archived"
+      ],
+      "description": "Connects commercial conversion to active delivery status.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-011",
+          "from_state": "lead",
+          "to_state": "prospect",
+          "trigger": "lead_qualified",
+          "guard_policy": "sales_allowed",
+          "event_emitted": "project_b.client_lifecycle_changed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-011",
+          "from_state": "prospect",
+          "to_state": "onboarding_pending",
+          "trigger": "commercial_gates_complete",
+          "guard_policy": "payment_and_agreement_ok",
+          "event_emitted": "project_b.onboarding_pending.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-011",
+          "from_state": "onboarding_pending",
+          "to_state": "onboarding_started",
+          "trigger": "start_onboarding",
+          "guard_policy": "client_invited",
+          "event_emitted": "project_b.onboarding_started.v1",
+          "api_or_command": "POST /onboarding-sessions",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-011",
+          "from_state": "onboarding_started",
+          "to_state": "active_client",
+          "trigger": "assignment_active",
+          "guard_policy": "core_access_granted",
+          "event_emitted": "project_b.client_activated.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-011",
+          "from_state": "active_client",
+          "to_state": "renewal_due",
+          "trigger": "renewal_signal",
+          "guard_policy": "renewal_policy_trigger",
+          "event_emitted": "project_b.renewal_triggered.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-011",
+          "from_state": "renewal_due",
+          "to_state": "renewed",
+          "trigger": "renewal_payment_success",
+          "guard_policy": "payment_succeeded",
+          "event_emitted": "project_b.client_renewed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-011",
+          "from_state": "renewal_due",
+          "to_state": "churned",
+          "trigger": "renewal_failed_or_cancelled",
+          "guard_policy": "policy_elapsed",
+          "event_emitted": "project_b.client_churned.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-011",
+          "from_state": "churned",
+          "to_state": "archived",
+          "trigger": "archive_client",
+          "guard_policy": "retention_policy_ok",
+          "event_emitted": "project_b.client_archived.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-012",
+      "name": "Core Access Allow Lifecycle",
+      "aggregate": "core_access_request",
+      "owner_module": "PB-M02",
+      "initial": "not_requested",
+      "terminal": "revoked_or_expired",
+      "states": [
+        "not_requested",
+        "requested",
+        "granted",
+        "denied",
+        "revocation_requested",
+        "revoked_or_expired"
+      ],
+      "description": "Adapter lifecycle for Core entitlement / consent / runtime access allow.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-012",
+          "from_state": "not_requested",
+          "to_state": "requested",
+          "trigger": "request_core_access",
+          "guard_policy": "assignment_created + commercial_gates_complete",
+          "event_emitted": "project_b.core_access_allow_requested.v1",
+          "api_or_command": "POST /access/core-allow-requests",
+          "failure_mode": "Core unavailable"
+        },
+        {
+          "state_machine_id": "SM-012",
+          "from_state": "requested",
+          "to_state": "granted",
+          "trigger": "core_allow_granted",
+          "guard_policy": "core_response_allow",
+          "event_emitted": "project_b.core_access_allow_granted.v1",
+          "api_or_command": "Core callback/event",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-012",
+          "from_state": "requested",
+          "to_state": "denied",
+          "trigger": "core_allow_denied",
+          "guard_policy": "core_response_deny",
+          "event_emitted": "project_b.core_access_allow_denied.v1",
+          "api_or_command": "Core callback/event",
+          "failure_mode": "delivery blocked"
+        },
+        {
+          "state_machine_id": "SM-012",
+          "from_state": "granted",
+          "to_state": "revocation_requested",
+          "trigger": "request_revoke",
+          "guard_policy": "assignment_revoked_or_payment_refund",
+          "event_emitted": "project_b.core_access_revoke_requested.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-012",
+          "from_state": "revocation_requested",
+          "to_state": "revoked_or_expired",
+          "trigger": "core_revoked",
+          "guard_policy": "core_response_revoke",
+          "event_emitted": "project_b.core_access_revoked.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-012",
+          "from_state": "granted",
+          "to_state": "revoked_or_expired",
+          "trigger": "core_async_revoked",
+          "guard_policy": "core_revocation_event",
+          "event_emitted": "project_b.core_access_revoked.v1",
+          "api_or_command": "Core event",
+          "failure_mode": "project b must lock delivery"
+        }
+      ]
+    },
+    {
+      "id": "SM-013",
+      "name": "Assignment Lifecycle",
+      "aggregate": "client_assignment",
+      "owner_module": "PB-M11",
+      "initial": "created",
+      "terminal": "completed_or_revoked",
+      "states": [
+        "created",
+        "core_access_requested",
+        "active",
+        "paused",
+        "blocked",
+        "completed_or_revoked"
+      ],
+      "description": "Controls assignment of published journey versions to clients.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-013",
+          "from_state": "created",
+          "to_state": "core_access_requested",
+          "trigger": "assignment_created",
+          "guard_policy": "published_version + commercial_gates",
+          "event_emitted": "project_b.client_assignment_created.v1",
+          "api_or_command": "POST /assignments",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-013",
+          "from_state": "core_access_requested",
+          "to_state": "active",
+          "trigger": "core_access_granted",
+          "guard_policy": "core_response_allow",
+          "event_emitted": "project_b.assignment_activated.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-013",
+          "from_state": "core_access_requested",
+          "to_state": "blocked",
+          "trigger": "core_access_denied",
+          "guard_policy": "core_response_deny",
+          "event_emitted": "project_b.assignment_blocked.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-013",
+          "from_state": "active",
+          "to_state": "paused",
+          "trigger": "pause_assignment",
+          "guard_policy": "coach_or_admin_allowed",
+          "event_emitted": "project_b.assignment_paused.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-013",
+          "from_state": "paused",
+          "to_state": "active",
+          "trigger": "resume_assignment",
+          "guard_policy": "core_access_still_granted",
+          "event_emitted": "project_b.assignment_resumed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-013",
+          "from_state": "active",
+          "to_state": "completed_or_revoked",
+          "trigger": "complete_or_revoke_assignment",
+          "guard_policy": "completion_or_revoke_guard",
+          "event_emitted": "project_b.assignment_closed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-013",
+          "from_state": "active",
+          "to_state": "blocked",
+          "trigger": "core_access_revoked",
+          "guard_policy": "core_revocation_event",
+          "event_emitted": "project_b.assignment_blocked.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-014",
+      "name": "Enrollment Lifecycle",
+      "aggregate": "enrollment",
+      "owner_module": "PB-M11",
+      "initial": "invited",
+      "terminal": "closed",
+      "states": [
+        "invited",
+        "activated",
+        "in_progress",
+        "paused",
+        "completed",
+        "cancelled",
+        "revoked",
+        "closed"
+      ],
+      "description": "Controls user-facing program/journey participation.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-014",
+          "from_state": "invited",
+          "to_state": "activated",
+          "trigger": "client_accepts_or_auto_start",
+          "guard_policy": "core_access_granted",
+          "event_emitted": "project_b.enrollment_activated.v1",
+          "api_or_command": "POST /enrollments",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-014",
+          "from_state": "activated",
+          "to_state": "in_progress",
+          "trigger": "first_step_available",
+          "guard_policy": "delivery_plan_materialized",
+          "event_emitted": "project_b.enrollment_started.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-014",
+          "from_state": "in_progress",
+          "to_state": "paused",
+          "trigger": "pause_enrollment",
+          "guard_policy": "coach_or_client_policy",
+          "event_emitted": "project_b.enrollment_paused.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-014",
+          "from_state": "paused",
+          "to_state": "in_progress",
+          "trigger": "resume_enrollment",
+          "guard_policy": "assignment_active",
+          "event_emitted": "project_b.enrollment_resumed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-014",
+          "from_state": "in_progress",
+          "to_state": "completed",
+          "trigger": "all_required_steps_done",
+          "guard_policy": "completion_policy_met",
+          "event_emitted": "project_b.enrollment_completed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-014",
+          "from_state": "in_progress",
+          "to_state": "revoked",
+          "trigger": "assignment_revoked",
+          "guard_policy": "access_revoked",
+          "event_emitted": "project_b.enrollment_revoked.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-014",
+          "from_state": "completed",
+          "to_state": "closed",
+          "trigger": "close_enrollment",
+          "guard_policy": "post_completion_window_elapsed",
+          "event_emitted": "project_b.enrollment_closed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-015",
+      "name": "Delivery Step Lifecycle",
+      "aggregate": "journey_step_instance",
+      "owner_module": "PB-M12",
+      "initial": "locked",
+      "terminal": "closed",
+      "states": [
+        "locked",
+        "available",
+        "started",
+        "completed",
+        "skipped",
+        "expired",
+        "reopened",
+        "closed"
+      ],
+      "description": "Controls runtime availability and completion of journey steps.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-015",
+          "from_state": "locked",
+          "to_state": "available",
+          "trigger": "unlock_step",
+          "guard_policy": "previous_step_policy_met + access_allow",
+          "event_emitted": "project_b.delivery_step_available.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-015",
+          "from_state": "available",
+          "to_state": "started",
+          "trigger": "start_step",
+          "guard_policy": "member_allowed",
+          "event_emitted": "project_b.delivery_step_started.v1",
+          "api_or_command": "POST /steps/{id}/start",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-015",
+          "from_state": "started",
+          "to_state": "completed",
+          "trigger": "complete_step",
+          "guard_policy": "completion_payload_valid",
+          "event_emitted": "project_b.step_completed.v1",
+          "api_or_command": "POST /steps/{id}/complete",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-015",
+          "from_state": "available",
+          "to_state": "skipped",
+          "trigger": "skip_step",
+          "guard_policy": "skip_policy_allows",
+          "event_emitted": "project_b.delivery_step_skipped.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-015",
+          "from_state": "available",
+          "to_state": "expired",
+          "trigger": "step_window_elapsed",
+          "guard_policy": "schedule_policy",
+          "event_emitted": "project_b.delivery_step_expired.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-015",
+          "from_state": "completed",
+          "to_state": "reopened",
+          "trigger": "reopen_step",
+          "guard_policy": "coach_policy_allows",
+          "event_emitted": "project_b.delivery_step_reopened.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-015",
+          "from_state": "completed",
+          "to_state": "closed",
+          "trigger": "close_step",
+          "guard_policy": "projection_complete",
+          "event_emitted": "project_b.delivery_step_closed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-016",
+      "name": "Reflection Lifecycle",
+      "aggregate": "reflection_entry",
+      "owner_module": "PB-M13",
+      "initial": "draft",
+      "terminal": "archived",
+      "states": [
+        "draft",
+        "submitted",
+        "revised",
+        "hidden_from_coach",
+        "deleted_soft",
+        "archived"
+      ],
+      "description": "Controls client reflection and visibility state.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-016",
+          "from_state": "draft",
+          "to_state": "submitted",
+          "trigger": "submit_reflection",
+          "guard_policy": "step_available + privacy_policy_valid",
+          "event_emitted": "project_b.reflection_submitted.v1",
+          "api_or_command": "POST /reflections",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-016",
+          "from_state": "submitted",
+          "to_state": "revised",
+          "trigger": "revise_reflection",
+          "guard_policy": "author_allowed + edit_window",
+          "event_emitted": "project_b.reflection_revised.v1",
+          "api_or_command": "PATCH /reflections/{id}",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-016",
+          "from_state": "submitted",
+          "to_state": "hidden_from_coach",
+          "trigger": "hide_reflection",
+          "guard_policy": "privacy_policy_allows",
+          "event_emitted": "project_b.reflection_visibility_changed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-016",
+          "from_state": "submitted",
+          "to_state": "deleted_soft",
+          "trigger": "delete_reflection",
+          "guard_policy": "author_allowed + retention_policy",
+          "event_emitted": "project_b.reflection_deleted.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-016",
+          "from_state": "revised",
+          "to_state": "archived",
+          "trigger": "archive_reflection",
+          "guard_policy": "retention_policy",
+          "event_emitted": "project_b.reflection_archived.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-017",
+      "name": "Message Thread Lifecycle",
+      "aggregate": "message_thread",
+      "owner_module": "PB-M14",
+      "initial": "open",
+      "terminal": "archived",
+      "states": [
+        "open",
+        "waiting_client",
+        "waiting_coach",
+        "closed",
+        "archived"
+      ],
+      "description": "Controls coach-client communication and intervention state.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-017",
+          "from_state": "open",
+          "to_state": "waiting_client",
+          "trigger": "coach_sent_message",
+          "guard_policy": "same_tenant + access_allow",
+          "event_emitted": "project_b.message_sent.v1",
+          "api_or_command": "POST /messages",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-017",
+          "from_state": "open",
+          "to_state": "waiting_coach",
+          "trigger": "client_sent_message",
+          "guard_policy": "same_tenant + access_allow",
+          "event_emitted": "project_b.message_sent.v1",
+          "api_or_command": "POST /messages",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-017",
+          "from_state": "waiting_client",
+          "to_state": "waiting_coach",
+          "trigger": "client_replied",
+          "guard_policy": "same_tenant + access_allow",
+          "event_emitted": "project_b.message_sent.v1",
+          "api_or_command": "POST /messages",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-017",
+          "from_state": "waiting_coach",
+          "to_state": "waiting_client",
+          "trigger": "coach_replied",
+          "guard_policy": "same_tenant + access_allow",
+          "event_emitted": "project_b.message_sent.v1",
+          "api_or_command": "POST /messages",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-017",
+          "from_state": "waiting_client",
+          "to_state": "closed",
+          "trigger": "close_thread",
+          "guard_policy": "coach_or_admin_allowed",
+          "event_emitted": "project_b.message_thread_closed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-017",
+          "from_state": "closed",
+          "to_state": "archived",
+          "trigger": "archive_thread",
+          "guard_policy": "retention_policy",
+          "event_emitted": "project_b.message_thread_archived.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-018",
+      "name": "Notification Lifecycle",
+      "aggregate": "notification_delivery",
+      "owner_module": "PB-M14",
+      "initial": "scheduled",
+      "terminal": "terminal",
+      "states": [
+        "scheduled",
+        "due",
+        "sending",
+        "sent",
+        "failed",
+        "retry_scheduled",
+        "cancelled",
+        "suppressed",
+        "terminal"
+      ],
+      "description": "Controls notification scheduling, consent suppression and provider delivery.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-018",
+          "from_state": "scheduled",
+          "to_state": "due",
+          "trigger": "time_due",
+          "guard_policy": "scheduler_clock",
+          "event_emitted": "project_b.notification_due.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-018",
+          "from_state": "due",
+          "to_state": "suppressed",
+          "trigger": "consent_or_quiet_hours_block",
+          "guard_policy": "notification_consent_guard",
+          "event_emitted": "project_b.notification_suppressed.v1",
+          "api_or_command": "",
+          "failure_mode": "no provider call"
+        },
+        {
+          "state_machine_id": "SM-018",
+          "from_state": "due",
+          "to_state": "sending",
+          "trigger": "send_attempt",
+          "guard_policy": "consent_ok + provider_available",
+          "event_emitted": "project_b.notification_sending.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-018",
+          "from_state": "sending",
+          "to_state": "sent",
+          "trigger": "provider_success",
+          "guard_policy": "provider_response_ok",
+          "event_emitted": "project_b.notification_sent.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-018",
+          "from_state": "sending",
+          "to_state": "failed",
+          "trigger": "provider_failure",
+          "guard_policy": "provider_response_failure",
+          "event_emitted": "project_b.notification_failed.v1",
+          "api_or_command": "",
+          "failure_mode": "retry if budget remains"
+        },
+        {
+          "state_machine_id": "SM-018",
+          "from_state": "failed",
+          "to_state": "retry_scheduled",
+          "trigger": "retry_budget_available",
+          "guard_policy": "retry_policy",
+          "event_emitted": "project_b.notification_retry_scheduled.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-018",
+          "from_state": "scheduled",
+          "to_state": "cancelled",
+          "trigger": "cancel_notification",
+          "guard_policy": "owner_or_system_allowed",
+          "event_emitted": "project_b.notification_cancelled.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-018",
+          "from_state": "sent",
+          "to_state": "terminal",
+          "trigger": "finalize",
+          "guard_policy": "terminal_policy",
+          "event_emitted": "project_b.notification_terminal.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-019",
+      "name": "Community Moderation Lifecycle",
+      "aggregate": "moderation_case",
+      "owner_module": "PB-M15",
+      "initial": "reported",
+      "terminal": "closed",
+      "states": [
+        "reported",
+        "in_review",
+        "actioned",
+        "dismissed",
+        "escalated",
+        "closed"
+      ],
+      "description": "Controls community report and moderation action handling.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-019",
+          "from_state": "reported",
+          "to_state": "in_review",
+          "trigger": "moderator_opens_report",
+          "guard_policy": "moderator_allowed",
+          "event_emitted": "project_b.community_content_reported.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-019",
+          "from_state": "in_review",
+          "to_state": "actioned",
+          "trigger": "apply_action",
+          "guard_policy": "moderator_allowed",
+          "event_emitted": "project_b.community_content_moderated.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-019",
+          "from_state": "in_review",
+          "to_state": "dismissed",
+          "trigger": "dismiss_report",
+          "guard_policy": "moderator_allowed",
+          "event_emitted": "project_b.community_report_dismissed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-019",
+          "from_state": "in_review",
+          "to_state": "escalated",
+          "trigger": "escalate_report",
+          "guard_policy": "severity_policy",
+          "event_emitted": "project_b.community_report_escalated.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-019",
+          "from_state": "actioned",
+          "to_state": "closed",
+          "trigger": "close_case",
+          "guard_policy": "audit_recorded",
+          "event_emitted": "project_b.moderation_case_closed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-020",
+      "name": "Outbox Lifecycle",
+      "aggregate": "outbox_event",
+      "owner_module": "PB-M17",
+      "initial": "pending",
+      "terminal": "terminal",
+      "states": [
+        "pending",
+        "publishing",
+        "published",
+        "failed",
+        "retry_scheduled",
+        "dead_lettered",
+        "terminal"
+      ],
+      "description": "Controls transactional event publication after commit.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-020",
+          "from_state": "pending",
+          "to_state": "publishing",
+          "trigger": "publisher_claims_event",
+          "guard_policy": "outbox_claim_lock",
+          "event_emitted": "project_b.outbox_event_publishing.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-020",
+          "from_state": "publishing",
+          "to_state": "published",
+          "trigger": "broker_ack",
+          "guard_policy": "publish_success",
+          "event_emitted": "project_b.outbox_event_published.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-020",
+          "from_state": "publishing",
+          "to_state": "failed",
+          "trigger": "broker_failure",
+          "guard_policy": "publish_failure",
+          "event_emitted": "project_b.outbox_event_failed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-020",
+          "from_state": "failed",
+          "to_state": "retry_scheduled",
+          "trigger": "retry_budget_available",
+          "guard_policy": "retry_policy",
+          "event_emitted": "project_b.outbox_event_retry_scheduled.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-020",
+          "from_state": "retry_scheduled",
+          "to_state": "publishing",
+          "trigger": "retry_due",
+          "guard_policy": "retry_lock",
+          "event_emitted": "project_b.outbox_event_publishing.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-020",
+          "from_state": "failed",
+          "to_state": "dead_lettered",
+          "trigger": "retry_budget_exhausted",
+          "guard_policy": "dlq_policy",
+          "event_emitted": "project_b.outbox_event_dead_lettered.v1",
+          "api_or_command": "",
+          "failure_mode": "manual review"
+        },
+        {
+          "state_machine_id": "SM-020",
+          "from_state": "published",
+          "to_state": "terminal",
+          "trigger": "finalize_published",
+          "guard_policy": "terminal_policy",
+          "event_emitted": "project_b.outbox_event_terminal.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-021",
+      "name": "Inbox Consumption Lifecycle",
+      "aggregate": "inbox_event",
+      "owner_module": "PB-M17",
+      "initial": "received",
+      "terminal": "terminal",
+      "states": [
+        "received",
+        "processing",
+        "processed",
+        "failed",
+        "retry_scheduled",
+        "dead_lettered",
+        "terminal"
+      ],
+      "description": "Controls idempotent consumer processing of inbound events.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-021",
+          "from_state": "received",
+          "to_state": "processing",
+          "trigger": "consumer_claims_event",
+          "guard_policy": "inbox_idempotency_lock",
+          "event_emitted": "project_b.inbox_event_processing.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-021",
+          "from_state": "processing",
+          "to_state": "processed",
+          "trigger": "consumer_success",
+          "guard_policy": "handler_success",
+          "event_emitted": "project_b.inbox_event_processed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-021",
+          "from_state": "processing",
+          "to_state": "failed",
+          "trigger": "consumer_failure",
+          "guard_policy": "handler_failure",
+          "event_emitted": "project_b.inbox_event_failed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-021",
+          "from_state": "failed",
+          "to_state": "retry_scheduled",
+          "trigger": "retry_budget_available",
+          "guard_policy": "retry_policy",
+          "event_emitted": "project_b.inbox_event_retry_scheduled.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-021",
+          "from_state": "failed",
+          "to_state": "dead_lettered",
+          "trigger": "retry_budget_exhausted",
+          "guard_policy": "dlq_policy",
+          "event_emitted": "project_b.inbox_event_dead_lettered.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-021",
+          "from_state": "processed",
+          "to_state": "terminal",
+          "trigger": "finalize",
+          "guard_policy": "terminal_policy",
+          "event_emitted": "project_b.inbox_event_terminal.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-022",
+      "name": "Projection Lifecycle",
+      "aggregate": "projection_checkpoint",
+      "owner_module": "PB-M17",
+      "initial": "fresh",
+      "terminal": "fresh",
+      "states": [
+        "fresh",
+        "stale",
+        "rebuild_requested",
+        "rebuilding",
+        "rebuilt",
+        "rebuild_failed"
+      ],
+      "description": "Controls read model freshness and rebuild behavior.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-022",
+          "from_state": "fresh",
+          "to_state": "stale",
+          "trigger": "dependency_event_received",
+          "guard_policy": "projection_dependency_changed",
+          "event_emitted": "project_b.projection_marked_stale.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-022",
+          "from_state": "stale",
+          "to_state": "rebuild_requested",
+          "trigger": "request_rebuild",
+          "guard_policy": "system_or_ops_allowed",
+          "event_emitted": "project_b.projection_rebuild_requested.v1",
+          "api_or_command": "POST /ops/projections/rebuild",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-022",
+          "from_state": "rebuild_requested",
+          "to_state": "rebuilding",
+          "trigger": "worker_claims_rebuild",
+          "guard_policy": "projection_lock",
+          "event_emitted": "project_b.projection_rebuild_started.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-022",
+          "from_state": "rebuilding",
+          "to_state": "rebuilt",
+          "trigger": "rebuild_success",
+          "guard_policy": "checkpoint_written",
+          "event_emitted": "project_b.projection_rebuilt.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-022",
+          "from_state": "rebuilding",
+          "to_state": "rebuild_failed",
+          "trigger": "rebuild_failure",
+          "guard_policy": "retry_or_dlq_policy",
+          "event_emitted": "project_b.projection_rebuild_failed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-022",
+          "from_state": "rebuilt",
+          "to_state": "fresh",
+          "trigger": "mark_fresh",
+          "guard_policy": "checkpoint_verified",
+          "event_emitted": "project_b.projection_fresh.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    },
+    {
+      "id": "SM-023",
+      "name": "Support Case / Replay Request Lifecycle",
+      "aggregate": "support_case_or_replay_request",
+      "owner_module": "PB-M18",
+      "initial": "created",
+      "terminal": "closed",
+      "states": [
+        "created",
+        "triaged",
+        "approved",
+        "rejected",
+        "running",
+        "completed",
+        "failed",
+        "closed"
+      ],
+      "description": "Controls audited support intervention and replay execution.",
+      "transitions": [
+        {
+          "state_machine_id": "SM-023",
+          "from_state": "created",
+          "to_state": "triaged",
+          "trigger": "triage_case",
+          "guard_policy": "support_allowed",
+          "event_emitted": "project_b.support_case_triaged.v1",
+          "api_or_command": "POST /ops/support-cases",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-023",
+          "from_state": "triaged",
+          "to_state": "approved",
+          "trigger": "approve_replay",
+          "guard_policy": "ops_role + reason + scope",
+          "event_emitted": "project_b.replay_request_approved.v1",
+          "api_or_command": "POST /ops/replay-requests",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-023",
+          "from_state": "triaged",
+          "to_state": "rejected",
+          "trigger": "reject_replay",
+          "guard_policy": "ops_role",
+          "event_emitted": "project_b.replay_request_rejected.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-023",
+          "from_state": "approved",
+          "to_state": "running",
+          "trigger": "run_replay",
+          "guard_policy": "replay_lock + scope_bound",
+          "event_emitted": "project_b.replay_started.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-023",
+          "from_state": "running",
+          "to_state": "completed",
+          "trigger": "replay_success",
+          "guard_policy": "checkpoint_verified",
+          "event_emitted": "project_b.replay_completed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-023",
+          "from_state": "running",
+          "to_state": "failed",
+          "trigger": "replay_failure",
+          "guard_policy": "failure_recorded",
+          "event_emitted": "project_b.replay_failed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        },
+        {
+          "state_machine_id": "SM-023",
+          "from_state": "completed",
+          "to_state": "closed",
+          "trigger": "close_case",
+          "guard_policy": "audit_recorded",
+          "event_emitted": "project_b.support_case_closed.v1",
+          "api_or_command": "",
+          "failure_mode": ""
+        }
+      ]
+    }
+  ],
+  "guards": [
+    {
+      "guard_id": "G-001",
+      "guard_name": "TenantActiveGuard",
+      "condition": "tenant_id resolves to active tenant",
+      "applies_to": "all tenant-scoped commands and reads",
+      "failure_behavior": "deny write/read or read-only by policy",
+      "owner_module": "PB-M01"
+    },
+    {
+      "guard_id": "G-002",
+      "guard_name": "SameTenantBoundaryGuard",
+      "condition": "actor tenant context matches target tenant_id",
+      "applies_to": "all tenant-scoped resources",
+      "failure_behavior": "403 and audit if privileged",
+      "owner_module": "PB-M02"
+    },
+    {
+      "guard_id": "G-003",
+      "guard_name": "CoreAccessAllowGuard",
+      "condition": "Core grants entitlement/consent/runtime access",
+      "applies_to": "member delivery, assignment activation, sensitive reads",
+      "failure_behavior": "deny by default if Core unavailable",
+      "owner_module": "PB-M02"
+    },
+    {
+      "guard_id": "G-004",
+      "guard_name": "CanonicalRefsValidGuard",
+      "condition": "all canonical refs valid or allowed warning",
+      "applies_to": "publish, assignment, composed content delivery",
+      "failure_behavior": "block publish or mark review_needed",
+      "owner_module": "PB-M07"
+    },
+    {
+      "guard_id": "G-005",
+      "guard_name": "PublishedVersionGuard",
+      "condition": "journey_version status is published",
+      "applies_to": "assignment/enrollment/delivery",
+      "failure_behavior": "deny assignment",
+      "owner_module": "PB-M08"
+    },
+    {
+      "guard_id": "G-006",
+      "guard_name": "PaymentSucceededGuard",
+      "condition": "provider confirms payment_succeeded reference",
+      "applies_to": "commercial activation",
+      "failure_behavior": "do not request Core allow",
+      "owner_module": "PB-M10"
+    },
+    {
+      "guard_id": "G-007",
+      "guard_name": "AgreementGateGuard",
+      "condition": "agreement signed/waived/not required",
+      "applies_to": "onboarding and delivery activation",
+      "failure_behavior": "block onboarding_pending",
+      "owner_module": "PB-M10"
+    },
+    {
+      "guard_id": "G-008",
+      "guard_name": "AssignmentActiveGuard",
+      "condition": "assignment active and not blocked/revoked",
+      "applies_to": "member home and step delivery",
+      "failure_behavior": "hide content/403",
+      "owner_module": "PB-M11"
+    },
+    {
+      "guard_id": "G-009",
+      "guard_name": "EnrollmentActiveGuard",
+      "condition": "enrollment activated or in_progress",
+      "applies_to": "member journey access",
+      "failure_behavior": "deny delivery",
+      "owner_module": "PB-M11"
+    },
+    {
+      "guard_id": "G-010",
+      "guard_name": "StepAvailabilityGuard",
+      "condition": "step available/started and unlock rules satisfied",
+      "applies_to": "step start/complete/reflection",
+      "failure_behavior": "409 invalid state",
+      "owner_module": "PB-M12"
+    },
+    {
+      "guard_id": "G-011",
+      "guard_name": "NotificationConsentGuard",
+      "condition": "notification consent and quiet-hours allow send",
+      "applies_to": "notification send",
+      "failure_behavior": "suppress without provider call",
+      "owner_module": "PB-M14"
+    },
+    {
+      "guard_id": "G-012",
+      "guard_name": "FeatureEnabledGuard",
+      "condition": "tenant feature flag enables capability",
+      "applies_to": "community, messaging, commerce, analytics",
+      "failure_behavior": "404/403 feature disabled",
+      "owner_module": "PB-M03"
+    },
+    {
+      "guard_id": "G-013",
+      "guard_name": "PrivacyVisibilityGuard",
+      "condition": "reflection/message visible to actor by policy",
+      "applies_to": "coach dashboards and reflection views",
+      "failure_behavior": "omit or 403",
+      "owner_module": "PB-M13"
+    },
+    {
+      "guard_id": "G-014",
+      "guard_name": "ModerationAuthorityGuard",
+      "condition": "actor has moderator role for space",
+      "applies_to": "moderation actions",
+      "failure_behavior": "403 + audit",
+      "owner_module": "PB-M15"
+    },
+    {
+      "guard_id": "G-015",
+      "guard_name": "IdempotencyKeyGuard",
+      "condition": "command/webhook idempotency key unique or replay-safe",
+      "applies_to": "payment webhooks, commands, outbox publish",
+      "failure_behavior": "return previous result/ignore duplicate",
+      "owner_module": "PB-M17"
+    },
+    {
+      "guard_id": "G-016",
+      "guard_name": "OutboxAtomicityGuard",
+      "condition": "domain mutation and outbox insert occur in one transaction",
+      "applies_to": "all event-producing commands",
+      "failure_behavior": "rollback both",
+      "owner_module": "PB-M17"
+    },
+    {
+      "guard_id": "G-017",
+      "guard_name": "RetryBudgetGuard",
+      "condition": "retry count below max and next_attempt_at due",
+      "applies_to": "outbox/inbox/notification retries",
+      "failure_behavior": "dead_lettered",
+      "owner_module": "PB-M17"
+    },
+    {
+      "guard_id": "G-018",
+      "guard_name": "ProjectionCheckpointGuard",
+      "condition": "projection rebuild writes checkpoint after complete replay",
+      "applies_to": "member home/dashboard/read models",
+      "failure_behavior": "mark stale/rebuild_failed",
+      "owner_module": "PB-M17"
+    },
+    {
+      "guard_id": "G-019",
+      "guard_name": "ReplayApprovalGuard",
+      "condition": "support replay has approved scope, reason, operator",
+      "applies_to": "ops replay",
+      "failure_behavior": "reject replay",
+      "owner_module": "PB-M18"
+    },
+    {
+      "guard_id": "G-020",
+      "guard_name": "PayloadMinimizationGuard",
+      "condition": "events/audit avoid raw PII and sensitive content",
+      "applies_to": "events, audit logs, support exports",
+      "failure_behavior": "block write or redact",
+      "owner_module": "PB-M17"
+    }
+  ]
+}

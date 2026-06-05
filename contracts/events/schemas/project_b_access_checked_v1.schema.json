@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.sovereign-os.local/project-b/events/project_b.access.checked.v1.schema.json",
+  "title": "project_b.access.checked.v1",
+  "description": "Evaluate Project B permission using Core decision envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tenant_id",
+    "aggregate_type",
+    "aggregate_id",
+    "occurred_at",
+    "source_operation",
+    "metadata"
+  ],
+  "properties": {
+    "tenant_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "aggregate_type": {
+      "type": "string",
+      "const": "access_check"
+    },
+    "aggregate_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_operation": {
+      "type": "string",
+      "const": "checkProjectBAccess"
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "core_decision_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "decision": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "allow",
+        "deny",
+        "unknown",
+        null
+      ]
+    },
+    "decision_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

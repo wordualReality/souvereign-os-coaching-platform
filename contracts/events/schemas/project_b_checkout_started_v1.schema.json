@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.sovereign-os.local/project-b/events/project_b.checkout.started.v1.schema.json",
+  "title": "project_b.checkout.started.v1",
+  "description": "Start checkout session",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tenant_id",
+    "aggregate_type",
+    "aggregate_id",
+    "occurred_at",
+    "source_operation",
+    "metadata"
+  ],
+  "properties": {
+    "tenant_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "aggregate_type": {
+      "type": "string",
+      "const": "checkout_session"
+    },
+    "aggregate_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_operation": {
+      "type": "string",
+      "const": "createCheckoutSession"
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "provider": {
+      "type": "string"
+    },
+    "provider_event_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "amount_minor": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 3,
+      "maxLength": 3
+    }
+  }
+}

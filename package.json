@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "validate:repo": "python scripts/validate_repo.py",
+    "validate:openapi": "python scripts/validate_openapi.py",
+    "validate:json": "python scripts/validate_json_schemas.py",
+    "validate:sql": "python scripts/validate_sql_static.py",
+    "validate:rls": "python scripts/validate_rls_static.py",
+    "validate:e2e-skeleton": "python scripts/validate_mvp_slice_01.py",
+    "validate:all": "python scripts/validate_repo.py && python scripts/validate_openapi.py && python scripts/validate_json_schemas.py && python scripts/validate_sql_static.py && python scripts/validate_rls_static.py && python scripts/validate_mvp_slice_01.py"
+  },
+  "devDependencies": {}
+}

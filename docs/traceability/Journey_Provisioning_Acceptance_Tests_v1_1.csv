@@ -1,0 +1,13 @@
+test_id,test_type,area,scenario,given,when,then,priority
+JH-T001,integration,manual provisioning,manual client draft creates audit,tenant admin has permission,client profile submitted,draft saved and audit event written,P0
+JH-T002,security,manual provisioning,duplicate client is blocked,same contact exists in tenant,admin submits duplicate,409 error and no duplicate client record,P0
+JH-T003,security,coach assignment,cross-tenant coach blocked,coach belongs to different tenant,admin assigns coach,403 and audit denial,P0
+JH-T004,integration,commercial gate,manual bypass requires reason,admin chooses bypass,reason missing,400 PB_ERR_BYPASS_REASON_REQUIRED,P0
+JH-T005,e2e,provisioning status,status aggregates all setup gates,client invited and journey assigned,admin opens provisioning status,invite/core/delivery/first-login states visible,P0
+JH-T006,contract,template clone,clone creates tenant draft,published template exists,coach clones template,draft created and source unchanged,P0
+JH-T007,e2e,cohort,cohort from template materializes schedule,published template exists,coach creates cohort,cohort + schedule + program refs exist,P0
+JH-T008,integration,cohort member,add member materializes delivery,client eligible and cohort active,coach adds member,membership and delivery plan created,P0
+JH-T009,contract,branching,invalid branch target blocks publish,branch target missing,coach validates journey,publish validation fails with explicit error,P0
+JH-T010,audit,branch trace,branch evaluation writes trace,client path changes due rule,delivery evaluates rule,trace persisted with input snapshot and effect,P0
+JH-T011,e2e,client app,client sees branch result not raw rule,branch routes to alternate path,client opens member home,next step reflects routed path,P0
+JH-T012,accessibility,client app,locked state accessible,step locked,client navigates by keyboard/screen reader,message and available action are perceivable,P1

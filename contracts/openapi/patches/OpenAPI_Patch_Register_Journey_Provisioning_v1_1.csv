@@ -1,0 +1,11 @@
+patch_id,type,resource_or_endpoint,operation,purpose,priority,notes
+PATCH-API-001,OpenAPI,/tenants/{tenantId}/clients:provision-draft,POST,Create manual client provisioning draft,P0,Needed for explicit manual client setup.
+PATCH-API-002,OpenAPI,/tenants/{tenantId}/clients/{clientId}/coach-assignment,PUT,Assign/reassign primary coach,P0,"Supports platform owner, tenant admin and coach roles."
+PATCH-API-003,OpenAPI,/tenants/{tenantId}/clients/{clientId}/commercial-gate,POST,Set plan/manual bypass/no-charge access gate,P0,Bypass requires reason and audit.
+PATCH-API-004,OpenAPI,/tenants/{tenantId}/clients/{clientId}/provisioning-status,GET,Read provisioning health state,P0,Used by setup wizard and support.
+PATCH-API-005,OpenAPI,/tenants/{tenantId}/journey-templates,GET/POST,Template catalog and draft creation,P0,Template model.
+PATCH-API-006,OpenAPI,/tenants/{tenantId}/journey-templates/{templateId}:clone,POST,Clone template into journey draft/cohort program,P0,Clone semantics.
+PATCH-API-007,OpenAPI,/tenants/{tenantId}/cohorts,GET/POST,Create/list cohorts,P0,Cohort model.
+PATCH-API-008,OpenAPI,/tenants/{tenantId}/cohorts/{cohortId}/members,POST/DELETE,Manage cohort members,P0,Group program delivery.
+PATCH-API-009,OpenAPI,/tenants/{tenantId}/journeys/{journeyId}/branch-rules,GET/POST,Manage conditional branch rules,P0,Journey flexibility.
+PATCH-API-010,OpenAPI,/tenants/{tenantId}/journeys/{journeyId}:simulate,POST,Simulate journey branch/app states,P1,Preview before publish.

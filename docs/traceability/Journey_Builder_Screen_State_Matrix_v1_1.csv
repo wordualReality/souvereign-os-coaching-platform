@@ -1,0 +1,11 @@
+screen_id,surface,screen,purpose,primary_actions,states,required_validation
+JB-S01,Coach Studio,Journey Builder Dashboard,List drafts/templates/published journeys,"create, clone, filter, publish","loading,empty,ready,error,forbidden",tenant_feature_enabled
+JB-S02,Coach Studio,Journey Canvas,Visual phase/step/path builder,"add phase, add step, drag, connect branch, preview","loading,dirty,validating,ready,error","no_orphan_step, no_invalid_ref"
+JB-S03,Coach Studio,Step Editor Drawer,Configure step content/tasks/reflections,"edit title, content, tasks, refs, duration","ready,dirty,invalid,saving,saved","required_fields, canonical_ref_valid"
+JB-S04,Coach Studio,Branch Rule Editor,Create conditional rule,"select input, operator, effect, priority","ready,invalid,validating,saved","rule_schema_valid, effect_target_exists"
+JB-S05,Coach Studio,Template Clone Wizard,Clone template into tenant journey,"select template, choose clone mode, map refs","ready,validating,cloned,error","template_published, refs_valid"
+JB-S06,Coach Studio,Cohort Program Builder,Create group program schedule,"create cohort, assign program, schedule steps","ready,invalid,published,error",cohort_schedule_valid
+JB-S07,Coach Studio,Publish Validation Panel,Show validation errors/warnings,"validate, fix, request publish","validating,pass,warning,fail",validation_result_required
+JB-S08,Client App,Journey Preview Mode,Preview as client before publish,"switch persona, simulate branches","loading,ready,error",admin_or_coach_only
+JB-S09,Admin/Ops,Journey Rule Trace Inspector,Inspect evaluated branch decision,"search client, inspect rule trace","ready,empty,error,forbidden",platform_or_tenant_admin
+JB-S10,Client App,Dynamic Next Step View,Render resulting step/path,"start, complete, reflect","loading,ready,locked,coach_review_pending,error",core_access_allowed

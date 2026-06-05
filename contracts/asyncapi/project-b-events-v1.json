@@ -1,0 +1,1192 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "Project B Event Schema & Outbox Contract",
+    "version": "1.0.0",
+    "description": "Handoff-grade event contract seed for Project B."
+  },
+  "defaultContentType": "application/json",
+  "servers": {
+    "projectBOutboxRelay": {
+      "host": "project-b-outbox-relay",
+      "protocol": "internal",
+      "description": "Outbox relay boundary; exact broker selected later."
+    }
+  },
+  "channels": {
+    "project_b.tenant.created.v1": {
+      "address": "project_b.tenant.created.v1",
+      "messages": {
+        "project_b.tenant.created.v1": {
+          "$ref": "#/components/messages/project_b.tenant.created.v1"
+        }
+      }
+    },
+    "project_b.tenant.status_changed.v1": {
+      "address": "project_b.tenant.status_changed.v1",
+      "messages": {
+        "project_b.tenant.status_changed.v1": {
+          "$ref": "#/components/messages/project_b.tenant.status_changed.v1"
+        }
+      }
+    },
+    "project_b.role.assigned.v1": {
+      "address": "project_b.role.assigned.v1",
+      "messages": {
+        "project_b.role.assigned.v1": {
+          "$ref": "#/components/messages/project_b.role.assigned.v1"
+        }
+      }
+    },
+    "project_b.role.revoked.v1": {
+      "address": "project_b.role.revoked.v1",
+      "messages": {
+        "project_b.role.revoked.v1": {
+          "$ref": "#/components/messages/project_b.role.revoked.v1"
+        }
+      }
+    },
+    "project_b.access.checked.v1": {
+      "address": "project_b.access.checked.v1",
+      "messages": {
+        "project_b.access.checked.v1": {
+          "$ref": "#/components/messages/project_b.access.checked.v1"
+        }
+      }
+    },
+    "project_b.blueprint.version_published.v1": {
+      "address": "project_b.blueprint.version_published.v1",
+      "messages": {
+        "project_b.blueprint.version_published.v1": {
+          "$ref": "#/components/messages/project_b.blueprint.version_published.v1"
+        }
+      }
+    },
+    "project_b.branding_theme.published.v1": {
+      "address": "project_b.branding_theme.published.v1",
+      "messages": {
+        "project_b.branding_theme.published.v1": {
+          "$ref": "#/components/messages/project_b.branding_theme.published.v1"
+        }
+      }
+    },
+    "project_b.journey_draft.created.v1": {
+      "address": "project_b.journey_draft.created.v1",
+      "messages": {
+        "project_b.journey_draft.created.v1": {
+          "$ref": "#/components/messages/project_b.journey_draft.created.v1"
+        }
+      }
+    },
+    "project_b.journey_draft.updated.v1": {
+      "address": "project_b.journey_draft.updated.v1",
+      "messages": {
+        "project_b.journey_draft.updated.v1": {
+          "$ref": "#/components/messages/project_b.journey_draft.updated.v1"
+        }
+      }
+    },
+    "project_b.journey_draft.validation_requested.v1": {
+      "address": "project_b.journey_draft.validation_requested.v1",
+      "messages": {
+        "project_b.journey_draft.validation_requested.v1": {
+          "$ref": "#/components/messages/project_b.journey_draft.validation_requested.v1"
+        }
+      }
+    },
+    "project_b.journey.version_published.v1": {
+      "address": "project_b.journey.version_published.v1",
+      "messages": {
+        "project_b.journey.version_published.v1": {
+          "$ref": "#/components/messages/project_b.journey.version_published.v1"
+        }
+      }
+    },
+    "project_b.content_asset.uploaded.v1": {
+      "address": "project_b.content_asset.uploaded.v1",
+      "messages": {
+        "project_b.content_asset.uploaded.v1": {
+          "$ref": "#/components/messages/project_b.content_asset.uploaded.v1"
+        }
+      }
+    },
+    "project_b.canonical_binding.validated.v1": {
+      "address": "project_b.canonical_binding.validated.v1",
+      "messages": {
+        "project_b.canonical_binding.validated.v1": {
+          "$ref": "#/components/messages/project_b.canonical_binding.validated.v1"
+        }
+      }
+    },
+    "project_b.lead.created.v1": {
+      "address": "project_b.lead.created.v1",
+      "messages": {
+        "project_b.lead.created.v1": {
+          "$ref": "#/components/messages/project_b.lead.created.v1"
+        }
+      }
+    },
+    "project_b.lead.stage_changed.v1": {
+      "address": "project_b.lead.stage_changed.v1",
+      "messages": {
+        "project_b.lead.stage_changed.v1": {
+          "$ref": "#/components/messages/project_b.lead.stage_changed.v1"
+        }
+      }
+    },
+    "project_b.discovery_call.booked.v1": {
+      "address": "project_b.discovery_call.booked.v1",
+      "messages": {
+        "project_b.discovery_call.booked.v1": {
+          "$ref": "#/components/messages/project_b.discovery_call.booked.v1"
+        }
+      }
+    },
+    "project_b.offer.created.v1": {
+      "address": "project_b.offer.created.v1",
+      "messages": {
+        "project_b.offer.created.v1": {
+          "$ref": "#/components/messages/project_b.offer.created.v1"
+        }
+      }
+    },
+    "project_b.checkout.started.v1": {
+      "address": "project_b.checkout.started.v1",
+      "messages": {
+        "project_b.checkout.started.v1": {
+          "$ref": "#/components/messages/project_b.checkout.started.v1"
+        }
+      }
+    },
+    "project_b.payment.succeeded.v1": {
+      "address": "project_b.payment.succeeded.v1",
+      "messages": {
+        "project_b.payment.succeeded.v1": {
+          "$ref": "#/components/messages/project_b.payment.succeeded.v1"
+        }
+      }
+    },
+    "project_b.payment.failed.v1": {
+      "address": "project_b.payment.failed.v1",
+      "messages": {
+        "project_b.payment.failed.v1": {
+          "$ref": "#/components/messages/project_b.payment.failed.v1"
+        }
+      }
+    },
+    "project_b.onboarding.started.v1": {
+      "address": "project_b.onboarding.started.v1",
+      "messages": {
+        "project_b.onboarding.started.v1": {
+          "$ref": "#/components/messages/project_b.onboarding.started.v1"
+        }
+      }
+    },
+    "project_b.client_assignment.created.v1": {
+      "address": "project_b.client_assignment.created.v1",
+      "messages": {
+        "project_b.client_assignment.created.v1": {
+          "$ref": "#/components/messages/project_b.client_assignment.created.v1"
+        }
+      }
+    },
+    "project_b.enrollment.activated.v1": {
+      "address": "project_b.enrollment.activated.v1",
+      "messages": {
+        "project_b.enrollment.activated.v1": {
+          "$ref": "#/components/messages/project_b.enrollment.activated.v1"
+        }
+      }
+    },
+    "project_b.step.completed.v1": {
+      "address": "project_b.step.completed.v1",
+      "messages": {
+        "project_b.step.completed.v1": {
+          "$ref": "#/components/messages/project_b.step.completed.v1"
+        }
+      }
+    },
+    "project_b.reflection.submitted.v1": {
+      "address": "project_b.reflection.submitted.v1",
+      "messages": {
+        "project_b.reflection.submitted.v1": {
+          "$ref": "#/components/messages/project_b.reflection.submitted.v1"
+        }
+      }
+    },
+    "project_b.message.sent.v1": {
+      "address": "project_b.message.sent.v1",
+      "messages": {
+        "project_b.message.sent.v1": {
+          "$ref": "#/components/messages/project_b.message.sent.v1"
+        }
+      }
+    },
+    "project_b.intervention.created.v1": {
+      "address": "project_b.intervention.created.v1",
+      "messages": {
+        "project_b.intervention.created.v1": {
+          "$ref": "#/components/messages/project_b.intervention.created.v1"
+        }
+      }
+    },
+    "project_b.notification.scheduled.v1": {
+      "address": "project_b.notification.scheduled.v1",
+      "messages": {
+        "project_b.notification.scheduled.v1": {
+          "$ref": "#/components/messages/project_b.notification.scheduled.v1"
+        }
+      }
+    },
+    "project_b.community_post.created.v1": {
+      "address": "project_b.community_post.created.v1",
+      "messages": {
+        "project_b.community_post.created.v1": {
+          "$ref": "#/components/messages/project_b.community_post.created.v1"
+        }
+      }
+    },
+    "project_b.community_content.reported.v1": {
+      "address": "project_b.community_content.reported.v1",
+      "messages": {
+        "project_b.community_content.reported.v1": {
+          "$ref": "#/components/messages/project_b.community_content.reported.v1"
+        }
+      }
+    },
+    "project_b.community_content.moderated.v1": {
+      "address": "project_b.community_content.moderated.v1",
+      "messages": {
+        "project_b.community_content.moderated.v1": {
+          "$ref": "#/components/messages/project_b.community_content.moderated.v1"
+        }
+      }
+    },
+    "project_b.support_case.created.v1": {
+      "address": "project_b.support_case.created.v1",
+      "messages": {
+        "project_b.support_case.created.v1": {
+          "$ref": "#/components/messages/project_b.support_case.created.v1"
+        }
+      }
+    },
+    "project_b.outbox.event_published.v1": {
+      "address": "project_b.outbox.event_published.v1",
+      "messages": {
+        "project_b.outbox.event_published.v1": {
+          "$ref": "#/components/messages/project_b.outbox.event_published.v1"
+        }
+      }
+    },
+    "project_b.outbox.event_failed.v1": {
+      "address": "project_b.outbox.event_failed.v1",
+      "messages": {
+        "project_b.outbox.event_failed.v1": {
+          "$ref": "#/components/messages/project_b.outbox.event_failed.v1"
+        }
+      }
+    },
+    "project_b.outbox.event_dead_lettered.v1": {
+      "address": "project_b.outbox.event_dead_lettered.v1",
+      "messages": {
+        "project_b.outbox.event_dead_lettered.v1": {
+          "$ref": "#/components/messages/project_b.outbox.event_dead_lettered.v1"
+        }
+      }
+    },
+    "project_b.projection.rebuild_requested.v1": {
+      "address": "project_b.projection.rebuild_requested.v1",
+      "messages": {
+        "project_b.projection.rebuild_requested.v1": {
+          "$ref": "#/components/messages/project_b.projection.rebuild_requested.v1"
+        }
+      }
+    },
+    "project_b.projection.rebuilt.v1": {
+      "address": "project_b.projection.rebuilt.v1",
+      "messages": {
+        "project_b.projection.rebuilt.v1": {
+          "$ref": "#/components/messages/project_b.projection.rebuilt.v1"
+        }
+      }
+    },
+    "project_b.core.access_allow_requested.v1": {
+      "address": "project_b.core.access_allow_requested.v1",
+      "messages": {
+        "project_b.core.access_allow_requested.v1": {
+          "$ref": "#/components/messages/project_b.core.access_allow_requested.v1"
+        }
+      }
+    },
+    "project_b.core.access_allow_granted.v1": {
+      "address": "project_b.core.access_allow_granted.v1",
+      "messages": {
+        "project_b.core.access_allow_granted.v1": {
+          "$ref": "#/components/messages/project_b.core.access_allow_granted.v1"
+        }
+      }
+    },
+    "project_b.core.access_allow_denied.v1": {
+      "address": "project_b.core.access_allow_denied.v1",
+      "messages": {
+        "project_b.core.access_allow_denied.v1": {
+          "$ref": "#/components/messages/project_b.core.access_allow_denied.v1"
+        }
+      }
+    },
+    "project_b.canonical_ref.validation_failed.v1": {
+      "address": "project_b.canonical_ref.validation_failed.v1",
+      "messages": {
+        "project_b.canonical_ref.validation_failed.v1": {
+          "$ref": "#/components/messages/project_b.canonical_ref.validation_failed.v1"
+        }
+      }
+    },
+    "project_b.agreement.signed.v1": {
+      "address": "project_b.agreement.signed.v1",
+      "messages": {
+        "project_b.agreement.signed.v1": {
+          "$ref": "#/components/messages/project_b.agreement.signed.v1"
+        }
+      }
+    },
+    "project_b.notification.sent.v1": {
+      "address": "project_b.notification.sent.v1",
+      "messages": {
+        "project_b.notification.sent.v1": {
+          "$ref": "#/components/messages/project_b.notification.sent.v1"
+        }
+      }
+    },
+    "project_b.notification.failed.v1": {
+      "address": "project_b.notification.failed.v1",
+      "messages": {
+        "project_b.notification.failed.v1": {
+          "$ref": "#/components/messages/project_b.notification.failed.v1"
+        }
+      }
+    },
+    "project_b.audit.policy_violation_detected.v1": {
+      "address": "project_b.audit.policy_violation_detected.v1",
+      "messages": {
+        "project_b.audit.policy_violation_detected.v1": {
+          "$ref": "#/components/messages/project_b.audit.policy_violation_detected.v1"
+        }
+      }
+    }
+  },
+  "operations": {
+    "publish_project_b_tenant_created_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.tenant.created.v1"
+      },
+      "summary": "Create tenant shell and boundary context"
+    },
+    "publish_project_b_tenant_status_changed_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.tenant.status_changed.v1"
+      },
+      "summary": "Update tenant operational status"
+    },
+    "publish_project_b_role_assigned_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.role.assigned.v1"
+      },
+      "summary": "Assign tenant role"
+    },
+    "publish_project_b_role_revoked_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.role.revoked.v1"
+      },
+      "summary": "Revoke tenant role"
+    },
+    "publish_project_b_access_checked_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.access.checked.v1"
+      },
+      "summary": "Evaluate Project B permission using Core decision envelope"
+    },
+    "publish_project_b_blueprint_version_published_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.blueprint.version_published.v1"
+      },
+      "summary": "Publish blueprint version"
+    },
+    "publish_project_b_branding_theme_published_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.branding_theme.published.v1"
+      },
+      "summary": "Create or update branding theme"
+    },
+    "publish_project_b_journey_draft_created_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.journey_draft.created.v1"
+      },
+      "summary": "Create journey draft"
+    },
+    "publish_project_b_journey_draft_updated_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.journey_draft.updated.v1"
+      },
+      "summary": "Update journey draft"
+    },
+    "publish_project_b_journey_draft_validation_requested_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.journey_draft.validation_requested.v1"
+      },
+      "summary": "Validate draft composition and canonical references"
+    },
+    "publish_project_b_journey_version_published_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.journey.version_published.v1"
+      },
+      "summary": "Publish immutable journey version"
+    },
+    "publish_project_b_content_asset_uploaded_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.content_asset.uploaded.v1"
+      },
+      "summary": "Create content asset metadata and upload intent"
+    },
+    "publish_project_b_canonical_binding_validated_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.canonical_binding.validated.v1"
+      },
+      "summary": "Validate canonical references through DB Canonical adapter"
+    },
+    "publish_project_b_lead_created_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.lead.created.v1"
+      },
+      "summary": "Create lead or prospect"
+    },
+    "publish_project_b_lead_stage_changed_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.lead.stage_changed.v1"
+      },
+      "summary": "Move lead pipeline stage"
+    },
+    "publish_project_b_discovery_call_booked_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.discovery_call.booked.v1"
+      },
+      "summary": "Book discovery call"
+    },
+    "publish_project_b_offer_created_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.offer.created.v1"
+      },
+      "summary": "Create offer draft"
+    },
+    "publish_project_b_checkout_started_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.checkout.started.v1"
+      },
+      "summary": "Start checkout session"
+    },
+    "publish_project_b_payment_succeeded_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.payment.succeeded.v1"
+      },
+      "summary": "Ingest payment webhook idempotently"
+    },
+    "publish_project_b_payment_failed_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.payment.failed.v1"
+      },
+      "summary": "Ingest payment webhook idempotently"
+    },
+    "publish_project_b_onboarding_started_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.onboarding.started.v1"
+      },
+      "summary": "Start onboarding"
+    },
+    "publish_project_b_client_assignment_created_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.client_assignment.created.v1"
+      },
+      "summary": "Assign journey or offer to client"
+    },
+    "publish_project_b_enrollment_activated_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.enrollment.activated.v1"
+      },
+      "summary": "Activate enrollment if payment, agreement and Core gates pass"
+    },
+    "publish_project_b_step_completed_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.step.completed.v1"
+      },
+      "summary": "Complete journey step"
+    },
+    "publish_project_b_reflection_submitted_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.reflection.submitted.v1"
+      },
+      "summary": "Submit reflection or practice log"
+    },
+    "publish_project_b_message_sent_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.message.sent.v1"
+      },
+      "summary": "Send coach/client message"
+    },
+    "publish_project_b_intervention_created_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.intervention.created.v1"
+      },
+      "summary": "Create coach intervention"
+    },
+    "publish_project_b_notification_scheduled_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.notification.scheduled.v1"
+      },
+      "summary": "Schedule notification"
+    },
+    "publish_project_b_community_post_created_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.community_post.created.v1"
+      },
+      "summary": "Create community post"
+    },
+    "publish_project_b_community_content_reported_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.community_content.reported.v1"
+      },
+      "summary": "Report community content"
+    },
+    "publish_project_b_community_content_moderated_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.community_content.moderated.v1"
+      },
+      "summary": "Moderate community content"
+    },
+    "publish_project_b_support_case_created_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.support_case.created.v1"
+      },
+      "summary": "Create support case"
+    },
+    "publish_project_b_outbox_event_published_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.outbox.event_published.v1"
+      },
+      "summary": "Outbox relay successfully published event to broker"
+    },
+    "publish_project_b_outbox_event_failed_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.outbox.event_failed.v1"
+      },
+      "summary": "Outbox relay publish attempt failed"
+    },
+    "publish_project_b_outbox_event_dead_lettered_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.outbox.event_dead_lettered.v1"
+      },
+      "summary": "Outbox event exceeded retry budget"
+    },
+    "publish_project_b_projection_rebuild_requested_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.projection.rebuild_requested.v1"
+      },
+      "summary": "Support or worker requests projection rebuild"
+    },
+    "publish_project_b_projection_rebuilt_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.projection.rebuilt.v1"
+      },
+      "summary": "Projection rebuild completed"
+    },
+    "publish_project_b_core_access_allow_requested_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.core.access_allow_requested.v1"
+      },
+      "summary": "Enrollment activation requires Core access allow"
+    },
+    "publish_project_b_core_access_allow_granted_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.core.access_allow_granted.v1"
+      },
+      "summary": "Core confirms access allow"
+    },
+    "publish_project_b_core_access_allow_denied_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.core.access_allow_denied.v1"
+      },
+      "summary": "Core denies access allow"
+    },
+    "publish_project_b_canonical_ref_validation_failed_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.canonical_ref.validation_failed.v1"
+      },
+      "summary": "DB Canonical validation returns invalid, restricted, removed, replaced or unsupported refs"
+    },
+    "publish_project_b_agreement_signed_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.agreement.signed.v1"
+      },
+      "summary": "Client agreement gate completed"
+    },
+    "publish_project_b_notification_sent_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.notification.sent.v1"
+      },
+      "summary": "Notification provider accepted message"
+    },
+    "publish_project_b_notification_failed_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.notification.failed.v1"
+      },
+      "summary": "Notification provider failed or consent gate denied"
+    },
+    "publish_project_b_audit_policy_violation_detected_v1": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/project_b.audit.policy_violation_detected.v1"
+      },
+      "summary": "Any module detects access, tenant, consent, canonical or publish rule violation"
+    }
+  },
+  "components": {
+    "messages": {
+      "project_b.tenant.created.v1": {
+        "name": "project_b.tenant.created.v1",
+        "title": "project_b.tenant.created.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_tenant_created_v1.schema.json"
+        }
+      },
+      "project_b.tenant.status_changed.v1": {
+        "name": "project_b.tenant.status_changed.v1",
+        "title": "project_b.tenant.status_changed.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_tenant_status_changed_v1.schema.json"
+        }
+      },
+      "project_b.role.assigned.v1": {
+        "name": "project_b.role.assigned.v1",
+        "title": "project_b.role.assigned.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_role_assigned_v1.schema.json"
+        }
+      },
+      "project_b.role.revoked.v1": {
+        "name": "project_b.role.revoked.v1",
+        "title": "project_b.role.revoked.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_role_revoked_v1.schema.json"
+        }
+      },
+      "project_b.access.checked.v1": {
+        "name": "project_b.access.checked.v1",
+        "title": "project_b.access.checked.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_access_checked_v1.schema.json"
+        }
+      },
+      "project_b.blueprint.version_published.v1": {
+        "name": "project_b.blueprint.version_published.v1",
+        "title": "project_b.blueprint.version_published.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_blueprint_version_published_v1.schema.json"
+        }
+      },
+      "project_b.branding_theme.published.v1": {
+        "name": "project_b.branding_theme.published.v1",
+        "title": "project_b.branding_theme.published.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_branding_theme_published_v1.schema.json"
+        }
+      },
+      "project_b.journey_draft.created.v1": {
+        "name": "project_b.journey_draft.created.v1",
+        "title": "project_b.journey_draft.created.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_journey_draft_created_v1.schema.json"
+        }
+      },
+      "project_b.journey_draft.updated.v1": {
+        "name": "project_b.journey_draft.updated.v1",
+        "title": "project_b.journey_draft.updated.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_journey_draft_updated_v1.schema.json"
+        }
+      },
+      "project_b.journey_draft.validation_requested.v1": {
+        "name": "project_b.journey_draft.validation_requested.v1",
+        "title": "project_b.journey_draft.validation_requested.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_journey_draft_validation_requested_v1.schema.json"
+        }
+      },
+      "project_b.journey.version_published.v1": {
+        "name": "project_b.journey.version_published.v1",
+        "title": "project_b.journey.version_published.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_journey_version_published_v1.schema.json"
+        }
+      },
+      "project_b.content_asset.uploaded.v1": {
+        "name": "project_b.content_asset.uploaded.v1",
+        "title": "project_b.content_asset.uploaded.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_content_asset_uploaded_v1.schema.json"
+        }
+      },
+      "project_b.canonical_binding.validated.v1": {
+        "name": "project_b.canonical_binding.validated.v1",
+        "title": "project_b.canonical_binding.validated.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_canonical_binding_validated_v1.schema.json"
+        }
+      },
+      "project_b.lead.created.v1": {
+        "name": "project_b.lead.created.v1",
+        "title": "project_b.lead.created.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_lead_created_v1.schema.json"
+        }
+      },
+      "project_b.lead.stage_changed.v1": {
+        "name": "project_b.lead.stage_changed.v1",
+        "title": "project_b.lead.stage_changed.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_lead_stage_changed_v1.schema.json"
+        }
+      },
+      "project_b.discovery_call.booked.v1": {
+        "name": "project_b.discovery_call.booked.v1",
+        "title": "project_b.discovery_call.booked.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_discovery_call_booked_v1.schema.json"
+        }
+      },
+      "project_b.offer.created.v1": {
+        "name": "project_b.offer.created.v1",
+        "title": "project_b.offer.created.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_offer_created_v1.schema.json"
+        }
+      },
+      "project_b.checkout.started.v1": {
+        "name": "project_b.checkout.started.v1",
+        "title": "project_b.checkout.started.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_checkout_started_v1.schema.json"
+        }
+      },
+      "project_b.payment.succeeded.v1": {
+        "name": "project_b.payment.succeeded.v1",
+        "title": "project_b.payment.succeeded.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_payment_succeeded_v1.schema.json"
+        }
+      },
+      "project_b.payment.failed.v1": {
+        "name": "project_b.payment.failed.v1",
+        "title": "project_b.payment.failed.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_payment_failed_v1.schema.json"
+        }
+      },
+      "project_b.onboarding.started.v1": {
+        "name": "project_b.onboarding.started.v1",
+        "title": "project_b.onboarding.started.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_onboarding_started_v1.schema.json"
+        }
+      },
+      "project_b.client_assignment.created.v1": {
+        "name": "project_b.client_assignment.created.v1",
+        "title": "project_b.client_assignment.created.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_client_assignment_created_v1.schema.json"
+        }
+      },
+      "project_b.enrollment.activated.v1": {
+        "name": "project_b.enrollment.activated.v1",
+        "title": "project_b.enrollment.activated.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_enrollment_activated_v1.schema.json"
+        }
+      },
+      "project_b.step.completed.v1": {
+        "name": "project_b.step.completed.v1",
+        "title": "project_b.step.completed.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_step_completed_v1.schema.json"
+        }
+      },
+      "project_b.reflection.submitted.v1": {
+        "name": "project_b.reflection.submitted.v1",
+        "title": "project_b.reflection.submitted.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_reflection_submitted_v1.schema.json"
+        }
+      },
+      "project_b.message.sent.v1": {
+        "name": "project_b.message.sent.v1",
+        "title": "project_b.message.sent.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_message_sent_v1.schema.json"
+        }
+      },
+      "project_b.intervention.created.v1": {
+        "name": "project_b.intervention.created.v1",
+        "title": "project_b.intervention.created.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_intervention_created_v1.schema.json"
+        }
+      },
+      "project_b.notification.scheduled.v1": {
+        "name": "project_b.notification.scheduled.v1",
+        "title": "project_b.notification.scheduled.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_notification_scheduled_v1.schema.json"
+        }
+      },
+      "project_b.community_post.created.v1": {
+        "name": "project_b.community_post.created.v1",
+        "title": "project_b.community_post.created.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_community_post_created_v1.schema.json"
+        }
+      },
+      "project_b.community_content.reported.v1": {
+        "name": "project_b.community_content.reported.v1",
+        "title": "project_b.community_content.reported.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_community_content_reported_v1.schema.json"
+        }
+      },
+      "project_b.community_content.moderated.v1": {
+        "name": "project_b.community_content.moderated.v1",
+        "title": "project_b.community_content.moderated.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_community_content_moderated_v1.schema.json"
+        }
+      },
+      "project_b.support_case.created.v1": {
+        "name": "project_b.support_case.created.v1",
+        "title": "project_b.support_case.created.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_support_case_created_v1.schema.json"
+        }
+      },
+      "project_b.outbox.event_published.v1": {
+        "name": "project_b.outbox.event_published.v1",
+        "title": "project_b.outbox.event_published.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_outbox_event_published_v1.schema.json"
+        }
+      },
+      "project_b.outbox.event_failed.v1": {
+        "name": "project_b.outbox.event_failed.v1",
+        "title": "project_b.outbox.event_failed.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_outbox_event_failed_v1.schema.json"
+        }
+      },
+      "project_b.outbox.event_dead_lettered.v1": {
+        "name": "project_b.outbox.event_dead_lettered.v1",
+        "title": "project_b.outbox.event_dead_lettered.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_outbox_event_dead_lettered_v1.schema.json"
+        }
+      },
+      "project_b.projection.rebuild_requested.v1": {
+        "name": "project_b.projection.rebuild_requested.v1",
+        "title": "project_b.projection.rebuild_requested.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_projection_rebuild_requested_v1.schema.json"
+        }
+      },
+      "project_b.projection.rebuilt.v1": {
+        "name": "project_b.projection.rebuilt.v1",
+        "title": "project_b.projection.rebuilt.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_projection_rebuilt_v1.schema.json"
+        }
+      },
+      "project_b.core.access_allow_requested.v1": {
+        "name": "project_b.core.access_allow_requested.v1",
+        "title": "project_b.core.access_allow_requested.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_core_access_allow_requested_v1.schema.json"
+        }
+      },
+      "project_b.core.access_allow_granted.v1": {
+        "name": "project_b.core.access_allow_granted.v1",
+        "title": "project_b.core.access_allow_granted.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_core_access_allow_granted_v1.schema.json"
+        }
+      },
+      "project_b.core.access_allow_denied.v1": {
+        "name": "project_b.core.access_allow_denied.v1",
+        "title": "project_b.core.access_allow_denied.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_core_access_allow_denied_v1.schema.json"
+        }
+      },
+      "project_b.canonical_ref.validation_failed.v1": {
+        "name": "project_b.canonical_ref.validation_failed.v1",
+        "title": "project_b.canonical_ref.validation_failed.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_canonical_ref_validation_failed_v1.schema.json"
+        }
+      },
+      "project_b.agreement.signed.v1": {
+        "name": "project_b.agreement.signed.v1",
+        "title": "project_b.agreement.signed.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_agreement_signed_v1.schema.json"
+        }
+      },
+      "project_b.notification.sent.v1": {
+        "name": "project_b.notification.sent.v1",
+        "title": "project_b.notification.sent.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_notification_sent_v1.schema.json"
+        }
+      },
+      "project_b.notification.failed.v1": {
+        "name": "project_b.notification.failed.v1",
+        "title": "project_b.notification.failed.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_notification_failed_v1.schema.json"
+        }
+      },
+      "project_b.audit.policy_violation_detected.v1": {
+        "name": "project_b.audit.policy_violation_detected.v1",
+        "title": "project_b.audit.policy_violation_detected.v1",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "./schemas/events/project_b_audit_policy_violation_detected_v1.schema.json"
+        }
+      }
+    },
+    "schemas": {
+      "ProjectBCloudEventEnvelope": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://schemas.sovereign-os.local/project-b/envelopes/project-b-cloud-event-envelope.v1.schema.json",
+        "title": "Project B CloudEvents Envelope v1",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "specversion",
+          "id",
+          "source",
+          "type",
+          "subject",
+          "time",
+          "datacontenttype",
+          "data",
+          "tenant_id",
+          "correlation_id",
+          "causation_id",
+          "producer",
+          "schema_version"
+        ],
+        "properties": {
+          "specversion": {
+            "const": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Globally unique event id."
+          },
+          "source": {
+            "type": "string",
+            "pattern": "^urn:sovereign-os:project-b:[a-z0-9-]+(:[a-z0-9-]+)*$"
+          },
+          "type": {
+            "type": "string",
+            "pattern": "^project_b\\.[a-z0-9_]+(\\.[a-z0-9_]+)*\\.v[0-9]+$"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Aggregate subject in form aggregate_type/aggregate_id."
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "datacontenttype": {
+            "const": "application/json"
+          },
+          "dataschema": {
+            "type": "string",
+            "format": "uri"
+          },
+          "tenant_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "actor_ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "External user or service actor reference. No PII."
+          },
+          "correlation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "causation_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "idempotency_key": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 180
+          },
+          "producer": {
+            "type": "object",
+            "required": [
+              "module_id",
+              "service",
+              "operation_id"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "module_id": {
+                "type": "string"
+              },
+              "service": {
+                "const": "project-b-api"
+              },
+              "operation_id": {
+                "type": "string"
+              }
+            }
+          },
+          "trace": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "trace_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "span_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "schema_version": {
+            "const": "v1"
+          },
+          "data": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

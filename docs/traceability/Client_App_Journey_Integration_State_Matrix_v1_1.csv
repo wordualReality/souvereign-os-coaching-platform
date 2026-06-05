@@ -1,0 +1,13 @@
+state_id,state,trigger,client_message,backend_source,allowed_actions,audit_or_metric
+CAS-01,not_invited,client profile exists but invite not sent,You have not been invited yet.,provisioning_status,none,metric.provisioning.not_invited
+CAS-02,invite_pending,invite sent but not accepted,Check your invite to activate access.,client_invite,"resend, contact support",audit.invite.pending
+CAS-03,onboarding_required,"first login complete, onboarding incomplete",Complete onboarding to unlock your journey.,onboarding_assignment,continue onboarding,metric.onboarding.required
+CAS-04,core_access_pending,commercial/consent gate waiting,Your access is being prepared.,core_access_request,none,audit.core_access.pending
+CAS-05,journey_ready,delivery plan materialized,Your next step is ready.,member_home_projection,start step,metric.delivery.ready
+CAS-06,branch_evaluating,rule evaluation in progress,Preparing the next best step.,branch_rule_evaluation,none,metric.branch.evaluating
+CAS-07,coach_review_pending,branch or reflection requires coach review,Your coach is reviewing your next step.,coach_review_request,message coach if allowed,audit.coach_review.pending
+CAS-08,step_locked,step unavailable due schedule or prerequisite,This step is not available yet.,step_availability,view available steps,metric.step.locked
+CAS-09,cohort_waiting,cohort schedule has not started,Your group program starts soon.,cohort_schedule,view start date,metric.cohort.waiting
+CAS-10,access_revoked,assignment or entitlement revoked,This content is no longer available.,core_access_result,contact support,audit.access.revoked
+CAS-11,completed,journey or cohort completed,You completed this journey.,completion_projection,view summary,metric.journey.completed
+CAS-12,error_recoverable,recoverable delivery error,Something needs to be refreshed.,delivery_projection,retry,metric.delivery.recoverable_error
