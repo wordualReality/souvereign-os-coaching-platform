@@ -15,7 +15,7 @@ create table if not exists project_b.tenants (
     correlation_id uuid,
     data jsonb not null default '{}'::jsonb
 );
-create index if not exists idx_tenants_status on project_b.tenants(status);
+create index if not exists idx_tenants_lifecycle_state on project_b.tenants(lifecycle_state);
 create trigger trg_tenants_updated_at before update on project_b.tenants for each row execute function project_b.set_updated_at();
 
 create table if not exists project_b.tenant_memberships (
