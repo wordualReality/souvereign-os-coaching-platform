@@ -1,0 +1,16 @@
+---
+description: Require requirements-to-evidence traceability for implementation work.
+globs: apps/**,contracts/**,database/**,tests/**,docs/requirements/**,docs/traceability/**
+alwaysApply: false
+---
+
+# Requirements and traceability
+
+Read `docs/requirements/REQUIREMENTS_BASELINE_INDEX.md` and `docs/traceability/IMPLEMENTATION_TRACEABILITY_INDEX.md`.
+
+- Identify the current requirement/capability and owner source before changing behavior.
+- Separate functional requirements, non-functional requirements and constraints.
+- Map acceptance criteria to architecture/contract, changed files, tests, evidence and gate.
+- Do not invent capability IDs or broaden product scope.
+- Treat native apps, commerce, community/cohorts, broad analytics, full KDB population and production deployment as non-goals unless a later gate explicitly authorizes them.
+- Missing or ambiguous requirements cause a stop/owner-return, not guessed behavior.
