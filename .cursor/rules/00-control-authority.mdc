@@ -1,0 +1,16 @@
+---
+description: Mandatory Project B implementation authority and stop rules.
+alwaysApply: true
+---
+
+# Control authority
+
+Read `AGENTS.md`, `docs/control/READ_FIRST.md` and `docs/control/AUTHORITY_AND_STOP_CONDITIONS.md` before acting.
+
+- Execute only the single packet authorized by the accepted predecessor gate.
+- Never edit `main` directly.
+- State repository, branch, base SHA, owner lane, allowed paths, forbidden actions, tests and evidence destination before changes.
+- Do not continue into later packets.
+- Stop on source conflict, unexplained worktree changes, missing owner authority, out-of-scope paths, secrets or unavailable mandatory tests.
+- A prompt or agent cannot self-authorize work.
+- Return evidence, one gate and exactly one successor.
