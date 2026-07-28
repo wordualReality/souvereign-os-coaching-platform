@@ -1,0 +1,16 @@
+---
+description: Apply Project B web-first, bounded UX and accessibility controls.
+globs: apps/web/**,apps/**/ui/**,components/**,styles/**,tests/**
+alwaysApply: false
+---
+
+# Web, UX and accessibility
+
+- Build only the surfaces named by the current vertical slice; no broad UI build.
+- Use the accepted role/surface and journey-state models.
+- Implement loading, empty, error, denied, success and retry states where applicable.
+- Preserve privacy boundaries in labels, lists, progress views and error messages.
+- Keyboard navigation, focus visibility, semantic structure, labels, validation messages and contrast require review.
+- Do not expose unavailable or unauthorized actions in the interface.
+- Native iOS/Android is deferred unless a later gate explicitly authorizes it.
+- UI completion requires integration and accessibility evidence, not static screenshots alone.
