@@ -1,14 +1,23 @@
-# Claude / Codex Context
+# Claude / Codex Repository Context
 
-Project B is Coach Studio + Tenant Journey Platform + Governed Commerce + Branded Client App. v1.1 supersedes v1.0 for implementation.
+Use `AGENTS.md` and repository-local governance as the controlling context. Historical v1.0/v1.1 handoff overlays are supporting history and do not globally supersede current gates, source manifests or repository evidence.
 
-Critical v1.1 additions:
-- Manual Client Provisioning Wizard
-- Coach Assignment / Client Ownership
-- Journey Templates
-- Cohorts / Group Programs
-- Conditional Branching Rules
-- Journey Builder UX
-- Client App Journey States
+## Product boundary
 
-Use v1.1 overlay endpoints and database migration `002_project_b_journey_provisioning_hardening.sql` before implementing these flows.
+Project B is a multi-tenant coaching/journey delivery platform. The bounded parking sprint targets one complete path from client provisioning through journey publication, enrollment, member completion/reflection and assigned-coach progress, with audit/outbox evidence.
+
+## Current authorization
+
+FPS-00C governance only. Do not implement features, SQL/migrations, workflows, deployment or production access until the governance gate is accepted.
+
+## Mandatory controls
+
+- Read `docs/control/READ_FIRST.md` and the exact packet prompt.
+- Respect Project B versus Database/Canonical owner boundaries.
+- Apply scoped `.cursor/rules` and the prompt engineering standard.
+- State assumptions and concise rationale; do not request or store private chain of thought.
+- Provide exact outputs, tests, evidence, deviations and blockers.
+- Stop on missing authority or source conflict.
+- Generate exactly one successor after independent review and gate.
+
+A model response is not proof of implementation, security, compliance, deployment or production readiness.
