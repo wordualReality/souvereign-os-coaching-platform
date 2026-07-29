@@ -21,6 +21,7 @@ Recommended structure:
 - `10_reviews/`
 - `11_gate/`
 - `12_successor/`
+- `OPERATOR_RETURN.md`
 
 ## Mandatory return fields
 
@@ -50,6 +51,22 @@ Recommended structure:
 - `AUTHORIZED_NEXT_ACTION`
 - `SUCCESSOR`
 
+## Operational handoff
+
+Follow `docs/evidence/MINIMAL_OPERATOR_HANDOFF.md`.
+
+When repository writes are authorized, the executor must:
+
+1. write the complete evidence under the packet directory;
+2. create the short `OPERATOR_RETURN.md`;
+3. commit and push code plus evidence on the packet branch;
+4. create or update the pull request with result SHA and evidence path;
+5. stop without merging or starting the successor.
+
+The operator must not be asked to paste long logs into chat. The normal operator message is only:
+
+`Prüfe <PACKET_ID> in PR #<number>.`
+
 ## Integrity and privacy
 
 - Preserve raw command output where safe.
@@ -59,5 +76,6 @@ Recommended structure:
 - Distinguish local, CI, staging and production evidence.
 - A screenshot must show only the necessary state and must be redacted.
 - A file, workflow or prompt existing is not execution evidence.
+- Do not commit dependencies, caches, raw real-data dumps or unnecessary large binaries.
 
 Evidence must be readable by an independent reviewer without this chat.
