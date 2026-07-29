@@ -1,0 +1,17 @@
+---
+description: Store complete packet output in repository evidence and minimize operator chat output.
+alwaysApply: true
+---
+
+# Minimal operator evidence handoff
+
+Read `docs/evidence/EVIDENCE_RETURN_PROTOCOL.md` and `docs/evidence/MINIMAL_OPERATOR_HANDOFF.md`.
+
+- Never ask the operator to paste long terminal, test, diff or agent output into chat when repository evidence can be written and pushed.
+- Store the complete packet return under `evidence/<packet-id>/<UTC-timestamp>/`.
+- Create a short `OPERATOR_RETURN.md` with packet ID, status, branch, result SHA, evidence path, PR and one operator action.
+- Redact secrets, personal data and unrestricted production identifiers.
+- Commit and push the evidence on the packet branch when repository writes are authorized.
+- Create or update the pull request and record the evidence path/result SHA there.
+- Stop after the return; do not merge or start the successor.
+- Do not require Google Drive access for the normal implementation loop. GitHub is the operational handoff; accepted outcomes are mirrored to Drive/Notion by Implementation Control.
