@@ -24,8 +24,15 @@ Every implementation packet must map this chain:
 - T2: manual client provisioning and ownership/assignment.
 - T3: journey draft and immutable publication.
 - T4: enrollment and member delivery.
-- T5: completion/reflection and coach progress projection.
-- T6: audit/outbox and minimal worker/workflow.
-- T7: deterministic demo seed, reset/rebuild, E2E and parking release.
+- T5: intention policy, pre-session reminder, privacy and progression stage.
+- T6: completion/reflection and coach progress projection.
+- T7: audit/outbox and minimal worker/workflow.
+- T8: deterministic demo seed, reset/rebuild, E2E and parking release.
+
+## Later curated pilot traceability group
+
+- T9: locality/season-aware botanical and supplement evidence projection, human review, safety/legal controls and read-only Project-B discovery.
+
+T9 requires separate Database/Canonical owner evidence for taxonomy, occurrence provenance, legal status, preparation-specific evidence, safety, publication, revalidation and withdrawal. Project B evidence alone cannot close T9.
 
 Do not claim coverage because a requirement appears in a document. Coverage requires an implementation and accepted test/evidence link.
