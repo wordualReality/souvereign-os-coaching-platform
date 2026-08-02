@@ -10,12 +10,15 @@
 | AgentScope conflict Option (a) | Accepted | Project A may scaffold non-authoritatively; Project B/KDB defer operational use |
 | Git + versioned rules + bounded packet + evidence + independent gate is the common control path | Accepted | No agent framework becomes a second source of truth |
 | Architecture freeze | Accepted | No silent reopening during implementation |
+| `ADR-SCOPE-INT-BOT-001` | Accepted for requirements/architecture | Intention joins MVP; botanical evidence remains Canonical-owned and enters later as a curated read-only pilot |
 
 ## Existing domain decisions to retain
 
 - Project B may not consume raw staging rows as client runtime truth.
 - `canonical_ref` is a validated reference envelope, not raw intake and not the canonical object itself.
 - Canonical promotion remains manual/human-governed.
+- Botanical identity, evidence, safety, legal status and publication remain Database/Canonical-owned.
+- Local occurrence, seasonality or traditional use never imply safety, efficacy or suitability.
 - Video/media is modeled as an asset relation, not a flat protocol field; detailed implementation remains gated.
 - n8n is support plane through restricted interfaces.
 
@@ -30,6 +33,7 @@ Create a new ADR and stop the affected packet when a change is required to:
 - RLS/RPC conventions;
 - API/event compatibility;
 - canonical promotion or provenance rules;
+- botanical evidence, safety, location or publication rules;
 - security/privacy/safety posture;
 - native/web strategy;
 - agent or workflow execution authority.
