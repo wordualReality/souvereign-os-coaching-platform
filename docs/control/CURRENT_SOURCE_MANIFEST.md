@@ -1,6 +1,6 @@
 # Current Source Manifest
 
-Version: FPS-00C / 2026-07-29
+Version: FPS-00C / 2026-08-02
 
 ## Authority tiers
 
@@ -14,6 +14,8 @@ Version: FPS-00C / 2026-07-29
 - `THREE-LANE-IMPLEMENTATION-KICKOFF-01` v1.2 or later.
 - `SOVEREIGN OS IMPLEMENTATION KICKOFF — Cross-Lane Repository, Tooling and Conflict Alignment` v1.1 or later.
 - `PROJECT-B CROSS-LANE-CONFLICT-RESOLUTION-RETURN-01`.
+- `SCOPE-CHANGE-INT-BOT-01` in the shared alignment register.
+- `ADR-SCOPE-INT-BOT-001`.
 - Accepted owner-lane ADRs, returns and producer-owned contracts.
 
 ### Tier 3 — Current implementation control
@@ -27,6 +29,8 @@ Version: FPS-00C / 2026-07-29
 
 - PB-RDH-09 complete integrated Project B system documentation RC1 and release manifest.
 - PB-RDH-01 through PB-RDH-08 accepted supporting packs: product/requirements, domain/data/contracts/workflows, security/privacy/safety, web/native/UX, DevSecOps/test/operations, backlog/vertical slices, Cursor packet pack and enterprise delivery method.
+- `PB-SCOPE-INTENTION-BOTANICAL-01 — Intention Progression and Local Botanical/Supplement Register v1.0`:
+  `https://docs.google.com/document/d/1Ecl-jsGoCZxrSSIY0uFgcqwDaP7LmuWZzzOoey3PlfU/edit`
 
 ### Tier 5 — Repository contracts and code
 
@@ -42,13 +46,15 @@ These files are repository reality but may still be skeleton, incomplete or supe
 
 ### Tier 6 — External references
 
-Use current official documentation for tool and standard behavior. PromptGenius is secondary prompt-method guidance only.
+Use current official documentation for tool and standard behavior. For botanical/supplement evidence, prefer official regulator/public-health sources, current scientific reviews and national biodiversity/legal sources. PromptGenius is secondary prompt-method guidance only.
 
 ## Frozen cross-lane decisions
 
 - Project A repository: `wordualReality/souvereign-os`.
 - Project B and Database/Canonical implementation repository for the bounded sprint: `wordualReality/souvereign-os-coaching-platform`.
 - Database/Canonical remains a separate owner lane and sole writer for KDB-owned migrations/canonical semantics during its packets.
+- Botanical taxonomy, occurrence provenance, evidence, safety, legal status and publication are Database/Canonical-owned; Project B consumes only a published projection.
+- Intention/session UX and reminder orchestration are Project-B-owned.
 - AgentScope is optional and non-authoritative; Project B/KDB defer operational use until governance and one manual packet are proven.
 
 ## Conflict rule
