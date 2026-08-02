@@ -1,0 +1,27 @@
+---
+description: Enforce intention privacy and botanical evidence, safety, locality and publication boundaries.
+alwaysApply: true
+---
+
+# Intention and botanical safety
+
+Read before changing intention, session-readiness, reminder, locality, botanical, supplement, evidence or discovery behavior:
+
+- `docs/requirements/INTENTION_AND_BOTANICAL_SCOPE_ADDENDUM.md`
+- `docs/architecture/INTENTION_AND_BOTANICAL_THREE_TIER_ARCHITECTURE.md`
+- `docs/security/BOTANICAL_SAFETY_AND_LOCATION_PRIVACY_RULES.md`
+- `docs/decisions/ADR-SCOPE-INT-BOT-001.md`
+
+Required:
+
+- use attention-regulation and deliberate-practice language; do not claim mind control;
+- keep intention text private by default and out of general logs/outbox payloads;
+- model reminders deterministically with snooze/disable and duplicate-delivery handling;
+- treat botanical occurrence, seasonality and traditional use as separate from safety and efficacy;
+- require exact taxon, plant part, preparation and evidence version;
+- never transfer dosage across preparations, extracts or concentrations;
+- use coarse locality by default and suppress sensitive/protected-species coordinates;
+- fail closed when identity, legal status, evidence, interaction or safety review is incomplete;
+- Project B consumes only a published Canonical projection and cannot write botanical evidence;
+- no autonomous publication, individualized dosage or unreviewed foraging instruction in the curated pilot;
+- do not implement this scope until an accepted successor packet explicitly authorizes it.

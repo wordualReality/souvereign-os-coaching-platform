@@ -1,0 +1,16 @@
+---
+description: Apply frozen architecture and owner-lane boundaries.
+globs: architecture/**,apps/**,contracts/**,database/**,docs/architecture/**,docs/decisions/**
+alwaysApply: false
+---
+
+# Architecture boundaries
+
+Read `docs/architecture/ARCHITECTURE_BASELINE_INDEX.md` and `docs/decisions/ADR_INDEX.md`.
+
+- Project B architecture is frozen for the bounded sprint.
+- Project B owns tenant/coach/client/journey runtime; Database/Canonical owns canonical knowledge, provenance and KDB semantics.
+- Preserve fail-closed effective access, tenant isolation, immutable published journey versions, governed canonical promotion and reconstructable audit/outbox.
+- Do not move Canonical truth into Project B or Project B behavior into KDB.
+- Do not introduce a new framework, service, repository or deployment boundary without an accepted ADR.
+- Stop and create an owner-return when implementation requires architecture reopening.

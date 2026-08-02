@@ -1,0 +1,17 @@
+---
+description: Enforce Project B security, privacy, safety and tenant isolation.
+globs: apps/**,contracts/**,database/**,tests/**,docs/security/**
+alwaysApply: false
+---
+
+# Security, privacy and tenant safety
+
+Read `docs/security/SECURITY_PRIVACY_SAFETY_RULES.md`.
+
+- Deny by default on missing identity, tenant, role, assignment, consent or entitlement.
+- Require positive and cross-tenant negative tests for tenant-sensitive behavior.
+- Clients see only their own approved runtime data; coaches see only assigned-client permitted projections.
+- Never expose service-role credentials or store secrets/personal data in prompts, logs, screenshots or evidence.
+- Use synthetic data for development and demos.
+- Raw staging/candidates are not client runtime truth; canonical promotion is never autonomous.
+- Security claims require executed evidence, not file presence or agent self-assessment.
