@@ -1,0 +1,18 @@
+# R02-P01 / RC1 repository control ownership
+# Server-side branch protection is the enforcement layer; this file only declares ownership.
+* @wordualReality
+
+/.github/ @wordualReality
+/database/ @wordualReality
+/db/ @wordualReality
+/contracts/ @wordualReality
+/policies/ @wordualReality
+/scripts/ @wordualReality
+/deploy-checklist/ @wordualReality
+/docs/security/ @wordualReality
+/docs/control/ @wordualReality
+/AGENTS.md @wordualReality
+/CLAUDE.md @wordualReality
+/CURSOR.md @wordualReality
+/SESSION_START.md @wordualReality
+/WORKFLOW.md @wordualReality
