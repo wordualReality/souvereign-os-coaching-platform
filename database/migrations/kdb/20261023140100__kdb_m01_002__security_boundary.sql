@@ -1,193 +1,39 @@
--- KDB-M01-03 / security boundary
--- Source ZIP SHA-256: 2dd1235c5da117ff732d06f77904c4358785da4c6a6807d5bdc9deefc58c4518
--- Source kdb_m01_foundation.sql SHA-256: e77e313bb070afd821f660b6c7bdda327be4ed41a3910ec1a4537e20f87f9bae
--- Materialization only. Do not apply from this packet.
-
-begin;
-
-do $roles$
-begin
-  if not exists (select 1 from pg_roles where rolname = 'kdb_runtime') then
-    create role kdb_runtime nologin nosuperuser nocreatedb nocreaterole noinherit nobypassrls;
-  end if;
-  if not exists (select 1 from pg_roles where rolname = 'kdb_ingest_writer') then
-    create role kdb_ingest_writer nologin nosuperuser nocreatedb nocreaterole noinherit nobypassrls;
-  end if;
-  if not exists (select 1 from pg_roles where rolname = 'kdb_reviewer') then
-    create role kdb_reviewer nologin nosuperuser nocreatedb nocreaterole noinherit nobypassrls;
-  end if;
-end
-$roles$;
-
-create or replace function kdb_audit.reject_immutable_mutation()
-returns trigger
-language plpgsql
-security invoker
-set search_path = pg_catalog
-as $fn$
-begin
-  raise exception using
-    errcode = '55000',
-    message = format('%I.%I is immutable; create a new version instead', tg_table_schema, tg_table_name);
-end
-$fn$;
-
-revoke all on function kdb_audit.reject_immutable_mutation() from public;
-
-do $immutability$
-declare
-  relation_name text;
-begin
-  foreach relation_name in array array[
-    'taxonomy_node_version', 'source_version', 'claim_version', 'evidence',
-    'claim_evidence', 'protocol_version', 'protocol_version_claim',
-    'protocol_version_taxonomy_relation', 'review_decision', 'publication'
-  ] loop
-    execute format('drop trigger if exists %I on canonical.%I',
-      'trg_' || relation_name || '_immutable', relation_name);
-    execute format(
-      'create trigger %I before update or delete on canonical.%I for each row execute function kdb_audit.reject_immutable_mutation()',
-      'trg_' || relation_name || '_immutable', relation_name
-    );
-  end loop;
-end
-$immutability$;
-
--- RLS is enabled and forced for every KDB table. Roles receive only task-specific policies.
-alter table canonical.taxonomy_node enable row level security;
-alter table canonical.taxonomy_node force row level security;
-alter table canonical.taxonomy_node_version enable row level security;
-alter table canonical.taxonomy_node_version force row level security;
-alter table canonical.source enable row level security;
-alter table canonical.source force row level security;
-alter table canonical.source_version enable row level security;
-alter table canonical.source_version force row level security;
-alter table canonical.claim enable row level security;
-alter table canonical.claim force row level security;
-alter table canonical.claim_version enable row level security;
-alter table canonical.claim_version force row level security;
-alter table canonical.evidence enable row level security;
-alter table canonical.evidence force row level security;
-alter table canonical.claim_evidence enable row level security;
-alter table canonical.claim_evidence force row level security;
-alter table canonical.protocol enable row level security;
-alter table canonical.protocol force row level security;
-alter table canonical.protocol_version enable row level security;
-alter table canonical.protocol_version force row level security;
-alter table canonical.protocol_version_claim enable row level security;
-alter table canonical.protocol_version_claim force row level security;
-alter table canonical.protocol_version_taxonomy_relation enable row level security;
-alter table canonical.protocol_version_taxonomy_relation force row level security;
-alter table canonical.review_decision enable row level security;
-alter table canonical.review_decision force row level security;
-alter table canonical.publication enable row level security;
-alter table canonical.publication force row level security;
-alter table dev_staging.ingestion_candidate enable row level security;
-alter table dev_staging.ingestion_candidate force row level security;
-alter table kdb_audit.outbox_event enable row level security;
-alter table kdb_audit.outbox_event force row level security;
-alter table kdb_audit.audit_record enable row level security;
-alter table kdb_audit.audit_record force row level security;
-
-grant usage on schema canonical, kdb_api to kdb_runtime;
-grant select on canonical.taxonomy_node, canonical.taxonomy_node_version,
-  canonical.claim, canonical.claim_version, canonical.evidence,
-  canonical.claim_evidence, canonical.protocol, canonical.protocol_version,
-  canonical.protocol_version_claim, canonical.protocol_version_taxonomy_relation,
-  canonical.publication to kdb_runtime;
-
-grant usage on schema canonical, dev_staging, kdb_api to kdb_ingest_writer;
-grant select on canonical.source, canonical.source_version to kdb_ingest_writer;
-grant insert, select on dev_staging.ingestion_candidate to kdb_ingest_writer;
-
-grant usage on schema canonical, dev_staging, kdb_audit, kdb_api to kdb_reviewer;
-grant select on all tables in schema canonical, dev_staging to kdb_reviewer;
-grant insert on canonical.review_decision, canonical.publication,
-  kdb_audit.outbox_event, kdb_audit.audit_record to kdb_reviewer;
-grant update (validation_status, review_status, validation_report, reviewed_at, reviewed_by_ref)
-  on dev_staging.ingestion_candidate to kdb_reviewer;
-
-create policy kdb_runtime_read_taxonomy_node on canonical.taxonomy_node
-  for select to kdb_runtime using (true);
-create policy kdb_runtime_read_taxonomy_node_version on canonical.taxonomy_node_version
-  for select to kdb_runtime using (true);
-create policy kdb_runtime_read_claim on canonical.claim
-  for select to kdb_runtime using (lifecycle_status = 'ACTIVE');
-create policy kdb_runtime_read_claim_version on canonical.claim_version
-  for select to kdb_runtime using (valid_to is null);
-create policy kdb_runtime_read_evidence on canonical.evidence
-  for select to kdb_runtime using (true);
-create policy kdb_runtime_read_claim_evidence on canonical.claim_evidence
-  for select to kdb_runtime using (true);
-create policy kdb_runtime_read_protocol on canonical.protocol
-  for select to kdb_runtime using (lifecycle_status = 'ACTIVE');
-create policy kdb_runtime_read_protocol_version on canonical.protocol_version
-  for select to kdb_runtime using (publication_status = 'PUBLISHED');
-create policy kdb_runtime_read_protocol_version_claim on canonical.protocol_version_claim
-  for select to kdb_runtime using (true);
-create policy kdb_runtime_read_protocol_version_taxonomy on canonical.protocol_version_taxonomy_relation
-  for select to kdb_runtime using (true);
-create policy kdb_runtime_read_publication on canonical.publication
-  for select to kdb_runtime using (publication_status = 'PUBLISHED');
-
-create policy kdb_ingest_read_source on canonical.source
-  for select to kdb_ingest_writer using (lifecycle_status <> 'WITHDRAWN');
-create policy kdb_ingest_read_source_version on canonical.source_version
-  for select to kdb_ingest_writer using (rights_status <> 'PROHIBITED');
-create policy kdb_ingest_insert_candidate on dev_staging.ingestion_candidate
-  for insert to kdb_ingest_writer with check (
-    validation_status = 'PENDING' and review_status = 'PENDING_REVIEW'
-  );
-create policy kdb_ingest_read_own_candidate on dev_staging.ingestion_candidate
-  for select to kdb_ingest_writer using (true);
-
-create policy kdb_reviewer_read_taxonomy_node on canonical.taxonomy_node
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_read_taxonomy_node_version on canonical.taxonomy_node_version
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_read_source on canonical.source
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_read_source_version on canonical.source_version
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_read_claim on canonical.claim
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_read_claim_version on canonical.claim_version
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_read_evidence on canonical.evidence
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_read_claim_evidence on canonical.claim_evidence
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_read_protocol on canonical.protocol
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_read_protocol_version on canonical.protocol_version
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_read_protocol_version_claim on canonical.protocol_version_claim
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_read_protocol_version_taxonomy on canonical.protocol_version_taxonomy_relation
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_read_review_decision on canonical.review_decision
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_insert_review_decision on canonical.review_decision
-  for insert to kdb_reviewer with check (reviewer_ref <> '');
-create policy kdb_reviewer_read_publication on canonical.publication
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_insert_publication on canonical.publication
-  for insert to kdb_reviewer with check (published_by_ref <> '');
-create policy kdb_reviewer_read_candidate on dev_staging.ingestion_candidate
-  for select to kdb_reviewer using (true);
-create policy kdb_reviewer_update_candidate on dev_staging.ingestion_candidate
-  for update to kdb_reviewer using (true) with check (true);
-create policy kdb_reviewer_insert_outbox on kdb_audit.outbox_event
-  for insert to kdb_reviewer with check (true);
-create policy kdb_reviewer_insert_audit on kdb_audit.audit_record
-  for insert to kdb_reviewer with check (actor_ref <> '');
-alter default privileges for role postgres in schema canonical
-  revoke all on tables from public, anon, authenticated, service_role;
-alter default privileges for role postgres in schema dev_staging
-  revoke all on tables from public, anon, authenticated, service_role;
-alter default privileges for role postgres in schema kdb_audit
-  revoke all on tables from public, anon, authenticated, service_role;
-alter default privileges for role postgres in schema kdb_api
-  revoke execute on functions from public, anon, authenticated, service_role;
-
-commit;
+-- KDB-M01 / READ-REVIEWED CANDIDATE. NO APPLY BEFORE MUTATION-GATE-A.
+-- Roles need CREATEROLE/grantor proofs before applying; do NOT fall back to service_role.
+BEGIN;
+SET LOCAL lock_timeout = '5s';
+CREATE ROLE kdb_schema_owner NOLOGIN NOBYPASSRLS;
+CREATE ROLE kdb_command_owner NOLOGIN NOBYPASSRLS;
+CREATE ROLE kdb_ingest_runtime LOGIN NOBYPASSRLS NOINHERIT;
+-- No password assigned by SQL: 1Password C3/provisioner gate required before external use.
+GRANT USAGE, CREATE ON SCHEMA kdb_canonical, kdb_governance, kdb_staging, kdb_ops TO kdb_schema_owner;
+GRANT USAGE ON SCHEMA kdb_governance, kdb_staging, kdb_ops TO kdb_command_owner;
+GRANT CREATE ON SCHEMA kdb_ops TO kdb_command_owner; -- NOLOGIN function owner only
+GRANT USAGE ON SCHEMA kdb_ops TO kdb_ingest_runtime;
+GRANT SELECT, INSERT ON kdb_governance.source, kdb_governance.source_version TO kdb_command_owner;
+GRANT SELECT, INSERT ON kdb_staging.submission, kdb_staging.candidate_revision, kdb_staging.review_work_item TO kdb_command_owner;
+GRANT SELECT, INSERT ON kdb_ops.command_receipt, kdb_ops.audit_event, kdb_ops.outbox_event TO kdb_command_owner;
+-- These are deliberately absent for ALL KDB-M01 operational roles:
+-- NO GRANTS on kdb_canonical.protocol, protocol_version, lifecycle_event.
+-- NO grants on human_review_decision to n8n or kdb_command_owner.
+-- No grants at all to anon, authenticated, service_role, PUBLIC.
+-- The command owner is NOT the table owner and has NOBYPASSRLS.
+DO $kdb$ DECLARE rec record; BEGIN
+  FOR rec IN SELECT schemaname,tablename FROM pg_tables WHERE (schemaname='kdb_governance' AND tablename IN ('source','source_version')) OR (schemaname='kdb_staging' AND tablename IN ('submission','candidate_revision','review_work_item')) OR (schemaname='kdb_ops' AND tablename IN ('command_receipt','audit_event','outbox_event')) LOOP
+    EXECUTE format('CREATE POLICY command_owner_select ON %I.%I AS PERMISSIVE FOR SELECT TO kdb_command_owner USING (tenant_scope = current_setting(''kdb.tenant_scope'', true))',rec.schemaname,rec.tablename);
+    EXECUTE format('CREATE POLICY command_owner_insert ON %I.%I AS PERMISSIVE FOR INSERT TO kdb_command_owner WITH CHECK (tenant_scope = current_setting(''kdb.tenant_scope'', true))',rec.schemaname,rec.tablename);
+  END LOOP;
+END $kdb$;
+-- Dedicated NOLOGIN schema owner; FORCE-RLS remains enabled even for table owner.
+DO $own$ DECLARE rec record; BEGIN
+  FOR rec IN SELECT schemaname,tablename FROM pg_tables WHERE schemaname IN ('kdb_canonical','kdb_staging','kdb_governance','kdb_ops') LOOP
+    EXECUTE format('ALTER TABLE %I.%I OWNER TO kdb_schema_owner', rec.schemaname, rec.tablename);
+  END LOOP;
+END $own$;
+ALTER SCHEMA kdb_canonical OWNER TO kdb_schema_owner;
+ALTER SCHEMA kdb_staging OWNER TO kdb_schema_owner;
+ALTER SCHEMA kdb_governance OWNER TO kdb_schema_owner;
+ALTER SCHEMA kdb_ops OWNER TO kdb_schema_owner;
+-- No default EXECUTE privilege: functions require explicit name-specific grants.
+ALTER DEFAULT PRIVILEGES IN SCHEMA kdb_ops REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
+COMMIT;

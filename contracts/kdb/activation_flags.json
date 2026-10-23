@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "o1": "PLANNED_OFFLINE_NOT_ACTIVATED",
+  "o2": "PLANNED_OFFLINE_NOT_ACTIVATED",
+  "o3": "PLANNED_OFFLINE_NOT_ACTIVATED",
+  "o4": "INACTIVE_NO_IMPORT_NO_ENDPOINT",
+  "o5": "INACTIVE_NO_IMPORT_NO_ENDPOINT",
+  "human_review_decision": "NO_AUTOMATED_WRITER",
+  "promotion": "NO_EXECUTABLE_M01_COMMAND",
+  "outbox_dispatch": "INACTIVE_M01"
+}

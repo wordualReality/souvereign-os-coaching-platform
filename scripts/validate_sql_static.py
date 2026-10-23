@@ -14,18 +14,21 @@ kdb_m01=[
     Path('database/migrations/kdb/20261023140200__kdb_m01_003__api_boundary.sql'),
     Path('database/migrations/kdb/20261023140300__kdb_m01_004__indexes_idempotency.sql'),
 ]
-for p in kdb_m01:
-    txt=p.read_text().lower()
-    assert p.exists(), f'{p}: missing'
-    assert 'drop schema canonical' not in txt, f'{p}: refuses dropping canonical'
-    assert 'zobjpmyccszkabybdmsf' not in txt, f'{p}: must not target integration project'
-    print(f'PASS SQL static kdb-m01 check: {p}')
-core=kdb_m01[0].read_text().lower()
-assert 'create table' in core and 'canonical.' in core
-sec=kdb_m01[1].read_text().lower()
-assert 'create policy' in sec and 'row level security' in sec
-api=kdb_m01[2].read_text().lower()
-assert 'kdb_api.submit_ingestion_candidate' in api
-idx=kdb_m01[3].read_text().lower()
-assert 'create index' in idx and 'create table' not in idx
+legacy_ddl=re.compile(r'(?im)^\s*(?:create|alter|drop)\s+(?:table|schema)\s+(?:canonical|dev_staging|public)\b')
+for pth in kdb_m01:
+    txt=pth.read_text()
+    assert 'zobjpmyccszkabybdmsf' not in txt.lower(), f'{pth}: must not target integration project'
+    assert not legacy_ddl.search(txt), f'{pth}: legacy schema DDL forbidden'
+    print(f'PASS SQL static kdb-m01 check: {pth}')
+core=kdb_m01[0].read_text()
+assert 'CREATE SCHEMA kdb_canonical;' in core
+assert 'CREATE SCHEMA kdb_staging;' in core
+assert 'CREATE SCHEMA kdb_governance;' in core
+assert 'CREATE SCHEMA kdb_ops;' in core
+assert 'CREATE SCHEMA canonical;' not in core
+assert 'kdb_api' not in core
+assert 'NOBYPASSRLS' in kdb_m01[1].read_text()
+assert 'kdb_ops.ingest_source' in kdb_m01[2].read_text()
+assert 'kdb_api.submit_ingestion_candidate' not in kdb_m01[2].read_text()
+assert 'NOT_AUTHORIZED_FOR_APPLY' in kdb_m01[3].read_text()
 print('NOTE: true SQL dry-run requires Postgres/Supabase CLI; this static check is the sandbox fallback.')

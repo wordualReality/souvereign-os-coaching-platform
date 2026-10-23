@@ -1,0 +1,6 @@
+-- DESIGN_ONLY: NOT an admitted migration; NEVER apply with M01 O1-O3.
+-- Promotion SHALL BE implemented as a separate reviewed KDB transactional command AFTER
+-- qualified immutable HumanReviewDecision, expected CandidateRevision hash, rights
+-- freshness/safety, immutable ProtocolVersion and transactional outbox+audit prove PASS.
+-- If this file is found in a migration runner's executable manifest, FAIL THE BUILD.
+-- No statements by design. Forbidden: auto-HumanReviewDecision or n8n promotion.

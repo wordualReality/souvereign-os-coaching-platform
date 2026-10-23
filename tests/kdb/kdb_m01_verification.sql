@@ -1,32 +1,19 @@
--- Read-only verification queries. Run after KDB-M01 apply.
+-- Read-only verification queries. Run after an authorized KDB-M01 apply.
+-- This packet does not run them.
+
+select n.nspname as schema_name
+from pg_namespace n
+where n.nspname in ('kdb_canonical','kdb_staging','kdb_governance','kdb_ops')
+order by 1;
 
 select n.nspname as schema_name, c.relname, c.relrowsecurity, c.relforcerowsecurity
 from pg_class c
 join pg_namespace n on n.oid = c.relnamespace
-where n.nspname in ('canonical','dev_staging','kdb_audit')
+where n.nspname in ('kdb_canonical','kdb_staging','kdb_governance','kdb_ops')
   and c.relkind = 'r'
 order by 1,2;
 
 select rolname, rolcanlogin, rolbypassrls, rolsuper, rolcreaterole
 from pg_roles
-where rolname in ('kdb_runtime','kdb_ingest_writer','kdb_reviewer')
+where rolname in ('kdb_schema_owner','kdb_command_owner','kdb_ingest_runtime')
 order by 1;
-
-select routine_schema, routine_name, security_type
-from information_schema.routines
-where routine_schema in ('kdb_api','kdb_audit')
-order by 1,2;
-
-select grantee, routine_schema, routine_name, privilege_type
-from information_schema.role_routine_grants
-where routine_schema = 'kdb_api'
-order by 1,2,3;
-
-select schemaname, tablename, policyname, roles, cmd
-from pg_policies
-where schemaname in ('canonical','dev_staging','kdb_audit')
-order by 1,2,3;
-
-select version, name
-from supabase_migrations.schema_migrations
-order by version;
