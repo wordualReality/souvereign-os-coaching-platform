@@ -1,6 +1,6 @@
 # ARC-36/P25 resume pointer
 
-Current package: ARC36P25-SERVICE-PUBLISH-AND-TRUST-BOUNDARY-01. Parent commit `fe3ec2b7708137ab98d3c354cfe725b57041badb` remains the consumed local producer milestone. This file is the trust-boundary pointer on the same branch.
+Current package: ARC36P25-SERVICE-PUBLISH-AND-TRUST-BOUNDARY-01. Implementation commit `771bae3f56e08192b38ce0d2df72795bd03a6590`. Parent `fe3ec2b7708137ab98d3c354cfe725b57041badb` remains the consumed local producer milestone. This file is the pointer on the same branch.
 
 ## Checkout
 
