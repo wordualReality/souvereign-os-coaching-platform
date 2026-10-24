@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Apply KDB-M01 001-003 to disposable PostgreSQL 17 and reapply.
+"""Apply KDB-M01 001-003 plus P3 fail-closed 005 to disposable PostgreSQL 17.
 
 Default: docker container kdb-m01-pg17-disposable on 127.0.0.1:55432.
 CI: KDB_PG17_MODE=libpq with PGHOST=127.0.0.1 only.
-Does not apply 004. Does not connect to Supabase.
+Does not apply 004, 098, or the P2 recovery candidate. Does not connect to Supabase.
 """
 from __future__ import annotations
 
@@ -27,7 +27,13 @@ MIGRATIONS = [
     SQL_DIR / "20261023140000__kdb_m01_001__core_foundation.sql",
     SQL_DIR / "20261023140100__kdb_m01_002__security_boundary.sql",
     SQL_DIR / "20261023140200__kdb_m01_003__api_boundary.sql",
+    SQL_DIR / "20261024190000__kdb_m01_p3__fail_closed_security.sql",
 ]
+FORBIDDEN_APPLY = (
+    "20261023140300__kdb_m01_004__indexes_idempotency.sql",
+    "098_deferred_promotion_not_for_m01.sql",
+    "20261024180000__kdb_m01_p2__forward_recovery_candidate.sql",
+)
 
 
 def run(sql: str, argv_extra=None) -> str:
@@ -110,7 +116,7 @@ WHERE n.nspname IN ('kdb_canonical','kdb_staging','kdb_governance','kdb_ops') AN
 ORDER BY 1;
 SELECT n.nspname||'.'||p.proname||' '||p.prosecdef||' '||pg_get_userbyid(p.proowner)
 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-WHERE n.nspname='kdb_ops' AND p.proname IN ('ingest_source','propose_candidate','request_review_handoff')
+WHERE n.nspname='kdb_ops' AND p.proname IN ('ingest_source','propose_candidate','request_review_handoff','security_context_ready','canonical_command_digest','jsonb_sha256')
 ORDER BY 1;
 """
     )
@@ -120,6 +126,8 @@ ORDER BY 1;
 def apply_stack() -> None:
     run(BOOT.read_text())
     for path in MIGRATIONS:
+        if path.name in FORBIDDEN_APPLY:
+            raise SystemExit(f"refusing forbidden apply {path.name}")
         print(f"APPLY {path.name}")
         run(path.read_text())
     print(run(ORACLES.read_text()).strip())

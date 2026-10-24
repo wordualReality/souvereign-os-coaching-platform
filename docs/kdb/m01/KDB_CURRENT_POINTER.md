@@ -1,25 +1,23 @@
-# KDB current pointer, 2026-10-24 P2
+# KDB current pointer, 2026-10-24 P3
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: GitHub Issue #8
+Active packet: GitHub Issue #10
 
 P1 remains accepted and frozen: PR #6 head bed66883d48dd882294663ce9d1100e6b7adf7b2.
-This pointer is the P2 working branch. Older G21-07 STOP text does not cancel the grant.
+P2 remains characterization-only and frozen: PR #9 head 3692a275deae3a670c2f70d8115a0046dab96fef.
+This pointer is the P3 working branch. Older G21-07 STOP text does not cancel the grant.
 
 ## Physical stand
 
-- Worktree: isolated `kdb/m01-p2-negative-security-and-recovery`
-- Do not merge P1 or P2 to main.
+- Worktree: isolated `kdb/m01-p3-fail-closed-security`
+- Do not merge P1, P2, or P3 to main.
 - Leave B03 SQL and Arcava paths to their owners.
+- Do not apply 004, 098, or the P2 recovery candidate.
 
-## Proven on P1
+## P3 work
 
-Disposable PostgreSQL 17 apply/rollback/reapply and O1-O3 LOGIN command path. CI 40089748909.
-
-## P2 work
-
-Adversarial tenant/hash/direct-privilege tests, ACL catalog, hosted recovery candidate and offline preflight diff. Hosted apply remains blocked.
+Fail-closed tenant, hash-binding, and kdb_migrator default-ACL patches. Positive O1-O3 remains `BLOCKED_FAIL_CLOSED_UNTIL_TRUST_ATTESTED`. Hosted apply remains blocked.
 
 ## Setup already reported once
 

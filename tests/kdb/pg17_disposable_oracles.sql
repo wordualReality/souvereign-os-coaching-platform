@@ -47,8 +47,8 @@ BEGIN
   IF has_function_privilege('service_role','kdb_ops.ingest_source(uuid,uuid,text,text,text,text,text,text,text,jsonb,text,text,text,text,uuid,timestamptz)','EXECUTE') THEN
     RAISE EXCEPTION 'service_role EXECUTE ingest_source';
   END IF;
-  IF NOT has_function_privilege('kdb_ingest_runtime','kdb_ops.ingest_source(uuid,uuid,text,text,text,text,text,text,text,jsonb,text,text,text,text,uuid,timestamptz)','EXECUTE') THEN
-    RAISE EXCEPTION 'runtime missing EXECUTE ingest_source';
+  IF has_function_privilege('kdb_ingest_runtime','kdb_ops.ingest_source(uuid,uuid,text,text,text,text,text,text,text,jsonb,text,text,text,text,uuid,timestamptz)','EXECUTE') THEN
+    RAISE EXCEPTION 'runtime still has EXECUTE ingest_source';
   END IF;
   IF has_table_privilege('kdb_ingest_runtime','kdb_canonical.protocol_version','SELECT') THEN
     RAISE EXCEPTION 'runtime SELECT protocol_version';
@@ -63,6 +63,11 @@ BEGIN
   IF NOT FOUND THEN RAISE EXCEPTION 'kdb_command_owner graph'; END IF;
   PERFORM 1 FROM pg_roles WHERE rolname='kdb_ingest_runtime' AND rolcanlogin IS TRUE AND rolbypassrls IS FALSE AND rolsuper IS FALSE AND rolcreaterole IS FALSE AND rolcreatedb IS FALSE AND rolinherit IS FALSE;
   IF NOT FOUND THEN RAISE EXCEPTION 'kdb_ingest_runtime graph'; END IF;
+  PERFORM 1 FROM pg_roles WHERE rolname='kdb_migrator' AND rolcanlogin IS FALSE AND rolbypassrls IS FALSE AND rolsuper IS FALSE AND rolinherit IS FALSE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'kdb_migrator graph'; END IF;
+  IF kdb_ops.security_context_ready() IS DISTINCT FROM false THEN
+    RAISE EXCEPTION 'security_context_ready must be false';
+  END IF;
 END $$;
 
 SELECT 'PASS_PG17_ORACLES' AS status;

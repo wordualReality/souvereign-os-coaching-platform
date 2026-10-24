@@ -145,12 +145,38 @@ def main() -> None:
     cmd.must(superuser, "DROP FUNCTION kdb_ops.p2_acl_probe_future();")
     if public_exe in {"t", "true"}:
         note(
-            "FUTURE_FUNCTION_PUBLIC_EXECUTE",
-            "RED",
-            "new kdb_ops function is PUBLIC EXECUTE; BLOCK_DEFAULT_ACL_CREATOR is physically open on this applier",
+            "BLOCK_DEFAULT_ACL_CREATOR",
+            "INFO",
+            "superuser-created function is PUBLIC EXECUTE; hosted apply stays blocked",
         )
     else:
-        note("FUTURE_FUNCTION_PUBLIC_EXECUTE", "CLOSED", "PUBLIC EXECUTE denied for probe function")
+        note("SUPERUSER_FUTURE_FUNCTION_PUBLIC_EXECUTE", "CLOSED", "PUBLIC EXECUTE denied for superuser probe")
+
+    cmd.must(
+        superuser,
+        "SET ROLE kdb_migrator; "
+        "CREATE FUNCTION kdb_ops.p3_acl_probe_future() "
+        "RETURNS integer LANGUAGE sql SET search_path = pg_catalog AS $$ SELECT 1 $$; "
+        "RESET ROLE;",
+    )
+    migrator_hits = []
+    for role in ("anon", "authenticated", "service_role", "public"):
+        exe = cmd.must(
+            superuser,
+            f"SELECT has_function_privilege({cmd.psql_str(role)}, "
+            "'kdb_ops.p3_acl_probe_future()', 'EXECUTE');",
+        )
+        if exe in {"t", "true"}:
+            migrator_hits.append(role)
+    cmd.must(superuser, "DROP FUNCTION kdb_ops.p3_acl_probe_future();")
+    if migrator_hits:
+        note(
+            "FUTURE_FUNCTION_PUBLIC_EXECUTE",
+            "RED",
+            {"creator": "kdb_migrator", "roles": migrator_hits},
+        )
+    else:
+        note("FUTURE_FUNCTION_PUBLIC_EXECUTE", "CLOSED", "kdb_migrator probe has no untrusted EXECUTE")
 
     tls = {
         "code": "TLS_1PASSWORD_ISSUER",

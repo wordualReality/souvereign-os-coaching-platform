@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Local O1-O3 command path on disposable PostgreSQL 17.
 
+Positive ingest is BLOCKED_FAIL_CLOSED_UNTIL_TRUST_ATTESTED.
 LOGIN as kdb_ingest_runtime. SET ROLE from superuser is not a positive.
 Does not apply 004. Does not connect to Supabase. Does not publish.
 """
@@ -212,14 +213,11 @@ def main() -> None:
     rights_sha = sha256_text(rights_json)
     content_sha = sha256_text("synthetic-kdb-m01-command-path-v1")
     request_sha = sha256_text("o1-request-v1")
-    request_sha_conflict = sha256_text("o1-request-v1-conflict")
-
     command_id = str(uuid.uuid4())
     submission_id = str(uuid.uuid4())
     correlation_id = str(uuid.uuid4())
     run_id = command_id[:8]
     tenant_a = "TENANT_SYNTH_A"
-    tenant_b = "TENANT_SYNTH_B"
 
     print("T01_SUPERUSER_DENIED")
     must_fail(
@@ -244,8 +242,16 @@ def main() -> None:
         "KDB_PRINCIPAL_DENIED",
     )
 
-    print("T02_INGEST")
-    first = must(
+    print("T02_RUNTIME_EXECUTE_REVOKED")
+    exe = must(
+        USER_SUPER,
+        "SELECT has_function_privilege('kdb_ingest_runtime',"
+        "'kdb_ops.ingest_source(uuid,uuid,text,text,text,text,text,text,text,jsonb,text,text,text,text,uuid,timestamptz)',"
+        "'EXECUTE');",
+    )
+    if exe in {"t", "true"}:
+        raise SystemExit("runtime still has EXECUTE ingest_source")
+    must_fail(
         USER_RUNTIME,
         ingest_sql(
             command_id,
@@ -264,205 +270,12 @@ def main() -> None:
             "kdb_knowledge_intake",
             correlation_id,
         ),
+        "permission denied",
+        "denied",
+        "KDB_SECURITY_CONTEXT_NOT_CONFIGURED",
     )
-    first_obj = json.loads(first)
-    if first_obj.get("status") != "RECORDED":
-        raise SystemExit(f"unexpected ingest outcome {first}")
-    source_version_id = first_obj["source_version_id"]
-
-    print("T03_REPLAY_SAME_BODY")
-    replay = must(
-        USER_RUNTIME,
-        ingest_sql(
-            command_id,
-            submission_id,
-            tenant_a,
-            "KDB",
-            f"idem-cmd-{run_id}",
-            request_sha,
-            "LICENSED_DOCUMENT",
-            f"synthetic://kdb/m01/command-path-{run_id}",
-            content_sha,
-            rights_json,
-            rights_sha,
-            "PRINCIPAL_REF_SYNTH_PIPELINE",
-            "ACCESS_SYNTH_OK",
-            "kdb_knowledge_intake",
-            correlation_id,
-        ),
-    )
-    if json.loads(replay) != first_obj:
-        raise SystemExit("replay did not return existing receipt")
-    receipt_count = must(
-        USER_SUPER,
-        f"SELECT count(*) FROM kdb_ops.command_receipt WHERE command_id='{command_id}'::uuid;",
-    )
-    if receipt_count != "1":
-        raise SystemExit(f"replay created extra receipt: {receipt_count}")
-
-    print("T04_IDEMPOTENCY_CONFLICT")
-    must_fail(
-        USER_RUNTIME,
-        ingest_sql(
-            command_id,
-            str(uuid.uuid4()),
-            tenant_a,
-            "KDB",
-            f"idem-cmd-{run_id}-conflict",
-            request_sha_conflict,
-            "LICENSED_DOCUMENT",
-            f"synthetic://kdb/m01/command-path-{run_id}",
-            content_sha,
-            rights_json,
-            rights_sha,
-            "PRINCIPAL_REF_SYNTH_PIPELINE",
-            "ACCESS_SYNTH_OK",
-            "kdb_knowledge_intake",
-            str(uuid.uuid4()),
-        ),
-        "KDB_IDEMPOTENCY_CONFLICT",
-    )
-
-    print("T05_CONTEXT_REQUIRED")
-    must_fail(
-        USER_RUNTIME,
-        ingest_sql(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            "",
-            "KDB",
-            f"idem-cmd-{run_id}-empty",
-            sha256_text("o1-empty-tenant"),
-            "LICENSED_DOCUMENT",
-            f"synthetic://kdb/m01/empty-tenant-{run_id}",
-            content_sha,
-            rights_json,
-            rights_sha,
-            "PRINCIPAL_REF_SYNTH_PIPELINE",
-            "ACCESS_SYNTH_OK",
-            "kdb_knowledge_intake",
-            str(uuid.uuid4()),
-        ),
-        "KDB_CONTEXT_REQUIRED",
-    )
-
-    print("T06_RIGHTS_NOT_ADMITTED")
-    blocked = dict(rights)
-    blocked["rights_status"] = "PENDING"
-    blocked_json = json.dumps(blocked, separators=(",", ":"), sort_keys=True)
-    must_fail(
-        USER_RUNTIME,
-        ingest_sql(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            tenant_a,
-            "KDB",
-            f"idem-cmd-{run_id}-pending",
-            sha256_text("o1-pending-rights"),
-            "LICENSED_DOCUMENT",
-            f"synthetic://kdb/m01/pending-rights-{run_id}",
-            content_sha,
-            blocked_json,
-            sha256_text(blocked_json),
-            "PRINCIPAL_REF_SYNTH_PIPELINE",
-            "ACCESS_SYNTH_OK",
-            "kdb_knowledge_intake",
-            str(uuid.uuid4()),
-        ),
-        "KDB_RIGHTS_NOT_ADMITTED",
-    )
-
-    print("T07_CROSS_TENANT_COMMAND_ID")
-    must_fail(
-        USER_RUNTIME,
-        ingest_sql(
-            command_id,
-            str(uuid.uuid4()),
-            tenant_b,
-            "KDB",
-            f"idem-cmd-{run_id}-cross",
-            sha256_text("o1-tenant-b"),
-            "LICENSED_DOCUMENT",
-            f"synthetic://kdb/m01/tenant-b-{run_id}",
-            content_sha,
-            rights_json,
-            rights_sha,
-            "PRINCIPAL_REF_SYNTH_PIPELINE",
-            "ACCESS_SYNTH_OK",
-            "kdb_knowledge_intake",
-            str(uuid.uuid4()),
-        ),
-        "KDB_COMMAND_RECEIPT_CONFLICT",
-        "command_receipt_command_id_key",
-        "duplicate key",
-    )
-
-    print("T08_PROPOSE_CANDIDATE")
-    candidate_command = str(uuid.uuid4())
-    candidate_id = str(uuid.uuid4())
-    candidate_sha = sha256_text("candidate-v1")
-    propose_sql = f"""
-SELECT kdb_ops.propose_candidate(
-  '{candidate_command}'::uuid,
-  {psql_str(tenant_a)},
-  '{submission_id}'::uuid,
-  '{source_version_id}'::uuid,
-  '{candidate_id}'::uuid,
-  1,
-  {psql_str(sha256_text("o2-request-v1"))},
-  {psql_str(candidate_sha)},
-  '[{{"start":0,"end":1}}]'::jsonb,
-  '{{"synthetic":true}}'::jsonb,
-  'PRINCIPAL_REF_SYNTH_PIPELINE',
-  'ACCESS_SYNTH_OK',
-  '{uuid.uuid4()}'::uuid
-);
-"""
-    proposed = json.loads(must(USER_RUNTIME, propose_sql))
-    if proposed.get("status") != "STRUCTURE_VALIDATED_NOT_REVIEWED":
-        raise SystemExit(f"unexpected propose outcome {proposed}")
-    candidate_revision_id = proposed["candidate_revision_id"]
-    proposed_again = json.loads(must(USER_RUNTIME, propose_sql))
-    if proposed_again != proposed:
-        raise SystemExit("candidate replay did not return existing receipt")
-
-    print("T09_REVIEW_HANDOFF")
-    review_command = str(uuid.uuid4())
-    review_sql = f"""
-SELECT kdb_ops.request_review_handoff(
-  '{review_command}'::uuid,
-  {psql_str(tenant_a)},
-  '{candidate_revision_id}'::uuid,
-  {psql_str(sha256_text("o3-request-v1"))},
-  'PRINCIPAL_REF_SYNTH_PIPELINE',
-  'ACCESS_SYNTH_OK',
-  '{uuid.uuid4()}'::uuid
-);
-"""
-    handed = json.loads(must(USER_RUNTIME, review_sql))
-    if handed.get("status") != "REVIEW_HANDOFF_REQUESTED_NOT_DECIDED":
-        raise SystemExit(f"unexpected handoff outcome {handed}")
-    handed_again = json.loads(must(USER_RUNTIME, review_sql))
-    if handed_again != handed:
-        raise SystemExit("handoff replay did not return existing receipt")
-
-    print("T10_NO_PUBLICATION")
-    proto = must(USER_SUPER, "SELECT count(*) FROM kdb_canonical.protocol;")
-    proto_v = must(USER_SUPER, "SELECT count(*) FROM kdb_canonical.protocol_version;")
-    decisions = must(
-        USER_SUPER, "SELECT count(*) FROM kdb_governance.human_review_decision;"
-    )
-    if proto != "0" or proto_v != "0" or decisions != "0":
-        raise SystemExit("publication tables were written")
-    outbox = must(
-        USER_SUPER,
-        f"SELECT count(*), min(publish_state) FROM kdb_ops.outbox_event "
-        f"WHERE aggregate_id='{candidate_revision_id}'::uuid;",
-    )
-    if not outbox.startswith("1|INACTIVE_M01"):
-        raise SystemExit(f"unexpected outbox {outbox}")
-
-    print("PASS_PG17_LOCAL_COMMAND_PATH_O1_O2_O3")
+    print("BLOCKED_FAIL_CLOSED_UNTIL_TRUST_ATTESTED")
+    print("PASS_PG17_COMMAND_PATH_FAIL_CLOSED")
     print("NOTE_PUBLICATION_NOT_EXECUTED")
     print("NOTE_N8N_RUNTIME_NOT_USED")
 
