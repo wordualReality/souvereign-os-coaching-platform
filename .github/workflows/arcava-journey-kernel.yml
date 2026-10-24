@@ -2,12 +2,14 @@ name: arcava-journey-kernel
 
 # Executes the isolated fixture described in
 # docs/arcava/ARC36P25-JOURNEY-KERNEL-DEVELOPMENT.md.
-# This is not Spring Boot, PIAC, persistence, T150 or T050 acceptance.
+# The kernel job is not Spring Boot, PIAC, T150 or T050 acceptance.
+# The path job proves the local journal and loopback HTTP service only.
 on:
   pull_request:
   push:
     branches:
       - feat/arc36p25-journey-kernel-candidate-20261023
+      - feat/arc36p25-journey-service-integration
 
 permissions:
   contents: read
@@ -45,3 +47,33 @@ jobs:
             services/api/src/main/java/com/projectb/api/domain/JourneyKernel.java \
             services/api/src/test/java/com/projectb/api/domain/JourneyKernelTest.java
           java -cp "$classes_dir" com.projectb.api.domain.JourneyKernelTest
+  journey-http-path:
+    name: Persisted loopback journey path / JDK ${{ matrix.java }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['21', '25']
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up isolated Java toolchain
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+      - name: Compile and execute persisted HTTP path
+        shell: bash
+        run: |
+          set -euo pipefail
+          classes_dir="$(mktemp -d "${RUNNER_TEMP}/arcava-http.XXXXXX")"
+          javac -Xlint:all -Werror -d "$classes_dir" \
+            services/api/src/main/java/com/projectb/api/domain/JourneyKernel.java \
+            services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java \
+            services/api/src/main/java/com/projectb/api/json/JsonMini.java \
+            services/api/src/main/java/com/projectb/api/http/JourneyHttpServer.java \
+            services/api/src/test/java/com/projectb/api/http/JourneyPathTest.java
+          java -cp "$classes_dir" com.projectb.api.http.JourneyPathTest
