@@ -6,6 +6,7 @@ Current package: persisted local coach and client journey path. Passed on 2026-1
 
 - Worktree: `/Users/aydin/Documents/GitHub/arcava-journey-worktree`
 - Branch: `feat/arc36p25-journey-service-integration`
+- Commit: `e4cc801fc896bd65548be2688fb624f498ec0ca2`
 - Base: `515dc46bab5deb03e61e0a34d3ad0c64d4a3fed5` (PR #5 head, including the JDK 21/25 kernel workflow)
 - The KDB checkout `/Users/aydin/Documents/GitHub/souvereign-os-coaching-platform` on `kdb/m01-03-repository-materialization` was not modified.
 
