@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:arcava:CT-ARC-R03-REM-001:1.0:result",
+  "title": "CT-ARC-R03-REM-001 result v1.0",
+  "allOf": [
+    {
+      "$ref": "urn:arcava:types:1.0:ResponseEnvelope#/$defs/responseEnvelopeBase"
+    },
+    {
+      "type": "object",
+      "required": [
+        "payload"
+      ],
+      "properties": {
+        "contract_id": {
+          "const": "CT-ARC-R03-REM-001"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "outcome": {
+          "const": "OK"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "due_intent_id",
+            "execution_mode",
+            "intent_state",
+            "intent_revision",
+            "current_plan_revision",
+            "eligible",
+            "reason_codes",
+            "valid_until",
+            "eligibility_evidence_ref"
+          ],
+          "properties": {
+            "due_intent_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "execution_mode": {
+              "enum": [
+                "ARCAVA_LOCAL",
+                "SOV_DELEGATED"
+              ]
+            },
+            "intent_state": {
+              "enum": [
+                "ACTIVE",
+                "CANCELLED",
+                "SUPERSEDED",
+                "EXPIRED"
+              ]
+            },
+            "intent_revision": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            },
+            "current_plan_revision": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            },
+            "eligible": {
+              "type": "boolean"
+            },
+            "reason_codes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "valid_until": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "eligibility_evidence_ref": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "producer_namespace",
+                "object_type",
+                "stable_id"
+              ],
+              "properties": {
+                "producer_namespace": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "object_type": {
+                  "const": "ProducerAuditRecord"
+                },
+                "stable_id": {
+                  "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                }
+              }
+            }
+          }
+        },
+        "error": false
+      }
+    }
+  ],
+  "unevaluatedProperties": false
+}
