@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply KDB-M01 001-003 plus P3 fail-closed 005 to disposable PostgreSQL 17.
+"""Apply KDB-M01 001-003, P3 005, and P4 digest integrity to disposable PostgreSQL 17.
 
 Default: docker container kdb-m01-pg17-disposable on 127.0.0.1:55432.
 CI: KDB_PG17_MODE=libpq with PGHOST=127.0.0.1 only.
@@ -28,6 +28,7 @@ MIGRATIONS = [
     SQL_DIR / "20261023140100__kdb_m01_002__security_boundary.sql",
     SQL_DIR / "20261023140200__kdb_m01_003__api_boundary.sql",
     SQL_DIR / "20261024190000__kdb_m01_p3__fail_closed_security.sql",
+    SQL_DIR / "20261024220000__kdb_m01_p4__digest_oracle_integrity.sql",
 ]
 FORBIDDEN_APPLY = (
     "20261023140300__kdb_m01_004__indexes_idempotency.sql",
@@ -116,7 +117,7 @@ WHERE n.nspname IN ('kdb_canonical','kdb_staging','kdb_governance','kdb_ops') AN
 ORDER BY 1;
 SELECT n.nspname||'.'||p.proname||' '||p.prosecdef||' '||pg_get_userbyid(p.proowner)
 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-WHERE n.nspname='kdb_ops' AND p.proname IN ('ingest_source','propose_candidate','request_review_handoff','security_context_ready','canonical_command_digest','jsonb_sha256')
+WHERE n.nspname='kdb_ops' AND p.proname IN ('ingest_source','propose_candidate','request_review_handoff','security_context_ready','canonical_command_digest','canonical_digest_v2','jsonb_sha256')
 ORDER BY 1;
 """
     )

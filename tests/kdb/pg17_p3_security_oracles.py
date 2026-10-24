@@ -118,8 +118,10 @@ def main() -> None:
     recorded = ok_b and '"status":"RECORDED"' in body_b.replace(" ", "")
     if recorded:
         note("TENANT_GUC_SPOOF_ACCEPTED_AT_DB", "RED", body_b)
+    elif "permission denied for function ingest_source" in body_b:
+        note("TENANT_GUC_SPOOF", "CLOSED", "permission denied for function ingest_source")
     else:
-        note("TENANT_GUC_SPOOF", "CLOSED", body_b[:300])
+        note("TENANT_GUC_SPOOF_UNEXPECTED", "RED", body_b[:400])
 
     print("P3B_CHANGED_PAYLOAD_WITHOUT_EXECUTE")
     ok_h, body_h = ingest_or_fail(
@@ -141,8 +143,10 @@ def main() -> None:
     )
     if ok_h:
         note("REQUEST_HASH_NOT_BOUND_TO_PAYLOAD", "RED", body_h)
+    elif "permission denied for function ingest_source" in body_h:
+        note("REQUEST_HASH_PAYLOAD_BINDING", "CLOSED", "permission denied for function ingest_source")
     else:
-        note("REQUEST_HASH_PAYLOAD_BINDING", "CLOSED", body_h[:300])
+        note("REQUEST_HASH_UNEXPECTED_DENIAL", "RED", body_h[:400])
 
     print("P3_TEMP_GRANT_PROVES_FAIL_CLOSED_BODY")
     try:
@@ -160,12 +164,12 @@ def main() -> None:
         )
         digest = cmd.must(
             superuser,
-            "SELECT kdb_ops.canonical_command_digest("
-            f"'SOURCE_INTAKE', '{command_a}'::uuid, {cmd.psql_str(tenant_a)}, "
+            "SELECT kdb_ops.canonical_digest_v2(jsonb_build_array("
+            f"'v2','SOURCE_INTAKE','{command_a}'::uuid, {cmd.psql_str(tenant_a)}, "
             f"{cmd.psql_str(origin)}, {cmd.psql_str(purpose)}, {cmd.psql_str(source_class)}, "
             f"{cmd.psql_str(locator)}, {cmd.psql_str(content_a)}, {cmd.psql_str(rights_pg)}, "
             f"{cmd.psql_str(principal)}, {cmd.psql_str(access)}, {cmd.psql_str(idem)}, "
-            f"'{submission_a}'::uuid);",
+            f"'{submission_a}'::uuid));",
         )
 
         ok_match, body_match = ingest_or_fail(
@@ -211,8 +215,10 @@ def main() -> None:
         )
         if ok_spoof:
             note("TENANT_GUC_SPOOF_ACCEPTED_AT_DB", "RED", body_spoof)
-        else:
+        elif "KDB_HASH_MISMATCH" in body_spoof or "KDB_SECURITY_CONTEXT_NOT_CONFIGURED" in body_spoof:
             note("TENANT_SPOOF_WITH_EXECUTE_STILL_DENIED", "CLOSED", body_spoof[:300])
+        else:
+            note("TENANT_SPOOF_UNEXPECTED", "RED", body_spoof[:400])
 
         other_rights = json.loads(rights_json)
         other_rights["rights_basis"] = "synthetic-other-license"
@@ -255,12 +261,12 @@ def main() -> None:
         prior_idem = f"idem-p3-prior-{run_id}"
         prior_digest = cmd.must(
             superuser,
-            "SELECT kdb_ops.canonical_command_digest("
-            f"'SOURCE_INTAKE', '{prior_id}'::uuid, {cmd.psql_str(tenant_a)}, "
+            "SELECT kdb_ops.canonical_digest_v2(jsonb_build_array("
+            f"'v2','SOURCE_INTAKE','{prior_id}'::uuid, {cmd.psql_str(tenant_a)}, "
             f"{cmd.psql_str(origin)}, {cmd.psql_str(purpose)}, {cmd.psql_str(source_class)}, "
             f"{cmd.psql_str(prior_locator)}, {cmd.psql_str(content_a)}, {cmd.psql_str(rights_pg)}, "
             f"{cmd.psql_str(principal)}, {cmd.psql_str(access)}, {cmd.psql_str(prior_idem)}, "
-            f"'{prior_sub}'::uuid);",
+            f"'{prior_sub}'::uuid));",
         )
         ok_conflict, body_conflict = ingest_or_fail(
             command_id=prior_id,

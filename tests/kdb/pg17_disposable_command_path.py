@@ -147,8 +147,15 @@ def ensure_schema() -> None:
         USER_SUPER,
         "SELECT count(*) FROM pg_namespace WHERE nspname='kdb_ops';",
     )
-    if exists != "1":
+    v2 = "f"
+    if exists == "1":
+        v2 = must(
+            USER_SUPER,
+            "SELECT to_regprocedure('kdb_ops.canonical_digest_v2(jsonb)') IS NOT NULL;",
+        )
+    if exists != "1" or v2 not in {"t", "true"}:
         print("APPLY_FOR_COMMAND_PATH")
+        apply.run(apply.ROLL.read_text())
         apply.apply_stack()
 
 
@@ -193,6 +200,62 @@ SELECT kdb_ops.ingest_source(
 
 def psql_str(value: str) -> str:
     return "'" + value.replace("'", "''") + "'"
+
+
+def propose_sql(
+    command_id: str,
+    tenant: str,
+    submission_id: str,
+    source_version_id: str,
+    candidate_id: str,
+    revision_no: int,
+    request_sha: str,
+    content_sha: str,
+    evidence_spans: str,
+    payload: str,
+    actor: str,
+    access: str,
+    correlation_id: str,
+) -> str:
+    return f"""
+SELECT kdb_ops.propose_candidate(
+  '{command_id}'::uuid,
+  {psql_str(tenant)},
+  '{submission_id}'::uuid,
+  '{source_version_id}'::uuid,
+  '{candidate_id}'::uuid,
+  {int(revision_no)}::bigint,
+  {psql_str(request_sha)},
+  {psql_str(content_sha)},
+  {psql_str(evidence_spans)}::jsonb,
+  {psql_str(payload)}::jsonb,
+  {psql_str(actor)},
+  {psql_str(access)},
+  '{correlation_id}'::uuid
+);
+"""
+
+
+def handoff_sql(
+    command_id: str,
+    tenant: str,
+    candidate_revision_id: str,
+    request_sha: str,
+    actor: str,
+    access: str,
+    correlation_id: str,
+) -> str:
+    return f"""
+SELECT kdb_ops.request_review_handoff(
+  '{command_id}'::uuid,
+  {psql_str(tenant)},
+  '{candidate_revision_id}'::uuid,
+  {psql_str(request_sha)},
+  {psql_str(actor)},
+  {psql_str(access)},
+  '{correlation_id}'::uuid
+);
+"""
 
 
 def main() -> None:
