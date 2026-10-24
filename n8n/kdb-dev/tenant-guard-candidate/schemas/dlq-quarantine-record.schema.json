@@ -1,0 +1,50 @@
+{
+  "$id": "kdb://offline/dlq-quarantine-record/1.1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "owner": "KDB/Data",
+  "properties": {
+    "bounded_retry": {
+      "type": "string"
+    },
+    "configuration_digest": {
+      "type": "string"
+    },
+    "configuration_revision": {
+      "type": "string"
+    },
+    "correlation_id": {
+      "type": "string"
+    },
+    "error_class": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "function_contract_version": {
+      "type": "string"
+    },
+    "function_signature": {
+      "type": "string"
+    },
+    "queue": {
+      "enum": [
+        "QUARANTINE",
+        "DLQ",
+        "DENY"
+      ]
+    }
+  },
+  "required": [
+    "queue",
+    "correlation_id",
+    "error_class",
+    "configuration_revision",
+    "configuration_digest",
+    "function_signature",
+    "function_contract_version"
+  ],
+  "schema_version": "1.1",
+  "status": "OFFLINE_CONTRACT_PROJECTION / NOT_DEPLOYED",
+  "type": "object"
+}

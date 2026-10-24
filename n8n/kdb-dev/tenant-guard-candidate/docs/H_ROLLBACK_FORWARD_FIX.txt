@@ -1,0 +1,28 @@
+KDB-N8N-PIPELINE-RECON-10 — HANDOVER · 2026-10-21 · v1.0
+OWNER: GPT_BUILDER_KDB | AUTHORITY: DOCUMENTATION_AND_PACKAGING_ONLY
+STATE: DESIGN/CANDIDATE ACCEPTED FOR HANDOVER; PHYSICAL OPERATIONS NOT APPROVED.
+
+H — ROLLBACK AND FORWARD-FIX / REOPEN PLAN
+BOUNDARY: This is a future design plan, not an executed rollback. Nothing live exists from this Step10 handover.
+
+OFFLINE ARTIFACT CORRECTION
+1. Freeze source manifest and Drive ID/revision; select exact versioned archive from J; reproduce hashes.
+2. If candidate F01 or another contract fails on disposable mock, stop; mark deployment admission BLOCKED; preserve prior accepted R01 archive, failed harness logs and diff.
+3. Repair under a new bounded Controller-authorized Rxx (never mutate historical ZIP), derive minimal semantic diff, manifest, fixtures and deterministic rebuild, then Builder-QS and required independent QS.
+4. No replacement may auto-change KDB contracts, Atlas 86 baseline, Arcava/SOV pointers, secrets, physical grants, SQL or existing user n8n.
+
+FUTURE ACTIVATION RECOVERY (AFTER SEPARATE APPROVAL ONLY)
+- Stop future new ingress before rollback, preserve source+receipt sequence, quarantine unknown outcomes, verify current KDB lifecycle watermark and subscriber ACKs.
+- Restore last independently accepted signed/hashed inactive workflow version only after reversible migration/API compatibility and rollback acceptance. Old app versions do not override revoked rights or withdrawn ProtocolVersion.
+- Use explicit KDB-owned forward-fix/reconciliation when data-version compatibility has changed. Never reverse a canonical HumanReviewDecision or immutable ProtocolVersion by patching n8n history.
+- Re-validate least-privilege identity, cert trust, grants/RLS, consent, service limits, replay uniqueness, DLQ age and auditing after any later cutover.
+- If C2/B03/RC1B or 1Password fails: hold, revoke exposed or invalid sessions, do not invoke a service_role fallback.
+
+REOPEN TRIGGERS
+Contract signature change, taxonomy/semantic rule incompatibility, source rights revocation, new client-purpose scope, security bypass evidence, runtime version drift, missing logs/metrics, unclassified product-repo porcelain drift, time/rate policy without signed owner decision, cross-lane T050 failure. Reopen only affected packet with exact source lock and negative tests.
+
+PORCELAIN PRECHECK (BINDING QS09 REPAIR)
+Prior mac HEAD 3d1b97480908541769931badfbcd5781f360797b and dirty-tree SHA ca31793b5cdec8e3df7ffe63c7fd785536b91f9bcf54afb0b772bd16d21bf19d. These are historical Step9 observations, NOT fresh Step10 physical inventory. BEFORE ANY FUTURE PRODUCT REPO WRITE, authorized local executor MUST reread `git status --porcelain -z` and path-by-path classify pre-existing dirty files, identify and FAIL CLOSED on collision; no repo write in this packet.
+
+RECOVERY OWNER
+KDB data owner handles canonical transactional repair; Arcava/SOV restore their owned projections only after explicit contract and security gates. Controller decides routing and separate Founder activation grant. This plan grants no actual rollback power.

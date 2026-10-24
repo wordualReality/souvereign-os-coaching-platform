@@ -1,0 +1,35 @@
+{
+  "body": {
+    "causation_id": "cause-synth-0001",
+    "command_id": "MAP04-C01",
+    "contract_id": "CT-KDB-R03-PIPE-001",
+    "correlation_id": "corr-synth-0005",
+    "idempotency_key": "idem-synth-0001",
+    "issued_at": "2026-10-18T00:00:00Z",
+    "payload": {
+      "access_decision_ref": "ACCESS_SYNTH_OK",
+      "captured_at": "2026-10-18T00:00:00Z",
+      "content_fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "origin_owner": "OWNER_REF_SYNTH_KDB",
+      "rights_decision_ref": "RIGHTS_SYNTH_OK",
+      "source_class": "LICENSED_REFERENCE",
+      "source_locator": "synthetic://source/c01",
+      "submission_id": "00000000-0000-4000-8000-000000000001"
+    },
+    "principal_context_ref": "PRINCIPAL_REF_SYNTH_PIPELINE",
+    "purpose": "kdb_knowledge_intake",
+    "schema_version": "1.0",
+    "synthetic_fault_class": "CONFLICT",
+    "tenant_scope": "TENANT_SYNTH_A"
+  },
+  "class": "duplicate different body",
+  "expected_route": "DENY",
+  "packet": "KDB-N8N-PIPELINE-RECON-08-R01",
+  "s06": [],
+  "s07": [
+    "S07-T02"
+  ],
+  "schema_version": "1.0",
+  "status": "SYNTHETIC / NO_REAL_PERSON_OR_CLIENT_DATA",
+  "target_oid": "O1"
+}

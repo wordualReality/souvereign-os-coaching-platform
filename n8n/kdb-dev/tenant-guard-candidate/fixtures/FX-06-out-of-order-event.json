@@ -1,0 +1,32 @@
+{
+  "body": {
+    "causation_id": "cause-synth-0001",
+    "command_id": "MAP04-C08",
+    "contract_id": "CT-KDB-R03-PIPE-001",
+    "correlation_id": "corr-synth-0006",
+    "idempotency_key": "idem-synth-0006",
+    "issued_at": "2026-10-18T00:00:00Z",
+    "payload": {
+      "ack_status": "ACCEPTED",
+      "event_id": "EVT_SYNTH_001",
+      "published_version_ref": "PV_SYNTH_001",
+      "subscriber_ref": "SUB_SYNTH_PROJECTION",
+      "watermark": "WM_SYNTH_001"
+    },
+    "principal_context_ref": "PRINCIPAL_REF_SYNTH_PIPELINE",
+    "purpose": "kdb_knowledge_intake",
+    "schema_version": "1.0",
+    "synthetic_fault_class": "STALE",
+    "tenant_scope": "TENANT_SYNTH_A"
+  },
+  "class": "out-of-order event",
+  "expected_route": "DENY",
+  "packet": "KDB-N8N-PIPELINE-RECON-08-R01",
+  "s06": [],
+  "s07": [
+    "S07-T05"
+  ],
+  "schema_version": "1.0",
+  "status": "SYNTHETIC / NO_REAL_PERSON_OR_CLIENT_DATA",
+  "target_oid": "O5"
+}

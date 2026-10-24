@@ -1,0 +1,109 @@
+KDB-N8N-PIPELINE-RECON-10 — HANDOVER · 2026-10-21 · v1.0
+OWNER: GPT_BUILDER_KDB | AUTHORITY: DOCUMENTATION_AND_PACKAGING_ONLY
+STATE: DESIGN/CANDIDATE ACCEPTED FOR HANDOVER; PHYSICAL OPERATIONS NOT APPROVED.
+
+J — EVIDENCE INDEX WITH SOURCE IDs, HASHES, REVISIONS AND ACCEPTANCE STATE
+VERIFICATION STANDARD: Drive file IDs and revisionIds refer to sources actually read in this session where available. `UNAVAILABLE_NOT_INVENTED` is explicit when a revision could not be read due to provider rate limit; IDs remain known and content was fetched. Machine bytes are SHA-256 verified locally from current Drive-backed files. No false native-Docs byte equality claim after conversion; a Drive Readback must separately prove 12 docs exist and content is legible.
+
+CANONICAL CONTROL DOCUMENTS / LIVE REVISION LOCK
+- STEP10_MASTERPROMPT: https://docs.google.com/document/d/1U7QSUFnthE2oZMZgI1fL5Bfb3dW8Tp7Yt_1MfCVIaBQ/edit ; revision=AHj4eMTB2eWnd6kCVSDddZiX6GGCQFIDbcGKKjtIfwau_rctsjlfFBmKs4h-eyNd-HksTQhbP3kfquBfw8yhyZwW2JHLhikS8ZeV5hXsz4M
+- STEP09_CONTROLLER_QS: https://docs.google.com/document/d/1HC4SUdpEKaFNV6661bIY22jI1BHdGhp6uK9zPKsbKBA/edit ; revision=AHj4eMR-5-dYJZwsflJ_75GuHmj7iCmrx19YBxvFFy1tIJobfpLJ8_HWL9ENGnvOmNAttCXR5ho9X0y39jlxSEVrZgMP0OMFRNABfWjz8gU
+- KDB_N8N_READ_FIRST: https://docs.google.com/document/d/1WMVjmx4qH-zkT2v9EYyPGEmLP1zPW3CLn3yqO2qF-eo/edit ; revision=AHj4eMSVS8SGnqSNFaUgdF9tHcetuewB7hJiPCPtmeqOT4BIHvsLnl5PCcYOcvLsneMITBePI6Dgiu4WK0_s0pGRxkTvq-fWUa8lRxlninA
+- KDB_N8N_ROLLING_PLAN: https://docs.google.com/document/d/1lhDdpuEdcd-qqBXTBTMj9zjEtCLV8iuXo94e8fZ187U/edit ; revision=AHj4eMSpLfJXfFAlO4QT0-BS6IJ75iwnGRvw4DGCU8v12XGWGCTQU2MKNvIDw39EXaLXWIrAMZGvQCLLZ7gBMHOsWKpFr9jGZ1KjhZUhoZM
+- HCP_CROSS_LANE_ADOPTION: https://docs.google.com/document/d/17A3EKwkrHkhGd9xFYts8eUs5eCwF0RsNgWql3n5nF54/edit ; revision=AHj4eMRlYOf0H8uBPtnf32eeW3tDbhRs5qMCwESTuys0Mm6MiyHMbHA_0cb7IZIm1cWX09gkx8Cbkm4Wghy7N3Tqg_QM0_tZoLHc0WY8IKE
+- ARCAVA_MASTERPLAN: https://docs.google.com/document/d/1LbnyokfHEeDUleZTpP3p3C3fiPj0450YPDerNBz4EvU/edit ; revision=AHj4eMTF9TgqA-rqYaIgBTueca-nmb1Ze_kiVK2Z0adGuSQyuT9BdglIv68keabEtjnVtvGQC_wz_qjS7d2RZ8lInP4N_2_HmTpgA4RSBPQ
+- SOV_MASTERPLAN: https://docs.google.com/document/d/10shll0K5K3l-CRJk6BSd8cnY4cgLyNwBeAUAyDEhTgM/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- KDB_MASTERPLAN: https://docs.google.com/document/d/1TLtLz7JUbhFG4ZO540vYpXEdRtglzacWBSX-LB5QLvw/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- CROSS_LANE_CHECKPOINT: https://docs.google.com/document/d/1SSbRb94ij-3CS_miSXrTIX-kGvhY1DtPxzYwDInV5Zg/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP03_TARGET_ARCHITECTURE: https://docs.google.com/document/d/19YmdVm2KI9hz8qLYa6Ddl8Vp6wiWdHsxJWykaLejy1w/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP03_QS: https://docs.google.com/document/d/1A7tUMcljZUs0CQ-PMIDaw2_srMg1H3beBZGE0YFNQg0/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP04_COMMAND_CATALOG: https://docs.google.com/document/d/1gOzg3mggvzAizUOhuNyyZxBoyyXH1VjPm-zhBmdd3Rc/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP04_QUERY_OUTBOX: https://docs.google.com/document/d/1NTwRl0aenDx1NUKbU1T-YG5qt3cxpKzgHsOSEWQ-Ix8/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP04_QS: https://docs.google.com/document/d/1Cazad6idu2uofm2ZHLrKpkdonSkOrGyI8iq8tJ73h0E/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP05_FIELD_DICTIONARY: https://docs.google.com/document/d/1X8r08Zfw1CVU9MQkDZ258XUsKfWDRyIfRjznV4uxhHM/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP05_SOURCE_PROVENANCE: https://docs.google.com/document/d/1FHObZoZe4Z201CQmhmg-YtDwaD6NfJGfGO2t9mPkNnA/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP05_TAXONOMY_DOSHA: https://docs.google.com/document/d/18ltDOsZXBAWD7MFA4IhgD12mtiCzI3cJVM7qlxRSKnY/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP05_REVIEW_LIFECYCLE: https://docs.google.com/document/d/1pm7BKF3lF13a9hT4PGkY7-ifnmwdBefpClr935ToiNM/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP05_QS: https://docs.google.com/document/d/1NGNKhZZGtqBXrO7SPv8ZmklpNHQadokC8DMtTh1Prys/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP06_PRINCIPAL: https://docs.google.com/document/d/1VeEDSqot_HxVaU3Ni0xHboY4rXowg8P4GfZ0ZxhSGk0/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP06_TLS: https://docs.google.com/document/d/1zu-jKan14-3Y1KoO8ZsFWetcUfKmj0StE3OlWQXoq2o/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP06_SECRET: https://docs.google.com/document/d/1XUBvNHXhAXYDSmgm_PIb4fneAfS9brQoAFRjGKI80SA/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP06_RLS: https://docs.google.com/document/d/1SQxWYHXrP9831DK1RWQEhfvekqGc-aL2w23O0sMP1lo/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP06_RPC_SECURITY: https://docs.google.com/document/d/1B01bbT3ipm5Ya31ZsJ3TdHUDtbDdB-h3nPtO_XpHZxI/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP06_QS: https://docs.google.com/document/d/1DI7Hfys0pDjOQcLfapnSQovdej5PGcw3iR8UtBMMefs/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP07_IDEMPOTENCY: https://docs.google.com/document/d/141tVa1esubYHZkzec1lG-6XtFqPJNOvz8WiMwoS2SqM/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP07_RETRY: https://docs.google.com/document/d/1XPRBk5sd4sxiIVoiyKYyZkFzVh3v6ozkpaBaMC1eBA8/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP07_DLQ: https://docs.google.com/document/d/18KGCdhj07euEtD8PbN9D1waE7HZFUVodqhp051nrsMg/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP07_QUALITY: https://docs.google.com/document/d/1yBlTemWU9TqooE0K61JiBrLXKL6oeMpNMjrBAtrxUUI/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP07_OBSERVABILITY: https://docs.google.com/document/d/1IFs6OySKPFhveHaf06PLJ62tpvf-ymhU7RYoMj7WGIM/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP07_RUNBOOK: https://docs.google.com/document/d/11EBwsud6RCu3UsLlDBjfqVRhh3rMUWh6_9xOAaDtw9E/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP07_QS: https://docs.google.com/document/d/1Lr4PbD4I7w7vnS8l5BA-SfpRVa6i-z8-j1qjGpkspw0/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP08_RE_QS: https://docs.google.com/document/d/1InOhbOaWmcoiuWgx35FF_WZz9kjvg1wnH07ERTOXa5E/edit ; revision=UNAVAILABLE_NOT_INVENTED
+- STEP09_OWNER_G: https://docs.google.com/document/d/1VvN_CRe6NdZVN_WjndCe15Q9V-T5TtEdZMaYUtHx_ao/edit ; revision=UNAVAILABLE_NOT_INVENTED
+
+RAW ACCEPTED MACHINE EVIDENCE
+- R01_ZIP: https://drive.google.com/file/d/1ZotyN6iSbk4qBItQNnVGOsFzVxI7D9W-/view ; bytes=52862; SHA256=f3f9b1045673d20c96843cffa7b30f1d5f034d55091fc9b7cb7c4e409dca25b9
+- R01_MACHINE_RESULTS: https://drive.google.com/file/d/1giu-OPWVgUIAenHJ_MDBtXbYAKgLDzWA/view ; bytes=24661; SHA256=53363599711b787918546b214c8bb0421113c75a2aeca3f8389aa0b316f26c9b
+- R01_JUNIT: https://drive.google.com/file/d/1ChpYR9X_XYZ2fjHMApvS1cvJ_R6qui4d/view ; bytes=5987; SHA256=805522a2750505fe3b4147f41c095a1aba64647b67da905204643b128b6aaea7
+- R01_NON_INTERFERENCE: https://drive.google.com/file/d/1lkJE_clHirj8fT3Vg8k7aGjL19EHlsy1/view ; bytes=1433; SHA256=8410d697182511e2d1da0f26becb4eefaad0fbf2cd44258e82a3b39a2ae64159
+
+R01 ZIPPED SOURCE OBJECTS (51 EXACT OBJECTS)
+- candidates/KNP-O1-SOURCE-INGEST-COORDINATOR.json: 23975 bytes / 6be6b32fb4ab1813f03545f1cd92bf01472d8fe0b420ea08dcd33ddb98809f1a
+- candidates/KNP-O2-EVIDENCE-SEMANTIC-DERIVATION.json: 24000 bytes / de747e92035b1398032772d100102edaf58f97a52795e5d612e57ab610f7f7e2
+- candidates/KNP-O3-HUMAN-REVIEW-HANDOFF.json: 23972 bytes / 361e8cd3078f79127c3dba911ab798ffca8d7e99cb1aa142d874ee4827f98bd7
+- candidates/KNP-O4-LIFECYCLE-WITHDRAWAL-COORDINATOR.json: 27620 bytes / 8ecb512350d029491952f83e94c9585fb02a67a6aa5a0901985dd324c640037d
+- candidates/KNP-O5-PUBLICATION-PROJECTION-COORDINATOR.json: 24002 bytes / 4a18d3c92a2d67c17fe31d1121998a5baae00f1808c200e6d8b372ad5efd3297
+- fixtures/FX-01-positive-valid.json: 1201 bytes / 2c050d849537c562ffa2a8115de0fa3440d58ec2139d638f55197c05acdc1a60
+- fixtures/FX-02-negative-authorization-denial.json: 1221 bytes / bc839f8c5daaeb506f21994b7df5e465c0d751f61193eaf1d8dcd280b76c2c12
+- fixtures/FX-03-malformed-envelope.json: 1167 bytes / 2bebf83cdb0e2e5f28b3fafde6b3eff7eab48fc4d124de48a0286d7b551ddef7
+- fixtures/FX-04-duplicate-same-body.json: 1179 bytes / 650476de5fd3311d3d6760ef293f1da7ff52c63dd3367c3be8bf069c84c9ad11
+- fixtures/FX-05-duplicate-different-body.json: 1188 bytes / 25884dcb0ca6df4ced257dddf216dfec6b9e4d35aa5edd9729c70bca18bcc71c
+- fixtures/FX-06-out-of-order-event.json: 936 bytes / 778affcb0f8aeb994bbce8dc1b2a32ff8584b62c5ee7215c4444bcab2879d4ee
+- fixtures/FX-07-stale-taxonomy-or-source-version.json: 1119 bytes / dc3a4f1b17ca39343093422dde065abf7939345ee9ff7ae96e0b69dc5b2f766d
+- fixtures/FX-08-withdrawn-or-revoked-source.json: 1207 bytes / 230a79e3dd7cf6675d730fab0afce85b2f3a86bc8d44c27857f8061a0f8b5e9b
+- fixtures/FX-09-rights-restricted-purpose-mismatch.json: 1200 bytes / 903a3d6b135d868803916083611cf30a128da7b99ba874b9e806e52eb7b7372c
+- fixtures/FX-10-missing-evidence-or-safety-field.json: 857 bytes / 724f6f77cf13a47887ffe054857a508ce67dc9bc3c84fc31480844cba7b73d37
+- fixtures/FX-11-prompt-retrieval-injection.json: 1205 bytes / fab79be6edd0524866497981b7cfd6f6cdfca7e44ad5cc616c30e97862f5f676
+- fixtures/FX-12-dependency-unavailable.json: 1199 bytes / f8e75fbe465c6596e87fc4012c583dfc7ccde07cdd0aa843852840ae373587d4
+- fixtures/FX-13-rate-limit-backpressure.json: 1188 bytes / d82f65526779fec1e2eb4503839d3f0ae913bd013cec6e4eac07f01bab9bc94d
+- fixtures/FX-14-partial-or-unknown-commit.json: 1225 bytes / b0f843aabf5b7ff040754a602bad3b3b9e5e0a22846a7eadd8b47b1dc8c4daa2
+- fixtures/FX-15-poison-record.json: 1181 bytes / 2d7baf09bdc64312543b285e919e580e53e4dce1c9b4ec1e3c2801a3b036540e
+- fixtures/FX-16-replay-and-correction.json: 1215 bytes / 3124081edd9e1bcd24bff113414f56377d90e998e2bfb17057fc88626f100631
+- fixtures/FX-C01-incomplete-payload.json: 793 bytes / a56360cd00474e445ad67619fd2e3344c4d269b8ee06c125e4ecf632a4d5978c
+- fixtures/FX-C01-positive.json: 1185 bytes / 8be732db0bf4738608711c14faa3bb432095abe8c4856c1ab4548256e4d058ff
+- fixtures/FX-C02-incomplete-payload.json: 777 bytes / b6a3d323bb2e3de343dde58faadd07ce2b501a74d5ae7b11ae1d2c6c38c823ae
+- fixtures/FX-C02-positive.json: 1094 bytes / 1baa9ce8fddaf2fc16d574b48842d93c552fb53d0a0851eaf3b4093bc11259bc
+- fixtures/FX-C03-incomplete-payload.json: 783 bytes / 198d54e75b48b066661c70810cb6c150ec175f2f17fae17c33d03b4deacab6cb
+- fixtures/FX-C03-positive.json: 935 bytes / 3391fab916d9ede1faefc1764e688f32d58017da9a28eb3c9e832a038c3a0ba7
+- fixtures/FX-C06-incomplete-payload.json: 778 bytes / 1d04e8cba09c1d265e8d001e358d953bc6a949b2bfdd73a6a112b7400d20857e
+- fixtures/FX-C06-positive.json: 1001 bytes / 4d881e0ed49a954ae7900567a907cc37a8a1ae169d753f02187ef3008a362544
+- fixtures/FX-C07-incomplete-payload.json: 795 bytes / 82a10f2e4830409351ee10225c4fe2e43c566388e79e8626f17de1918bffa4d2
+- fixtures/FX-C07-positive.json: 930 bytes / 9c0b414f4575fa5be1bd04627c0a9cb04bd154dbf2b2bd3acdcbe959260828ac
+- fixtures/FX-C08-incomplete-payload.json: 765 bytes / c04e481c20a7e0e6470321dda38788acf7395b82a57119ea71531cefcca07163
+- fixtures/FX-C08-positive.json: 925 bytes / 4d7565d722428b8ea56b15f6c0a455f8a69551fb76b671e9909e7c0746c321ee
+- fixtures/FX-HTTP-rate-limit.json: 1318 bytes / fcd7614538d631becefd8dd37e11edbe96e491ecb551c102b19b9c56e8fa154a
+- fixtures/FX-HTTP-timeout.json: 1066 bytes / a1decd5aec0075783da48bd59c71259f5737f7c9b46a12ca745fa44a9f0a5f15
+- fixtures/FX-HTTP-unavailable.json: 1248 bytes / 4c90e6d92b185815b4334d23272581aca04bfb0e467ddc86f6dc7a94ba5c0750
+- fixtures/FX-HTTP-unknown-commit.json: 1132 bytes / 0a1d6430546a5dc8ad0201191d407770dc93eda1fe8e78ec1306f6033bb46fa9
+- fixtures/FX-O1-foreign-command.json: 1093 bytes / 8bbdf0889cb3ce76f86aea4d23a721e6907c4e558ec973051cee82481a957374
+- fixtures/FX-O2-foreign-command.json: 1167 bytes / 60606ed71723830cb999d47a287096352921197be775140c9f22bc5e3b33d203
+- fixtures/FX-O3-foreign-command.json: 1167 bytes / 46bc7a7b71d2382030a8e93699532ddafcb3ef207706c297b50941c5cb48a48f
+- fixtures/FX-O4-foreign-command.json: 1167 bytes / fa98e1954f66ba0a9662664a23df5d1e4971d659e52340d5aa41de94eb21d73f
+- fixtures/FX-O5-foreign-command.json: 1167 bytes / 01645eb3775fd60c3d5e7dc19aeca2df033369d540446fd3559b60c0ee69d1fa
+- r01/integrity-manifest.sha256: 5334 bytes / 8d8826407f2a8124c5c8a6f2d81670697cc704e3b5e9f7e6a26959f3bb8f1ff1
+- r01/r01-cross-lane-impact-NON_ROUTING.txt: 1117 bytes / ec02c45d30b8546a8e1b273dda5af396db1652038423c8297081d8a56a682ee9
+- r01/r01-static-validation.json: 5851 bytes / f4dba35490f1614ed5bf485d7d48306c765f5b6e5200e044c464e8eadc36ebfc
+- schemas/candidate-input-envelope.schema.json: 1213 bytes / 8cf2c80db1d61f685eb184d3a536c44a4b1d5b54c8fc04624ee9cf58f6519e58
+- schemas/command-profile-constraints.schema.json: 3491 bytes / d86ea8f48cbbff603989221480480ac244e3ff27247aec9001167e2c3aab5165
+- schemas/configuration-binding.schema.json: 817 bytes / 537ab34da176e25eabac92470d29e67000f519eb234a24d58027ef69b88d8a6d
+- schemas/dlq-quarantine-record.schema.json: 992 bytes / a2c2d679ec318e6ca0717f5fbbd673589f4eda91e4e2a66285cceedb58378540
+- schemas/error-classification.schema.json: 648 bytes / d7a18186221ad8cdd931242d54cdd1f9fc2c4b3f1950bc34a85917cf7ae5a121
+- schemas/evidence-receipt.schema.json: 1005 bytes / 71bf96e75de8ea34c166db390ddb79369e0dc7c77cb99ba367568d3232a19204
+
+ACCEPTANCE STATE
+- Steps 1–9 accepted to Step10 handover only. Independent Step09 Controller QS: PASS_INDEPENDENT_STEP09_R01_QS_SCOPE_LIMITED_WITH_PORCELAIN_PRECHECK; scope strictly offline design/execution.
+- Five workflow candidates inactive and non-operational; 6 schemas, 37 fixtures; version pinned to accepted R01 archive.
+- 44 oracle rows PASS; 18 isolated branches PASS; 67 JUnit / zero failures; mock network only; no physical security or live contract test.
+- HCP GitHub control-plane status: PREPARATION/DRAFT PR ONLY, explicit projection grant for this Step10 not conclusively established; GitHub projection DEFERRED_NOT_EXECUTED. Do not treat draft PR as merge/cutover.
+- Gate status: C2_PHYSICAL OPEN; B03 OPEN; RC1B OPEN; QS02 UNAUTHORIZED; KDB-C2 PAUSED; Arcava T050 NOT_ADMITTED; SOV WAIT_T050.
+- ID/revision of new Step10 Drive Docs captured in Owner Return G after import/readback; do not speculate them in this source file.

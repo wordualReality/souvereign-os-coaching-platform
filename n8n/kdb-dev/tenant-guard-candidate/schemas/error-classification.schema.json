@@ -1,0 +1,35 @@
+{
+  "$id": "kdb://offline/error-classification/1.1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "owner": "KDB/Data",
+  "properties": {
+    "correlation_id": {
+      "type": "string"
+    },
+    "error_class": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "retry_allowed": {
+      "type": "boolean"
+    },
+    "route": {
+      "enum": [
+        "ACCEPT",
+        "DENY",
+        "QUARANTINE",
+        "DLQ"
+      ]
+    }
+  },
+  "required": [
+    "error_class",
+    "route",
+    "correlation_id"
+  ],
+  "schema_version": "1.1",
+  "status": "OFFLINE_CONTRACT_PROJECTION / NOT_DEPLOYED",
+  "type": "object"
+}

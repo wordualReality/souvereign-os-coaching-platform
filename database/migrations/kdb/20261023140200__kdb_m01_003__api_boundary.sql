@@ -1,3 +1,6 @@
+-- P06 draft: kdb.tenant_scope GUC is defense in depth, not authenticated PIAC.
+-- A compromised kdb_ingest_runtime LOGIN could spoof the GUC. Facade stays fail-closed.
+-- Named REVOKE EXECUTE on the three O1/O2/O3 functions. Signatures unchanged. Not applied.
 -- KDB-M01 O1-O3 COMMAND CONTRACT (OFFLINE CANDIDATE; DO NOT APPLY BEFORE GATE A).
 -- Public n8n does not call SQL or own the database principal; only the KDB-owned
 -- purpose-validated facade may use dedicated kdb_ingest_runtime over approved TLS.
@@ -180,4 +183,7 @@ ALTER FUNCTION kdb_ops.request_review_handoff(uuid,text,uuid,text,text,text,uuid
 GRANT EXECUTE ON FUNCTION kdb_ops.ingest_source(uuid,uuid,text,text,text,text,text,text,text,jsonb,text,text,text,text,uuid,timestamptz) TO kdb_ingest_runtime;
 GRANT EXECUTE ON FUNCTION kdb_ops.propose_candidate(uuid,text,uuid,uuid,uuid,bigint,text,text,jsonb,jsonb,text,text,uuid) TO kdb_ingest_runtime;
 GRANT EXECUTE ON FUNCTION kdb_ops.request_review_handoff(uuid,text,uuid,text,text,text,uuid) TO kdb_ingest_runtime;
+REVOKE EXECUTE ON FUNCTION kdb_ops.ingest_source(uuid,uuid,text,text,text,text,text,text,text,jsonb,text,text,text,text,uuid,timestamptz) FROM PUBLIC, anon, authenticated, service_role;
+REVOKE EXECUTE ON FUNCTION kdb_ops.propose_candidate(uuid,text,uuid,uuid,uuid,bigint,text,text,jsonb,jsonb,text,text,uuid) FROM PUBLIC, anon, authenticated, service_role;
+REVOKE EXECUTE ON FUNCTION kdb_ops.request_review_handoff(uuid,text,uuid,text,text,text,uuid) FROM PUBLIC, anon, authenticated, service_role;
 COMMIT;

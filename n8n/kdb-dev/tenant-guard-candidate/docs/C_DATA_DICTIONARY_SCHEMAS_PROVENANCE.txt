@@ -1,0 +1,73 @@
+KDB-N8N-PIPELINE-RECON-10 — HANDOVER · 2026-10-21 · v1.0
+OWNER: GPT_BUILDER_KDB | AUTHORITY: DOCUMENTATION_AND_PACKAGING_ONLY
+STATE: DESIGN/CANDIDATE ACCEPTED FOR HANDOVER; PHYSICAL OPERATIONS NOT APPROVED.
+
+C — DATA DICTIONARY, SCHEMA AND PROVENANCE/SOURCE-BINDING GUIDE
+Use the six EXACT unchanged offline JSON Schemas from the accepted R01 ZIP; no spec below upgrades them to deployed KDB API definitions. $id is a design artifact identifier, not an actual RPC endpoint.
+
+
+SCHEMA schemas/candidate-input-envelope.schema.json | $id=kdb://offline/candidate-input-envelope/1.1 | SHA256=8cf2c80db1d61f685eb184d3a536c44a4b1d5b54c8fc04624ee9cf58f6519e58 | Draft202012 (source declares: https://json-schema.org/draft/2020-12/schema)
+  causation_id: type=['string', 'null']; required=NO; format=-; enum=-; const=-
+  command_id: type=string; required=YES; format=-; enum=-; const=-
+  contract_id: type=string; required=YES; format=-; enum=-; const=-
+  correlation_id: type=string; required=YES; format=-; enum=-; const=-
+  idempotency_key: type=string; required=YES; format=-; enum=-; const=-
+  issued_at: type=string; required=YES; format=-; enum=-; const=-
+  payload: type=object; required=YES; format=-; enum=-; const=-
+  principal_context_ref: type=string; required=YES; format=-; enum=-; const=-
+  purpose: type=string; required=YES; format=-; enum=-; const=-
+  schema_version: type=see-constraints; required=YES; format=-; enum=-; const=1.0
+  synthetic_fault_class: type=['string', 'null']; required=NO; format=-; enum=-; const=-
+
+SCHEMA schemas/command-profile-constraints.schema.json | $id=kdb://offline/command-profile-constraints/1.1 | SHA256=d86ea8f48cbbff603989221480480ac244e3ff27247aec9001167e2c3aab5165 | Draft202012 (source declares: https://json-schema.org/draft/2020-12/schema)
+  Schema uses composite definitions; inspect exact original JSON, not this summary
+
+SCHEMA schemas/configuration-binding.schema.json | $id=kdb://offline/configuration-binding/1.1 | SHA256=537ab34da176e25eabac92470d29e67000f519eb234a24d58027ef69b88d8a6d | Draft202012 (source declares: https://json-schema.org/draft/2020-12/schema)
+  configuration_digest: type=string; required=YES; format=-; enum=-; const=-
+  configuration_revision: type=string; required=YES; format=-; enum=-; const=-
+  endpoint_placeholder: type=see-constraints; required=NO; format=-; enum=-; const=-
+  function_contract_version: type=string; required=YES; format=-; enum=-; const=-
+  function_signature: type=string; required=YES; format=-; enum=-; const=-
+  secret_ref_placeholder: type=see-constraints; required=NO; format=-; enum=-; const=SECRET_REF_PLACEHOLDER_C3
+
+SCHEMA schemas/dlq-quarantine-record.schema.json | $id=kdb://offline/dlq-quarantine-record/1.1 | SHA256=a2c2d679ec318e6ca0717f5fbbd673589f4eda91e4e2a66285cceedb58378540 | Draft202012 (source declares: https://json-schema.org/draft/2020-12/schema)
+  bounded_retry: type=string; required=NO; format=-; enum=-; const=-
+  configuration_digest: type=string; required=YES; format=-; enum=-; const=-
+  configuration_revision: type=string; required=YES; format=-; enum=-; const=-
+  correlation_id: type=string; required=YES; format=-; enum=-; const=-
+  error_class: type=['string', 'null']; required=YES; format=-; enum=-; const=-
+  function_contract_version: type=string; required=YES; format=-; enum=-; const=-
+  function_signature: type=string; required=YES; format=-; enum=-; const=-
+  queue: type=see-constraints; required=YES; format=-; enum=['QUARANTINE', 'DLQ', 'DENY']; const=-
+
+SCHEMA schemas/error-classification.schema.json | $id=kdb://offline/error-classification/1.1 | SHA256=d7a18186221ad8cdd931242d54cdd1f9fc2c4b3f1950bc34a85917cf7ae5a121 | Draft202012 (source declares: https://json-schema.org/draft/2020-12/schema)
+  correlation_id: type=string; required=YES; format=-; enum=-; const=-
+  error_class: type=['string', 'null']; required=YES; format=-; enum=-; const=-
+  retry_allowed: type=boolean; required=NO; format=-; enum=-; const=-
+  route: type=see-constraints; required=YES; format=-; enum=['ACCEPT', 'DENY', 'QUARANTINE', 'DLQ']; const=-
+
+SCHEMA schemas/evidence-receipt.schema.json | $id=kdb://offline/evidence-receipt/1.1 | SHA256=71bf96e75de8ea34c166db390ddb79369e0dc7c77cb99ba367568d3232a19204 | Draft202012 (source declares: https://json-schema.org/draft/2020-12/schema)
+  causation_id: type=['string', 'null']; required=NO; format=-; enum=-; const=-
+  configuration_digest: type=string; required=YES; format=-; enum=-; const=-
+  configuration_revision: type=string; required=YES; format=-; enum=-; const=-
+  correlation_id: type=string; required=YES; format=-; enum=-; const=-
+  function_contract_version: type=string; required=YES; format=-; enum=-; const=-
+  function_signature: type=string; required=YES; format=-; enum=-; const=-
+  idempotency_key: type=string; required=NO; format=-; enum=-; const=-
+  outcome: type=string; required=YES; format=-; enum=-; const=-
+  receipt_type: type=see-constraints; required=YES; format=-; enum=-; const=EVIDENCE_RECEIPT
+
+SHARED ENVELOPE / SIGNATURE EVIDENCE
+contract_id; schema_version; command_id; idempotency_key; principal_context_ref; purpose; correlation_id; issued_at; payload; contextual causation_id, expected_revision/version, source_version_id, safety_status/rights decision and provenance span; configuration_revision; configuration_digest; function_signature; function_contract_version. Conditional tenant scope, consent/entitlement, resource refs must resolve server-side from trusted principal context, not client-supplied claims.
+
+PROVENANCE LINEAGE RULES
+Source class and origin_owner -> rights/purpose decision -> immutable SourceVersion and content digest -> DerivationVersion with model/prompt/config identity -> EvidenceVersion plus exact source-span locator -> CandidateRevision hash, pinned SemanticDescriptorVersion/TaxonomyVersion/SemanticRuleVersion -> HumanReviewDecision from qualified actor -> separately fresh KDB Canonical Admission transaction -> immutable ProtocolVersion -> published version/outbox receipt -> consumer projection with status as_of/watermark. Withdrawal supersedes publication eligibility.
+
+REJECTION AND MINIMIZATION
+Missing rights, consent, semantic source, original digest, safety evidence, version pin, valid reviewer or verification => typed DENIED/QUARANTINE/REVALIDATION_REQUIRED, never blind retry or auto-promotion. Do not copy raw client data, diagnosis, Dosha client scores, private media or credentials into KDB event or n8n logs.
+
+IMMUTABILITY AND OWNER BOUNDARIES
+Area -> Domain -> Module structural parent in exact TaxonomyVersion, immutable ProtocolVersion, relationships via versioned CanonicalRelation; no inference of relation inheritance. SemanticRuleVersion marked HUMAN_REVIEW_REQUIRED / EXTERNAL_AUTHORITY_REQUIRED cannot be auto-executed. Notion OS tags not authoritative canonical taxonomy.
+
+VALIDATION PRECEDENCE
+Untrusted bytes -> allowlisted source type/rights -> envelope and command profile schema -> tenant/purpose, PIAC and identity -> exact provenance and revision -> semantic constraints and contra/uncertainty -> KDB-owned guarded commit. Offline schema examples are NOT the live 48-contract versioned registry. All physical signatures UNKNOWN until a separately granted KDB physical proof gate.

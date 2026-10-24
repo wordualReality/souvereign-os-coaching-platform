@@ -1,0 +1,25 @@
+KDB-N8N-PIPELINE-RECON-10 — HANDOVER · 2026-10-21 · v1.0
+OWNER: GPT_BUILDER_KDB | AUTHORITY: DOCUMENTATION_AND_PACKAGING_ONLY
+STATE: DESIGN/CANDIDATE ACCEPTED FOR HANDOVER; PHYSICAL OPERATIONS NOT APPROVED.
+
+E — CONTENT/INPUT GUIDE (MEDIA, TRANSCRIPT, EVIDENCE, TAXONOMY, CLASSIFICATION, REVIEW, LIFECYCLE)
+SOURCE TYPES: versioned Notion/Personal-Hub authored references, authorized PDFs/documents, public/licensed links, approved audio/video, transcripts, structured source snapshots, canonical taxonomy/ProtocolVersion metadata and KDB-owned lifecycle events. A locator does not constitute permission to fetch.
+
+INTAKE SEQUENCE — ADMISSION GATED
+1. Resolve named source owner and version, tenant, permitted purpose, legal/licensing/consent/provenance status and SOURCE_RIGHTS_PENDING classification before fetch.
+2. Extract authorized bytes without missing pagination, partial item counts or implicit media/text normalization; capture original digest, source_locator/asset_ref, capture time and rights ref. On missing page 101+, wrong transcript segmentation or altered digest: QUARANTINE.
+3. Where applicable, derive transcript/segments with timecodes/source-span evidence, language/model/prompt/config versions, negation/contraindication preserved, recorded uncertainty. Do not infer missing evidence or medical diagnosis.
+4. Submit only schema-validated, purpose-scoped KDB candidate proposal and provenance envelope through versioned owned contracts (MAP04-C01/C02). Data, AI and LLM outputs remain untrusted. Revisit rights and policy if source changes.
+5. Reconcile Area/Domain/Module and SemanticDescriptorVersion against exact canonical TaxonomyVersion. Notion tag name alone cannot classify ProtocolVersion; no automatic arbitrary Cross-Area relation.
+6. Route human_review_required, external_authority_required and ambiguous/contradicted content to KDB review queue (C03). Qualified human reviewer (C04 KDB-only) makes explicit action on exact pinned candidate. n8n cannot approve or alter reviewer identity.
+7. KDB Canonical Admission (C05 KDB-only) independently rechecks immutable pins, PIAC, evidence, safety, lifecycle and expected revision before ProtocolVersion is recorded and publisher separately accepts eligibility.
+8. KDB withdrawal/revalidation (C06/C07) invalidates eligibility; successor derivation/review uses new immutable versions. Publish/projection (C08) consumes only accepted versioned outbox with withdrawal-wins precedence.
+
+DOSHA/COACHING/CLIENT BOUNDARY
+KDB owns semantic knowledge models and score-rule definitions; Arcava owns client questionnaire responses and client Dosha profile/review and JourneyVersion; SOV owns minimized runtime personal context and deterministic DecisionTrace. No clinical/diagnostic authority delegated to n8n or AI and no client health scores written into shared knowledge/projection events. Prakriti/Vikriti remain distinct.
+
+VALID INPUTS (SYNTHETIC HANDOVER FIXTURE CLASSES)
+Positive, authority denial, malformed envelope, duplicate same vs different body, out-of-order, stale source/taxonomy, revoked source, rights/purpose mismatch, safety field missing, prompt injection, dependency unavailable, rate-limited, UNKNOWN_COMMIT, poison, replay/correction, C01/02/03/06/07/08 positive+incomplete and foreign-command, HTTP 429/503/timeout/500.
+
+OPERATIONAL INPUT GAPS TO CLOSE LATER
+Physical fetch adapters, legal retention classes, media codec/transcriber/provider contracts, pagination limits, content-size thresholds, consent handling, numerical cost/rate/SLO, n8n schedules and immutable source storage binding are OPEN owner/provider decisions, NOT existing implemented capabilities.

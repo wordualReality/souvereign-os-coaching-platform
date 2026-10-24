@@ -1,0 +1,33 @@
+KDB-N8N-PIPELINE-RECON-10 — HANDOVER · 2026-10-21 · v1.0
+OWNER: GPT_BUILDER_KDB | AUTHORITY: DOCUMENTATION_AND_PACKAGING_ONLY
+STATE: DESIGN/CANDIDATE ACCEPTED FOR HANDOVER; PHYSICAL OPERATIONS NOT APPROVED.
+
+G — TEST, FIXTURE, REPLAY, DLQ, RECOVERY, OBSERVABILITY AND RUNBOOK PACK
+TEST CLASSES: static schema/contract/command, synthetic classified fixtures, isolated disposable n8n runtime to local mock, physical identity/DB/network admission (NOT_RUN), deployment/production smoke (NOT_RUN). Do not promote offline PASS to operational PASS.
+
+ACCEPTED STEP9 R01 EVIDENCE
+Accepted independently: 5/5 F01 corrected Stamp pass-through; 18/18 isolated CLI branches with envelope preserved; 44/44 static oracle rows; 43 schema-result rows; 67 JUnit tests/0 failures; 10 local mock HTTP POSTs; foreign commands 0 POST; no auto-retry. Instance n8n OCI 2.29.8 local disposable internal network, existing n8n unchanged and exited. CLI `execute --id` ignores pinData; Pinned Fixture is execution-copy-only S09-F02, NOT candidate source or production feature.
+R01 MACHINE: https://drive.google.com/file/d/1giu-OPWVgUIAenHJ_MDBtXbYAKgLDzWA/view SHA256 53363599711b787918546b214c8bb0421113c75a2aeca3f8389aa0b316f26c9b
+R01 JUNIT: https://drive.google.com/file/d/1ChpYR9X_XYZ2fjHMApvS1cvJ_R6qui4d/view SHA256 805522a2750505fe3b4147f41c095a1aba64647b67da905204643b128b6aaea7
+R01 NON-INTERFERENCE: https://drive.google.com/file/d/1lkJE_clHirj8fT3Vg8k7aGjL19EHlsy1/view SHA256 8410d697182511e2d1da0f26becb4eefaad0fbf2cd44258e82a3b39a2ae64159
+
+TEST REGISTER
+- S06-T01..S06-T11: authority/TLS/RLS/role/session/rotation negative tests, physical subset open.
+- S07-T01..S07-T26: replay, backoff, DLQ, error routing, schema evolution, evidence correctness, lifecycle and runbook dry-runs, physical subset open.
+- FX-01..16: principal fault classes; FX-C01/02/03/06/07/08 positive+incomplete; FX-O1..O5 foreign-command; FX-HTTP-* rate limit, timeout, unavailable, unknown commit. Source archive contains exact 37 unchanged fixtures; each immutable fingerprint in manifest.
+- 18 R01 runtime branch identities stored in machine-results; exact commands/exits, mock requests and expected last-node assertions are not restated from memory.
+
+DELIVERY/IDEMPOTENCY
+At-least-once inbound; stable idempotency key + exact source digest; duplicate same-body -> existing receipt, different body -> CONFLICT; unknown commit -> reconcile KDB receipt/read-only service before any replay; no silent side effects or implicit latest source. Concurrency uses expected revision/version and deterministic conflict outcome.
+
+RETRY/ERROR POLICY
+Only owner-permitted transient 429/503/UNAVAILABLE within explicit max attempts, jitter/backoff and timeout budgets to be physically selected; never retry DENIED, REVOKED, RIGHTS_RESTRICTED, CONFLICT, INJECTION or unknown commit blindly. Circuit breaking/rate limits must not invent numeric budgets. Stable failure classes route typed Quarantine vs DLQ, with minimum safe payload and correlation.
+
+REPROCESS RUNBOOKS
+RBK07-01..RBK07-12 remain the exact source design runbook IDs in accepted Step07 F. Operator before/after checklist: authorize owner+PIAC+ticket; verify immutable version and rights; capture idempotency/source hash, current aggregate/lifecycle watermark and linked decision trace; select bounded replay/dry-run; verify no direct cross-owner mutations and authoritative KDB receipt; confirm downstream owner-local reconciliation; record rollback, root-cause and TTL/retention decision. No manual reprocessor allowed before identity/secrets/physical gates.
+
+OBSERVABILITY
+Separate Business Audit, Operational Log, Evidence Receipt. Require tenant/purpose-safe correlation, causation, config_revision, function signature/version, error_class, attempt number, retry budget, model+prompt versions (where derivation), redacted source ref/digest, owner, lifecycle watermark and consumer ack. Metrics for availability, retry/DLQ/quarantine aging, schema drift and rights expiration proposed only; SLO/RPO/RTO, retention and alerts remain OPEN not invented.
+
+MANUAL REPROCESS PROHIBITIONS
+No secret-bearing replay, credential export, raw PHI/clinical or client content in logs, no direct SQL correction, no bypass of review, no automatic resuscitation of WITHDRAWN versions, no production on-call admission from this document.

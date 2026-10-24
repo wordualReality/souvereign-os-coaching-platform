@@ -1,0 +1,29 @@
+{
+  "body": {
+    "causation_id": "cause-synth-0001",
+    "command_id": "MAP04-C01",
+    "contract_id": "CT-KDB-R03-PIPE-001",
+    "correlation_id": "corr-synth-0010",
+    "idempotency_key": "idem-synth-0010",
+    "issued_at": "2026-10-18T00:00:00Z",
+    "payload": {
+      "source_class": "LICENSED_REFERENCE",
+      "submission_id": "00000000-0000-4000-8000-000000000010"
+    },
+    "principal_context_ref": "PRINCIPAL_REF_SYNTH_PIPELINE",
+    "purpose": "kdb_knowledge_intake",
+    "schema_version": "1.0",
+    "synthetic_fault_class": null,
+    "tenant_scope": "TENANT_SYNTH_A"
+  },
+  "class": "missing evidence or safety field",
+  "expected_route": "DENY",
+  "packet": "KDB-N8N-PIPELINE-RECON-08-R01",
+  "s06": [],
+  "s07": [
+    "S07-T14"
+  ],
+  "schema_version": "1.0",
+  "status": "SYNTHETIC / NO_REAL_PERSON_OR_CLIENT_DATA",
+  "target_oid": "O1"
+}

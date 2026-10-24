@@ -1,0 +1,31 @@
+KDB-N8N-PIPELINE-RECON-10 — HANDOVER · 2026-10-21 · v1.0
+OWNER: GPT_BUILDER_KDB | AUTHORITY: DOCUMENTATION_AND_PACKAGING_ONLY
+STATE: DESIGN/CANDIDATE ACCEPTED FOR HANDOVER; PHYSICAL OPERATIONS NOT APPROVED.
+
+D — KDB-OWNED RPC/CONTRACT MAPPING · NO DIRECT SQL
+CONTRACT NAMESPACE LAW: MAP04-C01..C08 are local row identities only; do not add contract families to ATC-05 48. CT-KDB-R03-PIPE-001 and CT-KDB-006 are frozen logical family associations; actual guarded physical RPC/service signatures, grants and ownership remain unresolved.
+
+KDB ORCHESTRATION PROFILE -> OWNER CONTRACT
+MAP04-C01 | O1 | CT-KDB-R03-PIPE-001 | source-intake; durable submission/rights+duplicate receipt | physical=FUTURE_PHYSICAL_RPC_UNVERIFIED
+MAP04-C02 | O2 | CT-KDB-R03-PIPE-001 internal candidate operation | derive EvidenceVersion + SemanticDescriptorVersion proposal | physical=UNKNOWN_PHYSICAL_CONTRACT
+MAP04-C03 | O3 | KDB-internal review work-item operation | notify/queue request only, not HumanReviewDecision | physical=UNKNOWN_PHYSICAL_CONTRACT
+MAP04-C06 | O4 | CT-KDB-006 lifecycle command family | withdrawal/rights-invalidation coordination | physical=UNKNOWN_PHYSICAL_CONTRACT
+MAP04-C07 | O4 | CT-KDB-006 lifecycle command family | revalidation coordination | physical=UNKNOWN_PHYSICAL_CONTRACT
+MAP04-C08 | O5 | CT-KDB-001/002/005 + producer outbox projections | governed publication/projection receipt | physical=UNKNOWN_PHYSICAL_CONTRACT
+
+PROTECTED NON-n8n OPERATIONS
+MAP04-C04 Human Review Decision: qualified human + PIAC; exact frozen CandidateRevision, rights/safety/source/evidence/taxonomy digests; immutable HumanReviewDecision and audit. NEVER from n8n.
+MAP04-C05 Canonical Admission: KDB deterministic fresh policy/safety/rights/expected-version check, immutable ProtocolVersion+outbox in KDB-owned transaction. Human approval authorizes the check, not promotion itself. NEVER from n8n.
+
+SOURCE/TRANSPORT VS ADMISSION
+- `PLACEHOLDER_KDB_RPC_ENDPOINT` remains a typed inert placeholder, not authorization to point at `/rest/v1` tables, production server, Supabase or a public endpoint.
+- KDB app must publish exact allowlisted command IDs/URIs only after owner/PIAC/B03 grants and contract version review. Principal context, tenancy and purpose derived from trusted boundary.
+- No ad hoc SQL, `Execute Query`, cross-owner REST table CRUD, standard `service_role`, unrestricted SECURITY DEFINER, RLS bypass or hidden Notion update-as-proof.
+- Required receipt fields: command_id, contract_id, stable idempotency key, source payload digest, correlation/causation, config_revision/config_digest, function_signature/function_contract_version, decision/status, producer version and audit receipt. Receipt reconciliation is mandatory on UNKNOWN_COMMIT.
+- Structured retry only on policy-admitted transient UNAVAILABLE/RATE_LIMITED; transport 429/503/timeout/unknown-commit never automatically grants domain mutation.
+
+CAPABILITY/CONTRACT COVERAGE
+O1 E01/E02 => C01; O2 E03/E04 => C02; O3 E05 => C03; O4 E08 => C06/C07; O5 E07/E09/E10 => C08. E06 represents KDB-owned human admission boundary and MUST NOT be an n8n direct API call. The exact E06 binding remains KDB transaction authority.
+
+REQUIRED PHYSICAL PRECONDITIONS
+Exact endpoint allowlist and DNS/CA/hostname TLS verification; NOBYPASSRLS principal authenticated with enforced owner grants and RLS; expected function signatures and execution grants; rights/purpose/tenant/consent/PIAC tests; B03/RC1B closure and C2 physical reconciliation. NO such test was run in Step 10.

@@ -1,0 +1,783 @@
+{
+  "active": false,
+  "connections": {
+    "Call KDB Contract Placeholder": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Evidence Receipt",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Transport Error Classify",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Fail Closed Classify": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Route Accept",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Stamp Envelope Metadata",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Route Accept": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Call KDB Contract Placeholder",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Route Quarantine",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Route DLQ": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Dead Letter Record",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Deny Receipt",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Route Quarantine": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Quarantine Record",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Route DLQ",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Route Transport DLQ": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Dead Letter Record",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Quarantine Record",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Stamp Envelope Metadata": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Fail Closed Classify",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Transport Error Classify": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Route Transport DLQ",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "isArchived": false,
+  "meta": {
+    "capability": "KNP-CAP-02+KNP-CAP-03",
+    "classification": "CANDIDATE / INACTIVE / OFFLINE / NOT_OPERATIONAL_EVIDENCE",
+    "do_not_activate": true,
+    "edges": [
+      "E03",
+      "E04"
+    ],
+    "map04": [
+      "MAP04-C02"
+    ],
+    "onError_http": "continueErrorOutput",
+    "orchestration": "O2",
+    "packet": "KDB-N8N-PIPELINE-RECON-08-R01"
+  },
+  "name": "KNP-O2-EVIDENCE-SEMANTIC-DERIVATION",
+  "nodes": [
+    {
+      "id": "N001",
+      "name": "Manual Trigger",
+      "parameters": {},
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1
+    },
+    {
+      "id": "N002",
+      "name": "Stamp Envelope Metadata",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "configuration_revision",
+              "type": "string",
+              "value": "CFG-O2-v1.1"
+            },
+            {
+              "id": "a2",
+              "name": "configuration_digest",
+              "type": "string",
+              "value": "DIGEST_PLACEHOLDER_O2"
+            },
+            {
+              "id": "a3",
+              "name": "function_signature",
+              "type": "string",
+              "value": "PLACEHOLDER_FN_MAP04_C02"
+            },
+            {
+              "id": "a4",
+              "name": "function_contract_version",
+              "type": "string",
+              "value": "1.0"
+            },
+            {
+              "id": "a5",
+              "name": "capability",
+              "type": "string",
+              "value": "KNP-CAP-02+KNP-CAP-03"
+            },
+            {
+              "id": "a6",
+              "name": "orchestration",
+              "type": "string",
+              "value": "O2"
+            },
+            {
+              "id": "a7",
+              "name": "allowed_commands",
+              "type": "string",
+              "value": "MAP04-C02"
+            },
+            {
+              "id": "a8",
+              "name": "authority_note",
+              "type": "string",
+              "value": "AI advisory only; KDB owns evidence and descriptor versions"
+            }
+          ]
+        },
+        "duplicateItem": false,
+        "mode": "manual",
+        "includeOtherFields": true
+      },
+      "position": [
+        220,
+        0
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    },
+    {
+      "id": "N003",
+      "name": "Fail Closed Classify",
+      "parameters": {
+        "jsCode": "const e = $input.first().json || {};\nconst required = ['contract_id','schema_version','command_id','idempotency_key','principal_context_ref','purpose','correlation_id','issued_at','payload'];\nconst missing = required.filter(k => e[k] === undefined || e[k] === null || e[k] === '');\nif (typeof e.tenant_scope !== 'string' || e.tenant_scope.trim().length === 0 || e.tenant_scope.length > 128) missing.push('tenant_scope');\nconst inj = JSON.stringify(e).match(/ignore previous|system prompt|<\\s*script|union\\s+select|drop\\s+table/i);\nconst cls = e.synthetic_fault_class || null;\nconst allowed = String(e.allowed_commands || '').split(',').map(s => s.trim()).filter(Boolean);\nlet route = 'ACCEPT';\nlet error_class = null;\nif (missing.length) { route = 'DENY'; error_class = 'INCOMPLETE'; }\nelse if (allowed.length && e.command_id && !allowed.includes(e.command_id)) { route = 'DENY'; error_class = 'FOREIGN_COMMAND'; }\nelse if (cls === 'DENIED') { route = 'DENY'; error_class = 'DENIED'; }\nelse if (cls === 'UNKNOWN') { route = 'DENY'; error_class = 'UNKNOWN'; }\nelse if (cls === 'STALE') { route = 'DENY'; error_class = 'STALE'; }\nelse if (cls === 'WITHDRAWN' || cls === 'REVOKED') { route = 'DENY'; error_class = cls; }\nelse if (cls === 'RIGHTS_RESTRICTED') { route = 'DENY'; error_class = 'RIGHTS_RESTRICTED'; }\nelse if (cls === 'CONFLICT') { route = 'DENY'; error_class = 'CONFLICT'; }\nelse if (cls === 'INJECTION' || inj) { route = 'QUARANTINE'; error_class = 'INJECTION'; }\nelse if (cls === 'MALFORMED') { route = 'QUARANTINE'; error_class = 'VALIDATION_FAILED'; }\nelse if (cls === 'DEPENDENCY_UNAVAILABLE') { route = 'DLQ'; error_class = 'UNAVAILABLE'; }\nelse if (cls === 'RATE_LIMIT') { route = 'DLQ'; error_class = 'RATE_LIMITED'; }\nelse if (cls === 'POISON') { route = 'QUARANTINE'; error_class = 'POISON'; }\nelse if (cls === 'PARTIAL_UNKNOWN_COMMIT') { route = 'DLQ'; error_class = 'UNKNOWN_COMMIT'; }\nelse if (cls === 'TIMEOUT') { route = 'DLQ'; error_class = 'UNAVAILABLE'; }\nconst payload = e.payload || {};\nconst reqByCmd = {\n  'MAP04-C01': ['submission_id','source_class','origin_owner','content_fingerprint','rights_decision_ref','access_decision_ref','captured_at'],\n  'MAP04-C02': ['source_version_id','derivation_ref','evidence_spans','candidate_digest','semantic_version','model_version'],\n  'MAP04-C03': ['candidate_revision_ref','source_evidence_hash','reviewer_queue_policy'],\n  'MAP04-C06': ['source_version_ref','withdrawal_reason','rights_decision_ref','expected_version','revocation_watermark'],\n  'MAP04-C07': ['affected_version_refs','cause','new_evidence_or_rights_refs'],\n  'MAP04-C08': ['event_id','published_version_ref','subscriber_ref','ack_status','watermark']\n};\nif (route === 'ACCEPT' && reqByCmd[e.command_id]) {\n  const m = reqByCmd[e.command_id].filter(k => payload[k] === undefined || payload[k] === null || payload[k] === '');\n  if (e.command_id === 'MAP04-C01' && !payload.source_locator && !payload.asset_ref) m.push('source_locator_or_asset_ref');\n  if (m.length) { route = 'DENY'; error_class = 'INSUFFICIENT_EVIDENCE'; }\n}\nif (e.schema_version && e.schema_version !== '1.0') { route = 'QUARANTINE'; error_class = 'SCHEMA_DRIFT'; }\nreturn [{ json: Object.assign({}, e, { route, error_class, validator: 'KNP-OFFLINE-VALIDATOR-v1' }) }];\n",
+        "mode": "runOnceForAllItems"
+      },
+      "position": [
+        460,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "N004",
+      "name": "Route Accept",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.route }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "ACCEPT"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        700,
+        0
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "N005",
+      "name": "Call KDB Contract Placeholder",
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-KDB-Secret-Ref",
+              "value": "SECRET_REF_PLACEHOLDER_C3"
+            },
+            {
+              "name": "X-Correlation-Id",
+              "value": "={{ $('Fail Closed Classify').item.json.correlation_id }}"
+            }
+          ]
+        },
+        "jsonBody": "={{ $('Fail Closed Classify').item.json }}",
+        "method": "POST",
+        "options": {
+          "allowUnauthorizedCerts": false,
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "PLACEHOLDER_KDB_RPC_ENDPOINT/v1/commands/MAP04-C02"
+      },
+      "position": [
+        980,
+        -160
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "N006",
+      "name": "Evidence Receipt",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "receipt_type",
+              "type": "string",
+              "value": "EVIDENCE_RECEIPT"
+            },
+            {
+              "id": "f2",
+              "name": "correlation_id",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.correlation_id }}"
+            },
+            {
+              "id": "f3",
+              "name": "causation_id",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.causation_id }}"
+            },
+            {
+              "id": "f4",
+              "name": "idempotency_key",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.idempotency_key }}"
+            },
+            {
+              "id": "f5",
+              "name": "configuration_revision",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.configuration_revision }}"
+            },
+            {
+              "id": "f6",
+              "name": "configuration_digest",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.configuration_digest }}"
+            },
+            {
+              "id": "f7",
+              "name": "function_signature",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.function_signature }}"
+            },
+            {
+              "id": "f8",
+              "name": "function_contract_version",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.function_contract_version }}"
+            },
+            {
+              "id": "f9",
+              "name": "outcome",
+              "type": "string",
+              "value": "CANDIDATE_SUBMITTED_OFFLINE"
+            },
+            {
+              "id": "f10",
+              "name": "kdb_authority",
+              "type": "string",
+              "value": "KDB_OWNED_TRANSACTION"
+            }
+          ]
+        },
+        "mode": "manual",
+        "options": {
+          "includeOtherFields": false
+        }
+      },
+      "position": [
+        1260,
+        -160
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    },
+    {
+      "id": "N007",
+      "name": "Route Quarantine",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.route }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "QUARANTINE"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        980,
+        200
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "N008",
+      "name": "Quarantine Record",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "receipt_type",
+              "type": "string",
+              "value": "QUARANTINE"
+            },
+            {
+              "id": "f2",
+              "name": "correlation_id",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.correlation_id }}"
+            },
+            {
+              "id": "f3",
+              "name": "causation_id",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.causation_id }}"
+            },
+            {
+              "id": "f4",
+              "name": "idempotency_key",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.idempotency_key }}"
+            },
+            {
+              "id": "f5",
+              "name": "configuration_revision",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.configuration_revision }}"
+            },
+            {
+              "id": "f6",
+              "name": "configuration_digest",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.configuration_digest }}"
+            },
+            {
+              "id": "f7",
+              "name": "function_signature",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.function_signature }}"
+            },
+            {
+              "id": "f8",
+              "name": "function_contract_version",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.function_contract_version }}"
+            },
+            {
+              "id": "f9",
+              "name": "queue",
+              "type": "string",
+              "value": "QUARANTINE"
+            },
+            {
+              "id": "f10",
+              "name": "retry_allowed",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "id": "f11",
+              "name": "error_class",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.error_class }}"
+            }
+          ]
+        },
+        "mode": "manual",
+        "options": {
+          "includeOtherFields": false
+        }
+      },
+      "position": [
+        1260,
+        200
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    },
+    {
+      "id": "N009",
+      "name": "Route DLQ",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.route }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "DLQ"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        980,
+        360
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "N010",
+      "name": "Dead Letter Record",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "receipt_type",
+              "type": "string",
+              "value": "DLQ"
+            },
+            {
+              "id": "f2",
+              "name": "correlation_id",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.correlation_id }}"
+            },
+            {
+              "id": "f3",
+              "name": "causation_id",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.causation_id }}"
+            },
+            {
+              "id": "f4",
+              "name": "idempotency_key",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.idempotency_key }}"
+            },
+            {
+              "id": "f5",
+              "name": "configuration_revision",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.configuration_revision }}"
+            },
+            {
+              "id": "f6",
+              "name": "configuration_digest",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.configuration_digest }}"
+            },
+            {
+              "id": "f7",
+              "name": "function_signature",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.function_signature }}"
+            },
+            {
+              "id": "f8",
+              "name": "function_contract_version",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.function_contract_version }}"
+            },
+            {
+              "id": "f9",
+              "name": "queue",
+              "type": "string",
+              "value": "DLQ"
+            },
+            {
+              "id": "f10",
+              "name": "bounded_retry",
+              "type": "string",
+              "value": "OWNER_SIGNED_BUDGET_ONLY"
+            },
+            {
+              "id": "f11",
+              "name": "error_class",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.error_class }}"
+            }
+          ]
+        },
+        "mode": "manual",
+        "options": {
+          "includeOtherFields": false
+        }
+      },
+      "position": [
+        1260,
+        360
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    },
+    {
+      "id": "N011",
+      "name": "Deny Receipt",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "receipt_type",
+              "type": "string",
+              "value": "DENY"
+            },
+            {
+              "id": "f2",
+              "name": "correlation_id",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.correlation_id }}"
+            },
+            {
+              "id": "f3",
+              "name": "causation_id",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.causation_id }}"
+            },
+            {
+              "id": "f4",
+              "name": "idempotency_key",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.idempotency_key }}"
+            },
+            {
+              "id": "f5",
+              "name": "configuration_revision",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.configuration_revision }}"
+            },
+            {
+              "id": "f6",
+              "name": "configuration_digest",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.configuration_digest }}"
+            },
+            {
+              "id": "f7",
+              "name": "function_signature",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.function_signature }}"
+            },
+            {
+              "id": "f8",
+              "name": "function_contract_version",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.function_contract_version }}"
+            },
+            {
+              "id": "f9",
+              "name": "outcome",
+              "type": "string",
+              "value": "FAIL_CLOSED_DENY"
+            },
+            {
+              "id": "f10",
+              "name": "canonical_commit",
+              "type": "string",
+              "value": "FORBIDDEN"
+            },
+            {
+              "id": "f11",
+              "name": "error_class",
+              "type": "string",
+              "value": "={{ $('Fail Closed Classify').item.json.error_class }}"
+            },
+            {
+              "id": "f12",
+              "name": "queue",
+              "type": "string",
+              "value": "DENY"
+            }
+          ]
+        },
+        "mode": "manual",
+        "options": {
+          "includeOtherFields": false
+        }
+      },
+      "position": [
+        1260,
+        520
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    },
+    {
+      "id": "N012",
+      "name": "Transport Error Classify",
+      "parameters": {
+        "jsCode": "const origin = $('Fail Closed Classify').item.json || {};\nconst err = $json.error || $json;\nconst msg = JSON.stringify(err);\nlet error_class = 'UNKNOWN';\nlet route = 'QUARANTINE';\nif (/429|rate.?limit|retry-after/i.test(msg)) { error_class = 'RATE_LIMITED'; route = 'DLQ'; }\nelse if (/timeout|ETIMEDOUT|ESOCKETTIMEDOUT/i.test(msg)) { error_class = 'UNAVAILABLE'; route = 'DLQ'; }\nelse if (/unknown commit|UNKNOWN_COMMIT/i.test(msg)) { error_class = 'UNKNOWN_COMMIT'; route = 'DLQ'; }\nelse if (/5\\d\\d|ENOTFOUND|ECONNREFUSED|ECONNRESET|UNAVAILABLE|status\"?\\s*:\\s*0/i.test(msg)) { error_class = 'UNAVAILABLE'; route = 'DLQ'; }\nreturn [{ json: Object.assign({}, origin, { route, error_class, transport_error: true, validator: 'KNP-TRANSPORT-CLASSIFIER-v1' }) }];\n",
+        "mode": "runOnceForAllItems"
+      },
+      "position": [
+        980,
+        -400
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "N013",
+      "name": "Route Transport DLQ",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.route }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "DLQ"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        1220,
+        -400
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "availableInMCP": false,
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "versionId": "cand-o2-v1.1"
+}

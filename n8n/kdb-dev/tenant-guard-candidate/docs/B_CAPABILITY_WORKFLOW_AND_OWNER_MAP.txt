@@ -1,0 +1,29 @@
+KDB-N8N-PIPELINE-RECON-10 — HANDOVER · 2026-10-21 · v1.0
+OWNER: GPT_BUILDER_KDB | AUTHORITY: DOCUMENTATION_AND_PACKAGING_ONLY
+STATE: DESIGN/CANDIDATE ACCEPTED FOR HANDOVER; PHYSICAL OPERATIONS NOT APPROVED.
+
+B — CAPABILITY AND WORKFLOW MAP
+ARCHITECTURE THESIS: n8n is a bounded at-least-once transport/coordinator, not KDB domain authority, clinical/diagnostic expert, runtime eligibility engine, client journey owner or review approver.
+KNP-CAP-01 Source Intake / O1: source references, attested rights, immutable digest, consistent pagination and KDB-owned intake. No direct Notion-to-DB admission.
+KNP-CAP-02 Evidence Derivation and KNP-CAP-03 Semantic/Taxonomy Proposals / O2: authorized text/media/transcript source evidence -> candidate-specific derivations, spans, provenance, deterministic semantic validity and human-review eligibility. AI outputs untrusted.
+KNP-CAP-04 Review Handoff / O3: KDB-issued work-item request/notification only. HumanReviewDecision (MAP04-C04) and promotion (MAP04-C05) reside exclusively in KDB-owned guarded transactional contexts.
+KNP-CAP-05 Withdrawal/Revalidation / O4: rights changes, safety invalidation, withdrawal precedence, downstream signed/typed lifecycle notices. Lifecycle state remains KDB truth. C06 and C07 are separate allowlisted KDB request profiles.
+KNP-CAP-06 Publication/Projection / O5: consume KDB-governed immutable outbox and published exact ProtocolVersion; dispatch idempotent projections and receipt ACK. Never release unpublished, withdrawn or stale version.
+
+EXACT CANDIDATE-TO-EDGE-TO-CONTRACT MATRIX
+O1 | KNP-O1-SOURCE-INGEST-COORDINATOR | KNP-CAP-01 | MAP04-C01 | E01, E02 | sha256=6be6b32fb4ab1813f03545f1cd92bf01472d8fe0b420ea08dcd33ddb98809f1a | nodes=13
+O2 | KNP-O2-EVIDENCE-SEMANTIC-DERIVATION | KNP-CAP-02+KNP-CAP-03 | MAP04-C02 | E03, E04 | sha256=de747e92035b1398032772d100102edaf58f97a52795e5d612e57ab610f7f7e2 | nodes=13
+O3 | KNP-O3-HUMAN-REVIEW-HANDOFF | KNP-CAP-04 | MAP04-C03 | E05 | sha256=361e8cd3078f79127c3dba911ab798ffca8d7e99cb1aa142d874ee4827f98bd7 | nodes=13
+O4 | KNP-O4-LIFECYCLE-WITHDRAWAL-COORDINATOR | KNP-CAP-05 | MAP04-C06, MAP04-C07 | E08 | sha256=8ecb512350d029491952f83e94c9585fb02a67a6aa5a0901985dd324c640037d | nodes=16
+O5 | KNP-O5-PUBLICATION-PROJECTION-COORDINATOR | KNP-CAP-06 | MAP04-C08 | E07, E09, E10 | sha256=4a18d3c92a2d67c17fe31d1121998a5baae00f1808c200e6d8b372ad5efd3297 | nodes=13
+
+OWNERSHIP / CROSSINGS
+- KDB: SourceVersion, EvidenceVersion, TaxonomyVersion, SemanticDescriptorVersion, SemanticRuleVersion, EffectClaimVersion, ProtocolVersion, ReviewWorkItem and HumanReviewDecision policy/commit, immutable provenance, lifecycle, publisher outbox.
+- Arcava: client answers/profile, coach review per client, JourneyVersion, enrollment and coaching application; accepts governed knowledge references only. ARC-36/P25 · 7/10 ACTIVE, T150 partial, T050 not admitted.
+- SOV Runtime: runtime eligibility, DecisionTrace, personal events/ExpectedOccurrence and TrackingEvent; SOV-RE17-04 WAIT_T050 is event-driven, not unlocked by KDB mock tests.
+- PIAC: consent/access identity decisions; KDB+n8n must enforce purpose and tenant partitions without impersonating service_role or human.
+- Notion/Personal Hub: possible source/editor/projection; local Taxonomy is not KDB canonical TaxonomyVersion without explicit reconciliation.
+- SDF: transport receipts and control plane only; no independent domain mutation authority.
+- No invented Requirement 87: baseline 86=47 P0+39 P1; accepted 48 contracts/16 events frozen. MAP04-C01..C08 are LOCAL mappings, NOT eight new contract families.
+- Nonblocking Step10 handover to Arcava/SOV; hard blocks T050 producer, T150 runtime admission, C2 physical, B03/RC1B, PIAC consent and policy proofs.
+STEPS 1–9 link: Step1 sanitized W001..W005 supporting prototypes only; Step2 risks; Step3 DDD/capabilities; Step4 contracts; Step5 provenance; Step6 security; Step7 reliability; Step8 candidate pack; Step9 isolated offline evidentiary replay.

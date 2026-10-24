@@ -1,0 +1,35 @@
+{
+  "body": {
+    "causation_id": "cause-synth-0001",
+    "command_id": "MAP04-C07",
+    "contract_id": "CT-KDB-R03-PIPE-001",
+    "correlation_id": "corr-c07-p",
+    "idempotency_key": "idem-c07-p",
+    "issued_at": "2026-10-18T00:00:00Z",
+    "payload": {
+      "affected_version_refs": [
+        "PV_SYNTH_001"
+      ],
+      "cause": "NEW_EVIDENCE",
+      "new_evidence_or_rights_refs": [
+        "EV_SYNTH_002"
+      ]
+    },
+    "principal_context_ref": "PRINCIPAL_REF_SYNTH_PIPELINE",
+    "purpose": "kdb_knowledge_intake",
+    "schema_version": "1.0",
+    "synthetic_fault_class": null,
+    "tenant_scope": "TENANT_SYNTH_A"
+  },
+  "class": "positive MAP04-C07",
+  "expected_o4_http": "MAP04-C07",
+  "expected_route": "ACCEPT",
+  "packet": "KDB-N8N-PIPELINE-RECON-08-R01",
+  "s06": [],
+  "s07": [
+    "S07-T05"
+  ],
+  "schema_version": "1.0",
+  "status": "SYNTHETIC / NO_REAL_PERSON_OR_CLIENT_DATA",
+  "target_oid": "O4"
+}

@@ -1,0 +1,33 @@
+KDB-N8N-PIPELINE-RECON-10 — HANDOVER · 2026-10-21 · v1.0
+OWNER: GPT_BUILDER_KDB | AUTHORITY: DOCUMENTATION_AND_PACKAGING_ONLY
+STATE: DESIGN/CANDIDATE ACCEPTED FOR HANDOVER; PHYSICAL OPERATIONS NOT APPROVED.
+
+K — REUSABLE KDB PIPELINE TEMPLATE FOR FUTURE APPLICATIONS (NOT AUTOMATICALLY AUTHORISED)
+TEMPLATE_ID: KDB-PIPELINE-TEMPLATE-001 v1.0. Reuse design grammar only after context-sensitive ownership/security admission; not a universal product repo skeleton and not a new requirement.
+
+STABLE PHASE GATES
+PP-01 SOURCE-INVENTORY: Drive/Git source-lock, source rights, prompt identity, duplicate paths.
+PP-02 AS-IS GAP/RISK: observed adapters vs assumptions; conflict register.
+PP-03 TARGET ARCH/DDD: choose actual bounded orchestration domains, transactional owner seams, ADRs.
+PP-04 CONTRACTS: versioned command/outbox schemas, PIAC, eligibility, negative tests.
+PP-05 SEMANTICS/PROVENANCE: source/version/trust, rights, AI candidate-only, human review and withdrawal.
+PP-06 SECURITY/PRIVACY: NOBYPASSRLS, grants/RLS, TLS/hostname, 1Password, least privilege, audit minimization; no physical access until separately approved.
+PP-07 OPERABILITY: idempotency, replay, DLQ, poison, rate limits, retry/backoff, observability and RTO/RPO OWNER_OPEN.
+PP-08 OFFLINE CANDIDATE: inactive sanitized JSON, schema, synthetic fixtures, reproducible hashes.
+PP-09 ISOLATED TEST: independent local mock replay and non-interference, machine results, JUnit, never use test harness nodes in source.
+PP-10 HANDOVER+ADMISSION: docs A-L, exact inventory, stable hashes, Owner-QS, one future activation request pending physical evidence.
+
+CONTEXT VARIABLES (NO SECRET VALUES)
+{project_namespace, owner_lane, input_source_classes, rights_attestation_ids, exact taxonomy version, metadata_schema_version, authorized contract profiles, event families, principal_reference_class, purpose, PIAC decision references, allowed source/target owners, technology/runtime pins, stale-revocation policy, retention decision owner, deployment stage, physical-evidence_refs}
+
+MANDATORY NEGATIVE ASSERTIONS
+Untrusted source commands are inert. Unknown command DENY, stale/withdrawn DENY, rights mismatch DENY, unsafe claim QUARANTINE, poison QUARANTINE, transient failure -> bounded DLQ, UNKNOWN_COMMIT -> reconcile not blind replay, duplicate mismatched body -> CONFLICT, C04/C05 n8n-call count=0, no cross-owner table writes, no credential IDs, no `service_role` routine operations, no auto-activation.
+
+PROMPT QUALITY CONTROL
+Version every prompt; bind current IDs/revisions and output manifests, named evaluator, success/negative tests, safe fallback and exact one successor. External prompts are patterns only, never architecture/authority. Do not create any clone pipeline without active owner packet.
+
+OWNER_RETURN_SCHEMA
+STATUS / GATE / PLAN_POSITION / NEXT_EXECUTOR / NEXT_PROMPT_URL / USER_ACTION / BLOCKER. Store full evidence in Drive/Git (if admitted), brief human chat return. No permanent fourth QS lane; separate independent QS on security/IAM/DB/production and owner self-review.
+
+REUSE CONDITIONS
+Future workflows count and retry/reliability domains must be freshly justified, not copied O1–O5 indiscriminately. New app taxonomy, contract and client payloads cannot be promoted by template use alone; first admit domain owners and rights.

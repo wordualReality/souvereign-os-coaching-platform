@@ -1,0 +1,29 @@
+KDB-N8N-PIPELINE-RECON-10 — HANDOVER · 2026-10-21 · v1.0
+OWNER: GPT_BUILDER_KDB | AUTHORITY: DOCUMENTATION_AND_PACKAGING_ONLY
+STATE: DESIGN/CANDIDATE ACCEPTED FOR HANDOVER; PHYSICAL OPERATIONS NOT APPROVED.
+
+I — CLAUDE/n8n FUTURE IMPLEMENTATION AND MAINTENANCE HANDOVER
+INTENDED AUDIENCE: future Claude/Cursor/n8n implementer after explicit packet-specific Controller/Founder gate. Reading this guide is allowed; executing any live step is not.
+
+READ IN THIS ORDER
+1. Current KDB-n8n `00_READ_FIRST` + Rolling Plan and Step09 independent QS (J locks).
+2. This Step10 A-L pack and machine manifest with source hashes; do not trust abbreviated screenshots, user summaries or historical blocked checkpoints as the current pointer.
+3. Accepted Step3/4/5/6/7 Drive dossier links in J, especially ownership, command profile, review authority, principal, TLS and runbook negatives.
+4. Frozen accepted R01 ZIP; verify 52862 bytes / SHA256 f3f9b1045673d20c96843cffa7b30f1d5f034d55091fc9b7cb7c4e409dca25b9; unpack into disposable staging only.
+5. Verify 5/5 `active=false`+do_not_activate; Set parameters.includeOtherFields=true in source, no Pinned Fixture, no credentials, placeholder endpoints, no direct table access.
+6. Treat six Draft2020-12 Schemas and 37 synthetic fixture bytes as offline contract projections, not live DDL/SQL.
+
+IMPLEMENTATION RESUME (ONLY AFTER NEW GRANT)
+- Identify exact approved environment/host/versions, owner permissions, contract/RPC signature and source version. Check documented source->target idempotency, rights, review, publication guards. Compile physically approved network/TLS, PIAC, least-privilege RLS/GRANT and 1Password secret refs; never paste secrets to LLM or repo.
+- Drive remains canonical governance. GitHub control repository bootstrap branch/draft PR is a non-authoritative technical projection until HCP and Founder cutover gate; no merge or GitHub write authorized by this packet.
+- Validate isolated content with deterministic synthetic fixtures before any production credentials; replay/withdrawal precedence and eventual human review/canonical transaction must remain KDB application authority.
+- Use explicit new admission contract for live n8n import/activation/schedules; do not reuse local CLI test as live permission. Separate security QS and Founder activation decision mandatory.
+- Bind code changes to fresh status/dirty-path inventory and immutable base; fail closed if collision with pre-existing repo edits.
+
+MAINTENANCE OBSERVABILITY
+Evidence capture for every packet: named Owner, immutable input IDs/hashes, accepted contract/semantic version, exact config_revision, correlation/causation, tests and failure outcomes, transport retry/timeout evidence, authorization denied behavior, release and rollback, Drive readback, appropriate distinct QS. No auto-review by LLM or n8n.
+
+EXPLICIT DON'Ts
+No live import, activation, SQL/RPC, use of service_role, secret extraction, direct cross-owner table writes, AI approval, taxonomy invented from Notion or client health data, auto-spawned SOV agent, or unapproved Arcava gate changes. No Step11 roadmap or fourth permanent QS lane.
+
+EXIT FROM THIS DOCUMENT: Owner-QS documents `ACTIVATION_ADMISSION_PENDING`; separate Controller review + Founder decision only after physical prerequisites are genuinely evidenced.

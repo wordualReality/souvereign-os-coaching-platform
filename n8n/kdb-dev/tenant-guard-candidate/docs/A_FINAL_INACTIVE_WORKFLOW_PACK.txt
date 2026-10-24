@@ -1,0 +1,26 @@
+KDB-N8N-PIPELINE-RECON-10 — HANDOVER · 2026-10-21 · v1.0
+OWNER: GPT_BUILDER_KDB | AUTHORITY: DOCUMENTATION_AND_PACKAGING_ONLY
+STATE: DESIGN/CANDIDATE ACCEPTED FOR HANDOVER; PHYSICAL OPERATIONS NOT APPROVED.
+
+A — FINAL INACTIVE N8N CANDIDATE WORKFLOW PACK · CANONICAL REFERENCE
+SOURCE_LOCK: https://drive.google.com/file/d/1ZotyN6iSbk4qBItQNnVGOsFzVxI7D9W-/view; size=52862; SHA256=f3f9b1045673d20c96843cffa7b30f1d5f034d55091fc9b7cb7c4e409dca25b9; ZIP members 51, manifest entries 50/50.
+The five JSON candidate bytes copied into the handover archive are byte-for-byte unchanged from the independently accepted R01 ZIP. The authoritative frozen R01 ZIP continues to be the source; this Step10 handover is a derivative delivery copy, NOT an active n8n import or a new canonical decision.
+No workflow is imported, installed, scheduled, executed or activated here. Each workflow has active=false; do_not_activate=true; availableInMCP=false; no credential binding and no Pinned Fixture harness. The source's placeholder endpoint is deliberately NOT a physical working RPC.
+
+EXACT CANDIDATE INVENTORY
+O1 | KNP-O1-SOURCE-INGEST-COORDINATOR | KNP-CAP-01 | MAP04-C01 | E01, E02 | sha256=6be6b32fb4ab1813f03545f1cd92bf01472d8fe0b420ea08dcd33ddb98809f1a | nodes=13
+O2 | KNP-O2-EVIDENCE-SEMANTIC-DERIVATION | KNP-CAP-02+KNP-CAP-03 | MAP04-C02 | E03, E04 | sha256=de747e92035b1398032772d100102edaf58f97a52795e5d612e57ab610f7f7e2 | nodes=13
+O3 | KNP-O3-HUMAN-REVIEW-HANDOFF | KNP-CAP-04 | MAP04-C03 | E05 | sha256=361e8cd3078f79127c3dba911ab798ffca8d7e99cb1aa142d874ee4827f98bd7 | nodes=13
+O4 | KNP-O4-LIFECYCLE-WITHDRAWAL-COORDINATOR | KNP-CAP-05 | MAP04-C06, MAP04-C07 | E08 | sha256=8ecb512350d029491952f83e94c9585fb02a67a6aa5a0901985dd324c640037d | nodes=16
+O5 | KNP-O5-PUBLICATION-PROJECTION-COORDINATOR | KNP-CAP-06 | MAP04-C08 | E07, E09, E10 | sha256=4a18d3c92a2d67c17fe31d1121998a5baae00f1808c200e6d8b372ad5efd3297 | nodes=13
+
+PACKAGING INVARIANTS
+- O1..O5 reflect retry/cohesion/owner boundaries; their count remains a candidate physical-deployment decision, not immutable product topology.
+- O3 is a notification handoff; creation of HumanReviewDecision and Canonical Admission MAP04-C04/C05 is forbidden to n8n. O3-collapsing-to-KDB ADR remains open.
+- O4 C06/C07 endpoints are separated and statically allowlisted, not arbitrary dynamic URL selection.
+- All HTTP error branches route to transport classification, DLQ/quarantine; no auto-retry.
+- Stamp Envelope Metadata: parameters.includeOtherFields=true; options.includeOtherFields omitted. No other R01 semantics changed.
+- Execute with a Pinned Fixture node only inside disposable CLI execution copies for synthetic testing, never in any delivered canonical candidate.
+- Preserve exact source version, idempotency, correlation/causation, configuration_revision, function signature and contract version; no implicit latest-version fallback.
+- Class: CANDIDATE / INACTIVE / OFFLINE / NOT_OPERATIONAL_EVIDENCE. Direct SQL, cross-owner access and workflow autoapproval forbidden.
+HANDOVER_ARCHIVE: see J Evidence Index (source hashes, packaging digests and all artifact identities). Roll back to this accepted R01 ZIP only through controlled offline derivative restore, not a live import.
