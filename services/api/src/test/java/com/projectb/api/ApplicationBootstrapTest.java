@@ -41,6 +41,8 @@ class ApplicationBootstrapTest {
       assertThat(started.isActive()).isTrue();
       assertThat(started.getBean(Application.class)).isNotNull();
       assertThat(started.containsBean("dataSource")).isFalse();
+      assertThat(started.containsBean("journeyHttpServer")).isFalse();
+      assertThat(Application.ROLE).isEqualTo("NON_WEB_INACTIVE_BOOTSTRAP");
     } finally {
       if (started != null) {
         started.close();

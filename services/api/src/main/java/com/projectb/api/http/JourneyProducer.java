@@ -50,7 +50,7 @@ public final class JourneyProducer {
       return error("CT-ARC-002", "NOT_FOUND", "TERMINAL", "VERSION_ABSENT", correlation, requestId, asOf, 404);
     if ("WITHDRAWN".equals(projection.publicationState()))
       return error("CT-ARC-002", "WITHDRAWN", "TERMINAL", "VERSION_WITHDRAWN", correlation, requestId, asOf, 422);
-    if (!projection.phasesJson().contains("\"canonical_bindings\""))
+    if (!projection.phasesJson().contains("\"canonical_bindings\"") || TrustedKdbVerifier.NONE.claimsApproval(projection.phasesJson()))
       return error("CT-ARC-002", "REVALIDATION_REQUIRED", "AFTER_STATE_CHANGE", "CANONICAL_PIN_UNVERIFIED", correlation, requestId, asOf, 422);
     String payload = "{\"journey_id\":" + JsonMini.quote(projection.journeyId())
         + ",\"journey_version_id\":" + JsonMini.quote(projection.versionId())
@@ -105,6 +105,8 @@ public final class JourneyProducer {
     if ("WITHDRAWN".equals(projection.publicationState()))
       return error("CT-ARC-004", "STALE", "RECONCILE", "VERSION_WITHDRAWN", correlation, requestId, asOf, 409);
     String stepId = text(resource, "journey_step_id");
+    if (resource.containsKey("runtime_session_refs"))
+      return error("CT-ARC-004", "NOT_FOUND", "TERMINAL", "SOV_SESSION_NOT_OWNED", correlation, requestId, asOf, 404);
     if (!journal.stepPresent(projection, stepId))
       return error("CT-ARC-004", "NOT_FOUND", "TERMINAL", "STEP_ABSENT", correlation, requestId, asOf, 404);
     String sessionId = text(resource, "journey_session_id");

@@ -58,7 +58,11 @@ public final class JourneyProducerTest {
       HttpResponse<String> version = producer(port, "coach-a", "CT-ARC-002", COACH_A,
           "{\"journey_id\":\"" + journeyId + "\",\"journey_version_id\":\"" + versionId + "\"}");
       check(version.statusCode() == 200 && "OK".equals(outcome(version.body())), "002 " + version.body());
+      check(version.body().contains("\"rights_state\":\"caller-supplied-not-verified\""), "unverified pin stays unverified");
+      check(version.body().contains("\"publication_state\":\"DRAFT\""), "caller pin is not a KDB publication");
       check(version.body().contains("\"runtime_session_refs\"") == false, "002 does not carry tracking");
+      HttpResponse<String> claimed = publishClaim(port);
+      check(claimed.statusCode() == 422 && "REVALIDATION_REQUIRED".equals(outcome(claimed.body())), "claimed KDB pin is not approval " + claimed.body());
       String hash = fieldPayload(version.body(), "content_hash");
       HttpResponse<String> again = producer(port, "coach-a", "CT-ARC-002", COACH_A,
           "{\"journey_id\":\"" + journeyId + "\",\"journey_version_id\":\"" + versionId + "\"}");
@@ -67,6 +71,7 @@ public final class JourneyProducerTest {
       String enrollmentId = java.util.UUID.nameUUIDFromBytes(("enrollment/" + assignmentId).getBytes(java.nio.charset.StandardCharsets.UTF_8)).toString();
       HttpResponse<String> access = producer(port, "client-a", "CT-ARC-003", CLIENT_A, accessResource(enrollmentId, CLIENT_A) + extraConsent());
       check(access.statusCode() == 200 && "ALLOW".equals(fieldPayload(access.body(), "decision")), "003 allow " + access.body());
+      check(!access.body().contains("forged-grant"), "forged consent ref is not a PIAC grant");
       decisionId = fieldPayload(access.body(), "decision_id");
       HttpResponse<String> forged = producer(port, "client-a", "CT-ARC-003", CLIENT_A, accessResource(enrollmentId, CLIENT_A) + extraConsent());
       check(decisionId.equals(fieldPayload(forged.body(), "decision_id")), "forged consent ref does not change the decision");
@@ -81,6 +86,11 @@ public final class JourneyProducerTest {
       HttpResponse<String> session = producer(port, "client-a", "CT-ARC-004", CLIENT_A,
           "{\"journey_session_id\":\"session-1\",\"journey_version_id\":\"" + versionId + "\",\"journey_step_id\":\"" + STEP + "\"}");
       check(session.statusCode() == 200 && session.body().contains("\"runtime_session_refs\":[]"), "004 has no SOV session " + session.body());
+      HttpResponse<String> suppliedSession = call(port, "POST", producerPath("CT-ARC-004"), "client-a", null,
+          query("CT-ARC-004", CLIENT_A, "{\"journey_session_id\":\"session-1\",\"journey_version_id\":\"" + versionId
+              + "\",\"journey_step_id\":\"" + STEP + "\",\"runtime_session_refs\":[{\"stable_id\":\"sov-session-9\"}]}"), null);
+      check(suppliedSession.statusCode() == 404 && "NOT_FOUND".equals(outcome(suppliedSession.body()))
+          && !suppliedSession.body().contains("sov-session-9"), "caller SOV session is not a correlation " + suppliedSession.body());
       bindingId = fieldPayload(session.body(), "correlation_binding_id");
       HttpResponse<String> missingStep = producer(port, "client-a", "CT-ARC-004", CLIENT_A,
           "{\"journey_session_id\":\"session-1\",\"journey_version_id\":\"" + versionId + "\",\"journey_step_id\":\"missing-step\"}");
@@ -115,6 +125,10 @@ public final class JourneyProducerTest {
       server = JourneyHttpServer.start(journal, tokens, consent);
       HttpResponse<String> deniedAgain = producer(server.port(), "client-a", "CT-ARC-003", CLIENT_A, accessResource(enrollmentId, CLIENT_A));
       check(fieldPayload(deniedAccess.body(), "decision_id").equals(fieldPayload(deniedAgain.body(), "decision_id")), "withdrawal decision survived restart");
+      check(!decisionId.equals(fieldPayload(deniedAgain.body(), "decision_id")), "withdrawal decision is not the earlier allow");
+      HttpResponse<String> reassigned = call(server.port(), "POST", "/project-b/v1/tenants/" + TENANT_A + "/clients/" + CLIENT_A + "/assignments",
+          "coach-a", "assign-after-withdrawal", "{\"journey_version_id\":\"" + versionId + "\"}", null);
+      check(reassigned.statusCode() == 422 && reassigned.body().contains("WITHDRAWN"), "new assignment after withdrawal is not a fresh allow");
     } finally {
       server.stop();
     }
@@ -155,6 +169,26 @@ public final class JourneyProducerTest {
   }
 
   private static String drafts() { return "/project-b/v1/tenants/" + TENANT_A + "/journeys/drafts"; }
+
+  private static HttpResponse<String> publishClaim(int port) throws Exception {
+    HttpResponse<String> created = call(port, "POST", drafts(), "coach-a", "draft-claim", "{\"title\":\"Claimed pin\"}", null);
+    check(created.statusCode() == 201, "claim draft " + created.body());
+    String journeyId = field(created.body(), "draft_id");
+    String updatePath = drafts() + "/" + journeyId;
+    HttpResponse<String> updated = call(port, "PATCH", updatePath, "coach-a", null, claimedUpdate(), null);
+    check(updated.statusCode() == 200, "claim update " + updated.body());
+    HttpResponse<String> published = call(port, "POST", updatePath + "/publish", "coach-a", "publish-claim",
+        "{\"expected_draft_version\":2}", null);
+    check(published.statusCode() == 201, "claim publish " + published.body());
+    String versionId = field(published.body(), "journey_version_id");
+    return call(port, "POST", producerPath("CT-ARC-002"), "coach-a", null,
+        query("CT-ARC-002", COACH_A, "{\"journey_id\":\"" + journeyId + "\",\"journey_version_id\":\"" + versionId + "\"}"), null);
+  }
+
+  private static String claimedUpdate() {
+    return updateBody().replace("\"publication_state\":\"DRAFT\"", "\"publication_state\":\"PUBLISHED\"")
+        .replace("\"rights_state\":\"caller-supplied-not-verified\"", "\"rights_state\":\"granted\"");
+  }
 
   private static String updateBody() {
     return "{\"title\":\"Synthetic resilience\",\"expected_revision\":1,\"phases\":[{\"title\":\"Practice\",\"steps\":[{\"step_id\":\""
