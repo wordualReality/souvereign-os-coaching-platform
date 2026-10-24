@@ -68,6 +68,25 @@ BEGIN
   IF kdb_ops.security_context_ready() IS DISTINCT FROM false THEN
     RAISE EXCEPTION 'security_context_ready must be false';
   END IF;
+  IF to_regprocedure('kdb_ops.canonical_digest_v2(jsonb)') IS NULL THEN
+    RAISE EXCEPTION 'canonical_digest_v2 missing';
+  END IF;
+  IF kdb_ops.canonical_digest_v2(jsonb_build_array('v2','K',NULL,'P'))
+     IS NOT DISTINCT FROM kdb_ops.canonical_digest_v2(jsonb_build_array('v2','K','P')) THEN
+    RAISE EXCEPTION 'v2 digest still collapses NULL fields';
+  END IF;
+  FOR rec IN
+    SELECT p.proname, pg_get_functiondef(p.oid) AS def
+    FROM pg_proc p JOIN pg_namespace ns ON ns.oid=p.pronamespace
+    WHERE ns.nspname='kdb_ops' AND p.proname IN ('ingest_source','propose_candidate','request_review_handoff')
+  LOOP
+    IF rec.def LIKE '%concat_ws%' THEN
+      RAISE EXCEPTION '% still uses concat_ws', rec.proname;
+    END IF;
+    IF rec.def NOT LIKE '%security_context_ready()%' THEN
+      RAISE EXCEPTION '% does not consult security_context_ready', rec.proname;
+    END IF;
+  END LOOP;
 END $$;
 
 SELECT 'PASS_PG17_ORACLES' AS status;

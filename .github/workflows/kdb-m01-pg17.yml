@@ -52,7 +52,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Apply 001-003 plus P3 fail-closed 005, oracles, rollback/reapply
+      - name: Apply 001-003 plus P3 005 and P4 digest integrity, oracles, rollback/reapply
         env:
           KDB_PG17_MODE: libpq
           PGHOST: 127.0.0.1
@@ -96,3 +96,13 @@ jobs:
           PGUSER: kdb_local_super
           PGDATABASE: kdb_m01_disposable
         run: python3 tests/kdb/pg17_p3_security_oracles.py
+      - name: P4 digest fixtures and fail-closed security oracles
+        env:
+          KDB_PG17_MODE: libpq
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGUSER: kdb_local_super
+          PGDATABASE: kdb_m01_disposable
+        run: |
+          python3 tests/kdb/pg17_p4_digest_fixtures.py
+          python3 tests/kdb/pg17_p4_security_oracles.py

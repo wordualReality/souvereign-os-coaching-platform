@@ -15,6 +15,7 @@ kdb_m01=[
     Path('database/migrations/kdb/20261023140300__kdb_m01_004__indexes_idempotency.sql'),
     Path('database/migrations/kdb/20261024180000__kdb_m01_p2__forward_recovery_candidate.sql'),
     Path('database/migrations/kdb/20261024190000__kdb_m01_p3__fail_closed_security.sql'),
+    Path('database/migrations/kdb/20261024220000__kdb_m01_p4__digest_oracle_integrity.sql'),
 ]
 legacy_ddl=re.compile(r'(?im)^\s*(?:create|alter|drop)\s+(?:table|schema)\s+(?:canonical|dev_staging|public)\b')
 for pth in kdb_m01:
@@ -47,4 +48,12 @@ assert 'BYPASSRLS' not in p3.replace('NOBYPASSRLS','')
 assert 'CREATE SCHEMA canonical' not in p3
 assert 'zobjpmyccszkabybdmsf' not in p3.lower()
 assert 'NOT_AUTHORIZED_FOR_APPLY' not in p3
+p4=kdb_m01[6].read_text()
+assert 'canonical_digest_v2' in p4
+assert 'jsonb_build_array' in p4
+assert 'v_spans_digest' in p4
+assert 'CANONICAL_DIGEST_CONTRACT_UNRESOLVED' in p4
+assert 'BYPASSRLS' not in p4.replace('NOBYPASSRLS','')
+assert 'CREATE SCHEMA canonical' not in p4
+assert 'zobjpmyccszkabybdmsf' not in p4.lower()
 print('NOTE: true SQL dry-run requires Postgres/Supabase CLI; this static check is the sandbox fallback.')
