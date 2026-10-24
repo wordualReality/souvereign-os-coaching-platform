@@ -14,6 +14,7 @@ kdb_m01=[
     Path('database/migrations/kdb/20261023140200__kdb_m01_003__api_boundary.sql'),
     Path('database/migrations/kdb/20261023140300__kdb_m01_004__indexes_idempotency.sql'),
     Path('database/migrations/kdb/20261024180000__kdb_m01_p2__forward_recovery_candidate.sql'),
+    Path('database/migrations/kdb/20261024190000__kdb_m01_p3__fail_closed_security.sql'),
 ]
 legacy_ddl=re.compile(r'(?im)^\s*(?:create|alter|drop)\s+(?:table|schema)\s+(?:canonical|dev_staging|public)\b')
 for pth in kdb_m01:
@@ -36,4 +37,14 @@ assert 'NOT_AUTHORIZED_FOR_APPLY' in kdb_m01[4].read_text()
 assert 'canonical.protocol' in kdb_m01[4].read_text()
 assert 'CREATE SCHEMA canonical' not in kdb_m01[4].read_text()
 assert 'NOT_AUTHORIZED_FOR_APPLY' in kdb_m01[4].read_text()
+p3=kdb_m01[5].read_text()
+assert 'CREATE ROLE kdb_migrator' in p3
+assert 'NOBYPASSRLS' in p3
+assert 'KDB_SECURITY_CONTEXT_NOT_CONFIGURED' in p3
+assert 'canonical_command_digest' in p3
+assert 'kdb_ingest_runtime' in p3
+assert 'BYPASSRLS' not in p3.replace('NOBYPASSRLS','')
+assert 'CREATE SCHEMA canonical' not in p3
+assert 'zobjpmyccszkabybdmsf' not in p3.lower()
+assert 'NOT_AUTHORIZED_FOR_APPLY' not in p3
 print('NOTE: true SQL dry-run requires Postgres/Supabase CLI; this static check is the sandbox fallback.')

@@ -52,7 +52,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Apply 001-003, oracles, rollback/reapply
+      - name: Apply 001-003 plus P3 fail-closed 005, oracles, rollback/reapply
         env:
           KDB_PG17_MODE: libpq
           PGHOST: 127.0.0.1
@@ -60,7 +60,7 @@ jobs:
           PGUSER: kdb_local_super
           PGDATABASE: kdb_m01_disposable
         run: python3 tests/kdb/pg17_disposable_apply.py
-      - name: O1-O3 command path as kdb_ingest_runtime
+      - name: O1-O3 command path fail-closed until trust attested
         env:
           KDB_PG17_MODE: libpq
           PGHOST: 127.0.0.1
@@ -78,7 +78,7 @@ jobs:
           python3 tests/kdb/hosted_recovery_preflight_diff.py
           python3 tests/kdb/test_hosted_recovery_preflight.py
           python3 scripts/validate_sql_static.py
-      - name: P2 ACL catalog and adversarial negatives
+      - name: P2 ACL catalog and adversarial characterization
         env:
           KDB_PG17_MODE: libpq
           PGHOST: 127.0.0.1
@@ -88,3 +88,11 @@ jobs:
         run: |
           python3 tests/kdb/pg17_acl_catalog.py
           python3 tests/kdb/pg17_adversarial_negatives.py
+      - name: P3 fail-closed security oracles
+        env:
+          KDB_PG17_MODE: libpq
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGUSER: kdb_local_super
+          PGDATABASE: kdb_m01_disposable
+        run: python3 tests/kdb/pg17_p3_security_oracles.py

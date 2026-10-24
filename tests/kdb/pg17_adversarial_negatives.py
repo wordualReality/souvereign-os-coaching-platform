@@ -77,8 +77,12 @@ def main() -> None:
         purpose="kdb_knowledge_intake",
         correlation_id=str(uuid.uuid4()),
     )
-    if not ok:
-        raise SystemExit(f"setup ingest tenant A failed: {first}")
+    if ok and '"status":"RECORDED"' in first.replace(" ", ""):
+        finding("SETUP_INGEST_STILL_ACCEPTED", "RED", first)
+    elif ok:
+        finding("SETUP_INGEST_UNEXPECTED_SUCCESS", "RED", first)
+    else:
+        finding("SETUP_INGEST_DENIED_FAIL_CLOSED", "CLOSED", first[:300])
 
     print("P2A_FRESH_FOREIGN_TENANT_NEW_COMMAND")
     command_b = str(uuid.uuid4())
@@ -196,6 +200,8 @@ def main() -> None:
         finding("NULL_REQUEST_HASH_ACCEPTED", "RED", blob.strip())
     elif "KDB_HASH_INVALID" in blob:
         finding("NULL_REQUEST_HASH", "CLOSED", "KDB_HASH_INVALID")
+    elif "permission denied" in blob or "denied" in blob:
+        finding("NULL_REQUEST_HASH", "CLOSED", "runtime EXECUTE revoked")
     else:
         finding(
             "NULL_REQUEST_HASH_NOT_NAMED_EXCEPTION",
