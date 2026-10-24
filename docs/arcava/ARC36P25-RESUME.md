@@ -42,7 +42,7 @@ The physical producer schemas are not in this worktree. Start from ARC-27, file 
 ## Setup still required
 
 - GitHub push from this machine. `git push -u origin HEAD:feat/arc36p25-journey-service-integration` stopped with `could not read Username for 'https://github.com': Device not configured`. The commits are local. Do not push this branch onto `feat/arc36p25-journey-kernel-candidate-20261023`.
-- Maven, so the preserved Spring Boot 4.1.1 pom can host this path.
+- Maven 3.9.16 is present, but not on PATH. Binary: `/Users/aydin/Desktop/Tech docs /SouvereignOSProjectKontext/Sovereign OS/03_Arcava/_Lokal_Entpackt_und_Arbeitsordner/ARC36_P25_R8/ARC36P25_R8_RUN_20261010_002721_025017/apache-maven-3.9.16/bin/mvn`. It runs on Temurin 25.0.3. The local cache has `spring-boot-starter-web` 3.5.5 only. Spring Boot 4.1.1 is not cached, so the preserved pom still needs a dependency download before it can host this path.
 - A PIAC token and consent source. The current bearer map is a fixture.
 - A KDB publication verifier. The current receipt hash is caller input.
 - No runner is attached to this session. This file is the resume point. It does not continue execution after the session ends.
