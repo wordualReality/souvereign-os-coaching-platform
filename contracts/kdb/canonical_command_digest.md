@@ -4,7 +4,7 @@ Client-supplied `request_sha256` is an input. The database recomputes the digest
 
 v1 newline `concat_ws` is retired. Calling `kdb_ops.canonical_command_digest(...)` raises `CANONICAL_DIGEST_CONTRACT_UNRESOLVED`.
 
-The contract is PostgreSQL `jsonb_build_array(...)::text` UTF-8 SHA-256 via `kdb_ops.canonical_digest_v2`. Python `json.dumps` is not this contract. Cross-language byte parity is unresolved. A non-SQL producer that cannot reproduce this digest fails closed with `KDB_HASH_MISMATCH` or `CANONICAL_DIGEST_CONTRACT_UNRESOLVED`.
+The contract is PostgreSQL `jsonb_build_array(...)::text` UTF-8 SHA-256 via `kdb_ops.canonical_digest_v2`. Compact `JSON.stringify` is not this contract. The KDB-owned adapter is `services/kdb/digest_v2.py`. It is proven only against SQL golden vectors in `tests/kdb/fixtures/p5_sql_v2_golden.json`. A producer that cannot reproduce those bytes fails closed with `KDB_HASH_MISMATCH` or `CANONICAL_DIGEST_CONTRACT_UNRESOLVED`.
 
 NULL, empty string, embedded newlines, Unicode, numeric vs text, and field count are distinct array positions. JSON object key order is canonicalized by PostgreSQL jsonb, not by caller key order.
 
@@ -76,6 +76,10 @@ jsonb_build_array(
 
 `kdb_ops.security_context_ready()` is consulted by O1, O2 and O3. It returns false. A true result would still raise `KDB_SECURITY_CONTEXT_NOT_CONFIGURED` until an independently attested trust proof exists.
 
+## Signed local ingress
+
+A valid synthetic MAC is `LOCAL_SIGNED_INGRESS_VERIFIED` only. It is never `DB_COMMAND_ADMITTED`. Runtime O1-O3 EXECUTE stays revoked. `access_decision_ref` is not authorization.
+
 ## Arcava producer delta
 
-Arcava must not send a v1 newline digest as `request_sha256`. Until a SQL-side v2 digest is produced, ingest remains fail-closed. This notice does not change Arcava source in this packet.
+Contract version: SQL v2. Field order is the arrays above. Bytes are PostgreSQL `jsonb::text`, not JS `JSON.stringify`. Reference encoder: `services/kdb/digest_v2.py`. Golden vectors: `tests/kdb/fixtures/p5_sql_v2_golden.json`. Failure: `KDB_HASH_MISMATCH` or `CANONICAL_DIGEST_CONTRACT_UNRESOLVED`. Ingest stays fail-closed until DB trust is attested. This notice does not change Arcava source in this packet.

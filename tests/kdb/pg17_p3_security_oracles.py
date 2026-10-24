@@ -215,8 +215,8 @@ def main() -> None:
         )
         if ok_spoof:
             note("TENANT_GUC_SPOOF_ACCEPTED_AT_DB", "RED", body_spoof)
-        elif "KDB_HASH_MISMATCH" in body_spoof or "KDB_SECURITY_CONTEXT_NOT_CONFIGURED" in body_spoof:
-            note("TENANT_SPOOF_WITH_EXECUTE_STILL_DENIED", "CLOSED", body_spoof[:300])
+        elif "KDB_HASH_MISMATCH" in body_spoof:
+            note("TENANT_SPOOF_WITH_EXECUTE_STILL_DENIED", "CLOSED", "KDB_HASH_MISMATCH")
         else:
             note("TENANT_SPOOF_UNEXPECTED", "RED", body_spoof[:400])
 
