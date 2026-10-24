@@ -37,12 +37,12 @@ This is not T150 acceptance, not Spring Boot runtime, not Next.js runtime, not a
 
 ## Next executable package
 
-Read the accepted CT-ARC-002, CT-ARC-003 and CT-ARC-004 contract text. Implement producer backing on this journal and loopback service only for fields those contracts actually define. Keep fixture pins and the consent directory labelled untrusted until a real adapter is connected. Do not start from a new kernel.
+The physical producer schemas are not in this worktree. Start from ARC-27, file `1lnTmPDejSeXRSZExQtj8mjE3nE6M2k2XMW_HAQI8tiU`, and use only the accepted CT-ARC-002, CT-ARC-003 and CT-ARC-004 schema files once they are present. Implement producer backing on this journal and loopback service for fields those schemas define. Keep fixture pins and the consent directory labelled untrusted until a real adapter is connected.
 
 ## Setup still required
 
+- GitHub push from this machine. `git push -u origin HEAD:feat/arc36p25-journey-service-integration` stopped with `could not read Username for 'https://github.com': Device not configured`. The commits are local. Do not push this branch onto `feat/arc36p25-journey-kernel-candidate-20261023`.
 - Maven, so the preserved Spring Boot 4.1.1 pom can host this path.
 - A PIAC token and consent source. The current bearer map is a fixture.
 - A KDB publication verifier. The current receipt hash is caller input.
-- The CT-ARC contract documents are not in this worktree.
 - No runner is attached to this session. This file is the resume point. It does not continue execution after the session ends.
