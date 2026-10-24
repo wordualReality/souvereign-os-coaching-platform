@@ -1,0 +1,5 @@
+-- KDB-M01-04 / indexes and idempotency
+-- STATUS: NOT_AUTHORIZED_FOR_APPLY
+-- Index and unique constraints remain inside 001_foundation.
+-- This path is retained only so the P03 filename stays traceable.
+-- Do not execute this file.

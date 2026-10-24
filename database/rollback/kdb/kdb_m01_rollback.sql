@@ -1,0 +1,5 @@
+-- KDB-M01-04 rollback notice.
+-- STATUS: NOT_AUTHORIZED_FOR_APPLY
+-- Original P03 SQL dropped canonical objects and is withdrawn.
+-- Bound rollback/forward-fix strategy is documented in 099_rollback_and_forward_fix.md.
+-- Do not DROP canonical, dev_staging, or public objects.

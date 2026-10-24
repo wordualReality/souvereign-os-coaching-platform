@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kdb://m01/o3_review_handoff/1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "command_id",
+    "contract_id",
+    "correlation_id",
+    "idempotency_key",
+    "issued_at",
+    "origin_owner",
+    "tenant_scope",
+    "principal_context_ref",
+    "access_decision_ref",
+    "purpose",
+    "payload"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "command_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "contract_id": {
+      "const": "MAP04-C03"
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 256
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "origin_owner": {
+      "enum": [
+        "ARCAVA",
+        "KDB",
+        "APPROVED_EXTERNAL"
+      ]
+    },
+    "tenant_scope": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "principal_context_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "access_decision_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payload": {
+      "type": "object",
+      "required": [
+        "candidate_revision_id",
+        "review_queue"
+      ],
+      "properties": {
+        "candidate_revision_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "review_queue": {
+          "const": "KDB_HUMAN_REVIEW"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "$id": "kdb://offline/command-profile-constraints/1.1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "command_id": {
+            "const": "MAP04-C01"
+          }
+        },
+        "required": [
+          "command_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "submission_id",
+              "source_class",
+              "origin_owner",
+              "content_fingerprint",
+              "rights_decision_ref",
+              "access_decision_ref",
+              "captured_at"
+            ],
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_id": {
+            "const": "MAP04-C02"
+          }
+        },
+        "required": [
+          "command_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "source_version_id",
+              "derivation_ref",
+              "evidence_spans",
+              "candidate_digest",
+              "semantic_version",
+              "model_version"
+            ],
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_id": {
+            "const": "MAP04-C03"
+          }
+        },
+        "required": [
+          "command_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "candidate_revision_ref",
+              "source_evidence_hash",
+              "reviewer_queue_policy"
+            ],
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_id": {
+            "const": "MAP04-C06"
+          }
+        },
+        "required": [
+          "command_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "source_version_ref",
+              "withdrawal_reason",
+              "rights_decision_ref",
+              "expected_version",
+              "revocation_watermark"
+            ],
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_id": {
+            "const": "MAP04-C07"
+          }
+        },
+        "required": [
+          "command_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "affected_version_refs",
+              "cause",
+              "new_evidence_or_rights_refs"
+            ],
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_id": {
+            "const": "MAP04-C08"
+          }
+        },
+        "required": [
+          "command_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "event_id",
+              "published_version_ref",
+              "subscriber_ref",
+              "ack_status",
+              "watermark"
+            ],
+            "type": "object"
+          }
+        }
+      }
+    }
+  ],
+  "description": "Command-specific payload constraints. Does not add ATC families.",
+  "owner": "KDB/Data",
+  "schema_version": "1.1",
+  "status": "OFFLINE_CONTRACT_PROJECTION / NOT_DEPLOYED",
+  "type": "object"
+}

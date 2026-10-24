@@ -1,0 +1,5 @@
+-- KDB-M01-04 synthetic fixture.
+-- STATUS: DORMANT / NOT_AUTHORIZED_FOR_APPLY
+-- The P03 fixture inserted into canonical.* and is withdrawn.
+-- The SHA-frozen kit has no apply-time fixture for protocol_version or human_review_decision.
+-- Do not INSERT into kdb_canonical.protocol_version or kdb_governance.human_review_decision.

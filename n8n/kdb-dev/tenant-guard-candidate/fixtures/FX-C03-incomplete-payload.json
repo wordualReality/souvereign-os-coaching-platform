@@ -1,0 +1,28 @@
+{
+  "body": {
+    "causation_id": "cause-synth-0001",
+    "command_id": "MAP04-C03",
+    "contract_id": "CT-KDB-R03-PIPE-001",
+    "correlation_id": "corr-i-c03",
+    "idempotency_key": "idem-i-c03",
+    "issued_at": "2026-10-18T00:00:00Z",
+    "payload": {
+      "candidate_revision_ref": "CANDREV_SYNTH_001"
+    },
+    "principal_context_ref": "PRINCIPAL_REF_SYNTH_PIPELINE",
+    "purpose": "kdb_knowledge_intake",
+    "schema_version": "1.0",
+    "synthetic_fault_class": null,
+    "tenant_scope": "TENANT_SYNTH_A"
+  },
+  "class": "incomplete C03 payload",
+  "expected_route": "DENY",
+  "packet": "KDB-N8N-PIPELINE-RECON-08-R01",
+  "s06": [],
+  "s07": [
+    "S07-T14"
+  ],
+  "schema_version": "1.0",
+  "status": "SYNTHETIC / NO_REAL_PERSON_OR_CLIENT_DATA",
+  "target_oid": "O3"
+}

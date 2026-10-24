@@ -1,0 +1,36 @@
+{
+  "body": {
+    "causation_id": "cause-synth-0001",
+    "command_id": "MAP04-C06",
+    "contract_id": "CT-KDB-R03-PIPE-001",
+    "correlation_id": "corr-http-uc",
+    "idempotency_key": "idem-http-uc",
+    "issued_at": "2026-10-18T00:00:00Z",
+    "payload": {
+      "expected_version": "1",
+      "revocation_watermark": "WM_SYNTH_001",
+      "rights_decision_ref": "RIGHTS_SYNTH_REVOKED",
+      "source_version_ref": "SRCVER_SYNTH_001",
+      "withdrawal_reason": "RIGHTS_REVOKED"
+    },
+    "principal_context_ref": "PRINCIPAL_REF_SYNTH_PIPELINE",
+    "purpose": "kdb_knowledge_intake",
+    "schema_version": "1.0",
+    "synthetic_fault_class": null,
+    "tenant_scope": "TENANT_SYNTH_A"
+  },
+  "class": "HTTP unknown commit",
+  "expected_o4_http": "MAP04-C06",
+  "expected_route": "ACCEPT",
+  "expected_transport_class": "UNKNOWN_COMMIT",
+  "expected_transport_route": "DLQ",
+  "packet": "KDB-N8N-PIPELINE-RECON-08-R01",
+  "s06": [],
+  "s07": [
+    "S07-T03"
+  ],
+  "schema_version": "1.0",
+  "status": "SYNTHETIC / NO_REAL_PERSON_OR_CLIENT_DATA",
+  "target_oid": "O4",
+  "transport_message": "unknown commit UNKNOWN_COMMIT"
+}

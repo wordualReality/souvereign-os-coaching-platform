@@ -1,0 +1,38 @@
+{
+  "body": {
+    "causation_id": "cause-synth-0001",
+    "command_id": "MAP04-C02",
+    "contract_id": "CT-KDB-R03-PIPE-001",
+    "correlation_id": "corr-f-o1",
+    "idempotency_key": "idem-f-o1",
+    "issued_at": "2026-10-18T00:00:00Z",
+    "payload": {
+      "candidate_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "derivation_ref": "DERIV_SYNTH_001",
+      "evidence_spans": [
+        {
+          "end": 1,
+          "start": 0
+        }
+      ],
+      "model_version": "MODEL_SYNTH_NONE",
+      "semantic_version": "SDV_SYNTH_001",
+      "source_version_id": "SRCVER_SYNTH_001"
+    },
+    "principal_context_ref": "PRINCIPAL_REF_SYNTH_PIPELINE",
+    "purpose": "kdb_knowledge_intake",
+    "schema_version": "1.0",
+    "synthetic_fault_class": null,
+    "tenant_scope": "TENANT_SYNTH_A"
+  },
+  "class": "foreign command on O1",
+  "expected_route": "DENY",
+  "packet": "KDB-N8N-PIPELINE-RECON-08-R01",
+  "s06": [
+    "S06-T02"
+  ],
+  "s07": [],
+  "schema_version": "1.0",
+  "status": "SYNTHETIC / NO_REAL_PERSON_OR_CLIENT_DATA",
+  "target_oid": "O1"
+}

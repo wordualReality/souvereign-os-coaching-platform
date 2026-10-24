@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kdb://m01/owner-receipt/1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "command_id",
+    "status",
+    "aggregate_ref",
+    "producer_namespace",
+    "occurred_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "command_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "status": {
+      "enum": [
+        "RECORDED",
+        "STRUCTURE_VALIDATED_NOT_REVIEWED",
+        "REVIEW_HANDOFF_REQUESTED_NOT_DECIDED",
+        "DENIED",
+        "RIGHTS_BLOCKED",
+        "CONFLICT",
+        "QUARANTINED"
+      ]
+    },
+    "aggregate_ref": {
+      "type": "object",
+      "required": [
+        "namespace",
+        "object_type",
+        "id"
+      ],
+      "properties": {
+        "namespace": {
+          "const": "KDB"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "version_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "producer_namespace": {
+      "const": "KDB"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

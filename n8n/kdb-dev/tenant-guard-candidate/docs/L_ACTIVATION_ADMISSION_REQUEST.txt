@@ -1,0 +1,31 @@
+KDB-N8N-PIPELINE-RECON-10 — HANDOVER · 2026-10-21 · v1.0
+OWNER: GPT_BUILDER_KDB | AUTHORITY: DOCUMENTATION_AND_PACKAGING_ONLY
+STATE: DESIGN/CANDIDATE ACCEPTED FOR HANDOVER; PHYSICAL OPERATIONS NOT APPROVED.
+
+L — SEPARATE ACTIVATION_ADMISSION_REQUEST (NON_ROUTING / NOT AN ACTIVATION APPROVAL)
+REQUEST_ID: KDB-N8N-PIPELINE-RECON-10-ACTIVATION-ADMISSION-REQUEST-001 v1.0
+CURRENT_STATUS: ACTIVATION_ADMISSION_PENDING / PHYSICAL_GATES_OPEN / NO_FOUNDER_ACTIVATION_APPROVAL.
+CANDIDATES: accepted five R01 inactive workflows, exact hash per A/J, no Pinned Fixture and no credential binding. No install/import/schedule/run occurs in this Step10. This request is an input to a later distinct owner/Foun­der decision only, NOT authority to act.
+
+REQUIRED GATES — ALL OPEN UNLESS SPECIFICALLY STATED
+G01 KDB-C2 PAUSED -> Controller/Founder separate resume gate after valid DB/Env reconciliation and owner-specific execution approval; no implicit SQL.
+G02 C2_PHYSICAL OPEN -> KDB physical principal/network/TLS/grants/RLS/EXECUTE/row-level-default-deny evidence; no bypass; signoff.
+G03 B03 OPEN -> approved DB/Env grants and migration/contract physical interface evidence.
+G04 RC1B OPEN -> pre-main acceptance and exact controlled release prerequisite.
+G05 QS02 UNAUTHORIZED -> separately commissioned independent security/QS before any sensitive physical changes.
+G06 Found­er C1 PIPELINE_ONLY; C3 1Password Secrets Automation; C4 HARD_REVOKE_AFTER_CLONE_PROOF -> approved secret rotation/revocation and principal grants with no leaks.
+G07 PIAC/consent/tenant/purpose and source-rights proof -> trusted service identities, review actors, legal right to use and bounded retention.
+G08 Physical MAP04-C01/C02/C03/C06/C07/C08 KDB-owned signatures and versions -> KDB owner approval; C04 human review and C05 canonical admission remain n8n-uncallable.
+G09 Observability audit/log/evidence receipts, DLQ/poison/replay, SLO/RPO/RTO and retention owner decision -> signed operational readiness and runbooks with thresholds supplied by qualified owner.
+G10 Arcava T150 PARTIAL, T020/T050 NOT_ADMITTED; SOV WAIT_T050 -> external runtime producer and downstream compatibility gates not satisfied by KDB offline mock.
+G11 Repository pre-write fresh HEAD/status path inventory and full porcelain-drift classification; no overlap, approved path allowlist/PR and environment branch policy. Step10 has NO Git/product repo write authority.
+G12 Product release operations: independent security/DB/production QS, Founder explicit environment-targeted single-scope activation approval, rollback test, change window/owner, PII-safe audit proof; no deployment from this packet.
+
+DECISION BRANCH (MUTUALLY EXCLUSIVE)
+If any gate is missing (currently YES), NEXT_ROUTE = ACTIVATION_ADMISSION_PENDING; NEXT_EXECUTOR = CROSS_LANE_CONTROLLER / REVIEW_STEP10_OWNER_RETURN_AND_GATE_REGISTER; ACTION = consume documentation and preserve pause; not start n8n. If and only if every required physical evidence reference, independent QS, Founder approval and exact target has been separately verified in later packet may Controller generate READY_FOR_SEPARATE_FOUNDER_ACTIVATION_DECISION; even this Step10 cannot activate.
+
+DENIAL CONDITIONS
+Missing signed security scope; `service_role` default path; lack of TLS CA+hostname; privileged owner/BYPASSRLS runtime; unreadable manifest/source; stale KDB rights; incomplete S06/S07 physical tests; unknown rollback/retention; SOV T050 missing; active file not matching locked hash; unsafe repo porcelain overlap; unreviewed PR merge. Any denies activation and preserves offline candidate state.
+
+ROUTING / NO EXTRA GATES
+One closure record G for the ten-step KDB-n8n design/handover plus this admission-request artifact. No Step11, no auto-spawned SOV agent and no fourth permanent QS lane. Controller alone routes future packet after founder/auth physical decision.

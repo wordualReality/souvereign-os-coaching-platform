@@ -1,0 +1,49 @@
+{
+  "$id": "kdb://offline/evidence-receipt/1.1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "owner": "KDB/Data",
+  "properties": {
+    "causation_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "configuration_digest": {
+      "type": "string"
+    },
+    "configuration_revision": {
+      "type": "string"
+    },
+    "correlation_id": {
+      "type": "string"
+    },
+    "function_contract_version": {
+      "type": "string"
+    },
+    "function_signature": {
+      "type": "string"
+    },
+    "idempotency_key": {
+      "type": "string"
+    },
+    "outcome": {
+      "type": "string"
+    },
+    "receipt_type": {
+      "const": "EVIDENCE_RECEIPT"
+    }
+  },
+  "required": [
+    "receipt_type",
+    "correlation_id",
+    "outcome",
+    "configuration_revision",
+    "configuration_digest",
+    "function_signature",
+    "function_contract_version"
+  ],
+  "schema_version": "1.1",
+  "status": "OFFLINE_CONTRACT_PROJECTION / NOT_DEPLOYED",
+  "type": "object"
+}
