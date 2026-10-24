@@ -114,7 +114,8 @@ public final class JourneyHttpServer {
       requireCoach(actor);
       Map<String, Object> body = body(exchange);
       DraftView view = journal.updateDraft(actor, UUID.fromString(path[7]),
-          JsonMini.integer(body.get("expected_revision")), JsonMini.text(body.get("title")), steps(body.get("phases")));
+          JsonMini.integer(body.get("expected_revision")), JsonMini.text(body.get("title")),
+          steps(body.get("phases")), body.get("producer_phases") == null ? null : JsonMini.write(body.get("producer_phases")));
       send(exchange, 200, draftJson(view));
       return;
     }
@@ -157,6 +158,11 @@ public final class JourneyHttpServer {
         throw new DomainException(ErrorCode.FORBIDDEN, "client membership mismatch");
       PublishedView view = journal.kernel().readAssignedVersion(actor, tenant, UUID.fromString(path[8]));
       send(exchange, 200, versionJson(view));
+      return;
+    }
+    if (path.length == 7 && "producers".equals(path[5]) && "POST".equals(method)) {
+      JourneyProducer.Reply reply = JourneyProducer.handle(path[6], actor, consentedClients, journal, body(exchange));
+      send(exchange, reply.status(), reply.body());
       return;
     }
     send(exchange, 404, error("NOT_FOUND", "route not found", correlation));

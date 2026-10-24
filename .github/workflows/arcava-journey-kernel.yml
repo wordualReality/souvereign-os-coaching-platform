@@ -75,5 +75,8 @@ jobs:
             services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java \
             services/api/src/main/java/com/projectb/api/json/JsonMini.java \
             services/api/src/main/java/com/projectb/api/http/JourneyHttpServer.java \
-            services/api/src/test/java/com/projectb/api/http/JourneyPathTest.java
+            services/api/src/main/java/com/projectb/api/http/JourneyProducer.java \
+            services/api/src/test/java/com/projectb/api/http/JourneyPathTest.java \
+            services/api/src/test/java/com/projectb/api/http/JourneyProducerTest.java
           java -cp "$classes_dir" com.projectb.api.http.JourneyPathTest
+          java -cp "$classes_dir" com.projectb.api.http.JourneyProducerTest

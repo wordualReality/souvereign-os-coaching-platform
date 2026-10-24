@@ -33,6 +33,33 @@ public final class JsonMini {
     return number;
   }
 
+  public static String write(Object value) {
+    if (value == null) return "null";
+    if (value instanceof String text) return quote(text);
+    if (value instanceof Long number) return Long.toString(number);
+    if (value instanceof Integer number) return Integer.toString(number);
+    if (value instanceof Boolean flag) return flag.toString();
+    if (value instanceof List<?> list) {
+      StringBuilder out = new StringBuilder("[");
+      for (int i = 0; i < list.size(); i++) {
+        if (i > 0) out.append(',');
+        out.append(write(list.get(i)));
+      }
+      return out.append(']').toString();
+    }
+    if (value instanceof Map<?, ?> map) {
+      StringBuilder out = new StringBuilder("{");
+      boolean first = true;
+      for (Map.Entry<?, ?> entry : map.entrySet()) {
+        if (!first) out.append(',');
+        first = false;
+        out.append(quote(String.valueOf(entry.getKey()))).append(':').append(write(entry.getValue()));
+      }
+      return out.append('}').toString();
+    }
+    throw new IllegalArgumentException("unsupported JSON value");
+  }
+
   public static String quote(String value) {
     StringBuilder out = new StringBuilder(value.length() + 2).append('"');
     for (int i = 0; i < value.length(); i++) {
