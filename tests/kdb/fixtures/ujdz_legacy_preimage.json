@@ -1,0 +1,20 @@
+{
+  "target_ref": "ujdzahwlximlmndexgmx",
+  "forbidden_refs": ["zobjpmyccszkabybdmsf", "wixdcaqdwmpccbfmxyea"],
+  "source": "OWNER_REPORTED_NOT_LIVE_READ",
+  "legacy_protocol_schema": "canonical",
+  "legacy_protocol_rows": 1,
+  "protocol_provenance": "UNKNOWN",
+  "required_migration_substring": "rollback_objects_test_v2",
+  "migration_receipt_count": 6,
+  "legacy_nologin_roles": ["kdb_runtime", "kdb_ingest_writer", "kdb_reviewer"],
+  "do_not": [
+    "delete_protocol_row",
+    "reset_schema_migrations",
+    "unconditional_create_role",
+    "unconditional_foundation_replay",
+    "drop_canonical",
+    "apply_on_zobj",
+    "reuse_sov_dev"
+  ]
+}

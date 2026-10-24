@@ -6,6 +6,9 @@ on:
       - "database/migrations/kdb/**"
       - "tests/kdb/**"
       - "n8n/kdb-dev/**"
+      - "contracts/kdb/**"
+      - "services/kdb/**"
+      - "scripts/validate_sql_static.py"
       - ".github/workflows/kdb-m01-pg17.yml"
   push:
     branches: ["kdb/**"]
@@ -13,6 +16,9 @@ on:
       - "database/migrations/kdb/**"
       - "tests/kdb/**"
       - "n8n/kdb-dev/**"
+      - "contracts/kdb/**"
+      - "services/kdb/**"
+      - "scripts/validate_sql_static.py"
       - ".github/workflows/kdb-m01-pg17.yml"
 
 permissions:
@@ -69,3 +75,16 @@ jobs:
           python3 tests/kdb/test_replay_dlq_policy.py
           python3 tests/kdb/test_piac_fail_closed.py
           python3 tests/kdb/kdb_m01_06_security_static.py
+          python3 tests/kdb/hosted_recovery_preflight_diff.py
+          python3 tests/kdb/test_hosted_recovery_preflight.py
+          python3 scripts/validate_sql_static.py
+      - name: P2 ACL catalog and adversarial negatives
+        env:
+          KDB_PG17_MODE: libpq
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGUSER: kdb_local_super
+          PGDATABASE: kdb_m01_disposable
+        run: |
+          python3 tests/kdb/pg17_acl_catalog.py
+          python3 tests/kdb/pg17_adversarial_negatives.py

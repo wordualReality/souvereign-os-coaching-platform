@@ -217,6 +217,7 @@ def main() -> None:
     command_id = str(uuid.uuid4())
     submission_id = str(uuid.uuid4())
     correlation_id = str(uuid.uuid4())
+    run_id = command_id[:8]
     tenant_a = "TENANT_SYNTH_A"
     tenant_b = "TENANT_SYNTH_B"
 
@@ -228,10 +229,10 @@ def main() -> None:
             submission_id,
             tenant_a,
             "KDB",
-            "idem-cmd-0001",
+            f"idem-cmd-{run_id}",
             request_sha,
             "LICENSED_DOCUMENT",
-            "synthetic://kdb/m01/command-path",
+            f"synthetic://kdb/m01/command-path-{run_id}",
             content_sha,
             rights_json,
             rights_sha,
@@ -251,10 +252,10 @@ def main() -> None:
             submission_id,
             tenant_a,
             "KDB",
-            "idem-cmd-0001",
+            f"idem-cmd-{run_id}",
             request_sha,
             "LICENSED_DOCUMENT",
-            "synthetic://kdb/m01/command-path",
+            f"synthetic://kdb/m01/command-path-{run_id}",
             content_sha,
             rights_json,
             rights_sha,
@@ -277,10 +278,10 @@ def main() -> None:
             submission_id,
             tenant_a,
             "KDB",
-            "idem-cmd-0001",
+            f"idem-cmd-{run_id}",
             request_sha,
             "LICENSED_DOCUMENT",
-            "synthetic://kdb/m01/command-path",
+            f"synthetic://kdb/m01/command-path-{run_id}",
             content_sha,
             rights_json,
             rights_sha,
@@ -294,7 +295,7 @@ def main() -> None:
         raise SystemExit("replay did not return existing receipt")
     receipt_count = must(
         USER_SUPER,
-        "SELECT count(*) FROM kdb_ops.command_receipt;",
+        f"SELECT count(*) FROM kdb_ops.command_receipt WHERE command_id='{command_id}'::uuid;",
     )
     if receipt_count != "1":
         raise SystemExit(f"replay created extra receipt: {receipt_count}")
@@ -307,10 +308,10 @@ def main() -> None:
             str(uuid.uuid4()),
             tenant_a,
             "KDB",
-            "idem-cmd-0001-conflict",
+            f"idem-cmd-{run_id}-conflict",
             request_sha_conflict,
             "LICENSED_DOCUMENT",
-            "synthetic://kdb/m01/command-path",
+            f"synthetic://kdb/m01/command-path-{run_id}",
             content_sha,
             rights_json,
             rights_sha,
@@ -330,10 +331,10 @@ def main() -> None:
             str(uuid.uuid4()),
             "",
             "KDB",
-            "idem-cmd-0002",
+            f"idem-cmd-{run_id}-empty",
             sha256_text("o1-empty-tenant"),
             "LICENSED_DOCUMENT",
-            "synthetic://kdb/m01/empty-tenant",
+            f"synthetic://kdb/m01/empty-tenant-{run_id}",
             content_sha,
             rights_json,
             rights_sha,
@@ -356,10 +357,10 @@ def main() -> None:
             str(uuid.uuid4()),
             tenant_a,
             "KDB",
-            "idem-cmd-0003",
+            f"idem-cmd-{run_id}-pending",
             sha256_text("o1-pending-rights"),
             "LICENSED_DOCUMENT",
-            "synthetic://kdb/m01/pending-rights",
+            f"synthetic://kdb/m01/pending-rights-{run_id}",
             content_sha,
             blocked_json,
             sha256_text(blocked_json),
@@ -379,10 +380,10 @@ def main() -> None:
             str(uuid.uuid4()),
             tenant_b,
             "KDB",
-            "idem-cmd-0004",
+            f"idem-cmd-{run_id}-cross",
             sha256_text("o1-tenant-b"),
             "LICENSED_DOCUMENT",
-            "synthetic://kdb/m01/tenant-b",
+            f"synthetic://kdb/m01/tenant-b-{run_id}",
             content_sha,
             rights_json,
             rights_sha,
@@ -455,7 +456,8 @@ SELECT kdb_ops.request_review_handoff(
         raise SystemExit("publication tables were written")
     outbox = must(
         USER_SUPER,
-        "SELECT count(*), min(publish_state) FROM kdb_ops.outbox_event;",
+        f"SELECT count(*), min(publish_state) FROM kdb_ops.outbox_event "
+        f"WHERE aggregate_id='{candidate_revision_id}'::uuid;",
     )
     if not outbox.startswith("1|INACTIVE_M01"):
         raise SystemExit(f"unexpected outbox {outbox}")

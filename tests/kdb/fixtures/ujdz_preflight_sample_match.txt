@@ -1,0 +1,20 @@
+database_name|postgres
+effective_catalog_principal|postgres
+server_version|17.6
+read_only_flag|on
+canonical|postgres|{postgres=UC/postgres}
+dev_staging|postgres|{postgres=UC/postgres}
+canonical|protocol|r|postgres|t|f|
+canonical.protocol rows are not selected here
+kdb_runtime|f|f|f|f|t
+kdb_ingest_writer|f|f|f|f|t
+kdb_reviewer|f|f|f|f|t
+version|name
+20261012105203|foundation
+20261012120000|security
+20261012130000|api
+20261012140000|repair_1
+20261012150000|repair_2
+20261012160000|rollback_objects_test_v2
+legacy_protocol_rows|1
+nonself_active_or_lockwait_sessions|0
