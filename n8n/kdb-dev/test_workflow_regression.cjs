@@ -44,4 +44,4 @@ report.acceptance={offline_code_node_baseline:report.counts.legacy_pass===report
 fs.writeFileSync(OUTPUT,JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify({counts:report.counts,acceptance:report.acceptance},null,2));
 if(report.acceptance.offline_code_node_baseline!=='PASS')process.exitCode=1;
-// Security regressive failure is recorded and surfaced, but not an exception when inspecting source.
+if(report.acceptance.tenant_fail_closed!=='PASS')process.exitCode=1;

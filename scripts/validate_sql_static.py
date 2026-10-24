@@ -13,6 +13,7 @@ kdb_m01=[
     Path('database/migrations/kdb/20261023140100__kdb_m01_002__security_boundary.sql'),
     Path('database/migrations/kdb/20261023140200__kdb_m01_003__api_boundary.sql'),
     Path('database/migrations/kdb/20261023140300__kdb_m01_004__indexes_idempotency.sql'),
+    Path('database/migrations/kdb/20261024180000__kdb_m01_p2__forward_recovery_candidate.sql'),
 ]
 legacy_ddl=re.compile(r'(?im)^\s*(?:create|alter|drop)\s+(?:table|schema)\s+(?:canonical|dev_staging|public)\b')
 for pth in kdb_m01:
@@ -31,4 +32,8 @@ assert 'NOBYPASSRLS' in kdb_m01[1].read_text()
 assert 'kdb_ops.ingest_source' in kdb_m01[2].read_text()
 assert 'kdb_api.submit_ingestion_candidate' not in kdb_m01[2].read_text()
 assert 'NOT_AUTHORIZED_FOR_APPLY' in kdb_m01[3].read_text()
+assert 'NOT_AUTHORIZED_FOR_APPLY' in kdb_m01[4].read_text()
+assert 'canonical.protocol' in kdb_m01[4].read_text()
+assert 'CREATE SCHEMA canonical' not in kdb_m01[4].read_text()
+assert 'NOT_AUTHORIZED_FOR_APPLY' in kdb_m01[4].read_text()
 print('NOTE: true SQL dry-run requires Postgres/Supabase CLI; this static check is the sandbox fallback.')

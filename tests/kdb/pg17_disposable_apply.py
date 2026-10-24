@@ -8,6 +8,7 @@ Does not apply 004. Does not connect to Supabase.
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import subprocess
 import sys
@@ -91,12 +92,13 @@ def guard() -> None:
     ).strip()
     if not img.startswith("postgres:17"):
         raise SystemExit(f"refusing image {img}")
-    inspect = subprocess.check_output(
-        ["docker", "inspect", "-f", "{{range .NetworkSettings.Ports}}{{.}}{{end}}", CONTAINER],
-        text=True,
-    )
-    if "55432" not in inspect:
-        raise SystemExit(f"refusing non-local publish: {inspect.strip()}")
+    info = json.loads(subprocess.check_output(["docker", "inspect", CONTAINER], text=True))[0]
+    bindings = (info.get("NetworkSettings") or {}).get("Ports", {}).get("5432/tcp") or []
+    if not bindings:
+        raise SystemExit("refusing missing 5432 publish")
+    for binding in bindings:
+        if binding.get("HostIp") != "127.0.0.1" or binding.get("HostPort") != "55432":
+            raise SystemExit(f"refusing non-loopback publish: {binding}")
 
 
 def schema_fingerprint() -> str:

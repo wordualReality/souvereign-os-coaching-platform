@@ -1,0 +1,10 @@
+database_name|postgres
+effective_catalog_principal|postgres
+server_version|17.6
+read_only_flag|on
+canonical|postgres|{postgres=UC/postgres}
+kdb_runtime|f|f|f|f|t
+version|name
+20261012105203|foundation
+legacy_protocol_rows|0
+nonself_active_or_lockwait_sessions|0
