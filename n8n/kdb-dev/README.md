@@ -8,6 +8,8 @@ Reproduce:
 
 ```bash
 node n8n/kdb-dev/test_workflow_regression.cjs n8n/kdb-dev/tenant-guard-candidate /tmp/kdb-tenant-guard.json kit
+node n8n/kdb-dev/test_replay_dlq.cjs n8n/kdb-dev/tenant-guard-candidate /tmp/kdb-replay-dlq.json
 ```
 
 `kit` may be omitted. For contract cross-check use the original kit_clean contracts directory.
+Replay/DLQ tests are offline policy checks. They are not a live n8n import.
