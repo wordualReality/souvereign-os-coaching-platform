@@ -1,9 +1,14 @@
 package com.projectb.api;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
+import com.projectb.api.http.JourneyHttpServer;
+import com.projectb.api.http.TrustedKdbVerifier;
+import com.projectb.api.http.TrustedPiacVerifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringApplicationRunListener;
 import org.springframework.boot.WebApplicationType;
@@ -11,6 +16,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Executes Application.main and checks the inactive bootstrap contract.
@@ -48,5 +54,15 @@ class ApplicationBootstrapTest {
         started.close();
       }
     }
+  }
+
+  @Test
+  void liveProfileStaysClosedWithoutVerifiedAuthorities() throws Exception {
+    Path journal = Files.createTempDirectory("arcava-live-maven").resolve("journal.ndjson");
+    assertThatThrownBy(() -> JourneyHttpServer.startLive(journal, TrustedPiacVerifier.NONE, TrustedKdbVerifier.NONE))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("live runtime closed");
+    assertThat(Application.ROLE).isEqualTo("NON_WEB_INACTIVE_BOOTSTRAP");
+    assertThat(Files.exists(journal)).isFalse();
   }
 }

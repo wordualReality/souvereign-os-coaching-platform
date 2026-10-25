@@ -77,7 +77,12 @@ jobs:
             services/api/src/main/java/com/projectb/api/http/JourneyHttpServer.java \
             services/api/src/main/java/com/projectb/api/http/JourneyProducer.java \
             services/api/src/main/java/com/projectb/api/http/TrustedKdbVerifier.java \
+            services/api/src/main/java/com/projectb/api/http/TrustedPiacVerifier.java \
             services/api/src/test/java/com/projectb/api/http/JourneyPathTest.java \
-            services/api/src/test/java/com/projectb/api/http/JourneyProducerTest.java
+            services/api/src/test/java/com/projectb/api/http/JourneyProducerTest.java \
+            services/api/src/test/java/com/projectb/api/http/JournalAtomicityTest.java \
+            services/api/src/test/java/com/projectb/api/http/AuthorityBoundaryTest.java
           java -cp "$classes_dir" com.projectb.api.http.JourneyPathTest
           java -cp "$classes_dir" com.projectb.api.http.JourneyProducerTest
+          java -cp "$classes_dir" com.projectb.api.http.JournalAtomicityTest
+          java -cp "$classes_dir" com.projectb.api.http.AuthorityBoundaryTest

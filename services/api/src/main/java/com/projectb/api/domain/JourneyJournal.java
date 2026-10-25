@@ -1,6 +1,8 @@
 package com.projectb.api.domain;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,28 +26,47 @@ import com.projectb.api.json.JsonMini;
 
 /**
  * Append-only command journal for one local journey service.
- * Recovery rebuilds the kernel by applying each successful command once.
+ * A record is visible to the kernel only after its line is durably committed.
+ * Recovery rebuilds from complete lines. A trailing partial line is uncommitted.
+ * A complete but malformed interior record fails closed.
  * A client request body is never copied in as a consent authority.
  */
 public final class JourneyJournal {
+  public interface JournalCommit {
+    void commit(Path path, String line) throws IOException;
+  }
   public record Projection(String tenantId, String journeyId, String versionId, String phasesJson,
                           String contentHash, String publishedAt, String publicationState) {}
   public record EnrollmentLink(String tenantId, String clientId, String versionId,
                                String assignmentId, String enrollmentId) {}
 
   private final Path path;
+  private final JournalCommit sink;
   private final JourneyKernel kernel = new JourneyKernel();
   private final Map<UUID, String> draftPhases = new LinkedHashMap<>();
   private final Map<UUID, Projection> projections = new LinkedHashMap<>();
   private final Map<UUID, EnrollmentLink> enrollments = new LinkedHashMap<>();
 
-  private JourneyJournal(Path path) { this.path = path; }
+  private JourneyJournal(Path path, JournalCommit sink) {
+    this.path = path;
+    this.sink = sink;
+  }
 
   public static JourneyJournal open(Path path) throws IOException {
-    JourneyJournal journal = new JourneyJournal(path);
-    if (Files.exists(path)) {
+    return open(path, DurableCommit.INSTANCE);
+  }
+
+  public static JourneyJournal open(Path path, JournalCommit commit) throws IOException {
+    discardUncommittedTail(path);
+    JourneyJournal journal = new JourneyJournal(path, commit);
+    if (Files.exists(path) && !Files.isDirectory(path)) {
       for (String line : Files.readAllLines(path, StandardCharsets.UTF_8)) {
-        if (!line.isBlank()) journal.apply(line);
+        if (line.isBlank()) continue;
+        try {
+          journal.apply(line);
+        } catch (RuntimeException ex) {
+          throw new IOException("committed journal record is not recoverable", ex);
+        }
       }
     }
     return journal;
@@ -54,72 +75,77 @@ public final class JourneyJournal {
   public JourneyKernel kernel() { return kernel; }
 
   public synchronized DraftView createDraft(Actor actor, String title, String key) throws IOException {
-    DraftView view = kernel.createDraft(actor, actor.tenantId(), title, key);
-    append(command("create", actor, key)
+    DraftView existing = kernel.peekCreate(actor, actor.tenantId(), title, key);
+    if (existing != null) return existing;
+    UUID draftId = UUID.randomUUID();
+    commit(command("create", actor, key)
         + ",\"title\":" + JsonMini.quote(title)
-        + ",\"draft_id\":" + JsonMini.quote(view.draftId().toString()) + "}");
-    return view;
+        + ",\"draft_id\":" + JsonMini.quote(draftId.toString()) + "}");
+    DraftView created = kernel.peekCreate(actor, actor.tenantId(), title, key);
+    if (created == null) throw new IOException("committed create was not visible");
+    return created;
   }
 
   public synchronized DraftView updateDraft(Actor actor, UUID draftId, long expectedRevision,
                                             String title, List<Step> steps, String phasesJson) throws IOException {
-    DraftView view = kernel.updateDraft(actor, actor.tenantId(), draftId, expectedRevision, title, steps);
-    if (phasesJson != null) draftPhases.put(draftId, phasesJson);
-    append(command("update", actor, null)
+    kernel.validateUpdateDraft(actor, actor.tenantId(), draftId, expectedRevision, title, steps);
+    commit(command("update", actor, null)
         + ",\"draft_id\":" + JsonMini.quote(draftId.toString())
         + ",\"expected_revision\":" + expectedRevision
         + ",\"title\":" + JsonMini.quote(title)
         + ",\"steps\":" + stepsJson(steps)
         + (phasesJson == null ? "" : ",\"phases_json\":" + JsonMini.quote(phasesJson)) + "}");
-    return view;
+    return kernel.readDraft(actor, draftId);
   }
 
   public synchronized PublishedView publish(Actor actor, UUID draftId, long expectedRevision,
                                             String key) throws IOException {
-    PublishedView view = kernel.publish(actor, actor.tenantId(), draftId, expectedRevision, key);
+    PublishedView existing = kernel.peekPublish(actor, actor.tenantId(), draftId, expectedRevision, key);
+    if (existing != null) return existing;
+    kernel.validatePublish(actor, actor.tenantId(), draftId, expectedRevision);
+    UUID versionId = UUID.nameUUIDFromBytes((actor.tenantId() + "/" + draftId + "/" + expectedRevision)
+        .getBytes(StandardCharsets.UTF_8));
     String phases = draftPhases.getOrDefault(draftId, "[]");
-    Projection prior = projections.get(view.journeyVersionId());
+    Projection prior = projections.get(versionId);
     String publishedAt = prior == null ? Instant.now().toString() : prior.publishedAt();
     String hash = sha256(phases);
-    projections.put(view.journeyVersionId(), new Projection(actor.tenantId(), view.sourceDraftId().toString(),
-        view.journeyVersionId().toString(), phases, hash, publishedAt,
-        prior == null ? "PUBLISHED" : prior.publicationState()));
-    append(command("publish", actor, key)
+    commit(command("publish", actor, key)
         + ",\"draft_id\":" + JsonMini.quote(draftId.toString())
         + ",\"expected_revision\":" + expectedRevision
-        + ",\"version_id\":" + JsonMini.quote(view.journeyVersionId().toString())
+        + ",\"version_id\":" + JsonMini.quote(versionId.toString())
         + ",\"phases_json\":" + JsonMini.quote(phases)
         + ",\"content_hash\":" + JsonMini.quote(hash)
         + ",\"published_at\":" + JsonMini.quote(publishedAt) + "}");
-    return view;
+    PublishedView published = kernel.peekPublish(actor, actor.tenantId(), draftId, expectedRevision, key);
+    if (published == null) throw new IOException("committed publish was not visible");
+    return published;
   }
 
   public synchronized AssignmentView assign(Actor actor, String clientId, UUID versionId,
                                             boolean consentVerified, String key) throws IOException {
-    AssignmentView view = kernel.assign(actor, actor.tenantId(), clientId, versionId, consentVerified, key);
-    String enrollmentId = UUID.nameUUIDFromBytes(("enrollment/" + view.assignmentId())
+    AssignmentView existing = kernel.peekAssign(actor, actor.tenantId(), clientId, versionId, consentVerified, key);
+    if (existing != null) return existing;
+    kernel.validateAssign(actor, actor.tenantId(), clientId, versionId, consentVerified);
+    UUID assignmentId = UUID.randomUUID();
+    String enrollmentId = UUID.nameUUIDFromBytes(("enrollment/" + assignmentId)
         .getBytes(StandardCharsets.UTF_8)).toString();
-    enrollments.put(UUID.fromString(enrollmentId), new EnrollmentLink(actor.tenantId(), clientId,
-        versionId.toString(), view.assignmentId().toString(), enrollmentId));
-    append(command("assign", actor, key)
+    commit(command("assign", actor, key)
         + ",\"client_id\":" + JsonMini.quote(clientId)
         + ",\"version_id\":" + JsonMini.quote(versionId.toString())
-        + ",\"assignment_id\":" + JsonMini.quote(view.assignmentId().toString())
+        + ",\"assignment_id\":" + JsonMini.quote(assignmentId.toString())
         + ",\"enrollment_id\":" + JsonMini.quote(enrollmentId)
         + ",\"consent_verified\":" + consentVerified + "}");
-    return view;
+    AssignmentView assigned = kernel.peekAssign(actor, actor.tenantId(), clientId, versionId, consentVerified, key);
+    if (assigned == null) throw new IOException("committed assign was not visible");
+    return assigned;
   }
 
   public synchronized PublishedView withdraw(Actor actor, UUID versionId) throws IOException {
-    PublishedView view = kernel.withdraw(actor, actor.tenantId(), versionId);
-    Projection prior = projections.get(versionId);
-    if (prior != null) {
-      projections.put(versionId, new Projection(prior.tenantId(), prior.journeyId(), prior.versionId(),
-          prior.phasesJson(), prior.contentHash(), prior.publishedAt(), "WITHDRAWN"));
-    }
-    append(command("withdraw", actor, null)
+    PublishedView current = kernel.readPublishedForCoach(actor, versionId);
+    if (!"published".equals(current.status())) return current;
+    commit(command("withdraw", actor, null)
         + ",\"version_id\":" + JsonMini.quote(versionId.toString()) + "}");
-    return view;
+    return kernel.readPublishedForCoach(actor, versionId);
   }
 
   public synchronized Projection projection(UUID versionId) { return projections.get(versionId); }
@@ -238,8 +264,48 @@ public final class JourneyJournal {
     }
   }
 
-  private void append(String line) throws IOException {
-    Files.writeString(path, line + "\n", StandardCharsets.UTF_8,
-        StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.DSYNC);
+  private void commit(String line) throws IOException {
+    if (line.indexOf('\n') >= 0 || line.indexOf('\r') >= 0)
+      throw new IOException("journal record must be one line");
+    sink.commit(path, line);
+    apply(line);
+  }
+
+  private static void discardUncommittedTail(Path path) throws IOException {
+    if (!Files.exists(path) || Files.isDirectory(path)) return;
+    byte[] bytes = Files.readAllBytes(path);
+    if (bytes.length == 0 || bytes[bytes.length - 1] == '\n') return;
+    int end = bytes.length - 1;
+    while (end >= 0 && bytes[end] != '\n') end--;
+    try (FileChannel channel = FileChannel.open(path, StandardOpenOption.WRITE)) {
+      channel.truncate(end + 1L);
+      channel.force(true);
+    }
+  }
+
+  static final class DurableCommit implements JournalCommit {
+    static final DurableCommit INSTANCE = new DurableCommit();
+
+    public void commit(Path path, String line) throws IOException {
+      byte[] payload = (line + "\n").getBytes(StandardCharsets.UTF_8);
+      long committed = Files.exists(path) && !Files.isDirectory(path) ? Files.size(path) : 0L;
+      try (FileChannel channel = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+          StandardOpenOption.DSYNC)) {
+        try {
+          channel.position(committed);
+          ByteBuffer buffer = ByteBuffer.wrap(payload);
+          while (buffer.hasRemaining()) {
+            int wrote = channel.write(buffer);
+            if (wrote <= 0) throw new IOException("journal short write");
+          }
+          channel.force(true);
+          if (channel.size() != committed + payload.length) throw new IOException("journal partial commit");
+        } catch (IOException ex) {
+          channel.truncate(committed);
+          channel.force(true);
+          throw ex;
+        }
+      }
+    }
   }
 }

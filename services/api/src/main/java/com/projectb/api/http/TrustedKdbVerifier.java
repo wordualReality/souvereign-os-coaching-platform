@@ -13,6 +13,8 @@ public final class TrustedKdbVerifier {
 
   private TrustedKdbVerifier() {}
 
+  public boolean verifiesLivePublication() { return false; }
+
   public boolean claimsApproval(String phasesJson) {
     return walk(JsonMini.parse(phasesJson));
   }

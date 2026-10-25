@@ -49,9 +49,15 @@ public final class JourneyHttpServer {
     this.consentedClients = consentedClients;
   }
 
+  public static final String LOOPBACK_PROFILE = "TEST_LOOPBACK_ONLY";
+
   public static JourneyHttpServer start(Path journalPath, Map<String, Actor> tokens,
                                         Set<String> consentedClients) throws IOException {
-    JourneyJournal journal = JourneyJournal.open(journalPath);
+    return start(JourneyJournal.open(journalPath), tokens, consentedClients);
+  }
+
+  public static JourneyHttpServer start(JourneyJournal journal, Map<String, Actor> tokens,
+                                        Set<String> consentedClients) throws IOException {
     HttpServer server = HttpServer.create(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 0), 0);
     ExecutorService executor = Executors.newFixedThreadPool(4);
     JourneyHttpServer app = new JourneyHttpServer(server, executor, journal, Map.copyOf(tokens), Set.copyOf(consentedClients));
@@ -59,6 +65,13 @@ public final class JourneyHttpServer {
     server.setExecutor(executor);
     server.start();
     return app;
+  }
+
+  public static JourneyHttpServer startLive(Path journalPath, TrustedPiacVerifier piac, TrustedKdbVerifier kdb) {
+    if (journalPath == null || piac == null || kdb == null
+        || !piac.verifiesLiveIdentity() || !kdb.verifiesLivePublication())
+      throw new IllegalStateException("live runtime closed without verified PIAC and KDB authorities");
+    throw new IllegalStateException("live listener is not admitted in this repair");
   }
 
   public int port() { return server.getAddress().getPort(); }
@@ -76,6 +89,8 @@ public final class JourneyHttpServer {
       send(exchange, status(ex.code), error(ex.code.name(), ex.getMessage(), correlation));
     } catch (IllegalArgumentException ex) {
       send(exchange, 422, error("INVALID", "request does not match the journey contract", correlation));
+    } catch (IOException ex) {
+      send(exchange, 503, error("PERSISTENCE_FAILED", "journal commit failed closed", correlation));
     } catch (RuntimeException ex) {
       send(exchange, 500, error("INTERNAL", "journey service failed closed", correlation));
     }
@@ -87,7 +102,8 @@ public final class JourneyHttpServer {
     if ("GET".equals(method) && path.length == 4 && "project-b".equals(path[1])
         && "v1".equals(path[2]) && "health".equals(path[3])) {
       send(exchange, 200, "{\"data\":{\"status\":\"ready\",\"bind\":\"127.0.0.1\","
-          + "\"runtime\":\"active_http\",\"piac\":\"not_connected\",\"kdb\":\"not_connected\"}}");
+          + "\"profile\":\"" + LOOPBACK_PROFILE + "\",\"runtime\":\"loopback_fixture\","
+          + "\"piac\":\"not_connected\",\"kdb\":\"not_connected\"}}");
       return;
     }
     Actor actor = actor(exchange);
