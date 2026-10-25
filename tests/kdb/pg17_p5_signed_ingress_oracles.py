@@ -37,7 +37,21 @@ def note(code: str, severity: str, detail) -> None:
     print(f"{severity} {code} {detail if isinstance(detail, str) else json.dumps(detail)}")
 
 
+UNEXPECTED = (
+    "could not connect",
+    "connection refused",
+    "does not exist",
+    "syntax error",
+    "division by zero",
+    "invalid input syntax",
+    "server closed the connection",
+)
+
+
 def classify_tenant_spoof(body: str) -> str:
+    lower = (body or "").lower()
+    if any(token in lower for token in UNEXPECTED):
+        return "RED"
     if "KDB_HASH_MISMATCH" in body:
         return "CLOSED"
     if "KDB_SECURITY_CONTEXT_NOT_CONFIGURED" in body:
