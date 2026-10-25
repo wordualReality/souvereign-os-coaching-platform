@@ -79,6 +79,8 @@ jobs:
           python3 tests/kdb/test_hosted_recovery_preflight.py
           python3 scripts/validate_sql_static.py
           python3 tests/kdb/test_p4_digest_static.py
+          python3 tests/kdb/test_p4_oracle_classifier.py
+          python3 tests/kdb/prove_p4_static_fail_propagation.py
           python3 tests/kdb/test_p5_static.py
           python3 tests/kdb/test_signed_ingress.py
       - name: P2 ACL catalog and adversarial characterization
@@ -109,6 +111,7 @@ jobs:
         run: |
           python3 tests/kdb/pg17_p4_digest_fixtures.py
           python3 tests/kdb/pg17_p4_security_oracles.py
+          python3 tests/kdb/pg17_p4_tenant_digest_mutation.py
       - name: P5 SQL-v2 parity and signed ingress oracles
         env:
           KDB_PG17_MODE: libpq

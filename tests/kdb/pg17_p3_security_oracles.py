@@ -26,6 +26,15 @@ INGEST = (
 PROPOSE = "kdb_ops.propose_candidate(uuid,text,uuid,uuid,uuid,bigint,text,text,jsonb,jsonb,text,text,uuid)"
 HANDOFF = "kdb_ops.request_review_handoff(uuid,text,uuid,text,text,text,uuid)"
 UNTRUSTED = ("anon", "authenticated", "service_role", "public")
+UNEXPECTED = (
+    "could not connect",
+    "connection refused",
+    "does not exist",
+    "syntax error",
+    "division by zero",
+    "invalid input syntax",
+    "server closed the connection",
+)
 FINDINGS = []
 
 
@@ -215,8 +224,12 @@ def main() -> None:
         )
         if ok_spoof:
             note("TENANT_GUC_SPOOF_ACCEPTED_AT_DB", "RED", body_spoof)
+        elif any(token in body_spoof.lower() for token in UNEXPECTED):
+            note("TENANT_SPOOF_UNEXPECTED_SQL", "RED", body_spoof[:400])
         elif "KDB_HASH_MISMATCH" in body_spoof:
             note("TENANT_SPOOF_WITH_EXECUTE_STILL_DENIED", "CLOSED", "KDB_HASH_MISMATCH")
+        elif "KDB_SECURITY_CONTEXT_NOT_CONFIGURED" in body_spoof:
+            note("DIGEST_TENANT_BINDING_BROKEN", "RED", "trust denial is not tenant-digest proof")
         else:
             note("TENANT_SPOOF_UNEXPECTED", "RED", body_spoof[:400])
 
