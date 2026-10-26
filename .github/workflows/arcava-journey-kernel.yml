@@ -101,7 +101,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
-      - name: Install Maven 3.9.16 and run the active lifecycle tests
+      - name: Package the executable JAR and run the java -jar lifecycle
         shell: bash
         run: |
           set -euo pipefail
@@ -110,5 +110,7 @@ jobs:
             --output "${RUNNER_TEMP}/maven.tgz" \
             https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.16/apache-maven-3.9.16-bin.tar.gz
           tar -xzf "${RUNNER_TEMP}/maven.tgz" -C "${RUNNER_TEMP}"
-          "${maven_dir}/bin/mvn" -B -f services/api/pom.xml test
+          "${maven_dir}/bin/mvn" -B -f services/api/pom.xml package
+          chmod +x services/api/scripts/jar-lifecycle-smoke.sh
+          services/api/scripts/jar-lifecycle-smoke.sh services/api/target/projectb-api-0.1.0-SNAPSHOT.jar
           echo "This job does not admit live PIAC, live KDB, T150, T020, T050 or T160."

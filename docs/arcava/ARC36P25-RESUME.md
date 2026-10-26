@@ -1,6 +1,6 @@
 # ARC-36/P25 resume pointer
 
-Current package: ARC36P25-SPRING-ACTIVE-RUNTIME-TRUSTED-PORTS-01. Parent `dbe66d1a701397b333e7d25751381b38347e0f17`. ARC-01 and ARC-02 stay closed for that repair. This checkout does not accept the new delta review.
+Current package: ARC36P25-EXECUTABLE-JAR-PACKAGE-LIFECYCLE-01. Parent `45e001fce81c4d8f969acf934a2ecea76bd62110`. The local Spring delta QS is consumed for that commit only. ARC-01 and ARC-02 stay closed. This checkout does not accept the new JAR review.
 
 ## Checkout
 
@@ -10,28 +10,20 @@ Current package: ARC36P25-SPRING-ACTIVE-RUNTIME-TRUSTED-PORTS-01. Parent `dbe66d
 - Do not push `feat/arc36p25-journey-kernel-candidate-20261023`. Do not merge to `main`.
 - The KDB checkout was not modified.
 
-## Active development listener
+## Executable JAR
 
-`Application.ROLE` is `ACTIVE_DEV_HTTP`. It starts Spring Boot 4.1.1 on `127.0.0.1`. `GET /health/live` is 200. `GET /health/ready` is 503 while PIAC and KDB transports are absent. A non-loopback bind fails before the socket opens.
+Without an explicit main class, `spring-boot-maven-plugin:4.1.1:repackage` failed: `Unable to find a single main class from the following candidates [com.projectb.api.Application, com.projectb.api.inactive.InactiveBootstrap]`. The plugin now sets `mainClass` to `com.projectb.api.Application`. `InactiveBootstrap` remains the non-web fixture.
 
-`InactiveBootstrap.ROLE` stays `NON_WEB_INACTIVE_BOOTSTRAP` and does not open a socket. `JourneyHttpServer` stays `TEST_LOOPBACK_ONLY`.
+The repackaged file is `services/api/target/projectb-api-0.1.0-SNAPSHOT.jar`. Manifest: `Main-Class: org.springframework.boot.loader.launch.JarLauncher`, `Start-Class: com.projectb.api.Application`, `Spring-Boot-Version: 4.1.1`.
 
-## Trusted ports
+## Local java -jar evidence
 
-`DenyByDefaultPiacConsumer` and `DenyByDefaultKdbPublicationVerifier` admit no live transport. Null, timeout, stale, error, revoked consent, a fixture bearer, and a caller-supplied `PUBLISHED` pin stay denied. A dummy allow still ends at `LIVE_ADAPTER_NOT_ADMITTED`. Fixture credentials do not authorize `/project-b/` routes. Denied requests do not append to the journal.
-
-Repo A `PiacApplicationService.java` is not in this checkout. Live invocation stays not admitted.
-
-## Local evidence
-
-- JDK 25.0.3, Maven 3.9.16: `mvn -B -f services/api/pom.xml test`, 8 tests, 0 failures. The lifecycle test opened a Tomcat listener, read live and ready, denied fixture traffic, stopped, and restarted on the same journal bytes.
-- JDK 25.0.3: `JourneyKernelTest` 27 checks, `JourneyPathTest`, `JourneyProducerTest`, `JournalAtomicityTest`, `AuthorityBoundaryTest` PASS.
-- `javac --release 21` of the non-Spring sources: exit 0. A JDK 21 runtime is not installed on this Mac. GitHub CI still runs those sources on JDK 21 and JDK 25. The Spring listener job is JDK 25 and Maven 3.9.16.
+Temurin 25.0.3, Maven 3.9.16. `mvn -B -f services/api/pom.xml package` exit 0, 8 tests, 0 failures. `services/api/scripts/jar-lifecycle-smoke.sh` exit 0 on that JAR. SHA-256 `07c3e79b6b23c7d4c9be976e914587ad1c3eaa098139a084a818eef451ee9e0c`. Live 200 with `ACTIVE_DEV_HTTP` and closed authority. Ready 503. Absent bearer 401. Fixture bearer 403 `LIVE_AUTHORITY_CLOSED`. Journal bytes unchanged. SIGTERM exit 143, then the port refused connections. Restart repeated the closed checks. `--server.address=0.0.0.0` exit 1.
 
 ## Not claimed
 
-This is not live PIAC, not a live KDB verification, not T150 acceptance, and not a SOV-ready producer. T020, T050 and T160 stay not admitted. Issue #11 stays open for a different reviewer of this new boundary.
+This is not live PIAC, not a live KDB verification, not T150 acceptance, and not a SOV-ready producer. T020, T050 and T160 stay not admitted. A CI rebuild can hash differently because the archive carries build timestamps. CI must rerun the same smoke on its own JAR.
 
 ## Next executable step
 
-Independent delta review of this Spring and IAM boundary by a reviewer who did not write it. Do not resubmit the unchanged ARC-01 and ARC-02 repair. Do not mark the review passed from this checkout.
+Independent delta review of this packaged JAR boundary by a reviewer who did not write it. Do not resubmit the unchanged Spring listener review or ARC-01 and ARC-02. Do not mark the review passed from this checkout.
