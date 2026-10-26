@@ -82,6 +82,8 @@ jobs:
           python3 tests/kdb/test_p4_oracle_classifier.py
           python3 tests/kdb/prove_p4_static_fail_propagation.py
           python3 tests/kdb/test_p5_static.py
+          python3 tests/kdb/test_p5_trust_denial.py
+          python3 tests/kdb/test_digest_v2_unproven.py
           python3 tests/kdb/test_signed_ingress.py
       - name: P2 ACL catalog and adversarial characterization
         env:

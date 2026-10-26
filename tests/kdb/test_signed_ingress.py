@@ -1,4 +1,5 @@
 """Synthetic signed-ingress negatives. No private key is stored. No tokens logged."""
+import secrets
 import sys
 import unittest
 from pathlib import Path
@@ -37,7 +38,7 @@ def _claims(**overrides):
 
 class SignedIngressTests(unittest.TestCase):
     def setUp(self):
-        self.key = b"x" * 32
+        self.key = secrets.token_bytes(32)
         self.replay = set()
         self.revoked = set()
         self.verifier = SignedIngressVerifier(
@@ -127,6 +128,46 @@ class SignedIngressTests(unittest.TestCase):
         env["mac"] = mac_hex(self.key, env["claims"])
         verdict = self.verifier.verify(env)
         self.assertEqual(verdict["verdict"], "LOCAL_SIGNED_INGRESS_VERIFIED")
+
+    def test_list_kid_is_typed_fail_closed(self):
+        env = self._ok(kid=["kid-1"])
+        with self.assertRaises(SignedIngressError) as ctx:
+            self.verifier.verify(env)
+        self.assertEqual(ctx.exception.code, "SIGNED_INGRESS_MALFORMED")
+
+    def test_dict_kid_is_typed_fail_closed(self):
+        env = self._ok(kid={"kid": "kid-1"})
+        with self.assertRaises(SignedIngressError) as ctx:
+            self.verifier.verify(env)
+        self.assertEqual(ctx.exception.code, "SIGNED_INGRESS_MALFORMED")
+
+    def test_unicode_mac_is_typed_fail_closed(self):
+        env = self._ok()
+        env["mac"] = "ü" * 32
+        with self.assertRaises(SignedIngressError) as ctx:
+            self.verifier.verify(env)
+        self.assertEqual(ctx.exception.code, "SIGNED_INGRESS_MALFORMED")
+
+    def test_non_string_mac_is_typed_fail_closed(self):
+        env = self._ok()
+        env["mac"] = {"hex": "00"}
+        with self.assertRaises(SignedIngressError) as ctx:
+            self.verifier.verify(env)
+        self.assertEqual(ctx.exception.code, "SIGNED_INGRESS_MALFORMED")
+
+    def test_missing_mac_is_typed_fail_closed(self):
+        env = self._ok()
+        del env["mac"]
+        with self.assertRaises(SignedIngressError) as ctx:
+            self.verifier.verify(env)
+        self.assertEqual(ctx.exception.code, "SIGNED_INGRESS_MALFORMED")
+
+    def test_wrong_length_mac_is_bad_signature(self):
+        env = self._ok()
+        env["mac"] = "00"
+        with self.assertRaises(SignedIngressError) as ctx:
+            self.verifier.verify(env)
+        self.assertEqual(ctx.exception.code, "SIGNED_INGRESS_BAD_SIGNATURE")
 
 
 if __name__ == "__main__":

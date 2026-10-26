@@ -7,6 +7,7 @@ stays revoked after probes. Unexpected SQL errors are RED.
 from __future__ import annotations
 
 import json
+import secrets
 import sys
 import uuid
 from pathlib import Path
@@ -16,6 +17,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "services" / "kdb")
 import pg17_disposable_command_path as cmd  # noqa: E402
 from digest_v2 import local_digest, o1_fields, sql_jsonb_build_array  # noqa: E402
 from piac_fail_closed_probe import assert_piac_fail_closed  # noqa: E402
+from p5_trust_denial import (  # noqa: E402
+    TRUST_PSQL_RC,
+    classify_db_fail_closed,
+    error_messages,
+    evaluate_rb02_matrix,
+)
 from signed_ingress import (  # noqa: E402
     DB_NOT_ADMITTED,
     LOCAL_VERIFIED,
@@ -78,6 +85,16 @@ def main() -> None:
         note("TENANT_SPOOF_ORACLE_WEAK", "RED", "trust denial must not pass tenant-binding probe")
     else:
         note("TENANT_SPOOF_ORACLE_MUTATION", "CLOSED", "SECURITY_CONTEXT_NOT_CONFIGURED is not CLOSED")
+    print("RB02_MATRIX_BEGIN")
+    matrix_failed = False
+    for label, code, sev, exp_code, exp_sev in evaluate_rb02_matrix():
+        print("RB02_MATRIX", label, "got", code, sev, "want", exp_code, exp_sev)
+        if (code, sev) != (exp_code, exp_sev):
+            matrix_failed = True
+            note("RB02_MATRIX_CELL_FAILED", "RED", label)
+    print("RB02_MATRIX_END")
+    if not matrix_failed:
+        note("RB02_MATRIX_PASS", "CLOSED", "all required cells")
 
     rights = {
         "rights_status": "ADMITTED",
@@ -181,7 +198,7 @@ def main() -> None:
         else:
             note("OMITTED_TENANT_UNEXPECTED", "RED", omitted_body[:400])
 
-        key = b"p5-ephemeral-hmac-key-32-bytes!!"
+        key = secrets.token_bytes(32)
         replay = set()
         verifier = SignedIngressVerifier(
             keys={"kid-p5": key},
@@ -212,29 +229,53 @@ def main() -> None:
             "command_id": command_id,
             "access_decision_ref": "SYNTHETIC_ALLOW",
         }
+        db_state: dict[str, object] = {}
+
+        def ingest_kwargs() -> dict:
+            return {
+                "command_id": command_id,
+                "submission_id": submission_id,
+                "tenant": tenant_a,
+                "origin": origin,
+                "idem": idem,
+                "request_sha": sql_digest,
+                "source_class": source_class,
+                "locator": locator,
+                "content_sha": content_sha,
+                "rights_json": rights_json,
+                "rights_sha": rights_pg,
+                "principal": principal,
+                "access": access,
+                "purpose": purpose,
+                "correlation_id": str(uuid.uuid4()),
+            }
 
         def db_attempt() -> str:
-            proc = cmd.psql(
-                cmd.USER_RUNTIME,
-                cmd.ingest_sql(
-                    command_id=command_id,
-                    submission_id=submission_id,
-                    tenant=tenant_a,
-                    origin=origin,
-                    idem=idem,
-                    request_sha=sql_digest,
-                    source_class=source_class,
-                    locator=locator,
-                    content_sha=content_sha,
-                    rights_json=rights_json,
-                    rights_sha=rights_pg,
-                    principal=principal,
-                    access=access,
-                    purpose=purpose,
-                    correlation_id=str(uuid.uuid4()),
-                ),
-            )
-            return (proc.stdout + proc.stderr).strip()
+            proc = cmd.psql(cmd.USER_RUNTIME, cmd.ingest_sql(**ingest_kwargs()))
+            body = (proc.stdout + proc.stderr).strip()
+            db_state["rc"] = proc.returncode
+            db_state["body"] = body
+            print("CLAIM TRUST_FAIL_CLOSED")
+            print("PSQL_RC", proc.returncode)
+            return body
+
+        missing = cmd.psql(superuser, "SELECT kdb_ops.no_such_ingest_source();")
+        miss_code, miss_sev = classify_db_fail_closed(
+            psql_rc=missing.returncode, body=(missing.stdout + missing.stderr)
+        )
+        if miss_sev == "CLOSED":
+            note("MISSING_ROUTINE_CLASSIFIED_CLOSED", "RED", miss_code)
+        else:
+            note("MISSING_ROUTINE_IS_RED", "CLOSED", miss_code)
+
+        wrong_role = cmd.psql(superuser, cmd.ingest_sql(**ingest_kwargs()))
+        role_code, role_sev = classify_db_fail_closed(
+            psql_rc=wrong_role.returncode, body=(wrong_role.stdout + wrong_role.stderr)
+        )
+        if role_sev == "CLOSED":
+            note("WRONG_ROLE_CLASSIFIED_AS_TRUST", "RED", role_code)
+        else:
+            note("WRONG_ROLE_NOT_TRUST_CLOSED", "CLOSED", role_code)
 
         try:
             result = SignedIngressPipeline(verifier).evaluate(
@@ -246,17 +287,53 @@ def main() -> None:
         except SignedIngressError as exc:
             note("SIGNED_PIPELINE_FAILED", "RED", exc.code)
         else:
+            trust_code, trust_sev = classify_db_fail_closed(
+                psql_rc=int(db_state.get("rc", 1)),
+                body=str(db_state.get("body") or result["db_denial"]),
+            )
+            print("ORACLE_CODE", trust_code)
+            print("ORACLE_SEVERITY", trust_sev)
+            live_errors = error_messages(str(db_state.get("body") or ""))
+            print("LIVE_ERROR_LINE_COUNT", len(live_errors))
+            if len(live_errors) != 1:
+                note("LIVE_INGEST_NOT_SINGLE_ERROR", "RED", live_errors)
             if result["local_signed_ingress"] != LOCAL_VERIFIED:
                 note("LOCAL_SIGNED_INGRESS_MISSING", "RED", result)
             elif result["db_command"] != DB_NOT_ADMITTED:
                 note("DB_COMMAND_ADMITTED", "RED", result)
-            elif "KDB_SECURITY_CONTEXT_NOT_CONFIGURED" not in result["db_denial"] and "permission denied" not in result["db_denial"]:
-                note("DB_DENIAL_UNEXPECTED", "RED", result["db_denial"])
+            elif int(db_state.get("rc", 1)) != TRUST_PSQL_RC:
+                note("LIVE_TRUST_WRONG_PSQL_RC", "RED", db_state.get("rc"))
+            elif trust_sev != "CLOSED" or trust_code != "TRUST_FAIL_CLOSED":
+                note("DB_FAIL_CLOSED_NOT_EXACT", "RED", {"code": trust_code, "body": result["db_denial"]})
+            elif len(live_errors) != 1:
+                pass
             else:
                 note("LOCAL_SIGNED_INGRESS_VERIFIED", "CLOSED", "synthetic MAC recognized")
                 note("DB_COMMAND_NOT_ADMITTED", "CLOSED", result["db_denial"][:120])
                 print("SIGNATURE_NEGATIVE_PASS")
                 print("DB_FAIL_CLOSED_PASS")
+
+        print("P5_GRANT_STRIP_MUTATION")
+        set_runtime_execute(False)
+        stripped = cmd.psql(cmd.USER_RUNTIME, cmd.ingest_sql(**ingest_kwargs()))
+        stripped_body = (stripped.stdout + stripped.stderr).strip()
+        strip_code, strip_sev = classify_db_fail_closed(
+            psql_rc=stripped.returncode, body=stripped_body
+        )
+        print("PSQL_RC", stripped.returncode)
+        print("ORACLE_CODE", strip_code)
+        print("ORACLE_SEVERITY", strip_sev)
+        if strip_sev == "CLOSED" or "DB_FAIL_CLOSED_PASS" in strip_code:
+            note("PERMISSION_DENIED_MISREPORTED_AS_TRUST", "RED", stripped_body[:300])
+        elif strip_code != "PERMISSION_DENIED_NOT_TRUST":
+            note("GRANT_STRIP_UNEXPECTED", "RED", {"code": strip_code, "body": stripped_body[:300]})
+        else:
+            note(
+                "GRANT_STRIP_MUTATION_KILLED",
+                "CLOSED",
+                "permission denied is not DB_FAIL_CLOSED_PASS",
+            )
+        set_runtime_execute(True)
     finally:
         set_runtime_execute(False)
         leftover = cmd.must(

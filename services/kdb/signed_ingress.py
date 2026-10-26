@@ -23,6 +23,16 @@ class SignedIngressError(Exception):
         super().__init__(code)
 
 
+def _ascii_str(value: object, *, code: str = "SIGNED_INGRESS_MALFORMED") -> str:
+    if not isinstance(value, str):
+        raise SignedIngressError(code)
+    try:
+        value.encode("ascii")
+    except UnicodeEncodeError as exc:
+        raise SignedIngressError(code) from exc
+    return value
+
+
 def _canonical_claims(claims: dict[str, Any]) -> bytes:
     return json.dumps(claims, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
@@ -70,9 +80,9 @@ class SignedIngressVerifier:
         if self.revocation_store is None:
             raise SignedIngressError(REVOCATION_UNAVAILABLE)
         claims = envelope.get("claims")
-        presented = envelope.get("mac")
-        if not isinstance(claims, dict) or not isinstance(presented, str):
+        if not isinstance(claims, dict) or "mac" not in envelope:
             raise SignedIngressError("SIGNED_INGRESS_MALFORMED")
+        presented = _ascii_str(envelope.get("mac"))
         for field in self.required:
             if field not in claims or claims[field] in (None, ""):
                 raise SignedIngressError("SIGNED_INGRESS_MISSING_CLAIM")
@@ -81,6 +91,8 @@ class SignedIngressVerifier:
         if claims.get("aud") != self.audience:
             raise SignedIngressError("SIGNED_INGRESS_WRONG_AUDIENCE")
         kid = claims["kid"]
+        if not isinstance(kid, str):
+            raise SignedIngressError("SIGNED_INGRESS_MALFORMED")
         if kid in self.revocation_store:
             raise SignedIngressError("SIGNED_INGRESS_REVOKED")
         key = self.keys.get(kid)

@@ -21,12 +21,33 @@ class DigestContractError(ValueError):
         super().__init__(code if not detail else f"{code}:{detail}")
 
 
+def assert_proven_scalar(value: object) -> None:
+    """O1/O2/O3 adapter fields proven against PostgreSQL 17 golden vectors.
+
+    Proven: None, str, int. Nested dict/list, float, bool, bytes and other
+    types stay CANONICAL_DIGEST_CONTRACT_UNRESOLVED. Do not infer a new
+    SQL-v2 wire type from Python json.dumps.
+    """
+    if value is None:
+        return
+    if isinstance(value, bool) or isinstance(value, float):
+        raise DigestContractError(UNRESOLVED, type(value).__name__)
+    if isinstance(value, int):
+        return
+    if isinstance(value, str):
+        return
+    raise DigestContractError(UNRESOLVED, type(value).__name__)
+
+
 def pg_jsonb_array_text(values: Sequence[object]) -> str:
     """Local encoder aimed at PostgreSQL 17 jsonb array ::text.
 
     Proven only against golden vectors. A mismatch is unresolved, not a guess.
     """
-    return json.dumps(list(values), ensure_ascii=False, separators=(", ", ": "), sort_keys=True)
+    proven = list(values)
+    for value in proven:
+        assert_proven_scalar(value)
+    return json.dumps(proven, ensure_ascii=False, separators=(", ", ": "), sort_keys=True)
 
 
 def digest_hex_from_jsonb_text(text: str) -> str:
@@ -123,15 +144,11 @@ def sql_jsonb_build_array(values: Sequence[object]) -> str:
     """SQL fragment for jsonb_build_array over Python values. Superuser tests only."""
     parts = []
     for value in values:
+        assert_proven_scalar(value)
         if value is None:
             parts.append("NULL")
-        elif isinstance(value, bool):
-            parts.append("true" if value else "false")
-        elif isinstance(value, int) and not isinstance(value, bool):
+        elif isinstance(value, int):
             parts.append(f"{value}::bigint" if abs(value) > 2_147_483_647 else str(value))
-        elif isinstance(value, (dict, list)):
-            raw = json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
-            parts.append("'" + raw.replace("'", "''") + "'::jsonb")
         else:
             text = str(value).replace("'", "''")
             parts.append("'" + text + "'")
