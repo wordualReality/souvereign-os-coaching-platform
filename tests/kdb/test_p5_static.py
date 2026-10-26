@@ -48,6 +48,8 @@ class P5Static(unittest.TestCase):
         )
         self.assertIn("GRANT_STRIP_MUTATION", oracles)
         self.assertIn("primary_error_message", classifier)
+        self.assertIn("error_messages", classifier)
+        self.assertIn("MULTIPLE_PRIMARY_ERRORS", classifier)
         self.assertNotIn(
             'if "KDB_SECURITY_CONTEXT_NOT_CONFIGURED" in blob:',
             classifier,

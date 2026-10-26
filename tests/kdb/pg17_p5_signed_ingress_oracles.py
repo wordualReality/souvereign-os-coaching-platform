@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "services" / "kdb")
 import pg17_disposable_command_path as cmd  # noqa: E402
 from digest_v2 import local_digest, o1_fields, sql_jsonb_build_array  # noqa: E402
 from piac_fail_closed_probe import assert_piac_fail_closed  # noqa: E402
-from p5_trust_denial import classify_db_fail_closed  # noqa: E402
+from p5_trust_denial import classify_db_fail_closed, error_messages  # noqa: E402
 from signed_ingress import (  # noqa: E402
     DB_NOT_ADMITTED,
     LOCAL_VERIFIED,
@@ -86,6 +86,12 @@ def main() -> None:
         note("TRUST_CLASSIFIER_ACCEPTS_DETAIL_SPOOF", "RED", spoof_code)
     else:
         note("TRUST_CLASSIFIER_REJECTS_DETAIL_SPOOF", "CLOSED", spoof_code)
+    dual_spoof = "ERROR:  KDB_SECURITY_CONTEXT_NOT_CONFIGURED\nERROR:  KDB_OTHER_FAILURE"
+    dual_code, dual_sev = classify_db_fail_closed(psql_rc=3, body=dual_spoof)
+    if dual_sev == "CLOSED":
+        note("TRUST_CLASSIFIER_ACCEPTS_SECOND_ERROR", "RED", dual_code)
+    else:
+        note("TRUST_CLASSIFIER_REJECTS_SECOND_ERROR", "CLOSED", dual_code)
 
     rights = {
         "rights_status": "ADMITTED",
@@ -284,12 +290,18 @@ def main() -> None:
             )
             print("ORACLE_CODE", trust_code)
             print("ORACLE_SEVERITY", trust_sev)
+            live_errors = error_messages(str(db_state.get("body") or ""))
+            print("LIVE_ERROR_LINE_COUNT", len(live_errors))
+            if len(live_errors) != 1:
+                note("LIVE_INGEST_NOT_SINGLE_ERROR", "RED", live_errors)
             if result["local_signed_ingress"] != LOCAL_VERIFIED:
                 note("LOCAL_SIGNED_INGRESS_MISSING", "RED", result)
             elif result["db_command"] != DB_NOT_ADMITTED:
                 note("DB_COMMAND_ADMITTED", "RED", result)
             elif trust_sev != "CLOSED" or trust_code != "TRUST_FAIL_CLOSED":
                 note("DB_FAIL_CLOSED_NOT_EXACT", "RED", {"code": trust_code, "body": result["db_denial"]})
+            elif len(live_errors) != 1:
+                pass
             else:
                 note("LOCAL_SIGNED_INGRESS_VERIFIED", "CLOSED", "synthetic MAC recognized")
                 note("DB_COMMAND_NOT_ADMITTED", "CLOSED", result["db_denial"][:120])

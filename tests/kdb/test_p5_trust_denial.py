@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from p5_trust_denial import classify_db_fail_closed, primary_error_message
+from p5_trust_denial import classify_db_fail_closed, error_messages, primary_error_message
 
 
 CLEAN_PG17 = (
@@ -79,6 +79,22 @@ class TrustDenialClassifier(unittest.TestCase):
         code, sev = classify_db_fail_closed(psql_rc=3, body=DETAIL_SPOOF)
         self.assertEqual(sev, "RED")
         self.assertNotEqual(code, "TRUST_FAIL_CLOSED")
+
+    def test_second_error_line_is_red(self):
+        dual = (
+            "ERROR:  KDB_SECURITY_CONTEXT_NOT_CONFIGURED\n"
+            "ERROR:  KDB_OTHER_FAILURE"
+        )
+        self.assertEqual(
+            error_messages(dual),
+            ["KDB_SECURITY_CONTEXT_NOT_CONFIGURED", "KDB_OTHER_FAILURE"],
+        )
+        code, sev = classify_db_fail_closed(psql_rc=3, body=dual)
+        self.assertEqual(code, "MULTIPLE_PRIMARY_ERRORS")
+        self.assertEqual(sev, "RED")
+
+    def test_clean_pg17_shape_is_one_error_line(self):
+        self.assertEqual(error_messages(CLEAN_PG17), ["KDB_SECURITY_CONTEXT_NOT_CONFIGURED"])
 
 
 if __name__ == "__main__":
