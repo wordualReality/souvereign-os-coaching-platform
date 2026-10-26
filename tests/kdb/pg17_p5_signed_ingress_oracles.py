@@ -17,7 +17,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "services" / "kdb")
 import pg17_disposable_command_path as cmd  # noqa: E402
 from digest_v2 import local_digest, o1_fields, sql_jsonb_build_array  # noqa: E402
 from piac_fail_closed_probe import assert_piac_fail_closed  # noqa: E402
-from p5_trust_denial import classify_db_fail_closed, error_messages  # noqa: E402
+from p5_trust_denial import (  # noqa: E402
+    TRUST_PSQL_RC,
+    classify_db_fail_closed,
+    error_messages,
+    evaluate_rb02_matrix,
+)
 from signed_ingress import (  # noqa: E402
     DB_NOT_ADMITTED,
     LOCAL_VERIFIED,
@@ -80,18 +85,16 @@ def main() -> None:
         note("TENANT_SPOOF_ORACLE_WEAK", "RED", "trust denial must not pass tenant-binding probe")
     else:
         note("TENANT_SPOOF_ORACLE_MUTATION", "CLOSED", "SECURITY_CONTEXT_NOT_CONFIGURED is not CLOSED")
-    detail_spoof = "ERROR:  KDB_OTHER_FAILURE\nDETAIL:  KDB_SECURITY_CONTEXT_NOT_CONFIGURED"
-    spoof_code, spoof_sev = classify_db_fail_closed(psql_rc=3, body=detail_spoof)
-    if spoof_sev == "CLOSED":
-        note("TRUST_CLASSIFIER_ACCEPTS_DETAIL_SPOOF", "RED", spoof_code)
-    else:
-        note("TRUST_CLASSIFIER_REJECTS_DETAIL_SPOOF", "CLOSED", spoof_code)
-    dual_spoof = "ERROR:  KDB_SECURITY_CONTEXT_NOT_CONFIGURED\nERROR:  KDB_OTHER_FAILURE"
-    dual_code, dual_sev = classify_db_fail_closed(psql_rc=3, body=dual_spoof)
-    if dual_sev == "CLOSED":
-        note("TRUST_CLASSIFIER_ACCEPTS_SECOND_ERROR", "RED", dual_code)
-    else:
-        note("TRUST_CLASSIFIER_REJECTS_SECOND_ERROR", "CLOSED", dual_code)
+    print("RB02_MATRIX_BEGIN")
+    matrix_failed = False
+    for label, code, sev, exp_code, exp_sev in evaluate_rb02_matrix():
+        print("RB02_MATRIX", label, "got", code, sev, "want", exp_code, exp_sev)
+        if (code, sev) != (exp_code, exp_sev):
+            matrix_failed = True
+            note("RB02_MATRIX_CELL_FAILED", "RED", label)
+    print("RB02_MATRIX_END")
+    if not matrix_failed:
+        note("RB02_MATRIX_PASS", "CLOSED", "all required cells")
 
     rights = {
         "rights_status": "ADMITTED",
@@ -298,6 +301,8 @@ def main() -> None:
                 note("LOCAL_SIGNED_INGRESS_MISSING", "RED", result)
             elif result["db_command"] != DB_NOT_ADMITTED:
                 note("DB_COMMAND_ADMITTED", "RED", result)
+            elif int(db_state.get("rc", 1)) != TRUST_PSQL_RC:
+                note("LIVE_TRUST_WRONG_PSQL_RC", "RED", db_state.get("rc"))
             elif trust_sev != "CLOSED" or trust_code != "TRUST_FAIL_CLOSED":
                 note("DB_FAIL_CLOSED_NOT_EXACT", "RED", {"code": trust_code, "body": result["db_denial"]})
             elif len(live_errors) != 1:

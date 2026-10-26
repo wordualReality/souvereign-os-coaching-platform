@@ -1,29 +1,31 @@
-"""Exact trust-denial oracle. Secondary-line mentions cannot pass DB_FAIL_CLOSED."""
+"""RB02 trust-denial matrix. Exit-code and transport checks are mandatory."""
 import sys
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from p5_trust_denial import classify_db_fail_closed, error_messages, primary_error_message
-
-
-CLEAN_PG17 = (
-    "ERROR:  KDB_SECURITY_CONTEXT_NOT_CONFIGURED\n"
-    "CONTEXT:  PL/pgSQL function kdb_ops.ingest_source(uuid,uuid,text,text,text,"
-    "text,text,text,text,jsonb,text,text,text,text,uuid,timestamp with time zone) "
-    "line 21 at RAISE"
-)
-DETAIL_SPOOF = (
-    "ERROR:  KDB_OTHER_FAILURE\n"
-    "DETAIL:  KDB_SECURITY_CONTEXT_NOT_CONFIGURED"
-)
-CONTEXT_SPOOF = (
-    "ERROR:  KDB_OTHER_FAILURE\n"
-    "CONTEXT:  KDB_SECURITY_CONTEXT_NOT_CONFIGURED"
+from p5_trust_denial import (
+    CLEAN_PG17,
+    CONTEXT_SPOOF,
+    DETAIL_SPOOF,
+    DUAL_ERROR,
+    GRANT_STRIP,
+    classify_db_fail_closed,
+    error_messages,
+    evaluate_rb02_matrix,
+    primary_error_message,
 )
 
 
 class TrustDenialClassifier(unittest.TestCase):
+    def test_rb02_matrix(self):
+        failed = []
+        for label, code, sev, exp_code, exp_sev in evaluate_rb02_matrix():
+            print("RB02_MATRIX", label, "got", code, sev, "want", exp_code, exp_sev)
+            if (code, sev) != (exp_code, exp_sev):
+                failed.append((label, (code, sev), (exp_code, exp_sev)))
+        self.assertEqual(failed, [])
+
     def test_exact_pg17_security_context(self):
         self.assertEqual(primary_error_message(CLEAN_PG17), "KDB_SECURITY_CONTEXT_NOT_CONFIGURED")
         code, sev = classify_db_fail_closed(psql_rc=3, body=CLEAN_PG17)
@@ -48,9 +50,7 @@ class TrustDenialClassifier(unittest.TestCase):
         self.assertEqual(sev, "RED")
 
     def test_permission_denied_is_red(self):
-        code, sev = classify_db_fail_closed(
-            psql_rc=3, body="ERROR:  permission denied for function ingest_source"
-        )
+        code, sev = classify_db_fail_closed(psql_rc=3, body=GRANT_STRIP)
         self.assertEqual(code, "PERMISSION_DENIED_NOT_TRUST")
         self.assertEqual(sev, "RED")
 
@@ -74,27 +74,23 @@ class TrustDenialClassifier(unittest.TestCase):
             _code, sev = classify_db_fail_closed(psql_rc=2, body=body)
             self.assertEqual(sev, "RED", body)
 
-    def test_substring_classifier_would_have_passed_detail_spoof(self):
-        self.assertIn("KDB_SECURITY_CONTEXT_NOT_CONFIGURED", DETAIL_SPOOF)
-        code, sev = classify_db_fail_closed(psql_rc=3, body=DETAIL_SPOOF)
-        self.assertEqual(sev, "RED")
-        self.assertNotEqual(code, "TRUST_FAIL_CLOSED")
-
     def test_second_error_line_is_red(self):
-        dual = (
-            "ERROR:  KDB_SECURITY_CONTEXT_NOT_CONFIGURED\n"
-            "ERROR:  KDB_OTHER_FAILURE"
-        )
         self.assertEqual(
-            error_messages(dual),
+            error_messages(DUAL_ERROR),
             ["KDB_SECURITY_CONTEXT_NOT_CONFIGURED", "KDB_OTHER_FAILURE"],
         )
-        code, sev = classify_db_fail_closed(psql_rc=3, body=dual)
+        code, sev = classify_db_fail_closed(psql_rc=3, body=DUAL_ERROR)
         self.assertEqual(code, "MULTIPLE_PRIMARY_ERRORS")
         self.assertEqual(sev, "RED")
 
     def test_clean_pg17_shape_is_one_error_line(self):
         self.assertEqual(error_messages(CLEAN_PG17), ["KDB_SECURITY_CONTEXT_NOT_CONFIGURED"])
+
+    def test_fatal_before_trust_closed(self):
+        body = CLEAN_PG17 + "\nFATAL:  terminating connection due to administrator command"
+        code, sev = classify_db_fail_closed(psql_rc=3, body=body)
+        self.assertEqual(code, "TRANSPORT_OR_FATAL")
+        self.assertEqual(sev, "RED")
 
 
 if __name__ == "__main__":

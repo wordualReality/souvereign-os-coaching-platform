@@ -50,6 +50,9 @@ class P5Static(unittest.TestCase):
         self.assertIn("primary_error_message", classifier)
         self.assertIn("error_messages", classifier)
         self.assertIn("MULTIPLE_PRIMARY_ERRORS", classifier)
+        self.assertIn("TRUST_PSQL_RC = 3", classifier)
+        self.assertIn("TRANSPORT_OR_FATAL", classifier)
+        self.assertIn("WRONG_PSQL_RC", classifier)
         self.assertNotIn(
             'if "KDB_SECURITY_CONTEXT_NOT_CONFIGURED" in blob:',
             classifier,
