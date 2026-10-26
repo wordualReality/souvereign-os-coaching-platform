@@ -80,6 +80,12 @@ def main() -> None:
         note("TENANT_SPOOF_ORACLE_WEAK", "RED", "trust denial must not pass tenant-binding probe")
     else:
         note("TENANT_SPOOF_ORACLE_MUTATION", "CLOSED", "SECURITY_CONTEXT_NOT_CONFIGURED is not CLOSED")
+    detail_spoof = "ERROR:  KDB_OTHER_FAILURE\nDETAIL:  KDB_SECURITY_CONTEXT_NOT_CONFIGURED"
+    spoof_code, spoof_sev = classify_db_fail_closed(psql_rc=3, body=detail_spoof)
+    if spoof_sev == "CLOSED":
+        note("TRUST_CLASSIFIER_ACCEPTS_DETAIL_SPOOF", "RED", spoof_code)
+    else:
+        note("TRUST_CLASSIFIER_REJECTS_DETAIL_SPOOF", "CLOSED", spoof_code)
 
     rights = {
         "rights_status": "ADMITTED",
@@ -284,8 +290,6 @@ def main() -> None:
                 note("DB_COMMAND_ADMITTED", "RED", result)
             elif trust_sev != "CLOSED" or trust_code != "TRUST_FAIL_CLOSED":
                 note("DB_FAIL_CLOSED_NOT_EXACT", "RED", {"code": trust_code, "body": result["db_denial"]})
-            elif "KDB_SECURITY_CONTEXT_NOT_CONFIGURED" not in str(db_state.get("body") or ""):
-                note("DB_DENIAL_UNEXPECTED", "RED", result["db_denial"])
             else:
                 note("LOCAL_SIGNED_INGRESS_VERIFIED", "CLOSED", "synthetic MAC recognized")
                 note("DB_COMMAND_NOT_ADMITTED", "CLOSED", result["db_denial"][:120])

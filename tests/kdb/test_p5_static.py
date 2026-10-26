@@ -40,12 +40,18 @@ class P5Static(unittest.TestCase):
 
     def test_trust_denial_is_exact(self):
         oracles = (ROOT / "tests" / "kdb" / "pg17_p5_signed_ingress_oracles.py").read_text()
+        classifier = (ROOT / "tests" / "kdb" / "p5_trust_denial.py").read_text()
         self.assertIn("classify_db_fail_closed", oracles)
         self.assertNotIn(
             'and "permission denied" not in result["db_denial"]',
             oracles,
         )
         self.assertIn("GRANT_STRIP_MUTATION", oracles)
+        self.assertIn("primary_error_message", classifier)
+        self.assertNotIn(
+            'if "KDB_SECURITY_CONTEXT_NOT_CONFIGURED" in blob:',
+            classifier,
+        )
 
     def test_ci_runs_p5_review_delta_tests(self):
         self.assertIn("python3 tests/kdb/test_digest_v2_unproven.py", WF)

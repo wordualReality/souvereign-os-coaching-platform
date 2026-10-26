@@ -2,7 +2,7 @@
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: GitHub Issue #16 routing comment 6403074928
+Active packet: GitHub Issue #16 Owner-QS comment 6414426075 (KDB-P5-TRUST-ORACLE-RB01)
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2` remain frozen.
 This pointer is `kdb/m01-p5-review-delta` from accepted PR20 SHA `a2b55c23`. Older G21-07 STOP text does not cancel the grant.
@@ -18,9 +18,10 @@ This pointer is `kdb/m01-p5-review-delta` from accepted PR20 SHA `a2b55c23`. Old
 ## P5 review delta
 
 Typed fail-closed signed-ingress errors, runtime synthetic HMAC keys, exact
-`KDB_SECURITY_CONTEXT_NOT_CONFIGURED` trust denial, and unresolved unproven
-SQL-v2 adapter types. Positive O1-O3 remains `BLOCKED_FAIL_CLOSED_UNTIL_TRUST_ATTESTED`.
-Hosted apply remains blocked. Accepted KDB-01/KDB-02 is not replayed.
+primary `ERROR: KDB_SECURITY_CONTEXT_NOT_CONFIGURED` trust denial (DETAIL/CONTEXT
+mentions are RED), and unresolved unproven SQL-v2 adapter types. Positive O1-O3
+remains `BLOCKED_FAIL_CLOSED_UNTIL_TRUST_ATTESTED`. Hosted apply remains blocked.
+Accepted KDB-01/KDB-02 is not replayed.
 
 ## Setup already reported once
 
