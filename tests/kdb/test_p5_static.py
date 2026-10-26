@@ -29,8 +29,27 @@ class P5Static(unittest.TestCase):
 
     def test_no_checked_in_hmac_secret(self):
         ingress = (ROOT / "services" / "kdb" / "signed_ingress.py").read_text()
+        tests = (ROOT / "tests" / "kdb" / "test_signed_ingress.py").read_text()
+        oracles = (ROOT / "tests" / "kdb" / "pg17_p5_signed_ingress_oracles.py").read_text()
         self.assertNotIn("BEGIN PRIVATE", ingress)
         self.assertIn("REVOCATION_PROOF_UNAVAILABLE", ingress)
+        self.assertNotIn('b"x" * 32', tests)
+        self.assertNotIn("p5-ephemeral-hmac-key-32-bytes!!", oracles)
+        self.assertIn("secrets.token_bytes(32)", tests)
+        self.assertIn("secrets.token_bytes(32)", oracles)
+
+    def test_trust_denial_is_exact(self):
+        oracles = (ROOT / "tests" / "kdb" / "pg17_p5_signed_ingress_oracles.py").read_text()
+        self.assertIn("classify_db_fail_closed", oracles)
+        self.assertNotIn(
+            'and "permission denied" not in result["db_denial"]',
+            oracles,
+        )
+        self.assertIn("GRANT_STRIP_MUTATION", oracles)
+
+    def test_ci_runs_p5_review_delta_tests(self):
+        self.assertIn("python3 tests/kdb/test_digest_v2_unproven.py", WF)
+        self.assertIn("python3 tests/kdb/test_p5_trust_denial.py", WF)
 
 
 if __name__ == "__main__":
