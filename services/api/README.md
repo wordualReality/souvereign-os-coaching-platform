@@ -1,28 +1,13 @@
-# Arcava Backend — Source-Locked Spring Boot Bootstrap Candidate
+# Arcava Backend: Local Development HTTP Lifecycle
 
-This is an **unapplied, unbuilt candidate** for `ARC-36/ARC-P25`, `ARC10-T150`.
-The original `Project B API Skeleton` was an uncompiled Java console placeholder.
+This slice is `ARC-36/P25` step 7/10. It starts a Spring Boot 4.1.1 servlet listener for local development. The listener binds to `127.0.0.1`.
 
-Proposed toolchain: Spring Boot **4.1.1**, Java **25** and Apache Maven **3.9.16**.
-The Maven parent BOM governs framework/plugin dependency versions. An actual
-Maven wrapper or pinned distribution integrity check, resolved dependency
-checksums, Java compilation and test receipts are **not yet available**.
+`Application.ROLE` is `ACTIVE_DEV_HTTP`. `InactiveBootstrap.ROLE` remains `NON_WEB_INACTIVE_BOOTSTRAP` and does not open a socket.
 
-The new application class explicitly starts in **non-web mode**. No controllers
-are registered as HTTP endpoints; all pre-existing controller placeholders
-remain unchanged. No database driver, external provider, broker or worker is
-added. No application network service is enabled by this slice.
+`GET /health/live` reports the process is up. `GET /health/ready` stays 503 while PIAC and KDB transports are absent. Routes under `/project-b/` deny every bearer, including local fixture tokens. Request fields such as `consent_verified`, publication pins and `runtime_session_refs` are not authority.
 
-No Maven build, startup, dependency download, security scan, G01/PIAC read,
-A09-T01/T44/T48 runtime test or T150 acceptance is claimed. Do not run `mvn`
-or download dependencies without a separately admitted owner-scoped build gate.
+The journal is the existing append-only file. Denied HTTP requests do not append to it. `JourneyHttpServer` remains the separate `TEST_LOOPBACK_ONLY` fixture.
 
-After owner admission and verification of Maven distribution integrity, the
-future build step may verify real `mvn -B test` and `mvn -B package` in a
-network-restricted environment and add test evidence without enabling
-external calls. Until then treat all code as a candidate only, not active
-runtime or implementation acceptance.
+Live PIAC, live KDB, T150, T020, T050 and T160 stay not admitted. The canonical contracts are `/contracts/openapi/project-b-v1.json` and `/contracts/openapi/project-b-v1.1-overlay.json`. This listener does not replace them.
 
-Canonical contracts remain `/contracts/openapi/project-b-v1.json` and
-`/contracts/openapi/project-b-v1.1-overlay.json`. The candidate does not
-implement or replace these contracts.
+Local check: Temurin 25 and Maven 3.9.16, `mvn -B -f services/api/pom.xml test`.

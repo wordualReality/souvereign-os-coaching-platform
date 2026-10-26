@@ -86,3 +86,29 @@ jobs:
           java -cp "$classes_dir" com.projectb.api.http.JourneyProducerTest
           java -cp "$classes_dir" com.projectb.api.http.JournalAtomicityTest
           java -cp "$classes_dir" com.projectb.api.http.AuthorityBoundaryTest
+
+  journey-active-dev-http:
+    name: Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up isolated Java toolchain
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Install Maven 3.9.16 and run the active lifecycle tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          maven_dir="${RUNNER_TEMP}/apache-maven-3.9.16"
+          curl --fail --silent --show-error --location \
+            --output "${RUNNER_TEMP}/maven.tgz" \
+            https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.16/apache-maven-3.9.16-bin.tar.gz
+          tar -xzf "${RUNNER_TEMP}/maven.tgz" -C "${RUNNER_TEMP}"
+          "${maven_dir}/bin/mvn" -B -f services/api/pom.xml test
+          echo "This job does not admit live PIAC, live KDB, T150, T020, T050 or T160."

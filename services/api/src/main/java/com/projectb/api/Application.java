@@ -1,20 +1,18 @@
 package com.projectb.api;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Inactive Arcava backend framework bootstrap.
- * No endpoints, database, workers or providers are admitted by this main class.
- * The loopback producer listener is JourneyHttpServer and is not started here.
+ * Local development HTTP process.
+ * This role is the active development listener. The inactive role lives on InactiveBootstrap.
+ * Protected routes stay closed until a real PIAC verifier and a real KDB verifier are connected.
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.projectb.api.active")
 public class Application {
-  public static final String ROLE = "NON_WEB_INACTIVE_BOOTSTRAP";
+  public static final String ROLE = "ACTIVE_DEV_HTTP";
+
   public static void main(String[] args) {
-    SpringApplication app = new SpringApplication(Application.class);
-    app.setWebApplicationType(WebApplicationType.NONE);
-    app.run(args);
+    SpringApplication.run(Application.class, args);
   }
 }

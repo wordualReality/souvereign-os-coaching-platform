@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.projectb.api.http.JourneyHttpServer;
 import com.projectb.api.http.TrustedKdbVerifier;
 import com.projectb.api.http.TrustedPiacVerifier;
+import com.projectb.api.inactive.InactiveBootstrap;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringApplicationRunListener;
 import org.springframework.boot.WebApplicationType;
@@ -19,13 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Executes Application.main and checks the inactive bootstrap contract.
- * The production main class admits a non-web context and no database bean.
+ * The inactive bootstrap stays non-web.
+ * Application.main is the separate active development listener.
  */
 class ApplicationBootstrapTest {
 
   @Test
-  void mainAdmitsInactiveNonWebBootstrap() {
+  void inactiveBootstrapStaysNonWeb() {
     AtomicReference<SpringApplication> application = new AtomicReference<>();
     AtomicReference<ConfigurableApplicationContext> context = new AtomicReference<>();
     SpringApplication.withHook(
@@ -38,17 +39,17 @@ class ApplicationBootstrapTest {
             }
           };
         },
-        () -> Application.main(new String[0]));
+        () -> InactiveBootstrap.main(new String[0]));
     ConfigurableApplicationContext started = context.get();
     try {
       assertThat(application.get()).isNotNull();
       assertThat(application.get().getWebApplicationType()).isEqualTo(WebApplicationType.NONE);
       assertThat(started).isInstanceOf(AnnotationConfigApplicationContext.class);
       assertThat(started.isActive()).isTrue();
-      assertThat(started.getBean(Application.class)).isNotNull();
+      assertThat(started.getBean(InactiveBootstrap.class)).isNotNull();
       assertThat(started.containsBean("dataSource")).isFalse();
       assertThat(started.containsBean("journeyHttpServer")).isFalse();
-      assertThat(Application.ROLE).isEqualTo("NON_WEB_INACTIVE_BOOTSTRAP");
+      assertThat(InactiveBootstrap.ROLE).isEqualTo("NON_WEB_INACTIVE_BOOTSTRAP");
     } finally {
       if (started != null) {
         started.close();
@@ -62,7 +63,8 @@ class ApplicationBootstrapTest {
     assertThatThrownBy(() -> JourneyHttpServer.startLive(journal, TrustedPiacVerifier.NONE, TrustedKdbVerifier.NONE))
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("live runtime closed");
-    assertThat(Application.ROLE).isEqualTo("NON_WEB_INACTIVE_BOOTSTRAP");
+    assertThat(InactiveBootstrap.ROLE).isEqualTo("NON_WEB_INACTIVE_BOOTSTRAP");
+    assertThat(Application.ROLE).isEqualTo("ACTIVE_DEV_HTTP");
     assertThat(Files.exists(journal)).isFalse();
   }
 }
