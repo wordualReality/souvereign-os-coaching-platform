@@ -13,8 +13,10 @@ class P5Static(unittest.TestCase):
         self.assertIn("python3 tests/kdb/test_p4_digest_static.py", WF)
         self.assertIn("python3 tests/kdb/test_p5_static.py", WF)
         self.assertIn("python3 tests/kdb/test_signed_ingress.py", WF)
+        self.assertIn("python3 tests/kdb/test_sov_proof_consumer_offline.py", WF)
         self.assertIn("python3 tests/kdb/pg17_p5_sql_v2_parity.py", WF)
         self.assertIn("python3 tests/kdb/pg17_p5_signed_ingress_oracles.py", WF)
+        self.assertIn("python3 tests/kdb/pg17_p5_sov_proof_consumer_negatives.py", WF)
 
     def test_tenant_spoof_requires_hash_mismatch(self):
         self.assertIn('elif "KDB_HASH_MISMATCH" in body_spoof:', P3)

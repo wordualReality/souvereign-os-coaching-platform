@@ -7,5 +7,6 @@
   "o5": "INACTIVE_NO_IMPORT_NO_ENDPOINT",
   "human_review_decision": "NO_AUTOMATED_WRITER",
   "promotion": "NO_EXECUTABLE_M01_COMMAND",
-  "outbox_dispatch": "INACTIVE_M01"
+  "outbox_dispatch": "INACTIVE_M01",
+  "sov_piac_proof_consumer_v1": "DISABLED_CONTRACT_ONLY"
 }

@@ -1,0 +1,21 @@
+{
+  "proof_version": "PIAC_DECISION_PROOF_V1",
+  "admission": "synthetic tests only",
+  "cases": [
+    {"code": "DENIED", "when": "read ALLOW, loose profile, or a signed decision other than ALLOW"},
+    {"code": "REVOKED", "when": "revoked evidence, epoch mismatch, or a stale epoch at verification"},
+    {"code": "STALE", "when": "session or proof window is not current"},
+    {"code": "PRECONDITION_FAILED", "when": "required tenant, consent, or entitlement evidence is absent"},
+    {"code": "SIGNATURE_INVALID", "when": "signature bytes do not verify"},
+    {"code": "CLAIM_MISMATCH", "when": "principal, subject, session, tenant, purpose, resource, grant, or command id differs"},
+    {"code": "UNKNOWN_KEY", "when": "kid is absent from the trust set"},
+    {"code": "UNKNOWN_SCHEMA", "when": "proof version or envelope is not PIAC_DECISION_PROOF_V1"},
+    {"code": "AUTHORITY_NOT_CONFIGURED", "when": "live signing custody is absent"},
+    {"code": "DIGEST_MISMATCH", "when": "presented command bytes do not match request_sha256"},
+    {"code": "AUDIENCE_MISMATCH", "when": "audience differs"},
+    {"code": "EXPIRED", "when": "now is not before exp"},
+    {"code": "NOT_YET_VALID", "when": "now is before nbf or iat"},
+    {"code": "REPLAY", "when": "an accepted jti is presented again, including concurrent use"},
+    {"code": "DIGEST_CONTRACT_UNRESOLVED", "when": "command version, field count, or scalar type is outside SQL v2"}
+  ]
+}

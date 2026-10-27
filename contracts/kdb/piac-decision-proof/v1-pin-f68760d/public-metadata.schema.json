@@ -1,0 +1,14 @@
+{
+  "title": "PIAC decision proof public metadata",
+  "additionalProperties": false,
+  "required": ["kid", "algorithm", "proof_version", "issuer", "public_key_spki_base64url", "rotation"],
+  "properties": {
+    "kid": {"type": "string", "description": "Derived from the public key."},
+    "algorithm": {"const": "Ed25519"},
+    "proof_version": {"const": "PIAC_DECISION_PROOF_V1"},
+    "issuer": {"type": "string", "description": "Proof issuer. Distinct from the identity issuer."},
+    "public_key_spki_base64url": {"type": "string", "description": "SPKI public key. Not a signing key."},
+    "rotation": {"type": "string"}
+  },
+  "live_trust_anchor": false
+}
