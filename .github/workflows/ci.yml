@@ -44,6 +44,7 @@ jobs:
         run: |
           set -euo pipefail
           npm ci
-          chmod +x apps/web/scripts/renderer-smoke.sh
+          chmod +x apps/web/scripts/renderer-smoke.sh apps/web/scripts/operator-web.sh
           apps/web/scripts/renderer-smoke.sh
+          apps/web/scripts/operator-web.sh
           echo "This job does not admit live PIAC, live KDB, T150, T020, T050 or T160."

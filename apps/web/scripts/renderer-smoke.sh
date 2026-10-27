@@ -14,6 +14,7 @@ node_version=$(node -v)
 echo "NODE $node_version"
 node -e 'const p=require("./package.json"); const l=require("./package-lock.json"); const n=p.dependencies.next; if(l.packages["node_modules/next"].version!==n) process.exit(1); console.log("LOCK next="+n+" react="+p.dependencies.react)'
 
+export NEXT_TELEMETRY_DISABLED=1
 npm run web:build
 
 work=$(mktemp -d)

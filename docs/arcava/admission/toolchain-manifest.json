@@ -1,6 +1,6 @@
 {
-  "package": "ARC36P25-T150-OPERATOR-ENV-EVIDENCE-01",
-  "parent": "ab20302a4344207095d6f478b5ce2dfee762dda4",
+  "package": "ARC36P25-T150-OPERATOR-EFFECTIVE-CONFIG-ADMISSION-01",
+  "parent": "2ddd2ba9d2bdf28e7d019df6217651879c49be54",
   "pointer": "ARC-36/P25 step 7/10",
   "t150": "PARTIAL",
   "toolchain": {
@@ -43,9 +43,16 @@
     "unknown_process": "UNKNOWN"
   },
   "operator": {
-    "OPERATOR_START": "REQUIRED_OPEN",
-    "OPERATOR_STOP": "REQUIRED_OPEN",
-    "reason": "The java -jar smoke is a developer lifecycle check. It is not an admitted operator procedure.",
+    "OPERATOR_START": "EXERCISED_LOCAL",
+    "OPERATOR_STOP": "EXERCISED_LOCAL",
+    "OPERATOR_READY": "EXERCISED_LOCAL",
+    "OPERATOR_RESTART": "EXERCISED_LOCAL",
+    "UNKNOWN": "EXERCISED_LOCAL",
+    "RECOVERY": "EXERCISED_LOCAL",
+    "hosted_admission": "NOT_ADMITTED",
+    "reason": "Local procedures started, stopped, restarted and recovered the JAR and the Next shell on 127.0.0.1. This is not a hosted operator admission.",
+    "jar_receipt": "live 200, ready 503, effective schema pass, journal redacted and unchanged, SIGTERM 143, dead pid UNKNOWN, crash 137, recovery HTTP 200, non-loopback exit 1, blank journal exit 1",
+    "web_receipt": "four routes HTTP 200, SIGTERM 143, dead pid UNKNOWN, crash 137, recovery HTTP 200, telemetry disabled, forbidden env refused",
     "NON_WEB_NOT_APPLICABLE": "not inherited by ACTIVE_DEV_HTTP"
   },
   "frontend": {
@@ -72,6 +79,7 @@
     "A09-T01": "NOT_EXECUTED",
     "A09-T04": "NOT_EXECUTED",
     "A09-T44": "NOT_EXECUTED",
-    "A09-T48": "NOT_EXECUTED"
+    "A09-T48": "NOT_EXECUTED",
+    "missing": "This worktree contains no executable case for A09-T01, A09-T04, A09-T44 or A09-T48."
   }
 }

@@ -111,6 +111,7 @@ jobs:
             https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.16/apache-maven-3.9.16-bin.tar.gz
           tar -xzf "${RUNNER_TEMP}/maven.tgz" -C "${RUNNER_TEMP}"
           "${maven_dir}/bin/mvn" -B -f services/api/pom.xml package
-          chmod +x services/api/scripts/jar-lifecycle-smoke.sh
+          chmod +x services/api/scripts/jar-lifecycle-smoke.sh services/api/scripts/operator-active-dev.sh
           services/api/scripts/jar-lifecycle-smoke.sh services/api/target/projectb-api-0.1.0-SNAPSHOT.jar
+          services/api/scripts/operator-active-dev.sh services/api/target/projectb-api-0.1.0-SNAPSHOT.jar
           echo "This job does not admit live PIAC, live KDB, T150, T020, T050 or T160."

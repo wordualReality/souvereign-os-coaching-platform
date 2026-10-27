@@ -14,4 +14,4 @@ The packaged artifact starts with `com.projectb.api.Application`. `InactiveBoots
 
 Local check: Temurin 25 and Maven 3.9.16, `mvn -B -f services/api/pom.xml package`, then `services/api/scripts/jar-lifecycle-smoke.sh services/api/target/projectb-api-0.1.0-SNAPSHOT.jar`. The smoke requires HTTP 200 on `/health/live` and HTTP 403 on a fixture bearer. A denial body with HTTP 200 does not pass. The non-loopback start is bounded to 10 seconds.
 
-`OPERATOR_START` and `OPERATOR_STOP` stay open. This developer command is not an admitted operator procedure. The web renderer, runner and lock are unverified.
+`services/api/scripts/operator-active-dev.sh` starts, checks ready, reads a redacted effective config, stops, classifies a dead pid as UNKNOWN, and recovers the same journal. That local procedure is exercised. It is not a hosted operator admission. The web lock stays a registry proposal.

@@ -11,7 +11,7 @@
     "validate:rls": "python scripts/validate_rls_static.py",
     "validate:e2e-skeleton": "python scripts/validate_mvp_slice_01.py",
     "validate:all": "python scripts/validate_repo.py && python scripts/validate_openapi.py && python scripts/validate_json_schemas.py && python scripts/validate_sql_static.py && python scripts/validate_rls_static.py && python scripts/validate_mvp_slice_01.py",
-    "web:build": "next build apps/web",
+    "web:build": "NEXT_TELEMETRY_DISABLED=1 next build apps/web",
     "web:start": "next start apps/web --hostname 127.0.0.1"
   },
   "dependencies": {
