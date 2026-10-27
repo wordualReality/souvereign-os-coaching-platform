@@ -20,10 +20,15 @@ else
 fi
 
 work=$(mktemp -d)
+refuse_pid=""
 cleanup() {
   if [[ -n "${pid:-}" ]] && kill -0 "$pid" >/dev/null 2>&1; then
     kill -TERM "$pid" >/dev/null 2>&1 || true
     wait "$pid" >/dev/null 2>&1 || true
+  fi
+  if [[ -n "${refuse_pid}" ]] && kill -0 "$refuse_pid" >/dev/null 2>&1; then
+    kill -TERM "$refuse_pid" >/dev/null 2>&1 || true
+    wait "$refuse_pid" >/dev/null 2>&1 || true
   fi
   rm -rf "$work"
 }
@@ -81,14 +86,33 @@ stop_jar() {
   fi
 }
 
+# A denial body on HTTP 200 is not a closed route. The status is the oracle.
+deny_status_closed() {
+  local code=$1
+  local body=$2
+  if [[ "$code" == "200" ]]; then
+    return 1
+  fi
+  [[ "$code" == "403" ]] || return 1
+  grep -q 'LIVE_AUTHORITY_CLOSED' <<<"$body"
+}
+
+if deny_status_closed 200 '{"error":{"code":"LIVE_AUTHORITY_CLOSED"}}'; then
+  echo "oracle accepted an http 200 denial body" >&2
+  exit 1
+fi
+echo "ORACLE_HTTP200_WITH_DENIAL_BODY_FAILS"
+
 check_http() {
   local port=$1
-  local live ready denied absent
-  live=$(curl --silent --show-error --max-time 3 "http://127.0.0.1:${port}/health/live")
-  echo "LIVE $live"
-  grep -q 'ACTIVE_DEV_HTTP' <<<"$live"
-  grep -q '"live_authority":"closed"' <<<"$live"
-  if grep -q 'NON_WEB_INACTIVE_BOOTSTRAP' <<<"$live"; then
+  local live_code ready denied_code denied absent
+  live_code=$(curl --silent --show-error --output "$work/live.body" --write-out '%{http_code}' --max-time 3 \
+    "http://127.0.0.1:${port}/health/live")
+  echo "LIVE_HTTP $live_code"
+  [[ "$live_code" == "200" ]]
+  grep -q 'ACTIVE_DEV_HTTP' "$work/live.body"
+  grep -q '"live_authority":"closed"' "$work/live.body"
+  if grep -q 'NON_WEB_INACTIVE_BOOTSTRAP' "$work/live.body"; then
     return 1
   fi
   ready=$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 3 \
@@ -101,13 +125,15 @@ check_http() {
     --data '{"consent_verified":true}')
   echo "ABSENT_BEARER $absent"
   [[ "$absent" == "401" ]]
-  denied=$(curl --silent --show-error --max-time 3 \
+  denied_code=$(curl --silent --show-error --output "$work/denied.body" --write-out '%{http_code}' --max-time 3 \
     -X POST "http://127.0.0.1:${port}/project-b/v1/tenants/11111111-1111-4111-8111-111111111111/producers/CT-ARC-004" \
     -H 'authorization: Bearer coach-a' \
     -H 'content-type: application/json' \
     --data '{"consent_verified":true,"publication_state":"PUBLISHED","runtime_session_refs":["sov-session"],"forged-grant":true}')
+  denied=$(cat "$work/denied.body")
+  echo "DENIED_HTTP $denied_code"
   echo "DENIED $denied"
-  grep -q 'LIVE_AUTHORITY_CLOSED' <<<"$denied"
+  deny_status_closed "$denied_code" "$denied"
   if grep -q 'sov-session' <<<"$denied" || grep -q 'forged-grant' <<<"$denied"; then
     return 1
   fi
@@ -134,16 +160,31 @@ echo "RESTART_JOURNAL_UNCHANGED $restarted"
 stop_jar
 
 refuse_log="$work/refuse.log"
-set +e
 java -jar "$jar_path" \
   --spring.profiles.active=dev \
   --server.address=0.0.0.0 \
   --server.port="$(free_port)" \
   --arcava.journal.path="$work/refuse.ndjson" \
-  >"$refuse_log" 2>&1
+  >"$refuse_log" 2>&1 &
+refuse_pid=$!
+refuse_done=0
+for _ in $(seq 1 50); do
+  if ! kill -0 "$refuse_pid" >/dev/null 2>&1; then
+    refuse_done=1
+    break
+  fi
+  sleep 0.2
+done
+if [[ "$refuse_done" -ne 1 ]]; then
+  echo "NON_LOOPBACK_TIMEOUT bound=10s" >&2
+  exit 1
+fi
+set +e
+wait "$refuse_pid"
 refuse_status=$?
 set -e
+refuse_pid=""
 echo "NON_LOOPBACK_EXIT $refuse_status"
 [[ "$refuse_status" -ne 0 ]]
 grep -q 'non-loopback' "$refuse_log"
-echo "PASS jar_lifecycle live=200 ready=503 denied=closed journal=unchanged stop=terminated restart=closed"
+echo "PASS jar_lifecycle live_http=200 ready_http=503 denied_http=403 absent_http=401 journal=unchanged stop=terminated restart=closed nonloopback_bounded=10s"

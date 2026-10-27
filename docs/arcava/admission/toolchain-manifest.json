@@ -1,0 +1,63 @@
+{
+  "package": "ARC36P25-T150-OPERATOR-ENV-EVIDENCE-01",
+  "parent": "ab20302a4344207095d6f478b5ce2dfee762dda4",
+  "pointer": "ARC-36/P25 step 7/10",
+  "t150": "PARTIAL",
+  "toolchain": {
+    "java": "Temurin 25.0.3",
+    "java_build": "25.0.3+9-LTS",
+    "maven": "3.9.16",
+    "spring_boot": "4.1.1",
+    "verified_utc": "2026-10-27T12:12:53Z"
+  },
+  "artifact": {
+    "path": "services/api/target/projectb-api-0.1.0-SNAPSHOT.jar",
+    "main_class": "org.springframework.boot.loader.launch.JarLauncher",
+    "start_class": "com.projectb.api.Application",
+    "spring_boot_version": "4.1.1",
+    "local_sha256": "07c3e79b6b23c7d4c9be976e914587ad1c3eaa098139a084a818eef451ee9e0c",
+    "prior_ci_sha256_ab20302": "e7e2a2f837f0e7f5aab47be3d67c39114d4ca0465bbfb42db89971e5f054ca5f",
+    "byte_parity_across_builds": false,
+    "provenance": "Archive timestamps differ between machines. The smoke checks Main-Class, Start-Class and Spring-Boot-Version. Equal SHA-256 is not required."
+  },
+  "commands": {
+    "package": "mvn -B -f services/api/pom.xml package",
+    "package_exit": 0,
+    "maven_tests": "8 tests, 0 failures",
+    "start": "java -jar services/api/target/projectb-api-0.1.0-SNAPSHOT.jar --spring.profiles.active=dev --server.address=127.0.0.1 --server.port=<free> --arcava.journal.path=<temp>/journal.ndjson",
+    "smoke": "services/api/scripts/jar-lifecycle-smoke.sh services/api/target/projectb-api-0.1.0-SNAPSHOT.jar",
+    "smoke_exit": 0,
+    "stop": "SIGTERM",
+    "stop_exit": 143
+  },
+  "runtime": {
+    "role": "ACTIVE_DEV_HTTP",
+    "operator_classification": "ACTIVE_HTTP_LISTENER",
+    "bind": "127.0.0.1",
+    "health_live": 200,
+    "health_ready_while_authorities_absent": 503,
+    "piac": "not_connected",
+    "kdb": "not_connected",
+    "journal": "synthetic temporary ndjson, unchanged by denied HTTP",
+    "pids": [83824, 83906],
+    "unknown_process": "UNKNOWN"
+  },
+  "operator": {
+    "OPERATOR_START": "REQUIRED_OPEN",
+    "OPERATOR_STOP": "REQUIRED_OPEN",
+    "reason": "The java -jar smoke is a developer lifecycle check. It is not an admitted operator procedure.",
+    "NON_WEB_NOT_APPLICABLE": "not inherited by ACTIVE_DEV_HTTP"
+  },
+  "frontend": {
+    "renderer": "UNVERIFIED",
+    "runner": "UNVERIFIED",
+    "lock": "UNVERIFIED",
+    "observed": "apps/web contains route skeletons and README.md. This worktree has no apps/web/package.json and no package lock."
+  },
+  "not_executed": {
+    "A09-T01": "NOT_EXECUTED",
+    "A09-T04": "NOT_EXECUTED",
+    "A09-T44": "NOT_EXECUTED",
+    "A09-T48": "NOT_EXECUTED"
+  }
+}
