@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "services" / "kdb"))
 import pg17_disposable_command_path as cmd  # noqa: E402
-from digest_v2 import local_digest, sql_jsonb_build_array  # noqa: E402
+from digest_v2 import local_digest, pg_jsonb_array_text, sql_jsonb_build_array  # noqa: E402
 from p5_trust_denial import classify_db_fail_closed  # noqa: E402
 from sov_proof_consumer import (  # noqa: E402
     CONSUMER_DISABLED,
@@ -76,6 +76,23 @@ def main() -> None:
         note("ADAPTER_SQL_MISMATCH", "RED", sql_digest)
     else:
         note("ADAPTER_SQL_PARITY", "CLOSED", sql_digest[:16])
+
+    bf_fields = list(fields)
+    bf_fields[7] = "synthetic://kdb/p5/a\b\f"
+    local_bf = pg_jsonb_array_text(bf_fields)
+    if r"\b" not in local_bf or r"\f" not in local_bf or r"\u0008" in local_bf or r"\u000c" in local_bf:
+        note("BACKSPACE_FORMFEED_NOT_SHORT_ESCAPE", "RED", local_bf)
+    sql_bf_text = cmd.must(cmd.USER_SUPER, f"SELECT {sql_jsonb_build_array(bf_fields)}::jsonb::text;")
+    sql_bf_digest = cmd.must(
+        cmd.USER_SUPER,
+        f"SELECT kdb_ops.canonical_digest_v2({sql_jsonb_build_array(bf_fields)});",
+    )
+    if local_bf != sql_bf_text:
+        note("BACKSPACE_FORMFEED_TEXT_MISMATCH", "RED", {"local": local_bf, "sql": sql_bf_text})
+    elif local_digest(bf_fields) != sql_bf_digest:
+        note("BACKSPACE_FORMFEED_DIGEST_MISMATCH", "RED", sql_bf_digest)
+    else:
+        note("BACKSPACE_FORMFEED_PG17_PARITY", "CLOSED", sql_bf_digest[:16])
 
     receipts_before = cmd.must(cmd.USER_SUPER, "SELECT count(*) FROM kdb_ops.command_receipt;")
 

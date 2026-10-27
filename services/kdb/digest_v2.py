@@ -35,6 +35,10 @@ def assert_proven_scalar(value: object) -> None:
     if isinstance(value, int):
         return
     if isinstance(value, str):
+        try:
+            value.encode("utf-8")
+        except UnicodeEncodeError as exc:
+            raise DigestContractError(UNRESOLVED, "lone surrogate") from exc
         return
     raise DigestContractError(UNRESOLVED, type(value).__name__)
 

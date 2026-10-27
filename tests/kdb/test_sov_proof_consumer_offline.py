@@ -5,6 +5,7 @@ import hashlib
 import json
 import pathlib
 import sys
+import threading
 import unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "services" / "kdb"))
@@ -13,15 +14,21 @@ from ed25519_pure import publickey, signature, verify  # noqa: E402
 from facade import KdbCommandFacade  # noqa: E402
 from piac import PiacVerificationError  # noqa: E402
 from sov_proof_consumer import (  # noqa: E402
+    COMMAND_CLAIM_BINDINGS,
     CONSUMER_DISABLED,
     DB_NOT_ADMITTED,
     LOCAL_VERIFIED,
+    MAX_CHARS,
+    MAX_NESTING,
     NEEDS_SOV_SECURITY_QS,
+    OBSERVED_PRODUCER_SHA_NOT_ADOPTED,
     PIN_SHA,
     PAYLOAD_KEYS,
+    ProofPublicMetadata,
     SovProofConsumer,
     SovProofError,
     activation_flag,
+    canonical_json,
     consumer_enabled_by_flags,
 )
 from sov_proof_fixtures import (  # noqa: E402
@@ -59,6 +66,9 @@ class PinContractTests(unittest.TestCase):
         self.assertEqual(pin["producer_sha"], PIN_SHA)
         self.assertFalse(pin["normative_adoption"])
         self.assertEqual(pin["security_admission"], NEEDS_SOV_SECURITY_QS)
+        self.assertEqual(pin["observed_producer_sha_not_adopted"], OBSERVED_PRODUCER_SHA_NOT_ADOPTED)
+        self.assertEqual(pin["observed_artifact_blobs_identical"], 8)
+        self.assertFalse(pin["pin_advanced"])
         pairs = (
             ("proof-envelope.schema.json", "proof-envelope.schema.sha256"),
             ("public-metadata.schema.json", "public-metadata.schema.sha256"),
@@ -279,6 +289,121 @@ class ConsumerOfflineTests(unittest.TestCase):
         facade = (ROOT / "services" / "kdb" / "facade.py").read_text()
         self.assertNotIn("sov_proof_consumer", facade)
         self.assertNotIn("DB_COMMAND_ADMITTED", facade)
+
+    def test_each_signed_claim_binds_presented_command_field(self):
+        for index, claim, reason in COMMAND_CLAIM_BINDINGS:
+            with self.subTest(claim=claim):
+                fields = list(o1_ascii_fields())
+                fields[index] = "mutated-" + claim
+                payload = claims(self.authority, request_sha256=local_digest(fields))
+                env = envelope(self.authority, payload=payload)
+                expected = expected_context(command_fields=fields)
+                exc = self._raise(env, expected, "CLAIM_MISMATCH")
+                self.assertEqual(exc.reason, reason)
+
+    def test_trust_dict_key_must_match_metadata_kid(self):
+        meta = self.authority.metadata
+        with self.assertRaises(SovProofError) as ctx:
+            SovProofConsumer(
+                enabled=True,
+                trust={"wrong-kid": meta},
+                replay_store=set(),
+                now=lambda: NOW,
+            )
+        self.assertEqual(ctx.exception.code, "UNKNOWN_KEY")
+
+    def test_trust_algorithm_must_be_ed25519(self):
+        meta = self.authority.metadata
+        bad = ProofPublicMetadata(
+            kid=meta.kid,
+            algorithm="HMAC-SHA256",
+            proof_version=meta.proof_version,
+            issuer=meta.issuer,
+            public_key_spki_base64url=meta.public_key_spki_base64url,
+            rotation=meta.rotation,
+        )
+        with self.assertRaises(SovProofError) as ctx:
+            SovProofConsumer(
+                enabled=True,
+                trust={meta.kid: bad},
+                replay_store=set(),
+                now=lambda: NOW,
+            )
+        self.assertEqual(ctx.exception.code, "UNKNOWN_KEY")
+
+    def test_trust_kid_must_derive_from_spki(self):
+        meta = self.authority.metadata
+        other = EphemeralAuthority()
+        spoofed = ProofPublicMetadata(
+            kid=meta.kid,
+            algorithm=meta.algorithm,
+            proof_version=meta.proof_version,
+            issuer=meta.issuer,
+            public_key_spki_base64url=other.metadata.public_key_spki_base64url,
+            rotation=meta.rotation,
+        )
+        with self.assertRaises(SovProofError) as ctx:
+            SovProofConsumer(
+                enabled=True,
+                trust={meta.kid: spoofed},
+                replay_store=set(),
+                now=lambda: NOW,
+            )
+        self.assertEqual(ctx.exception.code, "UNKNOWN_KEY")
+
+    def test_concurrent_same_jti_one_replay(self):
+        env = envelope(self.authority)
+        expected = expected_context()
+        shared: set[str] = set()
+        results: list[str] = []
+        barrier = threading.Barrier(2)
+
+        def run() -> None:
+            consumer = SovProofConsumer(
+                enabled=True,
+                trust={self.authority.metadata.kid: self.authority.metadata},
+                replay_store=shared,
+                now=lambda: NOW,
+            )
+            barrier.wait()
+            try:
+                verdict = consumer.evaluate(env, expected)
+                results.append(str(verdict["verdict"]))
+            except SovProofError as exc:
+                results.append(exc.code)
+
+        workers = [threading.Thread(target=run), threading.Thread(target=run)]
+        for worker in workers:
+            worker.start()
+        for worker in workers:
+            worker.join()
+        self.assertEqual(sorted(results), sorted([LOCAL_VERIFIED, "REPLAY"]))
+
+    def test_lone_surrogate_is_unknown_schema(self):
+        with self.assertRaises(SovProofError) as ctx:
+            canonical_json({"k": "\ud800"})
+        self.assertEqual(ctx.exception.code, "UNKNOWN_SCHEMA")
+
+    def test_envelope_too_large(self):
+        blob = "{" + ("a" * (MAX_CHARS + 1)) + "}"
+        with self.assertRaises(SovProofError) as ctx:
+            self.consumer.evaluate(blob, expected_context())
+        self.assertEqual(ctx.exception.code, "UNKNOWN_SCHEMA")
+
+    def test_envelope_too_deep(self):
+        nested: object = []
+        for _ in range(MAX_NESTING):
+            nested = [nested]
+        env = {
+            "alg": "Ed25519",
+            "kid": "x",
+            "payload": nested,
+            "proof_version": "PIAC_DECISION_PROOF_V1",
+            "signature": "x",
+        }
+        with self.assertRaises(SovProofError) as ctx:
+            self.consumer.evaluate(json.dumps(env), expected_context())
+        self.assertEqual(ctx.exception.code, "UNKNOWN_SCHEMA")
 
 
 if __name__ == "__main__":

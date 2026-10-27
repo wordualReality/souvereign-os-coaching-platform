@@ -9,6 +9,12 @@ trust anchor, and not normative adoption by KDB. The producer is OPEN/DRAFT
 and has known authorization findings at pin time. `NEEDS_SOV_SECURITY_QS`
 remains a named dependency.
 
+Observed producer HEAD `0ad4516ee819684f5ce1ce381c688400e800700b` was compared
+on 2026-10-27. The eight schema, vector, and sidecar-hash files are
+byte-identical to this pin. The pin is not advanced. SOV security QS is still
+pending. Entitlement-tenant and consent subject/recipient binding remain
+producer findings.
+
 A later repaired SOV contract must be compared by SHA, schema hashes, and
 golden vectors before any pin change. Silent updates are forbidden.
 

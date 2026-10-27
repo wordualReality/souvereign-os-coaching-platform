@@ -64,6 +64,17 @@ class P5Static(unittest.TestCase):
         self.assertIn("python3 tests/kdb/test_digest_v2_unproven.py", WF)
         self.assertIn("python3 tests/kdb/test_p5_trust_denial.py", WF)
 
+    def test_consumer_binds_all_source_intake_claims(self):
+        consumer = (ROOT / "services" / "kdb" / "sov_proof_consumer.py").read_text()
+        self.assertIn("COMMAND_CLAIM_BINDINGS", consumer)
+        self.assertIn('"origin_owner"', consumer)
+        self.assertIn('"source_class"', consumer)
+        self.assertIn('"external_locator"', consumer)
+        self.assertIn('"idempotency_key"', consumer)
+        self.assertIn('"submission_id"', consumer)
+        self.assertIn("_REPLAY_LOCK", consumer)
+        self.assertIn("lone surrogate", consumer)
+
 
 if __name__ == "__main__":
     unittest.main()

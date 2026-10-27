@@ -75,6 +75,18 @@ class UnprovenDigestTypes(unittest.TestCase):
             local_digest(["v2", b"nope"])
         self.assertEqual(ctx.exception.code, UNRESOLVED)
 
+    def test_lone_surrogate_unresolved(self):
+        with self.assertRaises(DigestContractError) as ctx:
+            local_digest(["v2", "\ud800"])
+        self.assertEqual(ctx.exception.code, UNRESOLVED)
+
+    def test_backspace_formfeed_use_short_escapes(self):
+        text = pg_jsonb_array_text(["v2", "a\bb", "c\fd"])
+        self.assertIn(r"\b", text)
+        self.assertIn(r"\f", text)
+        self.assertNotIn(r"\u0008", text)
+        self.assertNotIn(r"\u000c", text)
+
 
 if __name__ == "__main__":
     unittest.main()

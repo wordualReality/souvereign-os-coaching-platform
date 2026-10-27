@@ -7,5 +7,8 @@
   "normative_adoption": false,
   "security_admission": "NEEDS_SOV_SECURITY_QS",
   "kdb_admission": "LOCAL_VERIFIED_ONLY_NEVER_DB_COMMAND_ADMITTED",
-  "known_producer_findings": "OPEN/DRAFT at pin; entitlement tenant binding and consent subject/recipient binding are producer findings, not KDB repairs"
+  "known_producer_findings": "OPEN/DRAFT at pin; entitlement tenant binding and consent subject/recipient binding are producer findings, not KDB repairs",
+  "observed_producer_sha_not_adopted": "0ad4516ee819684f5ce1ce381c688400e800700b",
+  "observed_artifact_blobs_identical": 8,
+  "pin_advanced": false
 }

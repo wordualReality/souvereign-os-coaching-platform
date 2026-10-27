@@ -9,6 +9,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import threading
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -28,7 +29,25 @@ DB_NOT_ADMITTED = "DB_COMMAND_NOT_ADMITTED"
 CONSUMER_DISABLED = "CONSUMER_DISABLED"
 NEEDS_SOV_SECURITY_QS = "NEEDS_SOV_SECURITY_QS"
 PIN_SHA = "f68760d799831ff260f99eb5b02358a1a3bda979"
+OBSERVED_PRODUCER_SHA_NOT_ADOPTED = "0ad4516ee819684f5ce1ce381c688400e800700b"
 ED25519_SPKI_PREFIX = bytes.fromhex("302a300506032b6570032100")
+MAX_NESTING = 8
+MAX_CHARS = 65_536
+_REPLAY_LOCK = threading.Lock()
+COMMAND_CLAIM_BINDINGS = (
+    (2, "command_id", "COMMAND_ID"),
+    (3, "tenant_id", "TENANT"),
+    (4, "origin_owner", "ORIGIN_OWNER"),
+    (5, "purpose_code", "PURPOSE"),
+    (6, "source_class", "SOURCE_CLASS"),
+    (7, "external_locator", "EXTERNAL_LOCATOR"),
+    (8, "source_version_ref", "SOURCE_VERSION"),
+    (9, "rights_digest", "RIGHTS"),
+    (10, "principal_context_ref", "PRINCIPAL_CONTEXT"),
+    (11, "decision_ref", "DECISION_REF"),
+    (12, "idempotency_key", "IDEMPOTENCY_KEY"),
+    (13, "submission_id", "SUBMISSION_ID"),
+)
 
 PAYLOAD_KEYS = frozenset(
     {
@@ -158,7 +177,38 @@ def b64url_decode(text: str) -> bytes:
 
 
 def canonical_json(value: object) -> str:
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    _assert_utf8_tree(value, 0)
+    text = json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    if len(text) > MAX_CHARS:
+        raise SovProofError("UNKNOWN_SCHEMA", "input too large")
+    try:
+        text.encode("utf-8")
+    except UnicodeEncodeError as exc:
+        raise SovProofError("UNKNOWN_SCHEMA", "lone surrogate") from exc
+    return text
+
+
+def _assert_utf8_tree(value: object, depth: int) -> None:
+    if isinstance(value, str):
+        try:
+            value.encode("utf-8")
+        except UnicodeEncodeError as exc:
+            raise SovProofError("UNKNOWN_SCHEMA", "lone surrogate") from exc
+        return
+    if isinstance(value, dict):
+        if depth >= MAX_NESTING:
+            raise SovProofError("UNKNOWN_SCHEMA", "nesting too deep")
+        for key, item in value.items():
+            if not isinstance(key, str):
+                raise SovProofError("UNKNOWN_SCHEMA", "object key")
+            _assert_utf8_tree(key, depth)
+            _assert_utf8_tree(item, depth + 1)
+        return
+    if isinstance(value, list):
+        if depth >= MAX_NESTING:
+            raise SovProofError("UNKNOWN_SCHEMA", "nesting too deep")
+        for item in value:
+            _assert_utf8_tree(item, depth + 1)
 
 
 def spki_from_raw(raw_pk: bytes) -> bytes:
@@ -200,7 +250,7 @@ class SovProofConsumer:
         now: Callable[[], int] | None = None,
     ) -> None:
         self.enabled = enabled
-        self.trust = dict(trust or {})
+        self.trust = _validated_trust(trust)
         self.replay_store = replay_store if replay_store is not None else set()
         self.now = now or (lambda: 0)
 
@@ -215,7 +265,12 @@ class SovProofConsumer:
         self._verify_schema(parsed)
         kid = _text(parsed, "kid")
         metadata = self.trust.get(kid)
-        if metadata is None or metadata.proof_version != PROOF_VERSION:
+        if (
+            metadata is None
+            or metadata.proof_version != PROOF_VERSION
+            or metadata.algorithm != ALG
+            or metadata.kid != kid
+        ):
             raise SovProofError("UNKNOWN_KEY", "KID")
         payload = parsed.get("payload")
         if not isinstance(payload, dict):
@@ -246,12 +301,15 @@ class SovProofConsumer:
 
     def _read_envelope(self, envelope: object) -> dict[str, Any]:
         if isinstance(envelope, str):
+            if len(envelope) > MAX_CHARS:
+                raise SovProofError("UNKNOWN_SCHEMA", "input too large")
             try:
                 envelope = json.loads(envelope)
             except json.JSONDecodeError as exc:
                 raise SovProofError("UNKNOWN_SCHEMA", "ENVELOPE") from exc
         if not isinstance(envelope, dict):
             raise SovProofError("UNKNOWN_SCHEMA", "envelope")
+        canonical_json(envelope)
         return envelope
 
     def _verify_schema(self, envelope: dict[str, Any]) -> None:
@@ -332,9 +390,11 @@ class SovProofConsumer:
         jti = _text(payload, "jti")
         if not jti.strip():
             raise SovProofError("CLAIM_MISMATCH", "JTI")
-        if jti in self.replay_store:
-            raise SovProofError("REPLAY", "JTI")
-        self.replay_store.add(jti)
+        # Single-process atomic check-and-insert. Not a durable multi-process store.
+        with _REPLAY_LOCK:
+            if jti in self.replay_store:
+                raise SovProofError("REPLAY", "JTI")
+            self.replay_store.add(jti)
 
 
 def _text(payload: dict[str, Any], key: str) -> str:
@@ -370,15 +430,26 @@ def _require_command_digest(payload: dict[str, Any], command: Sequence[object]) 
         raise SovProofError("DIGEST_MISMATCH", "REQUEST_SHA256")
     if len(command) != COMMAND_FIELDS:
         raise SovProofError("DIGEST_MISMATCH", "FIELD_COUNT")
-    _command_field(command, 2, _text(payload, "command_id"), "COMMAND_ID")
-    _command_field(command, 3, _text(payload, "tenant_id"), "TENANT")
-    _command_field(command, 5, _text(payload, "purpose_code"), "PURPOSE")
-    _command_field(command, 8, _text(payload, "source_version_ref"), "SOURCE_VERSION")
-    _command_field(command, 9, _text(payload, "rights_digest"), "RIGHTS")
-    _command_field(command, 11, _text(payload, "decision_ref"), "DECISION_REF")
+    for index, claim, reason in COMMAND_CLAIM_BINDINGS:
+        _command_field(command, index, _text(payload, claim), reason)
 
 
 def _command_field(command: Sequence[object], index: int, expected: str, reason: str) -> None:
     value = command[index]
     if value != expected:
         raise SovProofError("CLAIM_MISMATCH", reason)
+
+
+def _validated_trust(trust: Mapping[str, ProofPublicMetadata] | None) -> dict[str, ProofPublicMetadata]:
+    entries = dict(trust or {})
+    for key, meta in entries.items():
+        if meta.algorithm != ALG or meta.proof_version != PROOF_VERSION:
+            raise SovProofError("UNKNOWN_KEY", "TRUST_ENTRY")
+        try:
+            spki = b64url_decode(meta.public_key_spki_base64url)
+        except Exception as exc:
+            raise SovProofError("UNKNOWN_KEY", "SPKI") from exc
+        raw_pk_from_spki(spki)
+        if key != meta.kid or meta.kid != kid_from_spki(spki):
+            raise SovProofError("UNKNOWN_KEY", "TRUST_ENTRY")
+    return entries
