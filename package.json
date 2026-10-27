@@ -1,4 +1,8 @@
 {
+  "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "validate:repo": "python scripts/validate_repo.py",
     "validate:openapi": "python scripts/validate_openapi.py",
@@ -6,7 +10,18 @@
     "validate:sql": "python scripts/validate_sql_static.py",
     "validate:rls": "python scripts/validate_rls_static.py",
     "validate:e2e-skeleton": "python scripts/validate_mvp_slice_01.py",
-    "validate:all": "python scripts/validate_repo.py && python scripts/validate_openapi.py && python scripts/validate_json_schemas.py && python scripts/validate_sql_static.py && python scripts/validate_rls_static.py && python scripts/validate_mvp_slice_01.py"
+    "validate:all": "python scripts/validate_repo.py && python scripts/validate_openapi.py && python scripts/validate_json_schemas.py && python scripts/validate_sql_static.py && python scripts/validate_rls_static.py && python scripts/validate_mvp_slice_01.py",
+    "web:build": "next build apps/web",
+    "web:start": "next start apps/web --hostname 127.0.0.1"
   },
-  "devDependencies": {}
+  "dependencies": {
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "typescript": "7.0.2"
+  }
 }

@@ -30,3 +30,20 @@ jobs:
         run: python scripts/validate_rls_static.py
       - name: Validate MVP Slice 01 skeleton
         run: python scripts/validate_mvp_slice_01.py
+
+  web-renderer-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.12.2'
+          cache: npm
+      - name: Install the pinned renderer and run the loopback smoke
+        run: |
+          set -euo pipefail
+          npm ci
+          chmod +x apps/web/scripts/renderer-smoke.sh
+          apps/web/scripts/renderer-smoke.sh
+          echo "This job does not admit live PIAC, live KDB, T150, T020, T050 or T160."
