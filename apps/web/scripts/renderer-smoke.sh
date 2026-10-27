@@ -18,9 +18,18 @@ npm run web:build
 
 work=$(mktemp -d)
 pid=""
+stop_tree() {
+  local parent=$1
+  local child
+  for child in $(pgrep -P "$parent" || true); do
+    stop_tree "$child"
+  done
+  kill -TERM "$parent" >/dev/null 2>&1 || true
+}
+
 cleanup() {
   if [[ -n "$pid" ]] && kill -0 "$pid" >/dev/null 2>&1; then
-    kill -TERM "$pid" >/dev/null 2>&1 || true
+    stop_tree "$pid"
     wait "$pid" >/dev/null 2>&1 || true
   fi
   rm -rf "$work"
@@ -29,7 +38,8 @@ trap cleanup EXIT
 
 port=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1]); s.close()')
 env -u DATABASE_URL -u SUPABASE_SERVICE_ROLE_KEY -u SUPABASE_ANON_KEY -u SUPABASE_URL \
-  npm run web:start -- --port "$port" >"$work/server.log" 2>&1 &
+  NEXT_TELEMETRY_DISABLED=1 \
+  ./node_modules/.bin/next start apps/web --hostname 127.0.0.1 --port "$port" >"$work/server.log" 2>&1 &
 pid=$!
 echo "PID $pid PORT $port"
 
@@ -79,15 +89,23 @@ if grep -R -q "SUPABASE_SERVICE_ROLE_KEY" apps/web/.next; then
   exit 1
 fi
 
-kill -TERM "$pid"
+stop_tree "$pid"
 set +e
 wait "$pid"
 status=$?
 set -e
-pid=""
 echo "STOP_EXIT $status"
-if curl --silent --max-time 2 "http://127.0.0.1:${port}/" >/dev/null; then
-  echo "renderer still answered after stop" >&2
+closed=0
+for _ in $(seq 1 50); do
+  if ! curl --silent --max-time 1 "http://127.0.0.1:${port}/" >/dev/null; then
+    closed=1
+    break
+  fi
+  sleep 0.2
+done
+if [[ "$closed" -ne 1 ]]; then
+  echo "renderer still answered after stop bound=10s" >&2
   exit 1
 fi
+pid=""
 echo "PASS web_renderer routes=4 http=200 bind=127.0.0.1 stop=$status service_role=absent"
