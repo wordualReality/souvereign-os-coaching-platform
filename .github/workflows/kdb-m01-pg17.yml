@@ -70,9 +70,10 @@ jobs:
         run: python3 tests/kdb/pg17_disposable_command_path.py
       - name: Offline classifier and replay/DLQ policy
         run: |
-          node n8n/kdb-dev/test_workflow_regression.cjs n8n/kdb-dev/tenant-guard-candidate /tmp/kdb-tenant-guard.json
+          node n8n/kdb-dev/test_workflow_regression.cjs n8n/kdb-dev/tenant-guard-candidate /tmp/kdb-tenant-guard.json .
           node n8n/kdb-dev/test_replay_dlq.cjs n8n/kdb-dev/tenant-guard-candidate /tmp/kdb-replay-dlq.json
           python3 tests/kdb/test_replay_dlq_policy.py
+          python3 tests/kdb/test_tenant_guard_source.py
           python3 tests/kdb/test_piac_fail_closed.py
           python3 tests/kdb/kdb_m01_06_security_static.py
           python3 tests/kdb/hosted_recovery_preflight_diff.py

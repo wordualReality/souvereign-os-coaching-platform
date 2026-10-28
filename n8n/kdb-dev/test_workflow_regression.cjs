@@ -3,7 +3,7 @@
 const fs=require('fs'),path=require('path'),vm=require('vm');
 const ROOT=path.resolve(process.argv[2]||path.join(__dirname,'..','n8n'));
 const OUTPUT=path.resolve(process.argv[3]||path.join(__dirname,'..','regression-results.json'));
-const workflows={}, report={root:path.basename(ROOT),legacy_cases:[],tenant_isolation_negative_cases:[],checks:{source_contracts:[],topology:[]}};
+const workflows={}, report={root:path.basename(ROOT),legacy_cases:[],tenant_isolation_negative_cases:[],tenant_extra_regression_cases:[],checks:{source_contracts:[],topology:[]}};
 function loadJson(p){return JSON.parse(fs.readFileSync(path.join(ROOT,p),'utf8'))}
 for(const f of fs.readdirSync(path.join(ROOT,'candidates')).filter(x=>x.endsWith('.json')).sort()){
  const workflow=loadJson('candidates/'+f);
@@ -22,9 +22,13 @@ for(const f of fs.readdirSync(path.join(ROOT,'candidates')).filter(x=>x.endsWith
 // Cross-archive interface invariant: the M01 O1/O2/O3 contracts require tenant_scope.
 const kit=process.argv[4];
 if(kit){for(let o=1;o<=3;o++){const names={1:'o1_source_ingest.schema.json',2:'o2_candidate_proposal.schema.json',3:'o3_review_handoff.schema.json'};
-  const schema=JSON.parse(fs.readFileSync(path.join(kit,'contracts',names[o]),'utf8'));
+  const file=names[o];
+  const owned=path.join(kit,'contracts','kdb',file);
+  const legacy=path.join(kit,'contracts',file);
+  const schemaPath=fs.existsSync(owned)?owned:legacy;
+  const schema=JSON.parse(fs.readFileSync(schemaPath,'utf8'));
   if(!schema.required.includes('tenant_scope'))throw Error('KDB source contract changed');
-  report.checks.source_contracts.push({contract:`O${o}`,required_tenant_scope:true});
+  report.checks.source_contracts.push({contract:`O${o}`,required_tenant_scope:true,schema:path.relative(kit,schemaPath)});
 }}
 function classify(oid,body){const flow=workflows[oid];const json=JSON.parse(JSON.stringify(body));for(const m of flow.metadata){if(typeof m.value==='string'&&!m.value.startsWith('={{'))json[m.name]=m.value;}
  const ctx=vm.createContext({$input:{first:()=>({json})}});
@@ -37,10 +41,19 @@ for(const f of files){const c=loadJson('fixtures/'+f);const actual=classify(c.ta
    const obj=JSON.parse(JSON.stringify(c.body));if(variant==='missing')delete obj.tenant_scope;else obj.tenant_scope='   ';
    const outcome=classify(c.target_oid,obj).route;
    report.tenant_isolation_negative_cases.push({fixture:f,variant,expected:'DENY',actual:outcome,pass:outcome==='DENY'});
+ }
+ for(const extra of [
+   {variant:'oversize',mutate:obj=>{obj.tenant_scope='x'.repeat(129);}},
+   {variant:'non_string',mutate:obj=>{obj.tenant_scope=1;}},
+ ]){
+   const obj=JSON.parse(JSON.stringify(c.body));
+   extra.mutate(obj);
+   const outcome=classify(c.target_oid,obj).route;
+   report.tenant_extra_regression_cases.push({fixture:f,variant:extra.variant,expected:'DENY',actual:outcome,pass:outcome==='DENY'});
  }}
 }
-report.counts={workflow_count:Object.keys(workflows).length,legacy_cases:report.legacy_cases.length,legacy_pass:report.legacy_cases.filter(x=>x.pass).length,tenant_negative_cases:report.tenant_isolation_negative_cases.length,tenant_negative_pass:report.tenant_isolation_negative_cases.filter(x=>x.pass).length};
-report.acceptance={offline_code_node_baseline:report.counts.legacy_pass===report.counts.legacy_cases?'PASS':'FAIL',tenant_fail_closed:report.counts.tenant_negative_pass===report.counts.tenant_negative_cases?'PASS':'FAIL',physical_pg17:'NOT_RUN',PIAC_signature:'NOT_RUN',n8n_runtime:'NOT_RUN'};
+report.counts={workflow_count:Object.keys(workflows).length,legacy_cases:report.legacy_cases.length,legacy_pass:report.legacy_cases.filter(x=>x.pass).length,tenant_negative_cases:report.tenant_isolation_negative_cases.length,tenant_negative_pass:report.tenant_isolation_negative_cases.filter(x=>x.pass).length,tenant_extra_cases:report.tenant_extra_regression_cases.length,tenant_extra_pass:report.tenant_extra_regression_cases.filter(x=>x.pass).length};
+report.acceptance={offline_code_node_baseline:report.counts.legacy_pass===report.counts.legacy_cases?'PASS':'FAIL',tenant_fail_closed:report.counts.tenant_negative_pass===report.counts.tenant_negative_cases && report.counts.tenant_extra_pass===report.counts.tenant_extra_cases?'PASS':'FAIL',physical_pg17:'NOT_RUN',PIAC_signature:'NOT_RUN',n8n_runtime:'NOT_RUN'};
 fs.writeFileSync(OUTPUT,JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify({counts:report.counts,acceptance:report.acceptance},null,2));
 if(report.acceptance.offline_code_node_baseline!=='PASS')process.exitCode=1;

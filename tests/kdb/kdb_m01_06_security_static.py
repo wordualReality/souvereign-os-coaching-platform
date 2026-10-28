@@ -87,14 +87,24 @@ class P06SecurityStatic(unittest.TestCase):
         self.assertNotRegex(code, re.compile(r"(?im)^\s*ALTER DEFAULT PRIVILEGES FOR ROLE postgres\b"))
 
     def test_s05_piac_fail_closed_and_guc_not_auth(self):
-        with self.assertRaises(PiacVerificationError):
+        from tenant_scope import TenantScopeError
+
+        with self.assertRaises(TenantScopeError):
             KdbCommandFacade().handle({})
-        with self.assertRaises(PiacVerificationError):
+        with self.assertRaises(TenantScopeError):
             KdbCommandFacade().handle(
                 {
                     "access_decision_ref": "SYNTHETIC_ALLOW",
                     "principal_context_ref": "tenant_scope=forged",
                     "kdb.tenant_scope": "tenant-a",
+                }
+            )
+        with self.assertRaises(PiacVerificationError):
+            KdbCommandFacade().handle(
+                {
+                    "tenant_scope": "TENANT_SYNTH_A",
+                    "access_decision_ref": "SYNTHETIC_ALLOW",
+                    "principal_context_ref": "tenant_scope=forged",
                 }
             )
         self.assertIn("not authenticated PIAC", S3)
