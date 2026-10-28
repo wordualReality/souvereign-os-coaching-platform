@@ -13,8 +13,10 @@ class P5Static(unittest.TestCase):
         self.assertIn("python3 tests/kdb/test_p4_digest_static.py", WF)
         self.assertIn("python3 tests/kdb/test_p5_static.py", WF)
         self.assertIn("python3 tests/kdb/test_signed_ingress.py", WF)
+        self.assertIn("python3 tests/kdb/test_sov_proof_consumer_offline.py", WF)
         self.assertIn("python3 tests/kdb/pg17_p5_sql_v2_parity.py", WF)
         self.assertIn("python3 tests/kdb/pg17_p5_signed_ingress_oracles.py", WF)
+        self.assertIn("python3 tests/kdb/pg17_p5_sov_proof_consumer_negatives.py", WF)
 
     def test_tenant_spoof_requires_hash_mismatch(self):
         self.assertIn('elif "KDB_HASH_MISMATCH" in body_spoof:', P3)
@@ -61,6 +63,19 @@ class P5Static(unittest.TestCase):
     def test_ci_runs_p5_review_delta_tests(self):
         self.assertIn("python3 tests/kdb/test_digest_v2_unproven.py", WF)
         self.assertIn("python3 tests/kdb/test_p5_trust_denial.py", WF)
+
+    def test_consumer_binds_all_source_intake_claims(self):
+        consumer = (ROOT / "services" / "kdb" / "sov_proof_consumer.py").read_text()
+        self.assertIn("COMMAND_CLAIM_BINDINGS", consumer)
+        self.assertIn('"origin_owner"', consumer)
+        self.assertIn('"source_class"', consumer)
+        self.assertIn('"external_locator"', consumer)
+        self.assertIn('"idempotency_key"', consumer)
+        self.assertIn('"submission_id"', consumer)
+        self.assertIn("_REPLAY_LOCK", consumer)
+        self.assertIn("PROCESS_REPLAY_STORE", consumer)
+        self.assertIn('COMMAND_NAME = "SOURCE_INTAKE"', consumer)
+        self.assertIn("lone surrogate", consumer)
 
 
 if __name__ == "__main__":

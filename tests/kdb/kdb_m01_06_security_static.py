@@ -103,6 +103,7 @@ class P06SecurityStatic(unittest.TestCase):
     def test_s10_o4_o5_and_protected_writers(self):
         self.assertTrue(FLAGS["o4"].startswith("INACTIVE"))
         self.assertTrue(FLAGS["o5"].startswith("INACTIVE"))
+        self.assertEqual(FLAGS["sov_piac_proof_consumer_v1"], "DISABLED_CONTRACT_ONLY")
         self.assertNotIn("INSERT INTO kdb_governance.human_review_decision", S3)
         self.assertNotIn("INSERT INTO kdb_canonical.protocol_version", S3)
         self.assertNotIn("INSERT INTO kdb_canonical.protocol", S3)

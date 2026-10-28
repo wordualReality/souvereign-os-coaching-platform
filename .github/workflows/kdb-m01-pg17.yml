@@ -85,6 +85,7 @@ jobs:
           python3 tests/kdb/test_p5_trust_denial.py
           python3 tests/kdb/test_digest_v2_unproven.py
           python3 tests/kdb/test_signed_ingress.py
+          python3 tests/kdb/test_sov_proof_consumer_offline.py
       - name: P2 ACL catalog and adversarial characterization
         env:
           KDB_PG17_MODE: libpq
@@ -124,3 +125,4 @@ jobs:
         run: |
           python3 tests/kdb/pg17_p5_sql_v2_parity.py
           python3 tests/kdb/pg17_p5_signed_ingress_oracles.py
+          python3 tests/kdb/pg17_p5_sov_proof_consumer_negatives.py

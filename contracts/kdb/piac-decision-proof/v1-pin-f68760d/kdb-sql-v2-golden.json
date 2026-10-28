@@ -1,0 +1,57 @@
+{
+  "postgres_version": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "adapter": "services/kdb/digest_v2.py",
+  "contract": "SHA-256 UTF-8 PostgreSQL jsonb_build_array(...)::text",
+  "cases": [
+    {
+      "id": "o1_ascii",
+      "digest": "371be595ab75f84a3c38283b700f04ece635bae28277cf16454f64ce01589dab",
+      "jsonb_text": "[\"v2\", \"SOURCE_INTAKE\", \"00000000-0000-4000-8000-000000000001\", \"TENANT_SYNTH_A\", \"KDB\", \"kdb_knowledge_intake\", \"LICENSED_DOCUMENT\", \"synthetic://kdb/p5/a\", \"abababababababababababababababababababababababababababababababab\", \"fc44c824ba88e94bcac1056acea3aaf49eab60585ba167514dc9aeb3276bb0f2\", \"PRINCIPAL_REF_SYNTH_PIPELINE\", \"ACCESS_SYNTH_OK\", \"idem-p5\", \"00000000-0000-4000-8000-000000000002\"]"
+    },
+    {
+      "id": "o1_null_tenant",
+      "digest": "85bf383936bfaa98efe1cc4136992967c1beb20ef5133c2304a7f3c3cf31667b",
+      "jsonb_text": "[\"v2\", \"SOURCE_INTAKE\", \"00000000-0000-4000-8000-000000000001\", null, \"KDB\", \"kdb_knowledge_intake\", \"LICENSED_DOCUMENT\", \"synthetic://kdb/p5/a\", \"abababababababababababababababababababababababababababababababab\", \"fc44c824ba88e94bcac1056acea3aaf49eab60585ba167514dc9aeb3276bb0f2\", \"P\", \"A\", \"idem-p5\", \"00000000-0000-4000-8000-000000000002\"]"
+    },
+    {
+      "id": "o1_empty_tenant",
+      "digest": "afaea2dcf9561f5b5e7441bddf7c6cba2324fcb81b2ef9b6225af39586201291",
+      "jsonb_text": "[\"v2\", \"SOURCE_INTAKE\", \"00000000-0000-4000-8000-000000000001\", \"\", \"KDB\", \"kdb_knowledge_intake\", \"LICENSED_DOCUMENT\", \"synthetic://kdb/p5/a\", \"abababababababababababababababababababababababababababababababab\", \"fc44c824ba88e94bcac1056acea3aaf49eab60585ba167514dc9aeb3276bb0f2\", \"P\", \"A\", \"idem-p5\", \"00000000-0000-4000-8000-000000000002\"]"
+    },
+    {
+      "id": "o1_newline_locator",
+      "digest": "7d475fd19d2c6de94bc70f803dfd0e38df63dd061fbdd25e95b65ca48fbf0ce5",
+      "jsonb_text": "[\"v2\", \"SOURCE_INTAKE\", \"00000000-0000-4000-8000-000000000001\", \"TENANT_SYNTH_A\", \"KDB\", \"kdb_knowledge_intake\", \"LICENSED_DOCUMENT\", \"synthetic://kdb/p5/a\\nb\", \"abababababababababababababababababababababababababababababababab\", \"fc44c824ba88e94bcac1056acea3aaf49eab60585ba167514dc9aeb3276bb0f2\", \"P\", \"A\", \"idem-p5\", \"00000000-0000-4000-8000-000000000002\"]"
+    },
+    {
+      "id": "o1_quotes_backslash",
+      "digest": "a59c93e0505b6c335af86b3b20f5c867eb2a186ecca2e10d8d1488290ffbbb3c",
+      "jsonb_text": "[\"v2\", \"SOURCE_INTAKE\", \"00000000-0000-4000-8000-000000000001\", \"TENANT_SYNTH_A\", \"KDB\", \"kdb_knowledge_intake\", \"LICENSED_DOCUMENT\", \"loc\\\\and\\\"quote\", \"abababababababababababababababababababababababababababababababab\", \"fc44c824ba88e94bcac1056acea3aaf49eab60585ba167514dc9aeb3276bb0f2\", \"P\", \"A\", \"idem-p5\", \"00000000-0000-4000-8000-000000000002\"]"
+    },
+    {
+      "id": "o1_unicode",
+      "digest": "a4ed4ccfcf1b5781dbd14d1652a9bb5b79b858b175f124bc81517e5139165c29",
+      "jsonb_text": "[\"v2\", \"SOURCE_INTAKE\", \"00000000-0000-4000-8000-000000000001\", \"TENANT_SYNTH_A\", \"KDB\", \"kdb_knowledge_intake\", \"LICENSED_DOCUMENT\", \"cafe\u0301\", \"abababababababababababababababababababababababababababababababab\", \"fc44c824ba88e94bcac1056acea3aaf49eab60585ba167514dc9aeb3276bb0f2\", \"P\", \"A\", \"idem-p5\", \"00000000-0000-4000-8000-000000000002\"]"
+    },
+    {
+      "id": "o2_with_spans",
+      "digest": "352dfd038792f87533543ef42769552892b859dee88913d749a1a46e412da229",
+      "jsonb_text": "[\"v2\", \"CANDIDATE_PROPOSAL\", \"00000000-0000-4000-8000-000000000001\", \"TENANT_SYNTH_A\", \"00000000-0000-4000-8000-000000000002\", \"00000000-0000-4000-8000-000000000003\", \"00000000-0000-4000-8000-000000000004\", 1, \"abababababababababababababababababababababababababababababababab\", \"01c4011eb2b592c881163b532d441773b3087314d8b98f2431f163a5b07a3c4b\", \"ba2831ea542a96a92f3aa3707f84b1406710ca30fe118244e50c2393ff72b5c9\", \"ACTOR\", \"ACCESS\"]"
+    },
+    {
+      "id": "o2_changed_spans",
+      "digest": "3a187247d54b68d3a39c4419fd2e21dd9663c6b5cee43060e7608cb731721353",
+      "jsonb_text": "[\"v2\", \"CANDIDATE_PROPOSAL\", \"00000000-0000-4000-8000-000000000001\", \"TENANT_SYNTH_A\", \"00000000-0000-4000-8000-000000000002\", \"00000000-0000-4000-8000-000000000003\", \"00000000-0000-4000-8000-000000000004\", 1, \"abababababababababababababababababababababababababababababababab\", \"01c4011eb2b592c881163b532d441773b3087314d8b98f2431f163a5b07a3c4b\", \"2ea6f7cf41dfbfece960bcbd2a04d1f8b43b28de4fdb9f4e2fdd7f9c65f6e42f\", \"ACTOR\", \"ACCESS\"]"
+    },
+    {
+      "id": "o2_revision_two",
+      "digest": "50a1e9ee4411714844eb97a126f28835966ec3cc696b4881de4572495fb70c19",
+      "jsonb_text": "[\"v2\", \"CANDIDATE_PROPOSAL\", \"00000000-0000-4000-8000-000000000001\", \"TENANT_SYNTH_A\", \"00000000-0000-4000-8000-000000000002\", \"00000000-0000-4000-8000-000000000003\", \"00000000-0000-4000-8000-000000000004\", 2, \"abababababababababababababababababababababababababababababababab\", \"01c4011eb2b592c881163b532d441773b3087314d8b98f2431f163a5b07a3c4b\", \"ba2831ea542a96a92f3aa3707f84b1406710ca30fe118244e50c2393ff72b5c9\", \"ACTOR\", \"ACCESS\"]"
+    },
+    {
+      "id": "o3_handoff",
+      "digest": "4e8ac855c404272935cff74b0b6284a7723724200da8cb792401f3f37b0cb8ea",
+      "jsonb_text": "[\"v2\", \"REVIEW_HANDOFF\", \"00000000-0000-4000-8000-000000000001\", \"TENANT_SYNTH_A\", \"00000000-0000-4000-8000-000000000005\", \"ACTOR\", \"ACCESS\"]"
+    }
+  ]
+}

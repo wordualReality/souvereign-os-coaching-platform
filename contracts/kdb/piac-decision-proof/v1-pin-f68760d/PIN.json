@@ -1,0 +1,14 @@
+{
+  "producer_repo": "wordualReality/souvereign-os",
+  "producer_pr": 16,
+  "producer_sha": "f68760d799831ff260f99eb5b02358a1a3bda979",
+  "proof_version": "PIAC_DECISION_PROOF_V1",
+  "status": "PINNED_CONTRACT_ONLY",
+  "normative_adoption": false,
+  "security_admission": "NEEDS_SOV_SECURITY_QS",
+  "kdb_admission": "LOCAL_VERIFIED_ONLY_NEVER_DB_COMMAND_ADMITTED",
+  "known_producer_findings": "OPEN/DRAFT at pin; entitlement tenant binding and consent subject/recipient binding are producer findings, not KDB repairs",
+  "observed_producer_sha_not_adopted": "0ad4516ee819684f5ce1ce381c688400e800700b",
+  "observed_artifact_blobs_identical": 8,
+  "pin_advanced": false
+}
