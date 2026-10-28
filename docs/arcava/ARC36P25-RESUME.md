@@ -1,6 +1,6 @@
 # ARC-36/P25 resume pointer
 
-Current package: ARC36P25-T150-ADMITTED-OPERATOR-ENV-AND-ACCEPTANCE-01. Parent `7f2c6e046a3b7d0583b2278ea4ba7be57c7c47f1`. The operator and effective-config delta is consumed as PASS_WITH_CONDITIONS_DELTA_SCOPE_ONLY for that scope. The frontend, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
+Current package: ARC36P25-T150-TOOLCHAIN-SOURCE-AND-A09-CASE-BOOTSTRAP-01. Parent `292b7366682287a0e8a93474f47ddf1fb6e17f50`. The pre-build refusal delta is consumed as PASS_WITH_CONDITIONS_DELTA_SCOPE_ONLY for that scope. Earlier frontend, operator, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
 
 ## Checkout
 
@@ -22,11 +22,12 @@ Current package: ARC36P25-T150-ADMITTED-OPERATOR-ENV-AND-ACCEPTANCE-01. Parent `
 - The web operator refuses `SUPABASE_SERVICE_ROLE_KEY` and `NEXT_PUBLIC_*` before `npm ci` and `next build`. The build then runs in an allowlisted environment: `PATH`, `HOME`, `TMPDIR`, `NEXT_TELEMETRY_DISABLED=1`.
 - E1 authority stays `NOT_ADMITTED`. The running listener reports `LIVE_AUTHORITY_CLOSED` with PIAC and KDB transport not connected. No E1 issuer, engine or owner receipt is in this worktree.
 - Registry pins for Node, Next, React and TypeScript stay `PROPOSAL_EXERCISED_NOT_ADMITTED`.
-- A09-T01, A09-T04, A09-T44 and A09-T48 stay `NOT_EXECUTED`. No case file exists under `tests/`, `docs/arcava/admission/` or `services/api/src/test/`.
+- `scripts/toolchain_receipt.py` checks Java 25, Maven 3.9.16, Spring Boot 4.1.1, Node 20.12.2, Next 16.4.3, React 19.3.1 and TypeScript 7.0.2 against the pom, the lock and the workflows. The current Maven suite is 10 tests. Admission stays `PROPOSAL_EXERCISED_NOT_ADMITTED` because `docs/arcava/admission/toolchain-owner-pin.json` is absent.
+- `scripts/a09_case_discovery.py` reports A09-T01, A09-T04, A09-T44 and A09-T48 as `NOT_EXECUTED`. A case file without an owner receipt and an engine does not pass.
 
 ## Local evidence
 
-Temurin 25.0.3, Maven 3.9.16. `mvn -B -f services/api/pom.xml package` exit 0, 8 tests, 0 failures. JAR SHA-256 `07c3e79b6b23c7d4c9be976e914587ad1c3eaa098139a084a818eef451ee9e0c`. JAR smoke exit 0: live 200, ready 503, absent bearer 401, denied 403, journal unchanged, SIGTERM 143, restart closed, non-loopback exit 1 inside 10 seconds.
+Temurin 25.0.3, Maven 3.9.16. The JAR packet observed 8 tests. The current suite is 10 tests, 0 failures. JAR SHA-256 `07c3e79b6b23c7d4c9be976e914587ad1c3eaa098139a084a818eef451ee9e0c`. JAR smoke exit 0: live 200, ready 503, absent bearer 401, denied 403, journal unchanged, SIGTERM 143, restart closed, non-loopback exit 1 inside 10 seconds.
 
 Web smoke on Node v20.12.2: `apps/web/scripts/renderer-smoke.sh` exit 0. Next.js 16.4.3 served `/`, `/coach/journeys`, `/client/member-home` and `/admin/provisioning` with HTTP 200 on `127.0.0.1`, then SIGTERM 143. The service-role name was absent from the build output.
 
@@ -38,4 +39,4 @@ This is not full T150 admission, not live PIAC, not a live KDB verification, and
 
 ## Next executable step
 
-Independent delta review of the pre-build secret refusal and the E1 not-admitted readback only. Do not reopen `7f2c6e0`, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.
+GPT_BUILDER_ARCAVA consumes this return and decides the next build. Review scope is the toolchain receipt and the A09 discovery only. Do not reopen `292b736`, the operator procedures, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.

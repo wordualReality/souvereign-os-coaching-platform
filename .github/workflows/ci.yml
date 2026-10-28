@@ -30,6 +30,11 @@ jobs:
         run: python scripts/validate_rls_static.py
       - name: Validate MVP Slice 01 skeleton
         run: python scripts/validate_mvp_slice_01.py
+      - name: Check the toolchain receipt and A09 case discovery
+        run: |
+          python scripts/toolchain_receipt.py
+          python scripts/a09_case_discovery.py
+          python scripts/a09_case_discovery.py --self-check
 
   web-renderer-smoke:
     runs-on: ubuntu-latest

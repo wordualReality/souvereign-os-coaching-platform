@@ -1,6 +1,6 @@
 {
-  "package": "ARC36P25-T150-ADMITTED-OPERATOR-ENV-AND-ACCEPTANCE-01",
-  "parent": "7f2c6e046a3b7d0583b2278ea4ba7be57c7c47f1",
+  "package": "ARC36P25-T150-TOOLCHAIN-SOURCE-AND-A09-CASE-BOOTSTRAP-01",
+  "parent": "292b7366682287a0e8a93474f47ddf1fb6e17f50",
   "pointer": "ARC-36/P25 step 7/10",
   "t150": "PARTIAL",
   "toolchain": {
@@ -23,7 +23,8 @@
   "commands": {
     "package": "mvn -B -f services/api/pom.xml package",
     "package_exit": 0,
-    "maven_tests": "8 tests, 0 failures",
+    "maven_tests": "10 tests, 0 failures",
+    "maven_tests_note": "The executable JAR packet observed 8 tests. EffectiveConfigReadbackTest raised the current suite to 10.",
     "start": "java -jar services/api/target/projectb-api-0.1.0-SNAPSHOT.jar --spring.profiles.active=dev --server.address=127.0.0.1 --server.port=<free> --arcava.journal.path=<temp>/journal.ndjson",
     "smoke": "services/api/scripts/jar-lifecycle-smoke.sh services/api/target/projectb-api-0.1.0-SNAPSHOT.jar",
     "smoke_exit": 0,
@@ -80,7 +81,9 @@
     "A09-T04": "NOT_EXECUTED",
     "A09-T44": "NOT_EXECUTED",
     "A09-T48": "NOT_EXECUTED",
-    "missing": "No case file exists for A09-T01, A09-T04, A09-T44 or A09-T48 under tests/, docs/arcava/admission/ or services/api/src/test/.",
+    "missing": "docs/arcava/admission/a09/A09-T01, A09-T04, A09-T44 and A09-T48 each lack case.json, owner-receipt.json and engine.json.",
+    "discovery": "scripts/a09_case_discovery.py",
+    "owner_pin": "docs/arcava/admission/toolchain-owner-pin.json is absent. Registry and workflow pins stay PROPOSAL_EXERCISED_NOT_ADMITTED.",
     "e1_authority": "NOT_ADMITTED",
     "e1_missing": "No E1 issuer credential, transport engine or owner receipt is present in this worktree. The running listener reports piac_transport not_connected, kdb_transport not_connected and e1_reason LIVE_AUTHORITY_CLOSED. SOV issue 14 is not connected."
   }
