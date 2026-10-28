@@ -6,11 +6,12 @@ import json
 import pathlib
 import sys
 import threading
+import time
 import unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "services" / "kdb"))
 from digest_v2 import local_digest  # noqa: E402
-from ed25519_pure import publickey, signature, verify  # noqa: E402
+from ed25519_pure import Q, _encodepoint, publickey, signature, verify  # noqa: E402
 from facade import KdbCommandFacade  # noqa: E402
 from piac import PiacVerificationError  # noqa: E402
 from sov_proof_consumer import (  # noqa: E402
@@ -24,6 +25,7 @@ from sov_proof_consumer import (  # noqa: E402
     OBSERVED_PRODUCER_SHA_NOT_ADOPTED,
     PIN_SHA,
     PAYLOAD_KEYS,
+    PROCESS_REPLAY_STORE,
     ProofPublicMetadata,
     SovProofConsumer,
     SovProofError,
@@ -58,6 +60,18 @@ class Ed25519PureTests(unittest.TestCase):
         self.assertEqual(signature(b"", sk, pk), sig)
         self.assertTrue(verify(sig, b"", pk))
         self.assertFalse(verify(sig, b"x", pk))
+
+    def test_small_order_public_key_forgery_rejected(self):
+        pk = _encodepoint((0, Q - 1))
+        accepted = 0
+        for i in range(8):
+            msg = f"reviewer-forgery-{i}".encode()
+            for point in ((0, 1), (0, Q - 1)):
+                sig = _encodepoint(point) + bytes(32)
+                if verify(sig, msg, pk):
+                    accepted += 1
+                    break
+        self.assertEqual(accepted, 0)
 
 
 class PinContractTests(unittest.TestCase):
@@ -403,6 +417,76 @@ class ConsumerOfflineTests(unittest.TestCase):
         }
         with self.assertRaises(SovProofError) as ctx:
             self.consumer.evaluate(json.dumps(env), expected_context())
+        self.assertEqual(ctx.exception.code, "UNKNOWN_SCHEMA")
+
+    def test_two_default_instances_replay_same_jti(self):
+        PROCESS_REPLAY_STORE.clear()
+        env = envelope(self.authority, jti="jti-process-shared")
+        first = SovProofConsumer(
+            enabled=True,
+            trust={self.authority.metadata.kid: self.authority.metadata},
+            now=lambda: NOW,
+        )
+        second = SovProofConsumer(
+            enabled=True,
+            trust={self.authority.metadata.kid: self.authority.metadata},
+            now=lambda: NOW,
+        )
+        verdict = first.evaluate(env, expected_context())
+        self.assertEqual(verdict["verdict"], LOCAL_VERIFIED)
+        with self.assertRaises(SovProofError) as ctx:
+            second.evaluate(env, expected_context())
+        self.assertEqual(ctx.exception.code, "REPLAY")
+
+    def test_command_operation_must_be_source_intake(self):
+        fields = list(o1_ascii_fields())
+        fields[1] = "OTHER_OPERATION"
+        env = envelope(self.authority, request_sha256=local_digest(fields))
+        expected = expected_context(command_fields=fields)
+        exc = self._raise(env, expected, "CLAIM_MISMATCH")
+        self.assertEqual(exc.reason, "OPERATION")
+
+    def test_default_clock_is_unix_now(self):
+        before = int(time.time()) - 1
+        consumer = SovProofConsumer(
+            enabled=True,
+            trust={self.authority.metadata.kid: self.authority.metadata},
+            replay_store=set(),
+        )
+        stamp = consumer.now()
+        after = int(time.time()) + 1
+        self.assertGreaterEqual(stamp, before)
+        self.assertLessEqual(stamp, after)
+
+    def test_real_clock_rejects_expired_and_not_yet_valid(self):
+        now = int(time.time())
+        expired = envelope(self.authority, jti="jti-real-expired", nbf=now - 20, iat=now - 20, exp=now - 1)
+        future = envelope(self.authority, jti="jti-real-future", nbf=now + 60, iat=now + 60, exp=now + 120)
+        consumer = SovProofConsumer(
+            enabled=True,
+            trust={self.authority.metadata.kid: self.authority.metadata},
+            replay_store=set(),
+        )
+        with self.assertRaises(SovProofError) as ctx:
+            consumer.evaluate(expired, expected_context())
+        self.assertEqual(ctx.exception.code, "EXPIRED")
+        with self.assertRaises(SovProofError) as ctx:
+            consumer.evaluate(future, expected_context())
+        self.assertEqual(ctx.exception.code, "NOT_YET_VALID")
+
+    def test_oversize_integer_is_unknown_schema(self):
+        blob = '{"v":' + ("1" * 5000) + "}"
+        with self.assertRaises(SovProofError) as ctx:
+            self.consumer.evaluate(blob, expected_context())
+        self.assertEqual(ctx.exception.code, "UNKNOWN_SCHEMA")
+
+    def test_duplicate_json_key_is_unknown_schema(self):
+        blob = (
+            '{"alg":"Ed25519","alg":"HMAC","kid":"x","payload":{},'
+            '"proof_version":"PIAC_DECISION_PROOF_V1","signature":"x"}'
+        )
+        with self.assertRaises(SovProofError) as ctx:
+            self.consumer.evaluate(blob, expected_context())
         self.assertEqual(ctx.exception.code, "UNKNOWN_SCHEMA")
 
 

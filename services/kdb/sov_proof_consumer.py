@@ -10,6 +10,7 @@ import base64
 import hashlib
 import json
 import threading
+import time
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -34,6 +35,9 @@ ED25519_SPKI_PREFIX = bytes.fromhex("302a300506032b6570032100")
 MAX_NESTING = 8
 MAX_CHARS = 65_536
 _REPLAY_LOCK = threading.Lock()
+PROCESS_REPLAY_STORE: set[str] = set()
+COMMAND_VERSION = "v2"
+COMMAND_NAME = "SOURCE_INTAKE"
 COMMAND_CLAIM_BINDINGS = (
     (2, "command_id", "COMMAND_ID"),
     (3, "tenant_id", "TENANT"),
@@ -251,8 +255,8 @@ class SovProofConsumer:
     ) -> None:
         self.enabled = enabled
         self.trust = _validated_trust(trust)
-        self.replay_store = replay_store if replay_store is not None else set()
-        self.now = now or (lambda: 0)
+        self.replay_store = replay_store if replay_store is not None else PROCESS_REPLAY_STORE
+        self.now = now or (lambda: int(time.time()))
 
     def evaluate(self, envelope: object, expected: ExpectedContext | None) -> dict[str, Any]:
         if not self.enabled:
@@ -304,8 +308,10 @@ class SovProofConsumer:
             if len(envelope) > MAX_CHARS:
                 raise SovProofError("UNKNOWN_SCHEMA", "input too large")
             try:
-                envelope = json.loads(envelope)
-            except json.JSONDecodeError as exc:
+                envelope = json.loads(envelope, object_pairs_hook=_unique_object)
+            except SovProofError:
+                raise
+            except (json.JSONDecodeError, ValueError, RecursionError) as exc:
                 raise SovProofError("UNKNOWN_SCHEMA", "ENVELOPE") from exc
         if not isinstance(envelope, dict):
             raise SovProofError("UNKNOWN_SCHEMA", "envelope")
@@ -430,6 +436,10 @@ def _require_command_digest(payload: dict[str, Any], command: Sequence[object]) 
         raise SovProofError("DIGEST_MISMATCH", "REQUEST_SHA256")
     if len(command) != COMMAND_FIELDS:
         raise SovProofError("DIGEST_MISMATCH", "FIELD_COUNT")
+    if command[0] != COMMAND_VERSION:
+        raise SovProofError("DIGEST_CONTRACT_UNRESOLVED", "COMMAND")
+    if command[1] != COMMAND_NAME:
+        raise SovProofError("CLAIM_MISMATCH", "OPERATION")
     for index, claim, reason in COMMAND_CLAIM_BINDINGS:
         _command_field(command, index, _text(payload, claim), reason)
 
@@ -438,6 +448,15 @@ def _command_field(command: Sequence[object], index: int, expected: str, reason:
     value = command[index]
     if value != expected:
         raise SovProofError("CLAIM_MISMATCH", reason)
+
+
+def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in out:
+            raise SovProofError("UNKNOWN_SCHEMA", "duplicate key")
+        out[key] = value
+    return out
 
 
 def _validated_trust(trust: Mapping[str, ProofPublicMetadata] | None) -> dict[str, ProofPublicMetadata]:

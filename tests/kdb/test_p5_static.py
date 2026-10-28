@@ -73,6 +73,8 @@ class P5Static(unittest.TestCase):
         self.assertIn('"idempotency_key"', consumer)
         self.assertIn('"submission_id"', consumer)
         self.assertIn("_REPLAY_LOCK", consumer)
+        self.assertIn("PROCESS_REPLAY_STORE", consumer)
+        self.assertIn('COMMAND_NAME = "SOURCE_INTAKE"', consumer)
         self.assertIn("lone surrogate", consumer)
 
 

@@ -90,14 +90,24 @@ def _isoncurve(p: tuple[int, int]) -> bool:
 
 
 def _decodepoint(s: bytes) -> tuple[int, int]:
+    if len(s) != 32:
+        raise ValueError("point length")
     y = sum(2**i * _bit(s, i) for i in range(B - 1))
+    if y >= Q:
+        raise ValueError("non-canonical y")
     x = _xrecover(y)
     if x & 1 != _bit(s, B - 1):
         x = Q - x
     point = (x, y)
     if not _isoncurve(point):
         raise ValueError("point not on curve")
+    if _encodepoint(point) != s:
+        raise ValueError("non-canonical encoding")
     return point
+
+
+def _is_small_order(point: tuple[int, int]) -> bool:
+    return _scalarmult(point, 8) == (0, 1)
 
 
 def _hint(m: bytes) -> int:
@@ -130,8 +140,10 @@ def verify(sig: bytes, message: bytes, pk: bytes) -> bool:
         a = _decodepoint(pk)
     except ValueError:
         return False
+    if _is_small_order(r) or _is_small_order(a):
+        return False
     s = _decodeint(sig[32:])
-    if s >= L:
+    if s == 0 or s >= L:
         return False
     h = _hint(_encodepoint(r) + pk + message)
     return _scalarmult(BP, s) == _edwards(r, _scalarmult(a, h))
