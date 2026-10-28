@@ -47,6 +47,11 @@ public class DevHealthController {
     if (!profile.isBlank()) body.put("SPRING_PROFILES_ACTIVE", profile);
     body.put("ARCAVA_JOURNAL_PATH_PRESENT", !journal.isBlank());
     body.put("ARCAVA_JOURNAL_PATH_SHA256", sha256(journal));
+    boolean transport = gate.protectedTrafficReady(piac, kdb);
+    body.put("piac_transport", piac.admitsLiveTransport() ? "open" : "not_connected");
+    body.put("kdb_transport", kdb.admitsLiveTransport() ? "open" : "not_connected");
+    body.put("e1_authority", "NOT_ADMITTED");
+    body.put("e1_reason", transport ? "LIVE_ADAPTER_NOT_ADMITTED" : "LIVE_AUTHORITY_CLOSED");
     return body;
   }
 

@@ -42,6 +42,10 @@ class EffectiveConfigReadbackTest {
       assertThat(body.body()).contains("\"ARCAVA_JOURNAL_PATH_SHA256\":\"" + sha256(journal.toString()) + "\"");
       assertThat(body.body()).doesNotContain(journal.toString());
       assertThat(body.body()).doesNotContain("DATABASE_URL", "SUPABASE_SERVICE_ROLE_KEY");
+      assertThat(body.body()).contains("\"e1_authority\":\"NOT_ADMITTED\"");
+      assertThat(body.body()).contains("\"e1_reason\":\"LIVE_AUTHORITY_CLOSED\"");
+      assertThat(body.body()).contains("\"piac_transport\":\"not_connected\"");
+      assertThat(body.body()).contains("\"kdb_transport\":\"not_connected\"");
       assertThat(http.send(HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/health/ready"))
           .timeout(Duration.ofSeconds(3)).GET().build(), HttpResponse.BodyHandlers.ofString()).statusCode())
           .isEqualTo(503);

@@ -100,6 +100,10 @@ if body.get("ARCAVA_JOURNAL_PATH_SHA256") != digest:
     sys.exit("effective journal hash mismatch")
 if path in json.dumps(body):
     sys.exit("journal path leaked into effective readback")
+if body.get("e1_authority") != "NOT_ADMITTED" or body.get("e1_reason") != "LIVE_AUTHORITY_CLOSED":
+    sys.exit("e1 authority is not admitted on this listener")
+if body.get("piac_transport") != "not_connected" or body.get("kdb_transport") != "not_connected":
+    sys.exit("live transport is not connected")
 candidate = {
     "SERVER_ADDRESS": body["SERVER_ADDRESS"],
     "SERVER_PORT": body["SERVER_PORT"],
@@ -111,6 +115,7 @@ json.dump(candidate, open(payload + ".candidate", "w"))
 PY
 python3 scripts/validate_effective_config.py "$work/effective.json.candidate" >/dev/null
 echo "EFFECTIVE schema=pass journal=redacted address=127.0.0.1"
+echo "E1 authority=NOT_ADMITTED reason=LIVE_AUTHORITY_CLOSED"
 
 kill -TERM "$pid"
 set +e

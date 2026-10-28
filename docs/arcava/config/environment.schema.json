@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "arcava-active-dev-environment",
   "title": "Arcava active development environment keys",
-  "description": "The operator validator checks these keys on one effective config object. HTTP readback returns a hash of the journal path. This file stores no secret values. It does not validate E1 transport.",
+  "description": "The operator validator checks these local keys on one effective config object. HTTP readback returns a hash of the journal path and reports e1_authority NOT_ADMITTED from the live gate. This file stores no secret values and does not admit E1 transport.",
   "type": "object",
   "additionalProperties": false,
   "required": ["SERVER_ADDRESS", "ARCAVA_JOURNAL_PATH", "ARCAVA_RUNTIME_ROLE"],

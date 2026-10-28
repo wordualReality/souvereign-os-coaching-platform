@@ -6,29 +6,11 @@ set +m
 root=$(cd "$(dirname "$0")/../../.." && pwd)
 cd "$root"
 
-refuse_secret() {
-  local name
-  for name in DATABASE_URL SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY CORE_ACCESS_API_BASE CANONICAL_API_BASE; do
-    if [[ -n "${!name:-}" ]]; then
-      echo "REFUSED forbidden_env=$name" >&2
-      exit 1
-    fi
-  done
-}
-
-if [[ "${1:-}" == "--refuse-check" ]]; then
-  refuse_secret
-  echo "REFUSE_CHECK_ALLOWED"
-  exit 0
-fi
-
-if [[ ! -x node_modules/.bin/next ]]; then
-  echo "next is not installed. Run npm ci from the repository root." >&2
-  exit 2
-fi
-
-export NEXT_TELEMETRY_DISABLED=1
-npm run web:build
+# shellcheck source=apps/web/scripts/lib/refuse-build-env.sh
+source "$root/apps/web/scripts/lib/refuse-build-env.sh"
+refuse_secret
+clean_build npm ci --no-audit --no-fund
+clean_build npm run web:build
 
 work=$(mktemp -d)
 pid=""
@@ -54,7 +36,6 @@ free_port() {
 }
 
 start_renderer() {
-  refuse_secret
   local port=$1
   env -i \
     PATH="$PATH" \
@@ -178,15 +159,26 @@ wait "$pid"
 set -e
 pid=""
 
-set +e
-output=$(SUPABASE_SERVICE_ROLE_KEY=sentinel "$0" --refuse-check 2>&1)
-status=$?
-set -e
-[[ "$status" != "0" ]]
-[[ "$output" == *"REFUSED forbidden_env=SUPABASE_SERVICE_ROLE_KEY"* ]]
-if grep -q "sentinel" <<<"$output"; then
-  echo "secret value leaked into the refusal" >&2
-  exit 1
-fi
-echo "REFUSED forbidden_env=SUPABASE_SERVICE_ROLE_KEY"
-echo "PASS operator_web bind=127.0.0.1 routes=4 stop=$stop_status unknown=dead recovery=started telemetry=disabled secret=refused"
+assert_refused_before_build() {
+  local assignment=$1
+  local expected=$2
+  local output status
+  set +e
+  output=$(env "$assignment" "$0" 2>&1)
+  status=$?
+  set -e
+  [[ "$status" != "0" ]]
+  [[ "$output" == *"REFUSED forbidden_env=${expected}"* ]]
+  if grep -q "sentinel" <<<"$output"; then
+    echo "secret value leaked into the refusal" >&2
+    exit 1
+  fi
+  if grep -E -q "npm ci|web:build|next build" <<<"$output"; then
+    echo "build started before the refusal of ${expected}" >&2
+    exit 1
+  fi
+  echo "REFUSED forbidden_env=${expected} before_build=1"
+}
+assert_refused_before_build SUPABASE_SERVICE_ROLE_KEY=sentinel SUPABASE_SERVICE_ROLE_KEY
+assert_refused_before_build NEXT_PUBLIC_SUPABASE_ANON_KEY=sentinel NEXT_PUBLIC_SUPABASE_ANON_KEY
+echo "PASS operator_web bind=127.0.0.1 routes=4 stop=$stop_status unknown=dead recovery=started telemetry=disabled secret=refused_before_build"
