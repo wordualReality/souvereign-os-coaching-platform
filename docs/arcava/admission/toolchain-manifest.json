@@ -1,6 +1,6 @@
 {
-  "package": "ARC36P25-T150-TOOLCHAIN-SOURCE-AND-A09-CASE-BOOTSTRAP-01",
-  "parent": "292b7366682287a0e8a93474f47ddf1fb6e17f50",
+  "package": "ARC36P25-T150-EXECUTABLE-RUNNER-AND-A09-ADMISSION-GUARDS-01",
+  "parent": "a2dd98dfc3bf86c3c32d1e8638f35d1d294c20f1",
   "pointer": "ARC-36/P25 step 7/10",
   "t150": "PARTIAL",
   "toolchain": {
@@ -83,7 +83,8 @@
     "A09-T48": "NOT_EXECUTED",
     "missing": "docs/arcava/admission/a09/A09-T01, A09-T04, A09-T44 and A09-T48 each lack case.json, owner-receipt.json and engine.json.",
     "discovery": "scripts/a09_case_discovery.py",
-    "owner_pin": "docs/arcava/admission/toolchain-owner-pin.json is absent. Registry and workflow pins stay PROPOSAL_EXERCISED_NOT_ADMITTED.",
+    "owner_pin": "docs/arcava/admission/toolchain-owner-pin.json is absent. A local file or owner_admitted boolean is rejected. Registry and workflow pins stay PROPOSAL_EXERCISED_NOT_ADMITTED.",
+    "runtime_check": "scripts/toolchain_receipt.py --runtime checks Java major 25, Maven 3.9.16 and Node 20.12.2 on jobs that install those binaries. Inventory mode does not treat an absent binary as a runtime pass.",
     "e1_authority": "NOT_ADMITTED",
     "e1_missing": "No E1 issuer credential, transport engine or owner receipt is present in this worktree. The running listener reports piac_transport not_connected, kdb_transport not_connected and e1_reason LIVE_AUTHORITY_CLOSED. SOV issue 14 is not connected."
   }

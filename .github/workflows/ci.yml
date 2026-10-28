@@ -33,6 +33,7 @@ jobs:
       - name: Check the toolchain receipt and A09 case discovery
         run: |
           python scripts/toolchain_receipt.py
+          python scripts/toolchain_receipt.py --self-check
           python scripts/a09_case_discovery.py
           python scripts/a09_case_discovery.py --self-check
 
@@ -48,6 +49,7 @@ jobs:
       - name: Install the pinned renderer and run the loopback smoke
         run: |
           set -euo pipefail
+          python3 scripts/toolchain_receipt.py --runtime node
           npm ci
           chmod +x apps/web/scripts/renderer-smoke.sh apps/web/scripts/operator-web.sh
           apps/web/scripts/renderer-smoke.sh
