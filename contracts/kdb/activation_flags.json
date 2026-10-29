@@ -9,5 +9,6 @@
   "promotion": "NO_EXECUTABLE_M01_COMMAND",
   "outbox_dispatch": "INACTIVE_M01",
   "tenant_guard_classifier": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
-  "provenance_review_eligibility": "INACTIVE_VERSION_CONTROLLED_CANDIDATE"
+  "provenance_review_eligibility": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
+  "lifecycle_read_eligibility": "INACTIVE_VERSION_CONTROLLED_CANDIDATE"
 }

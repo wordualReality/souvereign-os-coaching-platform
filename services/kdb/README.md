@@ -8,5 +8,7 @@ Envelope `tenant_scope` is checked first and must be a nonempty trimmed string o
 
 `provenance_eligibility.py` is an offline review-handoff eligibility guard for the SourceVersion to ReviewWorkItem chain. A local ELIGIBLE result is not a database write, not C04, and not C05.
 
+`lifecycle_eligibility.py` is an offline read-eligibility guard for ProtocolVersion lifecycle events. Withdrawal and revoked rights win. A local READ_ELIGIBLE result is NON_EXECUTABLE and does not publish.
+
 `digest_v2.py` is the KDB-owned SQL-v2 adapter. It does not grant producers database EXECUTE.
 `signed_ingress.py` is a test-only synthetic HMAC verifier. A local pass is `LOCAL_SIGNED_INGRESS_VERIFIED`, never `DB_COMMAND_ADMITTED`.

@@ -75,6 +75,7 @@ jobs:
           python3 tests/kdb/test_replay_dlq_policy.py
           python3 tests/kdb/test_tenant_guard_source.py
           python3 tests/kdb/test_provenance_eligibility.py
+          python3 tests/kdb/test_lifecycle_eligibility.py
           python3 tests/kdb/test_piac_fail_closed.py
           python3 tests/kdb/kdb_m01_06_security_static.py
           python3 tests/kdb/hosted_recovery_preflight_diff.py
