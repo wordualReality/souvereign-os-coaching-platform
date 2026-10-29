@@ -77,6 +77,7 @@ jobs:
           python3 tests/kdb/test_provenance_eligibility.py
           python3 tests/kdb/test_lifecycle_eligibility.py
           python3 tests/kdb/test_offline_diagnostic.py
+          python3 tests/kdb/test_p11_source_review_readback.py
           python3 tests/kdb/test_piac_fail_closed.py
           python3 tests/kdb/kdb_m01_06_security_static.py
           python3 tests/kdb/hosted_recovery_preflight_diff.py
@@ -128,3 +129,11 @@ jobs:
         run: |
           python3 tests/kdb/pg17_p5_sql_v2_parity.py
           python3 tests/kdb/pg17_p5_signed_ingress_oracles.py
+      - name: P11 disposable PG17 source-to-review readback
+        env:
+          KDB_PG17_MODE: libpq
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGUSER: kdb_local_super
+          PGDATABASE: kdb_m01_disposable
+        run: python3 tests/kdb/pg17_p11_source_review_readback.py

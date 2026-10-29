@@ -16,5 +16,7 @@ Envelope `tenant_scope` is checked first and must be a nonempty trimmed string o
 python3 services/kdb/offline_diagnostic_cli.py tests/kdb/fixtures/p10_stage_coherent.json
 ```
 
+`tests/kdb/pg17_p11_source_review_readback.py` is a disposable PostgreSQL 17 fixture. It is not a production reader. TEST_FIXTURE_ADMIN DML is rolled back. Mapped rows still finish NOT_ADMITTED.
+
 `digest_v2.py` is the KDB-owned SQL-v2 adapter. It does not grant producers database EXECUTE.
 `signed_ingress.py` is a test-only synthetic HMAC verifier. A local pass is `LOCAL_SIGNED_INGRESS_VERIFIED`, never `DB_COMMAND_ADMITTED`.

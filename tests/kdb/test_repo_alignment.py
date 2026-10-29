@@ -28,6 +28,10 @@ class RepoAlignment(unittest.TestCase):
     def test_o4_o5_inactive(self):
         self.assertTrue(FLAGS["o4"].startswith("INACTIVE"))
         self.assertTrue(FLAGS["o5"].startswith("INACTIVE"))
+        self.assertEqual(
+            FLAGS["disposable_pg17_source_review_readback"],
+            "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
+        )
     def test_no_human_review_writer(self):
         self.assertNotIn("INSERT INTO kdb_governance.human_review_decision", S3)
         self.assertNotIn("INSERT INTO kdb_canonical.protocol_version", S3)

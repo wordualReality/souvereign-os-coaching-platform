@@ -9,6 +9,13 @@ DROP ROLE IF EXISTS kdb_command_owner;
 DROP ROLE IF EXISTS kdb_schema_owner;
 DO $$
 BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'kdb_test_fixture_admin') THEN
+    EXECUTE 'DROP OWNED BY kdb_test_fixture_admin';
+  END IF;
+END $$;
+DROP ROLE IF EXISTS kdb_test_fixture_admin;
+DO $$
+BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'kdb_migrator') THEN
     EXECUTE 'DROP OWNED BY kdb_migrator';
   END IF;

@@ -1,8 +1,8 @@
-# KDB current pointer, 2026-10-29 P10 offline diagnostic
+# KDB current pointer, 2026-10-29 P11 disposable PG17 source-to-review readback
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: KDB-M01-P10-LOCAL-DIAGNOSTIC-VERTICAL-SLICE-01
+Active packet: KDB-M01-P11-DISPOSABLE-PG17-SOURCE-TO-REVIEW-READBACK-01
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2`, PR #21 `2ba7ae44` remain frozen.
 PR #22 stays untouched at `0078c03`. This pointer is local branch `kdb/m01-p06-local-worktree-recovery` from accepted PR21.
@@ -34,4 +34,12 @@ Version-controlled inactive `n8n/kdb-dev/tenant-guard-candidate` already holds t
 
 ```
 python3 services/kdb/offline_diagnostic_cli.py tests/kdb/fixtures/p10_stage_coherent.json
+```
+
+## P11 disposable PG17 source-to-review readback
+
+`tests/kdb/pg17_p11_source_review_readback.py` inserts a synthetic Source to ReviewWorkItem chain as `kdb_test_fixture_admin` on disposable PostgreSQL 17, SELECTs it, maps it into P10, and rolls the transaction back. Lifecycle stays a separate synthetic fixture. C04/C05 are not inserted. Runtime LOGIN stays denied. FINAL remains NOT_ADMITTED.
+
+```
+python3 tests/kdb/pg17_p11_source_review_readback.py
 ```
