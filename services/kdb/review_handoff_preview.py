@@ -18,9 +18,14 @@ from provenance_eligibility import EligibilityError, evaluate_review_eligibility
 from tenant_scope import TenantScopeError, require_tenant_scope
 
 PACKET = "KDB-M01-P13-OFFLINE-REVIEW-HANDOFF-PREVIEW-01"
+REPAIR_PACKET = "KDB-M01-P13R-STRICT-INPUT-REDACTION-01"
 QUEUE = "KDB_HUMAN_REVIEW"
 MAX_CHARS = 65536
+MAX_NESTING = 8
+MAX_INT_DIGITS = 18
 CASE_ID_RE = r"^[A-Za-z0-9._-]{1,64}$"
+COMMIT_SHA_RE = r"^[0-9a-f]{40}$"
+COMMIT_LABEL_RE = r"^[A-Za-z0-9._-]{1,64}$"
 INPUT_KEYS = frozenset({"case_id", "expected_tenant_scope", "candidate_chain"})
 FORGED_KEYS = frozenset(
     {
@@ -61,6 +66,7 @@ ATC10_NAMED_CANDIDATES = (
     "TranscriptArtifact",
     "SourceDerivationRecord",
 )
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class PreviewParseError(Exception):
@@ -71,6 +77,74 @@ class PreviewParseError(Exception):
 
 def _deny_parse(code: str) -> None:
     raise PreviewParseError(code)
+
+
+def bound_commit(value: str) -> str:
+    if not isinstance(value, str):
+        _deny_parse("INVALID_COMMIT_LABEL")
+    if re.fullmatch(COMMIT_SHA_RE, value) or re.fullmatch(COMMIT_LABEL_RE, value):
+        return value
+    _deny_parse("INVALID_COMMIT_LABEL")
+    raise AssertionError("unreachable")
+
+
+def _reject_constant(value: str) -> None:
+    _deny_parse("NONCANONICAL_JSON")
+
+
+def _bounded_int(value: str) -> int:
+    digits = value[1:] if value[:1] in "+-" else value
+    if len(digits) > MAX_INT_DIGITS:
+        _deny_parse("HUGE_INTEGER")
+    return int(value)
+
+
+def _no_duplicate_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    seen: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in seen:
+            _deny_parse("DUPLICATE_JSON_KEY")
+        seen[key] = value
+    return seen
+
+
+def _nesting(value: Any, depth: int = 1) -> None:
+    if depth > MAX_NESTING:
+        _deny_parse("INPUT_TOO_DEEP")
+    if isinstance(value, dict):
+        for item in value.values():
+            _nesting(item, depth + 1)
+    elif isinstance(value, list):
+        for item in value:
+            _nesting(item, depth + 1)
+
+
+def parse_preview_json(text: str) -> dict[str, Any]:
+    if not isinstance(text, str) or text == "":
+        _deny_parse("EMPTY_INPUT")
+    if len(text) > MAX_CHARS:
+        _deny_parse("INPUT_TOO_LARGE")
+    try:
+        payload = json.loads(
+            text,
+            object_pairs_hook=_no_duplicate_object,
+            parse_int=_bounded_int,
+            parse_constant=_reject_constant,
+            strict=True,
+        )
+    except PreviewParseError:
+        raise
+    except json.JSONDecodeError as exc:
+        raise PreviewParseError("MALFORMED_JSON") from exc
+    except ValueError as exc:
+        raise PreviewParseError("MALFORMED_JSON") from exc
+    if not isinstance(payload, dict):
+        _deny_parse("INVALID_INPUT")
+    _nesting(payload)
+    extra = set(payload) - INPUT_KEYS
+    if extra:
+        _deny_parse("UNEXPECTED_INPUT_KEY")
+    return payload
 
 
 def _forged(value: Any) -> bool:
@@ -93,6 +167,7 @@ def _receipt(
 ) -> dict[str, Any]:
     return {
         "packet": PACKET,
+        "repair_packet": REPAIR_PACKET,
         "df_adoption": "DF-20261029-01",
         "case_id": case_id,
         "preview_status": preview_status,
@@ -115,6 +190,7 @@ def _receipt(
         "atc10_named_candidates": len(ATC10_NAMED_CANDIDATES),
         "hosted_verified": "HOSTED_VERIFIED_NO",
         "source_commit": commit,
+        "source_commit_attestation": "LABEL_NOT_ATTESTED",
     }
 
 
@@ -139,7 +215,6 @@ def _queue_card(chain: Mapping[str, Any]) -> dict[str, Any]:
         "review_work_item_id": str(work.get("review_work_item_id") or ""),
         "correlation_id": str(work.get("correlation_id") or ""),
         "rights_status": str(source.get("rights_status") or ""),
-        "media_type": str(version.get("media_type") or ""),
         "evidence_span_count": len(spans) if isinstance(spans, list) else 0,
         "content_digest_proof": "OPAQUE_SHA_UNPROVEN",
     }
@@ -152,10 +227,14 @@ def _assert_redacted(blob: str) -> None:
 
 
 def preview(payload: Mapping[str, Any] | None, *, commit: str = "UNPINNED_LOCAL") -> dict[str, Any]:
-    raw = deepcopy(payload if isinstance(payload, dict) else {})
-    extra = set(raw) - INPUT_KEYS
+    pin = bound_commit(commit)
+    if not isinstance(payload, dict):
+        _deny_parse("INVALID_INPUT")
+    extra = set(payload) - INPUT_KEYS
     if extra:
         _deny_parse("UNTRUSTED_CLAIM")
+    _nesting(payload)
+    raw = deepcopy(payload)
     case_id = raw.get("case_id")
     if not isinstance(case_id, str) or re.fullmatch(CASE_ID_RE, case_id) is None:
         _deny_parse("INVALID_CASE_ID")
@@ -165,21 +244,24 @@ def preview(payload: Mapping[str, Any] | None, *, commit: str = "UNPINNED_LOCAL"
             preview_status="PREVIEW_DENIED",
             deny_code="FORGED_REVIEWER_CLAIM",
             queue_card=None,
-            commit=commit,
+            commit=pin,
         )
     try:
         expected = require_tenant_scope(raw.get("expected_tenant_scope"))
         chain = raw.get("candidate_chain")
         if not isinstance(chain, dict):
             _deny_parse("MISSING_CHAIN")
-        require_tenant_scope(chain.get("source", {}).get("tenant_scope") if isinstance(chain.get("source"), dict) else None, expected)
+        source = chain.get("source")
+        if not isinstance(source, dict):
+            _deny_parse("MISSING_CHAIN")
+        require_tenant_scope(source.get("tenant_scope"), expected)
     except TenantScopeError as exc:
         return _receipt(
             case_id=case_id,
             preview_status="PREVIEW_DENIED",
             deny_code=exc.code,
             queue_card=None,
-            commit=commit,
+            commit=pin,
         )
     try:
         evaluate_review_eligibility(chain)
@@ -189,37 +271,52 @@ def preview(payload: Mapping[str, Any] | None, *, commit: str = "UNPINNED_LOCAL"
             preview_status="PREVIEW_DENIED",
             deny_code=exc.code,
             queue_card=None,
-            commit=commit,
+            commit=pin,
         )
     card = _queue_card(chain)
+    if "media_type" in card:
+        _deny_parse("PREVIEW_LEAK")
     receipt = _receipt(
         case_id=case_id,
         preview_status="PREVIEW_ONLY",
         deny_code=None,
         queue_card=card,
-        commit=commit,
+        commit=pin,
     )
     _assert_redacted(json.dumps(receipt, sort_keys=True))
     return receipt
 
 
-def preview_file(path: str | Path, *, commit: str = "UNPINNED_LOCAL") -> dict[str, Any]:
+def _safe_local_file(path: str | Path) -> Path:
     text_path = str(path)
     lowered = text_path.lower()
     if lowered.startswith("http://") or lowered.startswith("https://") or lowered.startswith("file:"):
         _deny_parse("NETWORK_PATH_DENIED")
-    location = Path(path)
+    if "\x00" in text_path:
+        _deny_parse("PATH_ESCAPE_DENIED")
+    location = Path(text_path)
+    if location.is_symlink():
+        _deny_parse("SYMLINK_DENIED")
     if not location.is_file():
         _deny_parse("MISSING_INPUT_FILE")
+    resolved = location.resolve()
+    try:
+        resolved.relative_to(REPO_ROOT)
+    except ValueError:
+        _deny_parse("PATH_ESCAPE_DENIED")
+    if resolved.is_symlink():
+        _deny_parse("SYMLINK_DENIED")
+    return resolved
+
+
+def preview_file(path: str | Path, *, commit: str = "UNPINNED_LOCAL") -> dict[str, Any]:
+    pin = bound_commit(commit)
+    location = _safe_local_file(path)
     if location.stat().st_size > MAX_CHARS:
         _deny_parse("INPUT_TOO_LARGE")
-    text = location.read_text(encoding="utf-8")
-    if len(text) > MAX_CHARS:
-        _deny_parse("INPUT_TOO_LARGE")
     try:
-        payload = json.loads(text)
-    except json.JSONDecodeError as exc:
-        raise PreviewParseError("MALFORMED_JSON") from exc
-    if not isinstance(payload, dict):
-        _deny_parse("INVALID_INPUT")
-    return preview(payload, commit=commit)
+        text = location.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        raise PreviewParseError("INVALID_UNICODE") from exc
+    payload = parse_preview_json(text)
+    return preview(payload, commit=pin)

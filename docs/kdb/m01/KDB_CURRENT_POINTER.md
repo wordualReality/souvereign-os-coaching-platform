@@ -1,8 +1,8 @@
-# KDB current pointer, 2026-10-29 P13 offline review-handoff preview
+# KDB current pointer, 2026-10-29 P13R strict input and redaction repair
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: KDB-M01-P13-OFFLINE-REVIEW-HANDOFF-PREVIEW-01
+Active packet: KDB-M01-P13R-STRICT-INPUT-REDACTION-01
 DF adoption: DF-20261029-01 evidence matrix. Twelve physical SQL001 tables. ATC-10 named 18 remain UNCONFIRMED. No 18/18 logical claim.
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2`, PR #21 `2ba7ae44` remain frozen.
@@ -61,3 +61,5 @@ python3 tests/kdb/pg17_p12_commit_reconnect_replay.py
 python3 services/kdb/review_handoff_preview_cli.py tests/kdb/fixtures/p13_preview_eligible.json
 python3 tests/kdb/pg17_p13_review_handoff_preview.py
 ```
+
+P13R keeps that preview path and rejects duplicate JSON keys, oversized or deep input, huge integers, path escape, symlinks, and untrusted commit labels. The queue card omits `media_type`. A local commit label is `LABEL_NOT_ATTESTED`.

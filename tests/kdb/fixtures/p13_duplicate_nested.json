@@ -1,0 +1,1 @@
+{"case_id": "P13-DUP-NEST", "expected_tenant_scope": "TENANT_SYNTH_A", "candidate_chain": {"source": {"tenant_scope": "TENANT_SYNTH_A", "tenant_scope": "TENANT_SYNTH_B"}}}
