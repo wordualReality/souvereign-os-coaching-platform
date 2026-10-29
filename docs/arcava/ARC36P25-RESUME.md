@@ -1,6 +1,6 @@
 # ARC-36/P25 resume pointer
 
-Current package: ARC36P25-T150-EXIT-STATUS-AND-A09-REVISION-GUARD-FIX-01. Parent `698518e4e3876c0eae16983eec741aea8ec23b9a`. The executable runner delta is consumed as CHANGES_REQUIRED_DELTA_SCOPE_ONLY for the exit status, the missing Node negative and the A09 revision check. Earlier frontend, operator, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
+Current package: ARC36P25-T150-EFFECTIVE-CONFIG-SCHEMA-VALIDATOR-HARDENING-01. Parent `ca9105b7e50f17e3bde8a0fac92641fbc5b428cc`. The exit-status delta is consumed as PASS_WITH_CONDITIONS_DELTA_SCOPE_ONLY for that scope. Earlier frontend, operator, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
 
 ## Checkout
 
@@ -17,7 +17,7 @@ Current package: ARC36P25-T150-EXIT-STATUS-AND-A09-REVISION-GUARD-FIX-01. Parent
 - Smoke now requires `LIVE_HTTP 200` and `DENIED_HTTP 403`, and rejects a synthetic HTTP 200 that only carries a denial body.
 - The non-loopback start waits at most 10 seconds.
 - Local operator procedures for the JAR and the Next shell are `EXERCISED_LOCAL`: start, ready, stop, restart, UNKNOWN after a dead pid, and recovery. Hosted operator admission stays open.
-- Effective config: `/health/effective` returns the bind, port, role and profile, plus a hash of the journal path. The path itself is not in the response. `scripts/validate_effective_config.py` accepts that object and rejects a non-loopback address, a missing or empty journal, a wrong role, a port outside 0-65535, and an extra `DATABASE_URL`.
+- Effective config: `/health/effective` returns the bind, port, role and profile, plus a hash of the journal path. The path itself is not in the response. `scripts/validate_effective_config.py` accepts that object and rejects a non-loopback address, a missing or empty journal, a wrong role, a port outside 0-65535, and an extra `DATABASE_URL`. A schema rule outside type, enum, const, minLength, minimum, maximum, description and x-sensitivity fails before the candidate is accepted. An unknown type, a missing type and an inverted bound fail the same way.
 - Frontend lock stays `PROPOSAL_EXERCISED_NOT_ADMITTED`. The registry versions are not an ARC-10 source pin.
 - The web operator refuses `SUPABASE_SERVICE_ROLE_KEY` and `NEXT_PUBLIC_*` before `npm ci` and `next build`. The build then runs in an allowlisted environment: `PATH`, `HOME`, `TMPDIR`, `NEXT_TELEMETRY_DISABLED=1`.
 - E1 authority stays `NOT_ADMITTED`. The running listener reports `LIVE_AUTHORITY_CLOSED` with PIAC and KDB transport not connected. No E1 issuer, engine or owner receipt is in this worktree.
@@ -39,4 +39,4 @@ This is not full T150 admission, not live PIAC, not a live KDB verification, and
 
 ## Next executable step
 
-GPT_BUILDER_ARCAVA consumes this return and decides the next build. Review scope is the executable exit status and the A09 source-revision check only. Do not reopen `698518e`, the operator procedures, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.
+GPT_BUILDER_ARCAVA consumes this return and decides the next build. Review scope is the effective-config schema validator only. Do not reopen `ca9105b`, the toolchain exit check, the operator procedures, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.
