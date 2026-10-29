@@ -1,6 +1,6 @@
 # ARC-36/P25 resume pointer
 
-Current package: ARC36P25-T150-REQUEST-WIRE-SCHEMA-AND-DENIAL-BOUNDARY-01. Parent `62aaa884441cdc6649a9a88ee8c6c274958cecea`. The response wire delta is consumed as PASS_WITH_CONDITIONS_DELTA_SCOPE_ONLY for that scope. Earlier manifest, toolchain, operator, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
+Current package: ARC36P25-T150-WIRE-PYTHON-DEPENDENCY-REPRODUCIBILITY-01. Parent `8d2111f89e9a43e84721f0a55219219beb290782`. The request wire delta is consumed as PASS_WITH_CONDITIONS_DELTA_SCOPE_ONLY for that scope. Earlier manifest, toolchain, operator, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
 
 ## Checkout
 
@@ -39,6 +39,8 @@ This is not full T150 admission, not live PIAC, not a live KDB verification, and
 
 ## Next executable step
 
-`scripts/validate_arcava_producer_request_wire.py` checks the synthetic requests captured beside `bodies.ndjson` against the CT-ARC-002, CT-ARC-003 and CT-ARC-004 request schemas. A schema-valid caller ref stays untrusted. The 15 response checks stay in place. `runtime_producer_ready` stays false.
+`docs/arcava/admission/wire-python-deps.lock` pins the direct and transitive Python packages used by the Arcava wire checks, with file hashes from the observed install. The kernel HTTP job installs that lock with `pip install --require-hashes --only-binary=:all:`. `scripts/check_arcava_wire_python_lock.py --self-check` rejects a one-byte wheel change, a changed hash, an unpinned requirement, an unknown package, and a wheel hash for another platform. `ubuntu-latest` and its host Python patch stay unpinned: `NONREPRODUCIBLE_RUNNER`. This lock is `SOURCE_BOUNDED_TEST_DEPENDENCY_PIN_CANDIDATE`. It is not an ARC-10 toolchain owner pin.
 
-GPT_BUILDER_ARCAVA consumes this return and decides the next build. Review scope is the request-wire schema check only. Do not reopen `62aaa88`, the response wire check, the manifest integrity gate, the toolchain exit check, the operator procedures, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.
+The 15 request checks and the 15 response checks stay in place. A schema-valid caller ref stays untrusted. `runtime_producer_ready` stays false.
+
+GPT_BUILDER_ARCAVA consumes this return and decides the next build. Review scope is the wire Python dependency lock and the kernel CI install only. Do not reopen `8d2111f`, the request wire check, `62aaa88`, the response wire check, the manifest integrity gate, the toolchain exit check, the operator procedures, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.

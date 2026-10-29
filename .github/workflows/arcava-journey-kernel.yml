@@ -82,8 +82,35 @@ jobs:
             services/api/src/test/java/com/projectb/api/http/JourneyProducerTest.java \
             services/api/src/test/java/com/projectb/api/http/JournalAtomicityTest.java \
             services/api/src/test/java/com/projectb/api/http/AuthorityBoundaryTest.java
+          python3 - << 'PY'
+          import sys
+          print("PYTHON_RUNTIME", sys.version.split()[0], sys.platform)
+          print("NONREPRODUCIBLE_RUNNER image=ubuntu-latest interpreter=host-python3 patch_not_pinned")
+          PY
           python3 -m venv "${RUNNER_TEMP}/wire-venv"
-          "${RUNNER_TEMP}/wire-venv/bin/pip" install --disable-pip-version-check jsonschema
+          "${RUNNER_TEMP}/wire-venv/bin/pip" install \
+            --disable-pip-version-check \
+            --no-cache-dir \
+            --require-hashes \
+            --only-binary=:all: \
+            -r docs/arcava/admission/wire-python-deps.lock
+          "${RUNNER_TEMP}/wire-venv/bin/python" - << 'PY'
+          import importlib.metadata as md
+          import sys
+          names = (
+              "jsonschema",
+              "attrs",
+              "jsonschema-specifications",
+              "referencing",
+              "rpds-py",
+              "typing-extensions",
+          )
+          print("PYTHON_RUNTIME", sys.version.split()[0], sys.platform)
+          for name in names:
+              print(f"WIRE_DEP {name}=={md.version(name)}")
+          print("WIRE_LOCK_INSTALL exit=0")
+          PY
+          python3 scripts/check_arcava_wire_python_lock.py --self-check
           java -cp "$classes_dir" com.projectb.api.http.JourneyPathTest
           producer_log="${RUNNER_TEMP}/producer.out"
           java -cp "$classes_dir" com.projectb.api.http.JourneyProducerTest | tee "$producer_log"
