@@ -1,8 +1,8 @@
-# KDB current pointer, 2026-10-28 P07 tenant guard
+# KDB current pointer, 2026-10-29 P08 provenance eligibility
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: KDB-M01-P07-BOUND-TENANT-GUARD-AND-SOURCE-FOUNDATION-01
+Active packet: KDB-M01-P08-PROVENANCE-AND-REVIEW-ELIGIBILITY-OFFLINE-01
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2`, PR #21 `2ba7ae44` remain frozen.
 PR #22 stays untouched at `0078c03`. This pointer is local branch `kdb/m01-p06-local-worktree-recovery` from accepted PR21.
@@ -19,3 +19,7 @@ PR #22 stays untouched at `0078c03`. This pointer is local branch `kdb/m01-p06-l
 ## P07 tenant guard
 
 Version-controlled inactive `n8n/kdb-dev/tenant-guard-candidate` already holds the corrected Fail Closed Classify nodes. P07 adds the same fail-closed `tenant_scope` rule to `services/kdb/tenant_scope.py`, checks it before PIAC, and records 37/37 plus 26/26 plus extra oversize/non-string regressions. Synthetic ALLOW is still rejected. Not a hosted or live ingest admission.
+
+## P08 provenance and review eligibility
+
+`services/kdb/provenance_eligibility.py` checks SourceVersion to Submission to CandidateRevision to ReviewWorkItem against SQL 001 and O1/O2/O3. A pass is eligibility for a review handoff only. It does not write SQL, create a human decision, or publish a ProtocolVersion. Semantic descriptor, taxonomy, and rule version pins are absent from those contracts and are reported as gaps. Synthetic ALLOW is still rejected by the facade.
