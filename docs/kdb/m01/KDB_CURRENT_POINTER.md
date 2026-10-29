@@ -1,8 +1,8 @@
-# KDB current pointer, 2026-10-29 P09 lifecycle eligibility
+# KDB current pointer, 2026-10-29 P10 offline diagnostic
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: KDB-M01-P09-LIFECYCLE-WITHDRAWAL-ELIGIBILITY-OFFLINE-01
+Active packet: KDB-M01-P10-LOCAL-DIAGNOSTIC-VERTICAL-SLICE-01
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2`, PR #21 `2ba7ae44` remain frozen.
 PR #22 stays untouched at `0078c03`. This pointer is local branch `kdb/m01-p06-local-worktree-recovery` from accepted PR21.
@@ -27,3 +27,11 @@ Version-controlled inactive `n8n/kdb-dev/tenant-guard-candidate` already holds t
 ## P09 lifecycle and withdrawal eligibility
 
 `services/kdb/lifecycle_eligibility.py` checks reserved SQL 001 protocol, protocol_version, and lifecycle_event kinds PUBLISHED, REVALIDATION_REQUIRED, WITHDRAWN, SUPERSEDED. Withdrawal and revoked source rights win. Unclear event order stays NOT_ADMITTED. A local pass is READ_ELIGIBLE_OFFLINE_ONLY and NON_EXECUTABLE. It does not write C04/C05, emit outbox, or recompute opaque content_sha256.
+
+## P10 local diagnostic vertical slice
+
+`services/kdb/offline_diagnostic.py` and `offline_diagnostic_cli.py` compose P07 tenant_scope, P08 provenance, and P09 lifecycle into one local JSON diagnosis. A coherent synthetic run may show STAGE_LOCAL_ELIGIBLE per stage. The receipt stays NOT_ADMITTED and NON_EXECUTABLE because there is no verified C04/C05 transition. No network, SQL, or n8n.
+
+```
+python3 services/kdb/offline_diagnostic_cli.py tests/kdb/fixtures/p10_stage_coherent.json
+```

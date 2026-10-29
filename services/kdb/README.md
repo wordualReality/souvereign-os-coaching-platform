@@ -10,5 +10,11 @@ Envelope `tenant_scope` is checked first and must be a nonempty trimmed string o
 
 `lifecycle_eligibility.py` is an offline read-eligibility guard for ProtocolVersion lifecycle events. Withdrawal and revoked rights win. A local READ_ELIGIBLE result is NON_EXECUTABLE and does not publish.
 
+`offline_diagnostic.py` plus `offline_diagnostic_cli.py` run those checks as one local diagnostic. Exit 0 prints a redacted receipt whose final_authority is always NOT_ADMITTED. Exit 2 means the input was rejected. Example:
+
+```
+python3 services/kdb/offline_diagnostic_cli.py tests/kdb/fixtures/p10_stage_coherent.json
+```
+
 `digest_v2.py` is the KDB-owned SQL-v2 adapter. It does not grant producers database EXECUTE.
 `signed_ingress.py` is a test-only synthetic HMAC verifier. A local pass is `LOCAL_SIGNED_INGRESS_VERIFIED`, never `DB_COMMAND_ADMITTED`.
