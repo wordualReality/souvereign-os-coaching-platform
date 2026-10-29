@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO / "services" / "kdb"))
 import pg17_disposable_command_path as cmd  # noqa: E402
 from offline_diagnostic import diagnose  # noqa: E402
+from p11_evidence_matrix import build_matrix, verify_contract_mappings  # noqa: E402
 from p11_snapshot_map import (  # noqa: E402
     assert_redacted,
     diagnostic_payload,
@@ -45,7 +46,9 @@ SELECT jsonb_build_object(
   'protocol', (SELECT count(*) FROM kdb_canonical.protocol),
   'protocol_version', (SELECT count(*) FROM kdb_canonical.protocol_version),
   'lifecycle_event', (SELECT count(*) FROM kdb_canonical.lifecycle_event),
-  'outbox_event', (SELECT count(*) FROM kdb_ops.outbox_event)
+  'outbox_event', (SELECT count(*) FROM kdb_ops.outbox_event),
+  'command_receipt', (SELECT count(*) FROM kdb_ops.command_receipt),
+  'audit_event', (SELECT count(*) FROM kdb_ops.audit_event)
 );
 """
 PROTECTED_ZERO = (
@@ -58,6 +61,7 @@ PROTECTED_ZERO = (
 
 SOURCE_ID = "11111111-1111-4111-8111-111111111111"
 VERSION_ID = "22222222-2222-4222-8222-222222222222"
+VERSION_ID_2 = "22222222-2222-4222-8222-222222222223"
 SUBMISSION_ID = "33333333-3333-4333-8333-333333333333"
 CANDIDATE_ID = "44444444-4444-4444-8444-444444444444"
 REVISION_ID = "55555555-5555-4555-8555-555555555555"
@@ -73,6 +77,7 @@ MALFORMED_CMD = "66666666-6666-4666-8666-666666666668"
 PENDING_SRC = "11111111-1111-4111-8111-aaaaaaaaaaa1"
 REVOKED_SRC = "11111111-1111-4111-8111-aaaaaaaaaaa2"
 CONTENT_SHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+CONTENT_SHA_2 = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
 RIGHTS_SHA = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 CAND_SHA = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
 REQ_SHA = "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
@@ -216,6 +221,13 @@ INSERT INTO kdb_governance.source_version (
   '{VERSION_ID}', '{SOURCE_ID}', '{TENANT}', '{CONTENT_SHA}', '{RIGHTS_ADMITTED}'::jsonb,
   '{RIGHTS_SHA}', 'text/plain', 1, '2026-10-28T00:00:00Z'
 );
+INSERT INTO kdb_governance.source_version (
+  source_version_id, source_id, tenant_scope, content_sha256, rights_snapshot,
+  rights_snapshot_sha256, media_type, source_version_no, acquired_at
+) VALUES (
+  '{VERSION_ID_2}', '{SOURCE_ID}', '{TENANT}', '{CONTENT_SHA_2}', '{RIGHTS_ADMITTED}'::jsonb,
+  '{RIGHTS_SHA}', 'text/plain', 2, '2026-10-28T01:00:00Z'
+);
 INSERT INTO kdb_staging.submission (
   submission_id, tenant_scope, origin_owner, idempotency_key, request_sha256,
   principal_context_ref, access_decision_ref, purpose, source_version_id, status
@@ -270,7 +282,9 @@ SELECT jsonb_build_object(
   'pending_source', (SELECT to_jsonb(p) FROM kdb_governance.source p WHERE source_id = '{PENDING_SRC}'),
   'revoked_source', (SELECT to_jsonb(r) FROM kdb_governance.source r WHERE source_id = '{REVOKED_SRC}'),
   'orphan_candidate', (SELECT to_jsonb(o) FROM kdb_staging.candidate_revision o WHERE candidate_revision_id = '{ORPHAN_REV}'),
-  'malformed_candidate', (SELECT to_jsonb(m) FROM kdb_staging.candidate_revision m WHERE candidate_revision_id = '{MALFORMED_REV}')
+  'malformed_candidate', (SELECT to_jsonb(m) FROM kdb_staging.candidate_revision m WHERE candidate_revision_id = '{MALFORMED_REV}'),
+  'source_version_count', (SELECT count(*) FROM kdb_governance.source_version WHERE source_id = '{SOURCE_ID}'),
+  'candidate_count', (SELECT count(*) FROM kdb_staging.candidate_revision WHERE source_version_id = '{VERSION_ID}')
 );
 ROLLBACK;
 """
@@ -467,6 +481,11 @@ def main() -> None:
             fail("P11_PENDING_NOT_PERSISTED_IN_TXN")
         if snapshot["revoked_source"]["rights_status"] != "REVOKED":
             fail("P11_REVOKED_NOT_PERSISTED_IN_TXN")
+        if int(snapshot.get("source_version_count") or 0) < 2:
+            fail("P11_SOURCE_VERSION_NOT_ONE_TO_N")
+        if int(snapshot.get("candidate_count") or 0) < 2:
+            fail("P11_CANDIDATE_NOT_ONE_TO_N")
+        mappings = verify_contract_mappings(snapshot)
 
         chain = map_candidate_chain(snapshot)
         payload = diagnostic_payload(
@@ -582,9 +601,40 @@ INSERT INTO kdb_governance.source (
         if after != before:
             fail(f"P11_RESIDUAL before={before} after={after}")
         ensure_protected_zero(after, "AFTER")
+        if after.get("command_receipt", 0) != before.get("command_receipt", 0):
+            fail("P11_NEW_COMMAND_RECEIPT")
+        if after.get("audit_event", 0) != before.get("audit_event", 0):
+            fail("P11_NEW_AUDIT_EVENT")
+        commit = source_commit()
+        matrix = build_matrix(
+            commit=commit,
+            environment="disposable-postgres-17",
+            run={
+                "slice_pass": True,
+                "denials_pass": True,
+                "zero_ops": True,
+                "tests": [
+                    "pg17_p11_source_review_readback",
+                    "test_p11_source_review_readback",
+                    "test_offline_diagnostic",
+                ],
+                "contract_mappings": mappings,
+                "cardinality": {
+                    "source_version_per_source": int(snapshot.get("source_version_count") or 0),
+                    "candidates_per_bound_version": int(snapshot.get("candidate_count") or 0),
+                },
+            },
+        )
+        if matrix["logical_objects_claimed"] == "18/18":
+            fail("P11_FALSE_18_OF_18")
+        if matrix["inventory_source"] != "INVENTORY_SOURCE_GAP":
+            fail("P11_INVENTORY_MUST_STAY_GAP")
+        if matrix["hosted_verified"] != "HOSTED_VERIFIED_NO":
+            fail("P11_FALSE_HOSTED")
 
         wrapper = {
             "packet": "KDB-M01-P11-DISPOSABLE-PG17-SOURCE-TO-REVIEW-READBACK-01",
+            "df_adoption": "DF-20261029-01",
             "gate": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
             "final_authority": "NOT_ADMITTED",
             "execution": "NON_EXECUTABLE",
@@ -608,8 +658,9 @@ INSERT INTO kdb_governance.source (
                 "missing_tenant_guc_count": 0,
                 "note": "SET_ROLE_FROM_SUPERUSER_IS_NOT_A_POSITIVE",
             },
+            "evidence_matrix": matrix,
             "diagnostic": receipt,
-            "source_commit": source_commit(),
+            "source_commit": commit,
         }
         text = json.dumps(wrapper, sort_keys=True)
         assert_redacted(text)

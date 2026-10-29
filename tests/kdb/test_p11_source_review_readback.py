@@ -11,6 +11,11 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO / "services" / "kdb"))
 from offline_diagnostic import diagnose  # noqa: E402
+from p11_evidence_matrix import (  # noqa: E402
+    NONPHYSICAL_CANDIDATES_NOT_ASSERTED,
+    build_matrix,
+    verify_contract_mappings,
+)
 from p11_snapshot_map import (  # noqa: E402
     REDACT_SUBSTRINGS,
     assert_redacted,
@@ -186,6 +191,47 @@ class P11SnapshotMap(unittest.TestCase):
             LIFECYCLE["protocol_version"]["source_candidate_revision_id"],
             SNAPSHOT["candidate_revision"]["candidate_revision_id"],
         )
+
+    def test_contract_mappings_bound_without_locator_leak(self) -> None:
+        mapped = verify_contract_mappings(SNAPSHOT)
+        self.assertEqual(len(mapped), 10)
+        self.assertTrue(all(item["status"] == "BOUND" for item in mapped))
+        blob = json.dumps(mapped)
+        self.assertNotIn("synthetic://", blob)
+
+    def test_df_matrix_twelve_physical_not_eighteen(self) -> None:
+        matrix = build_matrix(
+            commit="test-commit",
+            environment="unit",
+            run={
+                "slice_pass": True,
+                "denials_pass": True,
+                "zero_ops": True,
+                "tests": ["unit"],
+                "contract_mappings": verify_contract_mappings(SNAPSHOT),
+                "cardinality": {"source_version_per_source": 2, "candidates_per_bound_version": 3},
+            },
+        )
+        self.assertEqual(matrix["df_adoption"], "DF-20261029-01")
+        self.assertEqual(matrix["physical_sql001_tables"], 12)
+        self.assertEqual(len(matrix["objects"]), 12)
+        self.assertEqual(matrix["logical_objects_claimed"], "NOT_18_OF_18")
+        self.assertEqual(matrix["inventory_source"], "INVENTORY_SOURCE_GAP")
+        self.assertEqual(matrix["hosted_verified"], "HOSTED_VERIFIED_NO")
+        self.assertEqual(matrix["restart_replay"], "NOT_TESTED")
+        self.assertEqual(matrix["final_authority"], "NOT_ADMITTED")
+        self.assertEqual(
+            list(NONPHYSICAL_CANDIDATES_NOT_ASSERTED),
+            matrix["named_nonphysical_candidates_not_asserted"],
+        )
+        blob = json.dumps(matrix)
+        self.assertNotIn("18/18", blob)
+        self.assertNotIn("HOSTED_VERIFIED_YES", blob)
+        self.assertNotIn("synthetic://", blob)
+        self.assertNotIn("DB_COMMAND_ADMITTED", blob)
+        for row in matrix["objects"]:
+            self.assertEqual(row["hosted_verified"], "HOSTED_VERIFIED_NO")
+            self.assertEqual(row["owner"], "KDB")
 
 
 if __name__ == "__main__":
