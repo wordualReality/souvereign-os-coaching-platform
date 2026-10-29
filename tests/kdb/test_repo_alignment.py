@@ -32,6 +32,10 @@ class RepoAlignment(unittest.TestCase):
             FLAGS["disposable_pg17_source_review_readback"],
             "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
         )
+        self.assertEqual(
+            FLAGS["disposable_pg17_commit_reconnect_replay"],
+            "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
+        )
     def test_no_human_review_writer(self):
         self.assertNotIn("INSERT INTO kdb_governance.human_review_decision", S3)
         self.assertNotIn("INSERT INTO kdb_canonical.protocol_version", S3)

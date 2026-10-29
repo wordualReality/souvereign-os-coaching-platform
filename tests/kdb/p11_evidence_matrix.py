@@ -173,7 +173,15 @@ def verify_contract_mappings(snapshot: Mapping[str, Any]) -> list[dict[str, str]
     return out
 
 
-def build_matrix(*, commit: str, environment: str, run: Mapping[str, Any]) -> dict[str, Any]:
+def build_matrix(
+    *,
+    commit: str,
+    environment: str,
+    run: Mapping[str, Any],
+    packet: str | None = None,
+    restart_replay: str | None = None,
+    restart_replay_next: str | None = None,
+) -> dict[str, Any]:
     local_slice = "LOCAL_VERIFIED" if run.get("slice_pass") else "NOT_EXECUTED"
     denial = "LOCAL_VERIFIED" if run.get("denials_pass") else "NOT_EXECUTED"
     zero_ops = "LOCAL_VERIFIED" if run.get("zero_ops") else "NOT_EXECUTED"
@@ -362,7 +370,7 @@ def build_matrix(*, commit: str, environment: str, run: Mapping[str, Any]) -> di
     ]
     return {
         "df_adoption": "DF-20261029-01",
-        "packet": "KDB-M01-P11-DISPOSABLE-PG17-SOURCE-TO-REVIEW-READBACK-01",
+        "packet": packet or "KDB-M01-P11-DISPOSABLE-PG17-SOURCE-TO-REVIEW-READBACK-01",
         "source_commit": commit,
         "environment": environment,
         "final_authority": "NOT_ADMITTED",
@@ -376,8 +384,9 @@ def build_matrix(*, commit: str, environment: str, run: Mapping[str, Any]) -> di
         "named_nonphysical_candidates_not_asserted": list(NONPHYSICAL_CANDIDATES_NOT_ASSERTED),
         "inventory_next_step": "Owner KDB recover frozen 18-object inventory; do not adopt 17-table ZIP",
         "hosted_verified": "HOSTED_VERIFIED_NO",
-        "restart_replay": "NOT_TESTED",
-        "restart_replay_next": "existing P2 replay/DLQ classifier is not a PostgreSQL restart proof",
+        "restart_replay": restart_replay or "NOT_TESTED",
+        "restart_replay_next": restart_replay_next
+        or "existing P2 replay/DLQ classifier is not a PostgreSQL restart proof",
         "contract_mappings": list(run.get("contract_mappings") or CONTRACT_MAPPINGS),
         "cardinality": dict(run.get("cardinality") or {}),
         "objects": rows,
