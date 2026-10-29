@@ -1,9 +1,9 @@
-# KDB current pointer, 2026-10-29 P12 disposable PG17 commit reconnect replay revocation
+# KDB current pointer, 2026-10-29 P13 offline review-handoff preview
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: KDB-M01-P12-DISPOSABLE-PG17-COMMIT-RECONNECT-REPLAY-REVOCATION-01
-DF adoption: DF-20261029-01 evidence matrix. Twelve physical SQL001 tables. No 18/18 logical claim.
+Active packet: KDB-M01-P13-OFFLINE-REVIEW-HANDOFF-PREVIEW-01
+DF adoption: DF-20261029-01 evidence matrix. Twelve physical SQL001 tables. ATC-10 named 18 remain UNCONFIRMED. No 18/18 logical claim.
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2`, PR #21 `2ba7ae44` remain frozen.
 PR #22 stays untouched at `0078c03`. This pointer is local branch `kdb/m01-p06-local-worktree-recovery` from accepted PR21.
@@ -51,4 +51,13 @@ python3 tests/kdb/pg17_p11_source_review_readback.py
 
 ```
 python3 tests/kdb/pg17_p12_commit_reconnect_replay.py
+```
+
+## P13 offline review-handoff preview
+
+`services/kdb/review_handoff_preview.py` plus `review_handoff_preview_cli.py` assemble a redacted `KDB_HUMAN_REVIEW` queue card from O1/O2/O3 identities after P07 and P08. A local `PREVIEW_ONLY` result is still `NOT_ADMITTED` and `NON_EXECUTABLE`. Revoked or pending rights, stale versions, cross-tenant links, empty evidence, and forged reviewer claims produce no card. No review assignment, C04, C05, or publication.
+
+```
+python3 services/kdb/review_handoff_preview_cli.py tests/kdb/fixtures/p13_preview_eligible.json
+python3 tests/kdb/pg17_p13_review_handoff_preview.py
 ```
