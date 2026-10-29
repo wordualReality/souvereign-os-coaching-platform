@@ -82,8 +82,16 @@ jobs:
             services/api/src/test/java/com/projectb/api/http/JourneyProducerTest.java \
             services/api/src/test/java/com/projectb/api/http/JournalAtomicityTest.java \
             services/api/src/test/java/com/projectb/api/http/AuthorityBoundaryTest.java
+          python3 -m venv "${RUNNER_TEMP}/wire-venv"
+          "${RUNNER_TEMP}/wire-venv/bin/pip" install --disable-pip-version-check jsonschema
           java -cp "$classes_dir" com.projectb.api.http.JourneyPathTest
-          java -cp "$classes_dir" com.projectb.api.http.JourneyProducerTest
+          producer_log="${RUNNER_TEMP}/producer.out"
+          java -cp "$classes_dir" com.projectb.api.http.JourneyProducerTest | tee "$producer_log"
+          bodies="$(awk '/^BODIES / { print $2 }' "$producer_log")"
+          test -n "$bodies"
+          test -f "$bodies"
+          "${RUNNER_TEMP}/wire-venv/bin/python" scripts/validate_arcava_producer_wire_fixtures.py --bodies "$bodies"
+          "${RUNNER_TEMP}/wire-venv/bin/python" scripts/validate_arcava_producer_wire_fixtures.py --bodies "$bodies" --self-check
           java -cp "$classes_dir" com.projectb.api.http.JournalAtomicityTest
           java -cp "$classes_dir" com.projectb.api.http.AuthorityBoundaryTest
 
