@@ -1,6 +1,6 @@
 # ARC-36/P25 resume pointer
 
-Current package: ARC36P25-T150-LOOPBACK-PRODUCER-WIRE-CONFORMANCE-AND-RESTART-01. Parent `0afbe903d4097f19cc2ed90a6969e09deafd179d`. The manifest integrity delta is consumed as PASS_WITH_CONDITIONS_DELTA_SCOPE_ONLY for that scope. Earlier effective-config, toolchain, operator, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
+Current package: ARC36P25-T150-REQUEST-WIRE-SCHEMA-AND-DENIAL-BOUNDARY-01. Parent `62aaa884441cdc6649a9a88ee8c6c274958cecea`. The response wire delta is consumed as PASS_WITH_CONDITIONS_DELTA_SCOPE_ONLY for that scope. Earlier manifest, toolchain, operator, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
 
 ## Checkout
 
@@ -39,6 +39,6 @@ This is not full T150 admission, not live PIAC, not a live KDB verification, and
 
 ## Next executable step
 
-`scripts/validate_arcava_producer_wire_fixtures.py` checks the synthetic bodies captured by `JourneyProducerTest` against CT-ARC-002, CT-ARC-003 and CT-ARC-004. A status 401 stays outside those envelopes. CT-ARC-R03-REM-001 and the three common envelopes stay NOT_TESTED as runtime producers. `runtime_producer_ready` stays false.
+`scripts/validate_arcava_producer_request_wire.py` checks the synthetic requests captured beside `bodies.ndjson` against the CT-ARC-002, CT-ARC-003 and CT-ARC-004 request schemas. A schema-valid caller ref stays untrusted. The 15 response checks stay in place. `runtime_producer_ready` stays false.
 
-GPT_BUILDER_ARCAVA consumes this return and decides the next build. Review scope is the loopback wire-instance check only. Do not reopen `0afbe90`, the manifest integrity gate, the effective-config validator, the toolchain exit check, the operator procedures, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.
+GPT_BUILDER_ARCAVA consumes this return and decides the next build. Review scope is the request-wire schema check only. Do not reopen `62aaa88`, the response wire check, the manifest integrity gate, the toolchain exit check, the operator procedures, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.

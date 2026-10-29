@@ -28,6 +28,7 @@ public final class JourneyProducerTest {
   private static final String SHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   private static final HttpClient HTTP = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build();
   private static final List<String> CAPTURED = new ArrayList<>();
+  private static final List<String> REQUESTS = new ArrayList<>();
 
   public static void main(String[] args) throws Exception {
     Path dir = Files.createTempDirectory("arcava-producer");
@@ -133,7 +134,9 @@ public final class JourneyProducerTest {
       server.stop();
     }
     Files.write(dir.resolve("bodies.ndjson"), String.join("\n", CAPTURED).getBytes(StandardCharsets.UTF_8));
+    Files.write(dir.resolve("requests.ndjson"), String.join("\n", REQUESTS).getBytes(StandardCharsets.UTF_8));
     System.out.println("BODIES " + dir.resolve("bodies.ndjson"));
+    System.out.println("REQUESTS " + dir.resolve("requests.ndjson"));
     System.out.println("PASS JourneyProducerTest journal_replay=true tenant_isolation=true consent_directory=true withdrawal=true sov_tracking_refs=0 piac=not_connected kdb=not_connected");
   }
 
@@ -212,7 +215,12 @@ public final class JourneyProducerTest {
     if (body == null) builder.method(method, HttpRequest.BodyPublishers.noBody());
     else builder.method(method, HttpRequest.BodyPublishers.ofString(body)).header("Content-Type", "application/json");
     HttpResponse<String> response = HTTP.send(builder.build(), HttpResponse.BodyHandlers.ofString());
-    if (contract != null) CAPTURED.add(contract + "\t" + response.statusCode() + "\t" + response.body().replace("\n", ""));
+    if (contract != null) {
+      CAPTURED.add(contract + "\t" + response.statusCode() + "\t" + response.body().replace("\n", ""));
+      if (body != null) {
+        REQUESTS.add(contract + "\t" + response.statusCode() + "\t" + outcome(response.body()) + "\t" + body.replace("\n", ""));
+      }
+    }
     return response;
   }
 

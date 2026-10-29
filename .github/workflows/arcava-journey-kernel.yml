@@ -90,8 +90,13 @@ jobs:
           bodies="$(awk '/^BODIES / { print $2 }' "$producer_log")"
           test -n "$bodies"
           test -f "$bodies"
+          requests="$(awk '/^REQUESTS / { print $2 }' "$producer_log")"
+          test -n "$requests"
+          test -f "$requests"
           "${RUNNER_TEMP}/wire-venv/bin/python" scripts/validate_arcava_producer_wire_fixtures.py --bodies "$bodies"
           "${RUNNER_TEMP}/wire-venv/bin/python" scripts/validate_arcava_producer_wire_fixtures.py --bodies "$bodies" --self-check
+          "${RUNNER_TEMP}/wire-venv/bin/python" scripts/validate_arcava_producer_request_wire.py --requests "$requests"
+          "${RUNNER_TEMP}/wire-venv/bin/python" scripts/validate_arcava_producer_request_wire.py --requests "$requests" --self-check
           java -cp "$classes_dir" com.projectb.api.http.JournalAtomicityTest
           java -cp "$classes_dir" com.projectb.api.http.AuthorityBoundaryTest
 
