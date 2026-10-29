@@ -38,6 +38,10 @@ jobs:
           python scripts/a09_case_discovery.py --self-check
       - name: Check the effective config schema validator
         run: python scripts/validate_effective_config.py --self-check
+      - name: Check the Arcava contract manifest integrity
+        run: |
+          python scripts/validate_arcava_contract_manifest.py
+          python scripts/validate_arcava_contract_manifest.py --self-check
 
   web-renderer-smoke:
     runs-on: ubuntu-latest

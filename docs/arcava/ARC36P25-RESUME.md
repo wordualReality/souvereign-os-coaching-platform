@@ -1,6 +1,6 @@
 # ARC-36/P25 resume pointer
 
-Current package: ARC36P25-T150-EFFECTIVE-CONFIG-SCHEMA-VALIDATOR-HARDENING-01. Parent `ca9105b7e50f17e3bde8a0fac92641fbc5b428cc`. The exit-status delta is consumed as PASS_WITH_CONDITIONS_DELTA_SCOPE_ONLY for that scope. Earlier frontend, operator, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
+Current package: ARC36P25-T150-PRODUCER-CONTRACT-MANIFEST-INTEGRITY-CI-01. Parent `002a3c56e8035d1b21ea432c6a570b3bc1ad79fc`. The effective-config validator delta is consumed as PASS_WITH_CONDITIONS_DELTA_SCOPE_ONLY for that scope. Earlier toolchain, operator, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
 
 ## Checkout
 
@@ -39,4 +39,6 @@ This is not full T150 admission, not live PIAC, not a live KDB verification, and
 
 ## Next executable step
 
-GPT_BUILDER_ARCAVA consumes this return and decides the next build. Review scope is the effective-config schema validator only. Do not reopen `ca9105b`, the toolchain exit check, the operator procedures, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.
+`scripts/validate_arcava_contract_manifest.py` checks the 16 offline Arcava schema files against `contracts/arcava/contract-manifest.json`. A matching digest stays `MATERIALIZED_OFFLINE`. `runtime_producer_ready` stays false. This is not a T050 or T060 admission.
+
+GPT_BUILDER_ARCAVA consumes this return and decides the next build. Review scope is the Arcava contract manifest integrity check only. Do not reopen `002a3c5`, the effective-config validator, the toolchain exit check, the operator procedures, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.
