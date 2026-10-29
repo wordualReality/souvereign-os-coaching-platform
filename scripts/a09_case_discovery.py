@@ -2,6 +2,9 @@
 """Find admitted A09 cases. A local file or a boolean is not an owner receipt."""
 
 import json
+import os
+import re
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -47,7 +50,9 @@ def classify(root, case_id, source_revision=None):
             owner_state = "invalid"
         elif payload.get("case_id") != case_id:
             owner_state = "mismatch"
-        elif source_revision and "source_revision" in payload and payload.get("source_revision") != source_revision:
+        elif source_revision is None:
+            owner_state = "not_verified"
+        elif "source_revision" not in payload or payload.get("source_revision") != source_revision:
             owner_state = "wrong_revision"
         elif payload.get("owner_admitted") is True and not payload.get("authorization"):
             owner_state = "forged"
@@ -80,6 +85,31 @@ def report(root, source_revision=None):
             )
         )
     return lines
+
+
+def source_revision(root):
+    try:
+        result = subprocess.run(
+            ["git", "--no-optional-locks", "rev-parse", "HEAD"],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if result.returncode != 0:
+        return None
+    sha = result.stdout.strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", sha):
+        return None
+    return sha
+
+
+def discover(root):
+    revision = source_revision(root)
+    marker = revision if revision else "NOT_VERIFIED"
+    return revision, ["SOURCE_REVISION " + marker, *report(root, revision)]
 
 
 def fail_if_proxy_pass(lines):
@@ -128,7 +158,13 @@ def self_check():
             return 1
 
         invalid_root = Path(raw) / "invalid-engine"
-        write_case(invalid_root, "A09-T01", real_case, '{"status":"PASS"}', '{"case_id":"A09-T01"}')
+        write_case(
+            invalid_root,
+            "A09-T01",
+            real_case,
+            '{"status":"PASS"}',
+            '{"case_id":"A09-T01","source_revision":"%s"}' % revision,
+        )
         invalid_lines = report(invalid_root, revision)
         if require_line(invalid_lines, "A09-T01", "NOT_EXECUTED", "absent_authority"):
             return 1
@@ -180,10 +216,55 @@ def self_check():
         authority_lines = report(authority_root, revision)
         if require_line(authority_lines, "A09-T01", "PRESENT_NOT_RUN_WITH_UNVERIFIED_OWNER", "absent_authority"):
             return 1
+
+        live_root = Path(raw) / "live-revision"
+        live_root.mkdir()
+        git_env = os.environ.copy()
+        git_env.update(
+            {
+                "GIT_AUTHOR_NAME": "a09",
+                "GIT_AUTHOR_EMAIL": "a09@example.invalid",
+                "GIT_COMMITTER_NAME": "a09",
+                "GIT_COMMITTER_EMAIL": "a09@example.invalid",
+            }
+        )
+        subprocess.run(["git", "init"], cwd=live_root, check=True, capture_output=True, env=git_env)
+        (live_root / "seed").write_text("seed\n")
+        subprocess.run(["git", "add", "seed"], cwd=live_root, check=True, capture_output=True, env=git_env)
+        subprocess.run(["git", "commit", "-m", "seed"], cwd=live_root, check=True, capture_output=True, env=git_env)
+        sha = source_revision(live_root)
+        write_case(
+            live_root,
+            "A09-T01",
+            real_case,
+            real_engine,
+            '{"case_id":"A09-T01","source_revision":"wrong","owner":"other","authorization":"external"}',
+        )
+        live_revision, live_lines = discover(live_root)
+        if live_revision != sha or require_line(live_lines, "A09-T01", "NOT_EXECUTED", "wrong_revision"):
+            print("FAIL the default discovery skipped the source revision")
+            print("\n".join(live_lines))
+            return 1
+
+        unverified_root = Path(raw) / "unverified"
+        write_case(
+            unverified_root,
+            "A09-T01",
+            real_case,
+            real_engine,
+            '{"case_id":"A09-T01","source_revision":"%s","owner":"other","authorization":"external"}' % sha,
+        )
+        unverified_revision, unverified_lines = discover(unverified_root)
+        if unverified_revision is not None or "SOURCE_REVISION NOT_VERIFIED" not in unverified_lines[0]:
+            print("FAIL a tree without a source revision was verified")
+            return 1
+        if require_line(unverified_lines, "A09-T01", "NOT_EXECUTED", "not_verified"):
+            return 1
     print(
         "PASS a09_discovery_negative empty=not_executed partial=not_executed "
         "invalid_engine=not_executed case_mismatch=not_executed wrong_revision=not_executed "
-        "forged_owner=not_executed absent_authority=unverified_not_run proxy_pass=absent"
+        "forged_owner=not_executed absent_authority=unverified_not_run "
+        "default_path=revision_checked unverified_tree=not_executed proxy_pass=absent"
     )
     return 0
 
@@ -191,12 +272,16 @@ def self_check():
 def main():
     if len(sys.argv) == 2 and sys.argv[1] == "--self-check":
         return self_check()
-    lines = report(ROOT)
+    revision, lines = discover(ROOT)
+    if revision is None:
+        print("FAIL source revision is not verified")
+        return 1
     if fail_if_proxy_pass(lines):
         return 1
     for line in lines:
         print(line)
-    if any("NOT_EXECUTED" not in line for line in lines):
+    case_lines = [line for line in lines if line.startswith("A09-")]
+    if any("NOT_EXECUTED" not in line for line in case_lines):
         print("FAIL live a09 tree is not NOT_EXECUTED")
         return 1
     print(

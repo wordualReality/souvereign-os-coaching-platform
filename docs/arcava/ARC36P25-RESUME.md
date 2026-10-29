@@ -1,6 +1,6 @@
 # ARC-36/P25 resume pointer
 
-Current package: ARC36P25-T150-EXECUTABLE-RUNNER-AND-A09-ADMISSION-GUARDS-01. Parent `a2dd98dfc3bf86c3c32d1e8638f35d1d294c20f1`. The toolchain inventory delta is consumed as PASS_WITH_CONDITIONS_DELTA_SCOPE_ONLY for that scope. Earlier frontend, operator, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
+Current package: ARC36P25-T150-EXIT-STATUS-AND-A09-REVISION-GUARD-FIX-01. Parent `698518e4e3876c0eae16983eec741aea8ec23b9a`. The executable runner delta is consumed as CHANGES_REQUIRED_DELTA_SCOPE_ONLY for the exit status, the missing Node negative and the A09 revision check. Earlier frontend, operator, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
 
 ## Checkout
 
@@ -22,8 +22,8 @@ Current package: ARC36P25-T150-EXECUTABLE-RUNNER-AND-A09-ADMISSION-GUARDS-01. Pa
 - The web operator refuses `SUPABASE_SERVICE_ROLE_KEY` and `NEXT_PUBLIC_*` before `npm ci` and `next build`. The build then runs in an allowlisted environment: `PATH`, `HOME`, `TMPDIR`, `NEXT_TELEMETRY_DISABLED=1`.
 - E1 authority stays `NOT_ADMITTED`. The running listener reports `LIVE_AUTHORITY_CLOSED` with PIAC and KDB transport not connected. No E1 issuer, engine or owner receipt is in this worktree.
 - Registry pins for Node, Next, React and TypeScript stay `PROPOSAL_EXERCISED_NOT_ADMITTED`.
-- `scripts/toolchain_receipt.py` keeps the source pin inventory. `--runtime java,maven` and `--runtime node` fail when the binary is missing or the version differs. A local owner-pin file, including `owner_admitted: true`, stays `PROPOSAL_EXERCISED_NOT_ADMITTED`.
-- `scripts/a09_case_discovery.py` reports A09-T01, A09-T04, A09-T44 and A09-T48 as `NOT_EXECUTED`. An invalid engine, a mismatched case id, a wrong source revision, a forged `owner_admitted` flag and a missing authorization stay closed. Files without an independent owner receipt stay `PRESENT_NOT_RUN_WITH_UNVERIFIED_OWNER` and are not executed.
+- `scripts/toolchain_receipt.py` keeps the source pin inventory. `--runtime` fails when Java, Maven or Node is missing, mismatched, invalid, timed out, or exits nonzero, including when the text still shows the expected version. A local owner-pin file, including `owner_admitted: true`, stays `PROPOSAL_EXERCISED_NOT_ADMITTED`.
+- `scripts/a09_case_discovery.py` reads the worktree HEAD on the default path and reports A09-T01, A09-T04, A09-T44 and A09-T48 as `NOT_EXECUTED`. A wrong or missing source revision stays closed. An invalid engine, a mismatched case id, a forged `owner_admitted` flag and a missing authorization stay closed. Files without an independent owner receipt stay `PRESENT_NOT_RUN_WITH_UNVERIFIED_OWNER` and are not executed.
 
 ## Local evidence
 
@@ -39,4 +39,4 @@ This is not full T150 admission, not live PIAC, not a live KDB verification, and
 
 ## Next executable step
 
-GPT_BUILDER_ARCAVA consumes this return and decides the next build. Review scope is the executable toolchain check and the A09 admission guards only. Do not reopen `a2dd98d`, the operator procedures, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.
+GPT_BUILDER_ARCAVA consumes this return and decides the next build. Review scope is the executable exit status and the A09 source-revision check only. Do not reopen `698518e`, the operator procedures, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.

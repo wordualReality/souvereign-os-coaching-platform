@@ -115,15 +115,28 @@ def admission_lines(path):
     return lines, True
 
 
-def probe(binary, args, env):
+def probe(binary, args, env, timeout=10):
     found = shutil.which(binary, path=env.get("PATH", ""))
     if found is None:
-        return None
-    result = subprocess.run([found, *args], capture_output=True, text=True, env=env)
-    text = (result.stdout + "\n" + result.stderr).strip()
+        return "ABSENT", None
+    try:
+        result = subprocess.run(
+            [found, *args],
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired:
+        return "TIMEOUT", None
+    except OSError:
+        return "ERROR", None
     if result.returncode != 0:
-        return text or "UNUSABLE"
-    return text
+        return "EXIT", result.returncode
+    text = (result.stdout + "\n" + result.stderr).strip()
+    if not text:
+        return "INVALID", None
+    return "OK", text
 
 
 def parse_java(text):
@@ -150,10 +163,10 @@ TOOLS = {
 
 def observe(tool, env):
     spec = TOOLS[tool]
-    text = probe(spec["bin"], spec["args"], env)
-    if text is None:
-        return "ABSENT", None
-    version = spec["parse"](text)
+    state, detail = probe(spec["bin"], spec["args"], env)
+    if state != "OK":
+        return state, detail
+    version = spec["parse"](detail)
     if version == spec["expected"]:
         return "MATCH", version
     return "MISMATCH", version or "unparsed"
@@ -170,12 +183,13 @@ def inventory(env):
     check_source_pins()
     for tool in ("java", "maven", "node"):
         state, version = observe(tool, env)
-        if state == "ABSENT":
-            print("LOCAL_" + tool.upper() + " ABSENT")
-        elif state == "MATCH":
-            print("LOCAL_" + tool.upper() + " OBSERVED " + version)
-        else:
+        if state == "MATCH":
+            print("LOCAL_" + tool.upper() + " OBSERVED " + str(version))
+        elif state == "MISMATCH":
             print("LOCAL_" + tool.upper() + " MISMATCH " + str(version))
+        else:
+            suffix = "" if version is None else " " + str(version)
+            print("LOCAL_" + tool.upper() + " " + state + suffix)
     print("RUNTIME_CHECK skipped reason=inventory_mode")
     rejected = print_admission()
     if rejected:
@@ -265,6 +279,54 @@ def self_check():
             print("FAIL a missing java was accepted")
             print(missing.stdout)
             return 1
+        if "FAIL RUNTIME maven=ABSENT" not in missing.stdout:
+            print("FAIL a missing maven was accepted")
+            print(missing.stdout)
+            return 1
+        missing_node = run_child(["--runtime", "node"], missing_env)
+        if missing_node.returncode == 0 or "FAIL RUNTIME node=ABSENT" not in missing_node.stdout:
+            print("FAIL a missing node was accepted")
+            print(missing_node.stdout)
+            return 1
+
+        exit7 = root / "exit7"
+        exit7.mkdir()
+        write_tool(exit7, "java", "echo 'openjdk version \"25.0.3\"' >&2\nexit 7")
+        write_tool(exit7, "mvn", 'echo "Apache Maven 3.9.16"\nexit 7')
+        write_tool(exit7, "node", 'echo "v20.12.2"\nexit 7')
+        exit_env = base.copy()
+        exit_env["PATH"] = str(exit7)
+        exited = run_child(["--runtime", "java,maven,node"], exit_env)
+        if exited.returncode == 0 or "RUNTIME java=25 PASS" in exited.stdout or "RUNTIME_PASS" in exited.stdout:
+            print("FAIL exit 7 with a matching version was accepted")
+            print(exited.stdout)
+            return 1
+        for tool in ("java", "maven", "node"):
+            if "FAIL RUNTIME " + tool + "=EXIT observed=7" not in exited.stdout:
+                print("FAIL " + tool + " exit 7 was not rejected")
+                print(exited.stdout)
+                return 1
+
+        invalid = root / "invalid"
+        invalid.mkdir()
+        write_tool(invalid, "java", 'echo "not-a-version"')
+        invalid_env = base.copy()
+        invalid_env["PATH"] = str(invalid)
+        invalid_run = run_child(["--runtime", "java"], invalid_env)
+        if invalid_run.returncode == 0 or "FAIL RUNTIME java=MISMATCH" not in invalid_run.stdout:
+            print("FAIL invalid java output was accepted")
+            print(invalid_run.stdout)
+            return 1
+
+        hang = root / "hang"
+        hang.mkdir()
+        write_tool(hang, "java", "while true; do :; done")
+        hang_env = base.copy()
+        hang_env["PATH"] = str(hang)
+        hang_state, _detail = probe("java", ["-version"], hang_env, timeout=0.4)
+        if hang_state != "TIMEOUT":
+            print("FAIL a hung java was not a timeout")
+            return 1
 
         good_env = base.copy()
         good_env["PATH"] = str(good)
@@ -289,8 +351,9 @@ def self_check():
             print("FAIL a forged owner pin changed the admission")
             return 1
     print(
-        "PASS toolchain_runtime_negative missing=fail mismatch=fail "
-        "forged_pin=rejected inventory_absent=not_a_runtime_pass"
+        "PASS toolchain_runtime_negative missing=fail missing_node=fail mismatch=fail "
+        "exit_status=fail invalid=fail timeout=fail forged_pin=rejected "
+        "inventory_absent=not_a_runtime_pass"
     )
     return 0
 
