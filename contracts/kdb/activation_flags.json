@@ -19,5 +19,6 @@
   "offline_review_case_detail": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
   "offline_review_workbench": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
   "offline_review_snapshot_delta": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
-  "offline_review_demo_pack": "INACTIVE_VERSION_CONTROLLED_CANDIDATE"
+  "offline_review_demo_pack": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
+  "offline_review_viewmodel": "INACTIVE_VERSION_CONTROLLED_CANDIDATE"
 }

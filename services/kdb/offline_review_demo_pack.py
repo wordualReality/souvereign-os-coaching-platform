@@ -18,6 +18,7 @@ from typing import Any, Mapping
 from offline_review_case_detail import UUID_RE
 from offline_review_inbox import MAX_CHARS, parse_inbox_json
 from offline_review_snapshot_delta import PACKET as DELTA_PACKET, snapshot_delta
+from offline_review_viewmodel import PACKET as VIEWMODEL_PACKET, viewmodel
 from offline_review_workbench import (
     BANNER,
     GATES,
@@ -40,7 +41,14 @@ from review_handoff_preview import (
 )
 
 PACKET = "KDB-M01-P18-PORTABLE-OFFLINE-REVIEW-DEMO-PACK-01"
-FIXED_FILES = ("index.html", "current.html", "changes.html", "manifest.json", "README.txt")
+FIXED_FILES = (
+    "index.html",
+    "current.html",
+    "changes.html",
+    "review-viewmodel.json",
+    "manifest.json",
+    "README.txt",
+)
 DIR_NAME_RE = r"^[A-Za-z0-9._-]{1,64}$"
 DEMO_ROOT = REPO_ROOT / "tests" / "kdb" / "demo-artifacts"
 CHANGE_LABELS = "POSSIBLE_CHANGE_ONLY SNAPSHOT_ORDER_NOT_ATTESTED EVENT_WATERMARK_UNKNOWN"
@@ -179,6 +187,7 @@ def _readme(counts: Mapping[str, int], *, commit: str, pack_status: str) -> str:
         "index.html",
         "current.html",
         "changes.html",
+        "review-viewmodel.json",
         "manifest.json",
         "README.txt",
         "",
@@ -206,6 +215,7 @@ def _manifest(
         "packet": PACKET,
         "workbench_packet": WORKBENCH_PACKET,
         "delta_packet": DELTA_PACKET,
+        "viewmodel_packet": VIEWMODEL_PACKET,
         "preview_packet": PREVIEW_PACKET,
         "repair_packet": REPAIR_PACKET,
         "df_adoption": "DF-20261029-01",
@@ -252,6 +262,7 @@ def demo_pack(
     pin = bound_commit(commit)
     delta = snapshot_delta(baseline, current, commit=pin)
     current_wb = workbench(current, commit=pin)
+    model = viewmodel(baseline, current, commit=pin)
     denied = delta.get("delta_status") == "DELTA_DENIED"
     deny_code = str(delta.get("deny_code") or "") if denied else None
     counts = _counts_from_delta(delta)
@@ -267,6 +278,10 @@ def demo_pack(
         pack_status = "PREVIEW_ONLY"
         if int(current_wb.get("card_count") or 0) != len(current_ids):
             _deny_parse("PREVIEW_LEAK")
+    if denied and model.get("viewmodel_status") != "DEMO_DENIED":
+        _deny_parse("PREVIEW_LEAK")
+    if not denied and model.get("viewmodel_status") != "PREVIEW_ONLY":
+        _deny_parse("PREVIEW_LEAK")
     index_html = _index_page(
         denied=denied,
         deny_code=deny_code,
@@ -275,10 +290,12 @@ def demo_pack(
         commit=pin,
     )
     readme = _readme(counts, commit=pin, pack_status=pack_status)
+    viewmodel_text = json.dumps(model, indent=2, sort_keys=True) + "\n"
     staged = {
         "index.html": index_html,
         "current.html": current_html,
         "changes.html": changes_html,
+        "review-viewmodel.json": viewmodel_text,
         "README.txt": readme,
     }
     file_sha256 = {name: _sha256_text(text) for name, text in staged.items()}

@@ -74,7 +74,18 @@ class OfflineReviewDemoPack(unittest.TestCase):
         self.assertEqual(receipt["final_authority"], "NOT_ADMITTED")
         self.assertEqual(receipt["integrity"], "LOCAL_FILE_INTEGRITY_ONLY")
         artifacts = receipt["artifacts"]
+        self.assertEqual(len(FIXED_FILES), 6)
+        self.assertIn("review-viewmodel.json", FIXED_FILES)
         self.assertEqual(set(artifacts), set(FIXED_FILES))
+        viewmodel_doc = json.loads(artifacts["review-viewmodel.json"])
+        self.assertEqual(viewmodel_doc["schema_version"], "1.0")
+        self.assertEqual(viewmodel_doc["kind"], "KDB_REVIEW_OFFLINE_PREVIEW")
+        self.assertEqual(viewmodel_doc["viewmodel_status"], "PREVIEW_ONLY")
+        self.assertEqual(len(viewmodel_doc["current_cases"]), 2)
+        self.assertEqual(
+            viewmodel_doc["current_cases"][0]["review_work_item_id"],
+            WORK_A,
+        )
         index = artifacts["index.html"]
         current = artifacts["current.html"]
         changes = artifacts["changes.html"]
@@ -125,6 +136,13 @@ class OfflineReviewDemoPack(unittest.TestCase):
         self.assertIn(WORK_B, receipt["artifacts"]["current.html"])
         self.assertIn(WORK_B, receipt["artifacts"]["index.html"])
         self.assertIn("REMOVED_OR_DENIED_COUNT", receipt["artifacts"]["changes.html"])
+        viewmodel_doc = json.loads(receipt["artifacts"]["review-viewmodel.json"])
+        self.assertEqual(len(viewmodel_doc["current_cases"]), 1)
+        self.assertEqual(
+            viewmodel_doc["current_cases"][0]["review_work_item_id"],
+            WORK_B,
+        )
+        self.assertNotIn(WORK_A, receipt["artifacts"]["review-viewmodel.json"])
 
     def test_cross_tenant_denied_pack_has_no_case_pages(self) -> None:
         baseline = _load()
@@ -140,6 +158,10 @@ class OfflineReviewDemoPack(unittest.TestCase):
         self.assertNotIn(WORK_A, blob)
         self.assertNotIn(WORK_B, blob)
         self.assertNotIn(f'href="current.html#case-', receipt["artifacts"]["index.html"])
+        viewmodel_doc = json.loads(receipt["artifacts"]["review-viewmodel.json"])
+        self.assertEqual(viewmodel_doc["viewmodel_status"], "DEMO_DENIED")
+        self.assertEqual(viewmodel_doc["current_cases"], [])
+        self.assertEqual(viewmodel_doc["visible_current_count"], 0)
 
     def test_secrets_never_enter_the_bundle(self) -> None:
         baseline = _load()
@@ -170,14 +192,20 @@ class OfflineReviewDemoPack(unittest.TestCase):
         try:
             written = write_demo_pack(receipt["artifacts"], out)
             self.assertEqual(written.name, name)
+            self.assertEqual(len(list(written.iterdir())), 6)
             for filename in FIXED_FILES:
                 path = written / filename
                 self.assertTrue(path.is_file())
+            self.assertIn("review-viewmodel.json", receipt["file_sha256"])
             for filename, digest in receipt["file_sha256"].items():
                 data = (written / filename).read_bytes()
                 self.assertEqual(hashlib.sha256(data).hexdigest(), digest)
             manifest = json.loads((written / "manifest.json").read_text())
             self.assertEqual(manifest["files"]["index.html"], receipt["file_sha256"]["index.html"])
+            self.assertEqual(
+                manifest["files"]["review-viewmodel.json"],
+                receipt["file_sha256"]["review-viewmodel.json"],
+            )
             with self.assertRaises(PreviewParseError) as exists:
                 write_demo_pack(receipt["artifacts"], out)
             self.assertEqual(exists.exception.code, "OUTPUT_EXISTS")
@@ -234,6 +262,10 @@ class OfflineReviewDemoPack(unittest.TestCase):
         )
         self.assertEqual(
             FLAGS["offline_review_snapshot_delta"],
+            "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
+        )
+        self.assertEqual(
+            FLAGS["offline_review_viewmodel"],
             "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
         )
 

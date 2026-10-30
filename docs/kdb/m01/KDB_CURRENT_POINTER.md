@@ -1,8 +1,8 @@
-# KDB current pointer, 2026-10-30 P18 portable offline review demo pack
+# KDB current pointer, 2026-10-30 P19 versioned offline review viewmodel
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: KDB-M01-P18-PORTABLE-OFFLINE-REVIEW-DEMO-PACK-01
+Active packet: KDB-M01-P19-VERSIONED-OFFLINE-REVIEW-VIEWMODEL-01
 DF adoption: DF-20261029-01 evidence matrix. Twelve physical SQL001 tables. ATC-10 named 18 remain UNCONFIRMED. No 18/18 logical claim.
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2`, PR #21 `2ba7ae44` remain frozen.
@@ -102,10 +102,19 @@ python3 tests/kdb/pg17_p17_review_snapshot_delta.py
 
 ## P18 portable offline review demo pack
 
-`offline_review_demo_pack.py` plus `offline_review_demo_pack_cli.py` turn the current P16 workbench and P17 snapshot-delta into a local file bundle. `index.html` is the landing page. `current.html` is the current snapshot. `changes.html` keeps removed items as counts only. `manifest.json` hashes those files as `LOCAL_FILE_INTEGRITY_ONLY`. Snapshot order is not attested. Generated bundles stay out of git under `tests/kdb/demo-artifacts`.
+`offline_review_demo_pack.py` plus `offline_review_demo_pack_cli.py` turn the current P16 workbench and P17 snapshot-delta into a local file bundle. `index.html` is the landing page. `current.html` is the current snapshot. `changes.html` keeps removed items as counts only. `review-viewmodel.json` is the P19 machine-readable preview. `manifest.json` hashes those files as `LOCAL_FILE_INTEGRITY_ONLY`. Snapshot order is not attested. Generated bundles stay out of git under `tests/kdb/demo-artifacts`.
 
 ```
 python3 services/kdb/offline_review_demo_pack_cli.py tests/kdb/fixtures/p14_inbox_two_eligible.json path/to/current-p14-batch.json
 python3 tests/kdb/pg17_p18_review_demo_pack.py
+```
+
+## P19 versioned offline review viewmodel
+
+`offline_review_viewmodel.py` plus `offline_review_viewmodel_cli.py` emit a versioned JSON preview from P14 inbox cards, P15 case detail, and P17 count-only delta. Schema `1.0` is internal and non-normative. Whole-batch deny yields `DEMO_DENIED` with empty cases and zero counts. Removed identities stay out of the document. This is not an admitted consumer contract.
+
+```
+python3 services/kdb/offline_review_viewmodel_cli.py tests/kdb/fixtures/p14_inbox_two_eligible.json path/to/current-p14-batch.json
+python3 tests/kdb/pg17_p19_review_viewmodel.py
 ```
 

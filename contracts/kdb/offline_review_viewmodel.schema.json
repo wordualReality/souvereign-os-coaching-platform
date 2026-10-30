@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kdb-internal://m01/offline_review_viewmodel.schema.json",
+  "title": "KDB offline review viewmodel. Internal preview only.",
+  "description": "NON_NORMATIVE_INTERNAL_PREVIEW. Not an admitted producer or consumer contract and not a live endpoint.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "packet",
+    "schema_id",
+    "schema_version",
+    "kind",
+    "internal_only",
+    "non_normative",
+    "preview_contract_version",
+    "df_adoption",
+    "gate",
+    "final_authority",
+    "assignment",
+    "execution",
+    "snapshot_authority",
+    "snapshot_order",
+    "change_authority",
+    "event_watermark",
+    "read_model",
+    "publication",
+    "db_write",
+    "c04_human_decision",
+    "c05_canonical_admission",
+    "outbox",
+    "hosted_verified",
+    "logical_objects_claimed",
+    "inventory_source",
+    "physical_sql001_tables",
+    "source_commit",
+    "source_commit_attestation",
+    "viewmodel_status",
+    "deny_code",
+    "baseline_eligible_count",
+    "current_eligible_count",
+    "visible_current_count",
+    "added_count",
+    "removed_or_denied_count",
+    "unchanged_count",
+    "current_cases"
+  ],
+  "properties": {
+    "packet": {
+      "type": "string",
+      "const": "KDB-M01-P19-VERSIONED-OFFLINE-REVIEW-VIEWMODEL-01"
+    },
+    "schema_id": {
+      "type": "string",
+      "const": "kdb-internal://m01/offline_review_viewmodel.schema.json"
+    },
+    "schema_version": { "type": "string", "const": "1.0" },
+    "kind": { "type": "string", "const": "KDB_REVIEW_OFFLINE_PREVIEW" },
+    "internal_only": { "type": "boolean", "const": true },
+    "non_normative": { "type": "boolean", "const": true },
+    "preview_contract_version": {
+      "type": "string",
+      "const": "kdb://m01/offline_review_viewmodel/1.0"
+    },
+    "df_adoption": { "type": "string", "const": "DF-20261029-01" },
+    "gate": {
+      "type": "string",
+      "const": "INACTIVE_VERSION_CONTROLLED_CANDIDATE"
+    },
+    "final_authority": { "type": "string", "const": "NOT_ADMITTED" },
+    "assignment": { "type": "string", "const": "NOT_ASSIGNED" },
+    "execution": { "type": "string", "const": "NON_EXECUTABLE" },
+    "snapshot_authority": { "type": "string", "const": "SNAPSHOT_UNTRUSTED" },
+    "snapshot_order": { "type": "string", "const": "SNAPSHOT_ORDER_NOT_ATTESTED" },
+    "change_authority": { "type": "string", "const": "POSSIBLE_CHANGE_ONLY" },
+    "event_watermark": { "type": "string", "const": "EVENT_WATERMARK_UNKNOWN" },
+    "read_model": {
+      "type": "string",
+      "const": "NON_NORMATIVE_INTERNAL_PREVIEW"
+    },
+    "publication": { "type": "string", "const": "NOT_PUBLISHED" },
+    "db_write": { "type": "string", "const": "NOT_ADMITTED" },
+    "c04_human_decision": { "type": "string", "const": "NOT_WRITTEN" },
+    "c05_canonical_admission": { "type": "string", "const": "NOT_WRITTEN" },
+    "outbox": { "type": "string", "const": "NOT_EMITTED" },
+    "hosted_verified": { "type": "string", "const": "HOSTED_VERIFIED_NO" },
+    "logical_objects_claimed": { "type": "string", "const": "NOT_18_OF_18" },
+    "inventory_source": {
+      "type": "string",
+      "const": "UNCONFIRMED_ATC10_CANDIDATES"
+    },
+    "physical_sql001_tables": { "type": "integer", "const": 12 },
+    "source_commit": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9._-]+$"
+    },
+    "source_commit_attestation": {
+      "type": "string",
+      "const": "LABEL_NOT_ATTESTED"
+    },
+    "viewmodel_status": {
+      "type": "string",
+      "enum": ["PREVIEW_ONLY", "DEMO_DENIED"]
+    },
+    "deny_code": { "type": ["string", "null"], "maxLength": 64 },
+    "tenant_scope": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "baseline_eligible_count": { "type": "integer", "minimum": 0, "maximum": 32 },
+    "current_eligible_count": { "type": "integer", "minimum": 0, "maximum": 32 },
+    "visible_current_count": { "type": "integer", "minimum": 0, "maximum": 32 },
+    "added_count": { "type": "integer", "minimum": 0, "maximum": 32 },
+    "removed_or_denied_count": { "type": "integer", "minimum": 0, "maximum": 32 },
+    "unchanged_count": { "type": "integer", "minimum": 0, "maximum": 32 },
+    "current_cases": {
+      "type": "array",
+      "maxItems": 32,
+      "items": { "$ref": "#/$defs/currentCase" }
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "currentCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "review_queue",
+        "work_item_state",
+        "tenant_scope",
+        "source_id",
+        "source_version_id",
+        "source_version_no",
+        "submission_id",
+        "candidate_id",
+        "candidate_revision_id",
+        "revision_no",
+        "review_work_item_id",
+        "correlation_id",
+        "rights_status",
+        "evidence_span_count",
+        "content_digest_proof",
+        "consumer_o1",
+        "consumer_o2",
+        "consumer_o3",
+        "eligibility_reasons",
+        "explicit_gaps",
+        "provenance_trace"
+      ],
+      "properties": {
+        "review_queue": { "type": "string", "const": "KDB_HUMAN_REVIEW" },
+        "work_item_state": { "type": "string", "const": "REQUESTED" },
+        "tenant_scope": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "source_id": { "$ref": "#/$defs/uuid" },
+        "source_version_id": { "$ref": "#/$defs/uuid" },
+        "source_version_no": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+        "submission_id": { "$ref": "#/$defs/uuid" },
+        "candidate_id": { "$ref": "#/$defs/uuid" },
+        "candidate_revision_id": { "$ref": "#/$defs/uuid" },
+        "revision_no": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+        "review_work_item_id": { "$ref": "#/$defs/uuid" },
+        "correlation_id": { "$ref": "#/$defs/uuid" },
+        "rights_status": { "type": "string", "const": "ADMITTED" },
+        "evidence_span_count": { "type": "integer", "minimum": 1, "maximum": 32 },
+        "content_digest_proof": { "type": "string", "const": "OPAQUE_SHA_UNPROVEN" },
+        "consumer_o1": {
+          "type": "string",
+          "const": "kdb://m01/o1_source_ingest/1.0"
+        },
+        "consumer_o2": {
+          "type": "string",
+          "const": "kdb://m01/o2_candidate_proposal/1.0"
+        },
+        "consumer_o3": {
+          "type": "string",
+          "const": "kdb://m01/o3_review_handoff/1.0"
+        },
+        "eligibility_reasons": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": [
+              "TENANT_SCOPE_CHECKED",
+              "P08_REVIEW_ELIGIBLE_OFFLINE",
+              "P14_CARD_SELECTED"
+            ]
+          }
+        },
+        "explicit_gaps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": [
+              "CONTENT_SHA_OPAQUE_UNPROVEN",
+              "EVENT_WATERMARK_UNTRUSTED",
+              "LIVE_PIAC_ISSUER_UNPROVEN",
+              "C04_NOT_WRITTEN",
+              "C05_NOT_WRITTEN",
+              "HOSTED_VERIFIED_NO"
+            ]
+          }
+        },
+        "provenance_trace": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tenant_scope_check",
+            "source_rights",
+            "p08_eligibility",
+            "declared_sha",
+            "event_watermark"
+          ],
+          "properties": {
+            "tenant_scope_check": { "type": "string", "const": "CHECKED" },
+            "source_rights": { "type": "string", "const": "DECLARED_SYNTHETIC" },
+            "p08_eligibility": {
+              "type": "string",
+              "const": "LOCAL_ELIGIBLE_OFFLINE_ONLY"
+            },
+            "declared_sha": { "type": "string", "const": "NOT_VERIFIED" },
+            "event_watermark": { "type": "string", "const": "UNKNOWN" }
+          }
+        }
+      }
+    }
+  }
+}
