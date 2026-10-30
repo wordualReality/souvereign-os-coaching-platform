@@ -1,6 +1,6 @@
 # ARC-36/P25 resume pointer
 
-Current package: ARC36P25-T150-HTTP-RUNNER-PYTHON-PROVENANCE-01. Parent `69f5043c05aa9b97d280d60720b270d9f8219ba7`. The wire Python lock delta is consumed as PASS_WITH_CONDITIONS_DELTA_SCOPE_ONLY for that scope. Earlier manifest, toolchain, operator, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
+Current package: ARC36P25-T150-LOCAL-ADMISSION-VERIFIER-AND-A09-ARTIFACTS-01. Parent `1457be9863ab6086a4b1e2dcc566129c9d7d832b`. The HTTP runner delta is consumed as PASS_WITH_CONDITIONS_DELTA_SCOPE_ONLY for that scope. Earlier manifest, toolchain, operator, JAR, Spring, ARC-01 and ARC-02 reviews stay closed. This checkout does not accept the new review.
 
 ## Checkout
 
@@ -39,8 +39,8 @@ This is not full T150 admission, not live PIAC, not a live KDB verification, and
 
 ## Next executable step
 
-The persisted HTTP job uses `ubuntu-24.04` and `actions/setup-python` at `6d4fd22b20465ccc0f7354476588e8df7c9ca0e0` with Python 3.12.3. The wire venv and the lock checker use that interpreter. The image revision stays `IMAGE_REVISION_DYNAMIC`. The lock file bytes stay at SHA-256 `c3e2b71d733c847ccef6815cebf863d4b8719bcdeee996ec607d8525c57d5a3f`. `scripts/check_arcava_wire_python_lock.py` accepts exactly the six pinned packages and rejects a seventh hash-pinned package and a duplicate name. The kernel fixture job and the Maven job stay on `ubuntu-latest`. `ci.yml` and `requirements-dev.txt` stay unchanged. This is not an ARC-10 toolchain owner pin.
+`scripts/arcava_local_admission.py` checks the captured mandate excerpt for decision `ARC36P25-T150-MANDATE-AND-E1-A09-SCOPE-01`, document `18tLEM05Dxlo_8_bPmCvWygFHJtQ4v1B5mYp0PL7OdZI`, and preimage `1457be9863ab6086a4b1e2dcc566129c9d7d832b`. A live Drive reread is not available inside the checker, so the source state stays `UNVERIFIED`. Snapshot integrity is separate. Revocation stays `UNKNOWN`, and admission stays fail-closed. Caller URLs, digests, authorization text, and file overrides are rejected. The allowed action is the offline subcheck only.
 
-The 15 request checks and the 15 response checks stay in place. A schema-valid caller ref stays untrusted. `runtime_producer_ready` stays false.
+Synthetic fixtures for A09-T01, A09-T04, A09-T44, and A09-T48 live under `docs/arcava/admission/synthetic/`. The fixed entrypoints do not evaluate `engine.json` as a shell. T01 records migration checksums and blocks on an absent ledger. T04 counts 16 schema files and does not treat them as the 48-contract registry. T44 reads the historical RLS seed as text and does not apply SQL. T48 keeps the declared baseline of 86 open. Each result is `SUBCHECK_PASS`. `scripts/a09_case_discovery.py` still reports the four IDs as `NOT_EXECUTED`. This is not an A09 admission and not an ARC-10 toolchain owner pin.
 
-GPT_BUILDER_ARCAVA consumes this return and decides the next build. Review scope is the HTTP runner label, the setup-python pin, and the exact six-pin check. Do not reopen `69f5043`, the wire dependency lock bytes, the request wire check, `62aaa88`, the response wire check, the manifest integrity gate, the toolchain exit check, the operator procedures, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.
+GPT_BUILDER_ARCAVA consumes this return and sends it to non-author QS. Review scope is the local admission verifier, the synthetic subchecks, and the negative tests. Do not reopen `1457be9`, the HTTP runner pin, the wire dependency lock bytes, the request wire check, `62aaa88`, the response wire check, the manifest integrity gate, the toolchain exit check, the operator procedures, the frontend renderer, the JAR packet, the Spring boundary, or ARC-01 and ARC-02. This checkout does not accept that review.

@@ -98,6 +98,7 @@ def admission_lines(path):
             "Spring Boot 4.1.1, Node 20.12.2, Next 16.4.3, React 19.3.1 and TypeScript 7.0.2 "
             "with source_repo, source_revision, owner, revision_digest and authorization"
         )
+        lines.extend(mandate_separation_lines())
         return lines, False
     forged = False
     try:
@@ -112,7 +113,15 @@ def admission_lines(path):
     lines.append(
         "OWNER_PIN_REQUIRED fields=source_repo,source_revision,owner,versions,revision_digest,authorization"
     )
+    lines.extend(mandate_separation_lines())
     return lines, True
+
+
+def mandate_separation_lines():
+    return [
+        "MANDATE_RECORD separated path=scripts/arcava_local_admission.py",
+        "LOCAL_TEST_SCOPE is not an owner pin",
+    ]
 
 
 def probe(binary, args, env, timeout=10):
