@@ -14,5 +14,6 @@
   "offline_diagnostic_vertical_slice": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
   "disposable_pg17_source_review_readback": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
   "disposable_pg17_commit_reconnect_replay": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
-  "offline_review_handoff_preview": "INACTIVE_VERSION_CONTROLLED_CANDIDATE"
+  "offline_review_handoff_preview": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
+  "offline_review_inbox_readmodel": "INACTIVE_VERSION_CONTROLLED_CANDIDATE"
 }

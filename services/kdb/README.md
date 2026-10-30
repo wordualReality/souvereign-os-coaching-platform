@@ -22,5 +22,7 @@ python3 services/kdb/offline_diagnostic_cli.py tests/kdb/fixtures/p10_stage_cohe
 
 `review_handoff_preview.py` plus `review_handoff_preview_cli.py` turn an eligible synthetic candidate chain into a redacted `PREVIEW_ONLY` `KDB_HUMAN_REVIEW` queue card. That is not a reviewer assignment, C04 decision, or publication. Revoked rights and stale versions produce no card. Duplicate JSON keys, oversized or deep input, and untrusted commit labels are rejected. The queue card omits `media_type`. FINAL remains NOT_ADMITTED.
 
+`offline_review_inbox.py` plus `offline_review_inbox_cli.py` aggregate those previews into a sorted, filterable inbox. The read model is a non-normative internal preview. It stays `SNAPSHOT_UNTRUSTED` and `NOT_ASSIGNED`. Cross-tenant input and duplicate work items yield no cards. Rights revocation wins for the same SourceID. FINAL remains NOT_ADMITTED.
+
 `digest_v2.py` is the KDB-owned SQL-v2 adapter. It does not grant producers database EXECUTE.
 `signed_ingress.py` is a test-only synthetic HMAC verifier. A local pass is `LOCAL_SIGNED_INGRESS_VERIFIED`, never `DB_COMMAND_ADMITTED`.

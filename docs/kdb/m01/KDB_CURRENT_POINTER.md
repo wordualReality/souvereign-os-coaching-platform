@@ -1,8 +1,8 @@
-# KDB current pointer, 2026-10-29 P13R strict input and redaction repair
+# KDB current pointer, 2026-10-30 P14 offline review-inbox read model
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: KDB-M01-P13R-STRICT-INPUT-REDACTION-01
+Active packet: KDB-M01-P14-OFFLINE-REVIEW-INBOX-READMODEL-01
 DF adoption: DF-20261029-01 evidence matrix. Twelve physical SQL001 tables. ATC-10 named 18 remain UNCONFIRMED. No 18/18 logical claim.
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2`, PR #21 `2ba7ae44` remain frozen.
@@ -63,3 +63,12 @@ python3 tests/kdb/pg17_p13_review_handoff_preview.py
 ```
 
 P13R keeps that preview path and rejects duplicate JSON keys, oversized or deep input, huge integers, path escape, symlinks, and untrusted commit labels. The queue card omits `media_type`. A local commit label is `LABEL_NOT_ATTESTED`.
+
+## P14 offline review-inbox read model
+
+`offline_review_inbox.py` plus `offline_review_inbox_cli.py` aggregate P13R per-candidate previews into a sorted, filterable, redacted inbox. The receipt is a non-normative internal preview. It stays `SNAPSHOT_UNTRUSTED`, `NOT_ASSIGNED`, and `NOT_ADMITTED`. Cross-tenant input yields no cards. Rights revocation wins for every item that shares a SourceID. Physical PostgreSQL 17 coverage is two linked Source-to-Review chains, not a many-to-many claim.
+
+```
+python3 services/kdb/offline_review_inbox_cli.py tests/kdb/fixtures/p14_inbox_two_eligible.json
+python3 tests/kdb/pg17_p14_review_inbox.py
+```
