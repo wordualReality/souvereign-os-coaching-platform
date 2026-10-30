@@ -30,5 +30,7 @@ python3 services/kdb/offline_diagnostic_cli.py tests/kdb/fixtures/p10_stage_cohe
 
 `offline_review_snapshot_delta.py` plus `offline_review_snapshot_delta_cli.py` compare two synthetic P14 batches and render current eligible cases plus aggregate counts. Removed or revoked baseline items are count only. Snapshot order is an input, not an attested event sequence. FINAL remains NOT_ADMITTED.
 
+`offline_review_demo_pack.py` plus `offline_review_demo_pack_cli.py` package current workbench HTML and the snapshot-delta view into a local file bundle. Default CLI prints a redacted manifest. `--out-dir` writes a new directory under `tests/kdb/demo-artifacts`. Checksums are local file integrity only. FINAL remains NOT_ADMITTED.
+
 `digest_v2.py` is the KDB-owned SQL-v2 adapter. It does not grant producers database EXECUTE.
 `signed_ingress.py` is a test-only synthetic HMAC verifier. A local pass is `LOCAL_SIGNED_INGRESS_VERIFIED`, never `DB_COMMAND_ADMITTED`.
