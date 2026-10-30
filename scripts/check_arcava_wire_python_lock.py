@@ -90,22 +90,35 @@ def check_lock(text):
         items = requirements(text)
     except ValueError as error:
         return fail(str(error))
-    found = {f"{name}=={version}": hashes for name, version, hashes in items}
-    for pin in PINS:
-        hashes = found.get(pin)
-        if not hashes:
-            return fail(f"missing pin {pin}")
+    found = {}
+    seen = set()
+    for name, version, hashes in items:
+        pin = f"{name}=={version}"
+        if name in seen or pin in found:
+            return fail(f"duplicate package {name}")
+        seen.add(name)
+        if len(hashes) < 1:
+            return fail(f"missing hashes {pin}")
+        for digest in hashes:
+            if len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
+                return fail(f"invalid hash {name}")
+        found[pin] = hashes
+    if len(items) != len(PINS):
+        return fail(f"requirement count {len(items)}")
+    if set(found) != set(PINS):
+        return fail("pin set mismatch")
     if CI_LINUX_WHEEL not in text or MAC_ARM_WHEEL not in text:
         return fail("platform wheel hash missing")
     if WIN32_ONLY not in text:
         return fail("control wheel hash missing")
     print("PASS wire_python_lock structure pins=6")
+    print("STRUCTURE_EXACT count=6")
     print("CI_WHEEL_HASH_PRESENT rpds_py cp312 manylinux_x86_64")
     print("MAC_WHEEL_HASH_PRESENT rpds_py cp314 macosx_arm64")
     print("PIN_CLASS SOURCE_BOUNDED_TEST_DEPENDENCY_PIN_CANDIDATE")
     print("TOOLCHAIN_OWNER_PIN_MISSING")
     print("A09_NOT_EXECUTED")
-    print("NONREPRODUCIBLE_RUNNER ubuntu-latest host python patch_not_pinned")
+    print("IMAGE_REVISION_DYNAMIC")
     return 0
 
 
@@ -118,6 +131,27 @@ def expect_fail(label, cmd):
     if result.returncode == 0:
         print(redact(result.stdout[-500:] + result.stderr[-500:]))
         print(f"FAIL wire_python_lock {label} exit=0")
+        return 1
+    print(f"PASS wire_python_lock {label} exit={result.returncode}")
+    return 0
+
+
+def expect_structure_fail(label, mutated, expected):
+    with tempfile.TemporaryDirectory(prefix="arcava-wire-structure-") as temporary:
+        probe = Path(temporary) / "probe.lock"
+        probe.write_text(mutated)
+        code = (
+            "import importlib.util, pathlib, sys\n"
+            f"spec = importlib.util.spec_from_file_location('lockcheck', {str(Path(__file__))!r})\n"
+            "mod = importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(mod)\n"
+            f"text = pathlib.Path({str(probe)!r}).read_text()\n"
+            "sys.exit(mod.check_lock(text))\n"
+        )
+        result = run([sys.executable, "-c", code])
+    if result.returncode == 0 or expected not in result.stdout:
+        print(redact(result.stdout[-400:] + result.stderr[-400:]))
+        print(f"FAIL wire_python_lock {label} exit={result.returncode}")
         return 1
     print(f"PASS wire_python_lock {label} exit={result.returncode}")
     return 0
@@ -156,6 +190,13 @@ def restrict_rpds(text):
 def self_check():
     text = LOCK.read_text()
     status = check_lock(text)
+    if status != 0:
+        return status
+    extra_hash = "ab" * 32
+    extra = text.rstrip() + f"\narcava-wire-extra==1.0.0 \\\n    --hash=sha256:{extra_hash}\n"
+    status = expect_structure_fail("extra_pin", extra, "requirement count")
+    duplicate = text.rstrip() + f"\nattrs==26.1.0 \\\n    --hash=sha256:{'cd' * 32}\n"
+    status |= expect_structure_fail("duplicate_pin", duplicate, "duplicate package")
     if status != 0:
         return status
     with tempfile.TemporaryDirectory(prefix="arcava-wire-lock-") as temporary:

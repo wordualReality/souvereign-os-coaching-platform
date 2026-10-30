@@ -49,7 +49,7 @@ jobs:
           java -cp "$classes_dir" com.projectb.api.domain.JourneyKernelTest
   journey-http-path:
     name: Persisted loopback journey path / JDK ${{ matrix.java }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     strategy:
       fail-fast: false
@@ -65,8 +65,15 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
+      - name: Set up Python 3.12.3
+        id: arcava-python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12.3'
       - name: Compile and execute persisted HTTP path
         shell: bash
+        env:
+          ARCAVA_PYTHON: ${{ steps.arcava-python.outputs.python-path }}
         run: |
           set -euo pipefail
           classes_dir="$(mktemp -d "${RUNNER_TEMP}/arcava-http.XXXXXX")"
@@ -82,12 +89,46 @@ jobs:
             services/api/src/test/java/com/projectb/api/http/JourneyProducerTest.java \
             services/api/src/test/java/com/projectb/api/http/JournalAtomicityTest.java \
             services/api/src/test/java/com/projectb/api/http/AuthorityBoundaryTest.java
-          python3 - << 'PY'
-          import sys
-          print("PYTHON_RUNTIME", sys.version.split()[0], sys.platform)
-          print("NONREPRODUCIBLE_RUNNER image=ubuntu-latest interpreter=host-python3 patch_not_pinned")
+          wire_python="${ARCAVA_PYTHON}"
+          test -n "${wire_python}"
+          test -x "${wire_python}"
+          echo "RUNNER_OS ${{ runner.os }}"
+          echo "RUNNER_ARCH ${{ runner.arch }}"
+          echo "RUNNER_LABEL ubuntu-24.04"
+          echo "SETUP_PYTHON_SHA 6d4fd22b20465ccc0f7354476588e8df7c9ca0e0"
+          echo "JDK_MATRIX ${{ matrix.java }}"
+          echo "GITHUB_SHA ${GITHUB_SHA}"
+          echo "GITHUB_WORKFLOW ${GITHUB_WORKFLOW}"
+          echo "GITHUB_REF ${GITHUB_REF}"
+          if [ -n "${ImageOS:-}" ]; then echo "IMAGE_OS ${ImageOS}"; else echo "IMAGE_OS absent"; fi
+          if [ -n "${ImageVersion:-}" ]; then echo "IMAGE_VERSION ${ImageVersion}"; else echo "IMAGE_VERSION absent"; fi
+          echo "IMAGE_REVISION_DYNAMIC"
+          uname -srm
+          "${wire_python}" - << 'PY'
+          import hashlib, os, platform, sys
+          from pathlib import Path
+          expected = "3.12.3"
+          actual = sys.version.split()[0]
+          print("PYTHON_FULL", sys.version.replace("\n", " "))
+          print("PYTHON_RUNTIME", actual, sys.platform, platform.machine())
+          if actual != expected:
+              raise SystemExit("PYTHON_PATCH_MISMATCH expected=" + expected + " actual=" + actual)
+          path = sys.executable
+          for key in ("HOME", "RUNNER_TEMP"):
+              value = os.environ.get(key)
+              if value:
+                  path = path.replace(value, "$" + key)
+          print("PYTHON_EXECUTABLE", path)
+          digest = hashlib.sha256(Path("docs/arcava/admission/wire-python-deps.lock").read_bytes()).hexdigest()
+          print("WIRE_LOCK_SHA256", digest)
+          if digest != "c3e2b71d733c847ccef6815cebf863d4b8719bcdeee996ec607d8525c57d5a3f":
+              raise SystemExit("WIRE_LOCK_SHA_MISMATCH")
           PY
-          python3 -m venv "${RUNNER_TEMP}/wire-venv"
+          "${wire_python}" -m venv "${RUNNER_TEMP}/wire-venv"
+          pip_version="$("${RUNNER_TEMP}/wire-venv/bin/pip" --version)"
+          if [ -n "${HOME:-}" ]; then pip_version="${pip_version//${HOME}/\$HOME}"; fi
+          if [ -n "${RUNNER_TEMP:-}" ]; then pip_version="${pip_version//${RUNNER_TEMP}/\$RUNNER_TEMP}"; fi
+          echo "PIP_VERSION ${pip_version}"
           "${RUNNER_TEMP}/wire-venv/bin/pip" install \
             --disable-pip-version-check \
             --no-cache-dir \
@@ -105,12 +146,15 @@ jobs:
               "rpds-py",
               "typing-extensions",
           )
-          print("PYTHON_RUNTIME", sys.version.split()[0], sys.platform)
+          actual = sys.version.split()[0]
+          print("PYTHON_RUNTIME", actual, sys.platform)
+          if actual != "3.12.3":
+              raise SystemExit("PYTHON_PATCH_MISMATCH actual=" + actual)
           for name in names:
               print(f"WIRE_DEP {name}=={md.version(name)}")
           print("WIRE_LOCK_INSTALL exit=0")
           PY
-          python3 scripts/check_arcava_wire_python_lock.py --self-check
+          "${wire_python}" scripts/check_arcava_wire_python_lock.py --self-check
           java -cp "$classes_dir" com.projectb.api.http.JourneyPathTest
           producer_log="${RUNNER_TEMP}/producer.out"
           java -cp "$classes_dir" com.projectb.api.http.JourneyProducerTest | tee "$producer_log"
