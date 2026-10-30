@@ -1,8 +1,8 @@
-# KDB current pointer, 2026-10-30 P19 versioned offline review viewmodel
+# KDB current pointer, 2026-10-30 P20 offline source-bytes evidence proof
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: KDB-M01-P19-VERSIONED-OFFLINE-REVIEW-VIEWMODEL-01
+Active packet: KDB-M01-P20-OFFLINE-SOURCE-BYTES-EVIDENCE-PROOF-01
 DF adoption: DF-20261029-01 evidence matrix. Twelve physical SQL001 tables. ATC-10 named 18 remain UNCONFIRMED. No 18/18 logical claim.
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2`, PR #21 `2ba7ae44` remain frozen.
@@ -116,5 +116,14 @@ python3 tests/kdb/pg17_p18_review_demo_pack.py
 ```
 python3 services/kdb/offline_review_viewmodel_cli.py tests/kdb/fixtures/p14_inbox_two_eligible.json path/to/current-p14-batch.json
 python3 tests/kdb/pg17_p19_review_viewmodel.py
+```
+
+## P20 offline source-bytes evidence proof
+
+`offline_source_bytes_proof.py` plus `offline_source_bytes_proof_cli.py` hash one bounded repo-local synthetic file and compare it to the declared `SourceVersion.content_sha256` of a P15-selectable work item. A match is `LOCAL_BYTES_MATCH_DECLARED_SHA` only. It is not rights, origin, or live ingest. Text locators stay `UNVERIFIED_LOCAL_SPAN_SEMANTICS`.
+
+```
+python3 services/kdb/offline_source_bytes_proof_cli.py tests/kdb/fixtures/p20_inbox_match.json --work-item-id aaaaaaaa-bbbb-4ccc-8ddd-777777777777 --source-file tests/kdb/fixtures/p20_source_a.bin
+python3 tests/kdb/pg17_p20_source_bytes_proof.py
 ```
 

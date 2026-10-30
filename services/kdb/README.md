@@ -34,5 +34,7 @@ python3 services/kdb/offline_diagnostic_cli.py tests/kdb/fixtures/p10_stage_cohe
 
 `offline_review_viewmodel.py` plus `offline_review_viewmodel_cli.py` emit a versioned JSON preview of current eligible cases plus aggregate counts. The schema is internal and non-normative. Default CLI prints JSON and writes nothing. FINAL remains NOT_ADMITTED.
 
+`offline_source_bytes_proof.py` plus `offline_source_bytes_proof_cli.py` compare exact local synthetic file bytes to a declared SourceVersion SHA-256 after P14/P15 selection. A local match is not source custody, license proof, or admitted ingest. FINAL remains NOT_ADMITTED.
+
 `digest_v2.py` is the KDB-owned SQL-v2 adapter. It does not grant producers database EXECUTE.
 `signed_ingress.py` is a test-only synthetic HMAC verifier. A local pass is `LOCAL_SIGNED_INGRESS_VERIFIED`, never `DB_COMMAND_ADMITTED`.

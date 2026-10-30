@@ -1,0 +1,150 @@
+{
+  "snapshot_case_id": "P20-SYNTH-BYTES",
+  "tenant_scope": "TENANT_SYNTH_A",
+  "entries": [
+    {
+      "case_id": "P20-SYNTH-A",
+      "expected_tenant_scope": "TENANT_SYNTH_A",
+      "candidate_chain": {
+        "source": {
+          "source_id": "aaaaaaaa-bbbb-4ccc-8ddd-111111111111",
+          "tenant_scope": "TENANT_SYNTH_A",
+          "source_class": "OWNER_AUTHORED",
+          "external_locator": "synthetic://kdb/p13/source",
+          "rights_status": "ADMITTED",
+          "owner_namespace": "KDB"
+        },
+        "source_version": {
+          "source_version_id": "aaaaaaaa-bbbb-4ccc-8ddd-222222222222",
+          "source_id": "aaaaaaaa-bbbb-4ccc-8ddd-111111111111",
+          "tenant_scope": "TENANT_SYNTH_A",
+          "content_sha256": "7efa700e86d00a8147cf20775c4fc9b8ad44f9c769dc7192d1d5ab7498e2c9ca",
+          "rights_snapshot": {
+            "rights_status": "ADMITTED",
+            "rights_basis": "owner-authored-fixture",
+            "allowed_purposes": [
+              "KNOWLEDGE_INTAKE"
+            ]
+          },
+          "rights_snapshot_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "media_type": "text/plain",
+          "source_version_no": 1,
+          "acquired_at": "2026-10-28T00:00:00Z"
+        },
+        "submission": {
+          "submission_id": "aaaaaaaa-bbbb-4ccc-8ddd-333333333333",
+          "tenant_scope": "TENANT_SYNTH_A",
+          "origin_owner": "KDB",
+          "idempotency_key": "p13-preview-001",
+          "request_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "principal_context_ref": "piac-ref-untrusted-string",
+          "access_decision_ref": "access-ref-untrusted-string",
+          "purpose": "KNOWLEDGE_INTAKE",
+          "source_version_id": "aaaaaaaa-bbbb-4ccc-8ddd-222222222222",
+          "status": "RECORDED"
+        },
+        "candidate_revision": {
+          "candidate_revision_id": "aaaaaaaa-bbbb-4ccc-8ddd-555555555555",
+          "candidate_id": "aaaaaaaa-bbbb-4ccc-8ddd-444444444444",
+          "revision_no": 1,
+          "tenant_scope": "TENANT_SYNTH_A",
+          "source_version_id": "aaaaaaaa-bbbb-4ccc-8ddd-222222222222",
+          "submission_id": "aaaaaaaa-bbbb-4ccc-8ddd-333333333333",
+          "proposal_command_id": "aaaaaaaa-bbbb-4ccc-8ddd-666666666666",
+          "content_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "evidence_span_refs": [
+            {
+              "source_version_id": "aaaaaaaa-bbbb-4ccc-8ddd-222222222222",
+              "locator": "bytes:0-31"
+            }
+          ],
+          "proposal_payload": {
+            "title": "synthetic-candidate"
+          },
+          "validation_state": "STRUCTURE_VALIDATED",
+          "review_state": "PENDING_REVIEW"
+        },
+        "review_work_item": {
+          "review_work_item_id": "aaaaaaaa-bbbb-4ccc-8ddd-777777777777",
+          "candidate_revision_id": "aaaaaaaa-bbbb-4ccc-8ddd-555555555555",
+          "tenant_scope": "TENANT_SYNTH_A",
+          "owner_queue": "KDB_HUMAN_REVIEW",
+          "state": "REQUESTED",
+          "correlation_id": "aaaaaaaa-bbbb-4ccc-8ddd-888888888888"
+        }
+      }
+    },
+    {
+      "case_id": "P20-SYNTH-B",
+      "expected_tenant_scope": "TENANT_SYNTH_A",
+      "candidate_chain": {
+        "source": {
+          "source_id": "aaaaaaaa-bbbb-4ccc-8ddd-111111111112",
+          "tenant_scope": "TENANT_SYNTH_A",
+          "source_class": "OWNER_AUTHORED",
+          "external_locator": "synthetic://kdb/p13/source",
+          "rights_status": "ADMITTED",
+          "owner_namespace": "KDB"
+        },
+        "source_version": {
+          "source_version_id": "aaaaaaaa-bbbb-4ccc-8ddd-222222222223",
+          "source_id": "aaaaaaaa-bbbb-4ccc-8ddd-111111111112",
+          "tenant_scope": "TENANT_SYNTH_A",
+          "content_sha256": "9bfde885787eeab7fa2a2c255dd3460932ee8162d2d6090830ef32b0fd599e26",
+          "rights_snapshot": {
+            "rights_status": "ADMITTED",
+            "rights_basis": "owner-authored-fixture",
+            "allowed_purposes": [
+              "KNOWLEDGE_INTAKE"
+            ]
+          },
+          "rights_snapshot_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "media_type": "text/plain",
+          "source_version_no": 1,
+          "acquired_at": "2026-10-28T00:00:00Z"
+        },
+        "submission": {
+          "submission_id": "aaaaaaaa-bbbb-4ccc-8ddd-333333333334",
+          "tenant_scope": "TENANT_SYNTH_A",
+          "origin_owner": "KDB",
+          "idempotency_key": "p14-preview-002",
+          "request_sha256": "dededededededededededededededededededededededededededededededede",
+          "principal_context_ref": "piac-ref-untrusted-string",
+          "access_decision_ref": "access-ref-untrusted-string",
+          "purpose": "KNOWLEDGE_INTAKE",
+          "source_version_id": "aaaaaaaa-bbbb-4ccc-8ddd-222222222223",
+          "status": "RECORDED"
+        },
+        "candidate_revision": {
+          "candidate_revision_id": "aaaaaaaa-bbbb-4ccc-8ddd-555555555556",
+          "candidate_id": "aaaaaaaa-bbbb-4ccc-8ddd-444444444445",
+          "revision_no": 1,
+          "tenant_scope": "TENANT_SYNTH_A",
+          "source_version_id": "aaaaaaaa-bbbb-4ccc-8ddd-222222222223",
+          "submission_id": "aaaaaaaa-bbbb-4ccc-8ddd-333333333334",
+          "proposal_command_id": "aaaaaaaa-bbbb-4ccc-8ddd-666666666667",
+          "content_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "evidence_span_refs": [
+            {
+              "source_version_id": "aaaaaaaa-bbbb-4ccc-8ddd-222222222223",
+              "locator": "bytes:0-31"
+            }
+          ],
+          "proposal_payload": {
+            "title": "synthetic-candidate"
+          },
+          "validation_state": "STRUCTURE_VALIDATED",
+          "review_state": "PENDING_REVIEW"
+        },
+        "review_work_item": {
+          "review_work_item_id": "aaaaaaaa-bbbb-4ccc-8ddd-777777777778",
+          "candidate_revision_id": "aaaaaaaa-bbbb-4ccc-8ddd-555555555556",
+          "tenant_scope": "TENANT_SYNTH_A",
+          "owner_queue": "KDB_HUMAN_REVIEW",
+          "state": "REQUESTED",
+          "correlation_id": "aaaaaaaa-bbbb-4ccc-8ddd-888888888889"
+        }
+      }
+    }
+  ]
+}
