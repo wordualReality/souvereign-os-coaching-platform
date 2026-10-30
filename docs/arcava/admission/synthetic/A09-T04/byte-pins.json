@@ -1,0 +1,142 @@
+{
+  "fixture_class": "SYNTHETIC_OFFLINE",
+  "registry_scope": "ARCAVA_PARTIAL_NOT_48",
+  "expected": {
+    "disposition": "BYTE_BIND_PASS",
+    "reason": "bytes_match_pins",
+    "schema_file_count": 16,
+    "contract_count": 4,
+    "registry_48": "NOT_MATERIALIZED",
+    "runtime_producer_ready": false
+  },
+  "pins": [
+    {
+      "set": "common",
+      "version": "1.0",
+      "path": "contracts/arcava/types/1.0/QueryEnvelope.schema.json",
+      "sha256": "5995eaa5cafcd91e73e96ad05bba05d6bb5df2cae5ece3b528281cf444033f21"
+    },
+    {
+      "set": "common",
+      "version": "1.0",
+      "path": "contracts/arcava/types/1.0/ResponseEnvelope.schema.json",
+      "sha256": "01e03e2155747ebfc996f09fc8cfd109b79402c7684f47f8a293e5a802488944"
+    },
+    {
+      "set": "common",
+      "version": "1.0",
+      "path": "contracts/arcava/types/1.0/EventEnvelope.schema.json",
+      "sha256": "42e2afd366c234cc102c22a528fc5e0848e00b9dfa7f7cff2aa593b16e85baaa"
+    },
+    {
+      "set": "contract",
+      "contract_id": "CT-ARC-002",
+      "version": "1.0",
+      "kind": "request",
+      "path": "contracts/arcava/CT-ARC-002/1.0/request.schema.json",
+      "sha256": "23b388323182cac055da79f9a2ef5941c2760e82ee5bc742d5e9ad2f945c7cc8"
+    },
+    {
+      "set": "contract",
+      "contract_id": "CT-ARC-002",
+      "version": "1.0",
+      "kind": "result",
+      "path": "contracts/arcava/CT-ARC-002/1.0/result.schema.json",
+      "sha256": "58df835bef388bed435be4410610afa64c9a9f20e612ce54a9e9d95ec7b83595"
+    },
+    {
+      "set": "contract",
+      "contract_id": "CT-ARC-002",
+      "version": "1.0",
+      "kind": "error",
+      "path": "contracts/arcava/CT-ARC-002/1.0/error.schema.json",
+      "sha256": "1c19a0ef3ba552c564320aa44563feaab5968b4f8fcb7e152d5148c24d614eeb"
+    },
+    {
+      "set": "contract",
+      "contract_id": "CT-ARC-003",
+      "version": "1.0",
+      "kind": "request",
+      "path": "contracts/arcava/CT-ARC-003/1.0/request.schema.json",
+      "sha256": "4cee43f582d99b8d15e07eefc93090b2a4d2ea6f3bfdf5472226185116b9866c"
+    },
+    {
+      "set": "contract",
+      "contract_id": "CT-ARC-003",
+      "version": "1.0",
+      "kind": "result",
+      "path": "contracts/arcava/CT-ARC-003/1.0/result.schema.json",
+      "sha256": "d4ad8de0747e1a3f546eb2835bc3454d560bcaa300a4fb2817eaa8ef5859699c"
+    },
+    {
+      "set": "contract",
+      "contract_id": "CT-ARC-003",
+      "version": "1.0",
+      "kind": "error",
+      "path": "contracts/arcava/CT-ARC-003/1.0/error.schema.json",
+      "sha256": "d0bb1c8774a0efc8de46e90e053b661c0a3b25b272320b9069e6b67bd4e2caf1"
+    },
+    {
+      "set": "contract",
+      "contract_id": "CT-ARC-004",
+      "version": "1.0",
+      "kind": "request",
+      "path": "contracts/arcava/CT-ARC-004/1.0/request.schema.json",
+      "sha256": "622ec3f7f683246530ac268ec1b93a7466f2c295d590974883134722ad5739e6"
+    },
+    {
+      "set": "contract",
+      "contract_id": "CT-ARC-004",
+      "version": "1.0",
+      "kind": "result",
+      "path": "contracts/arcava/CT-ARC-004/1.0/result.schema.json",
+      "sha256": "7d58687bb732643a31b4f3b099180f3d823a41d7e1f1b800e4af606e553a9265"
+    },
+    {
+      "set": "contract",
+      "contract_id": "CT-ARC-004",
+      "version": "1.0",
+      "kind": "error",
+      "path": "contracts/arcava/CT-ARC-004/1.0/error.schema.json",
+      "sha256": "6a927120dcaf3d9c9f39f81a04c7199496ceea251b7e03564568c7e0bd20e830"
+    },
+    {
+      "set": "contract",
+      "contract_id": "CT-ARC-R03-REM-001",
+      "version": "1.0",
+      "kind": "request",
+      "path": "contracts/arcava/CT-ARC-R03-REM-001/1.0/request.schema.json",
+      "sha256": "fa572d44d19a7bd1cf56c7a7f230f5add1e89f8d53e9ff02251d0c353f8367f1"
+    },
+    {
+      "set": "contract",
+      "contract_id": "CT-ARC-R03-REM-001",
+      "version": "1.0",
+      "kind": "result",
+      "path": "contracts/arcava/CT-ARC-R03-REM-001/1.0/result.schema.json",
+      "sha256": "42b08029205dcf4eb24fc3815669ee20cee61dd4b396937cb1c1f166d96fabd2"
+    },
+    {
+      "set": "contract",
+      "contract_id": "CT-ARC-R03-REM-001",
+      "version": "1.0",
+      "kind": "event",
+      "path": "contracts/arcava/CT-ARC-R03-REM-001/1.0/event.schema.json",
+      "sha256": "13aae6b52adb1da71624472ae382522e3516745fb58acda2104ef7c0604e6db1"
+    },
+    {
+      "set": "contract",
+      "contract_id": "CT-ARC-R03-REM-001",
+      "version": "1.0",
+      "kind": "error",
+      "path": "contracts/arcava/CT-ARC-R03-REM-001/1.0/error.schema.json",
+      "sha256": "f2c61f8cbbeafb8f5a906aee8a41bc0e7e2cf69c54b1ce0274d97bcbd5e565d0"
+    },
+    {
+      "set": "manifest",
+      "version": "1.0",
+      "path": "contracts/arcava/contract-manifest.json",
+      "sha256": "e0dfef2598eef6885221521a768a46d85f46beac8c47b17fd9447a90bcba88d8"
+    }
+  ]
+}

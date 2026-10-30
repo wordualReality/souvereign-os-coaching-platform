@@ -10,6 +10,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -210,28 +211,104 @@ def migration_checksums(root):
     return {path.name: sha256_file(path) for path in files}
 
 
+KNOWN_MIGRATIONS = (
+    (
+        "001_project_b_baseline_schema",
+        "database/migrations/001_project_b_baseline_schema.sql",
+    ),
+    (
+        "002_project_b_journey_provisioning_hardening",
+        "database/migrations/002_project_b_journey_provisioning_hardening.sql",
+    ),
+)
+
+
+def ledger_lines(disposition, reason, plan):
+    lines = [
+        "LEDGER_CLASS SYNTHETIC",
+        "APPLIED_DATABASE_STATE ABSENT",
+        "LEDGER_RESULT " + disposition + " reason=" + reason,
+        "SQL_EXECUTION NOT_EXECUTED",
+        "MUTATION_APPLY NOT_EXECUTED",
+    ]
+    if disposition == "LOCAL_PLAN":
+        lines.append("PLAN " + ",".join(plan))
+        lines.append("MUTATION_PLAN DELIVERED")
+    else:
+        lines.append("MUTATION_PLAN BLOCKED")
+    return lines
+
+
+def evaluate_ledger(root, fixture):
+    entries = fixture.get("entries")
+    if not isinstance(entries, list):
+        return ledger_lines("MUTATION_PLAN_BLOCKED", "malformed", []), 1, "malformed"
+    seen = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            return ledger_lines("MUTATION_PLAN_BLOCKED", "malformed", []), 1, "malformed"
+        migration_id = entry.get("migration_id")
+        if migration_id in seen:
+            return ledger_lines("MUTATION_PLAN_BLOCKED", "duplicate_entry", []), 1, "duplicate_entry"
+        seen.append(migration_id)
+    if fixture.get("execute") is True:
+        return ledger_lines("MUTATION_PLAN_BLOCKED", "execute_requested", []), 1, "execute_requested"
+    known = {migration_id: path for migration_id, path in KNOWN_MIGRATIONS}
+    reasons = []
+    plan = []
+    listed = set()
+    for entry in entries:
+        migration_id = entry.get("migration_id")
+        relative = entry.get("path")
+        recorded = entry.get("sha256")
+        listed.add(migration_id)
+        if migration_id not in known or relative != known[migration_id]:
+            reasons.append("unknown_migration")
+            continue
+        try:
+            allowed_path(root, relative)
+        except ValueError:
+            reasons.append("unknown_migration")
+            continue
+        file_path = root / relative
+        if not file_path.is_file():
+            reasons.append("missing_entry")
+            continue
+        if sha256_file(file_path) != recorded:
+            reasons.append("digest_mismatch")
+            continue
+        plan.append(migration_id)
+    for migration_id, relative in KNOWN_MIGRATIONS:
+        if migration_id not in listed and (root / relative).is_file():
+            reasons.append("missing_entry")
+    if reasons:
+        return ledger_lines("MUTATION_PLAN_BLOCKED", reasons[0], []), 1, reasons[0]
+    expected_plan = [migration_id for migration_id, _relative in KNOWN_MIGRATIONS]
+    if plan != expected_plan:
+        return ledger_lines("MUTATION_PLAN_BLOCKED", "missing_entry", []), 1, "missing_entry"
+    return ledger_lines("LOCAL_PLAN", "checksums_agree", plan), 0, "checksums_agree"
+
+
+def load_json(path):
+    return json.loads(path.read_text())
+
+
 def run_t01(root):
-    lines = ["CASE A09-T01", "CASE_ARTIFACT PRESENT", "TEST_EXECUTION EXECUTED"]
-    checksums = migration_checksums(root)
-    if set(checksums) != {
-        "001_project_b_baseline_schema.sql",
-        "002_project_b_journey_provisioning_hardening.sql",
-    }:
-        lines.append("DISPOSITION UNKNOWN reason=migration_set")
-        lines.append("MUTATION_BLOCKED")
-        lines.append("SQL_EXECUTION NOT_EXECUTED")
-        lines.append("A09_STATUS NOT_EXECUTED")
-        lines.append("FULL_A09_PASS ABSENT")
-        return lines, 1
-    for name, digest in checksums.items():
-        lines.append("CHECKSUM " + name + " " + digest)
-    disposition, reason = classify_preflight(checksums, None)
-    lines.append("LEDGER ABSENT")
-    lines.append("DISPOSITION " + disposition + " reason=" + reason)
-    lines.append("MUTATION_BLOCKED")
-    lines.append("SQL_EXECUTION NOT_EXECUTED")
+    lines = ["CASE A09-T01", "CASE_ARTIFACT PRESENT", "OFFLINE_SUBCHECK_EXECUTED"]
+    fixture = load_json(SYNTHETIC / "A09-T01" / "golden" / "ledger-match.json")
+    evaluated, code, reason = evaluate_ledger(root, fixture)
+    lines.extend(evaluated)
+    expected = fixture["expected"]
     lines.append("A09_STATUS NOT_EXECUTED")
     lines.append("FULL_A09_PASS ABSENT")
+    if (
+        code != 0
+        or reason != expected["reason"]
+        or expected["disposition"] != "LOCAL_PLAN"
+        or fixture.get("applied_database_state") is not False
+    ):
+        lines.append("FAIL ledger_oracle")
+        return lines, 1
     lines.append("SUBCHECK_PASS case=A09-T01")
     return lines, 0
 
@@ -256,27 +333,86 @@ def classify_registry(file_count, contract_ids, claim_48):
     return "SUBCHECK", "physical_16_is_not_registry_48"
 
 
+def bind_contracts(root, pins):
+    manifest_path = root / "contracts" / "arcava" / "contract-manifest.json"
+    if not manifest_path.is_file():
+        return ["BYTE_BIND FAIL reason=missing_file"], 1, "missing_file"
+    manifest = json.loads(manifest_path.read_text())
+    contracts = {item["contract_id"]: item for item in manifest["contracts"]}
+    common = {item["path"]: item["sha256"] for item in manifest["common_components"]}
+    if "CT-ARC-007" in contracts:
+        return ["BYTE_BIND FAIL reason=e16_presented_active"], 1, "e16_presented_active"
+    schema_count = 0
+    for pin in pins.get("pins", []):
+        relative = pin.get("path", "")
+        try:
+            allowed_path(root, relative)
+        except ValueError:
+            return ["BYTE_BIND FAIL reason=illegal_path"], 1, "illegal_path"
+        if not relative.startswith("contracts/arcava/"):
+            return ["BYTE_BIND FAIL reason=illegal_path"], 1, "illegal_path"
+        file_path = root / relative
+        if not file_path.is_file():
+            return ["BYTE_BIND FAIL reason=missing_file"], 1, "missing_file"
+        digest = sha256_file(file_path)
+        if digest != pin.get("sha256"):
+            return ["BYTE_BIND FAIL reason=digest_mismatch"], 1, "digest_mismatch"
+        kind = pin.get("set")
+        if kind == "manifest":
+            if relative != "contracts/arcava/contract-manifest.json" or pin.get("version") != manifest["manifest_version"]:
+                return ["BYTE_BIND FAIL reason=binding_mismatch"], 1, "binding_mismatch"
+            continue
+        if kind == "common":
+            if common.get(relative) != digest or pin.get("version") != "1.0":
+                return ["BYTE_BIND FAIL reason=binding_mismatch"], 1, "binding_mismatch"
+            schema_count += 1
+            continue
+        if kind != "contract":
+            return ["BYTE_BIND FAIL reason=binding_mismatch"], 1, "binding_mismatch"
+        contract = contracts.get(pin.get("contract_id"))
+        if contract is None or contract.get("profile_version") != pin.get("version"):
+            return ["BYTE_BIND FAIL reason=binding_mismatch"], 1, "binding_mismatch"
+        if contract.get("runtime_producer_ready") is not False:
+            return ["BYTE_BIND FAIL reason=runtime_claim"], 1, "runtime_claim"
+        expected_path = "contracts/arcava/{0}/{1}/{2}.schema.json".format(
+            pin["contract_id"], pin["version"], pin["kind"]
+        )
+        matches = [item for item in contract["physical_schemas"] if item["path"] == relative]
+        if relative != expected_path or len(matches) != 1:
+            return ["BYTE_BIND FAIL reason=binding_mismatch"], 1, "binding_mismatch"
+        if matches[0]["sha256"] != digest or matches[0]["kind"] != pin["kind"]:
+            return ["BYTE_BIND FAIL reason=binding_mismatch"], 1, "binding_mismatch"
+        schema_count += 1
+    if schema_count != 16 or len(contracts) != 4:
+        return ["BYTE_BIND FAIL reason=registry_drift"], 1, "registry_drift"
+    return ["BYTE_BIND PASS reason=bytes_match_pins"], 0, "bytes_match_pins"
+
+
 def run_t04(root):
-    lines = ["CASE A09-T04", "CASE_ARTIFACT PRESENT", "TEST_EXECUTION EXECUTED"]
-    files = schema_files(root)
-    manifest = json.loads((root / "contracts" / "arcava" / "contract-manifest.json").read_text())
-    contract_ids = tuple(item["contract_id"] for item in manifest["contracts"])
-    kind, reason = classify_registry(len(files), contract_ids, False)
-    lines.append("PHYSICAL_SCHEMA_FILES " + str(len(files)))
-    lines.append("MANIFEST_CONTRACTS " + str(len(contract_ids)))
+    lines = ["CASE A09-T04", "CASE_ARTIFACT PRESENT", "OFFLINE_SUBCHECK_EXECUTED"]
+    pins = load_json(SYNTHETIC / "A09-T04" / "byte-pins.json")
+    evaluated, code, reason = bind_contracts(root, pins)
+    lines.extend(evaluated)
+    lines.append("PHYSICAL_SCHEMA_FILES 16")
+    lines.append("MANIFEST_CONTRACTS 4")
     lines.append("REGISTRY_48 NOT_MATERIALIZED")
     lines.append("E16 INACTIVE")
+    lines.append("RUNTIME_PRODUCER_READY false")
     lines.append("A09_STATUS NOT_EXECUTED")
     lines.append("FULL_A09_PASS ABSENT")
-    if kind != "SUBCHECK":
-        lines.append("FAIL " + reason)
+    expected = pins["expected"]
+    if code != 0 or reason != expected["reason"] or expected["disposition"] != "BYTE_BIND_PASS":
+        lines.append("FAIL contract_oracle")
+        return lines, 1
+    if expected["schema_file_count"] != 16 or expected["registry_48"] != "NOT_MATERIALIZED":
+        lines.append("FAIL contract_oracle")
         return lines, 1
     lines.append("SUBCHECK_PASS case=A09-T04")
     return lines, 0
 
 
 def run_t44(root):
-    lines = ["CASE A09-T44", "CASE_ARTIFACT PRESENT", "TEST_EXECUTION EXECUTED"]
+    lines = ["CASE A09-T44", "CASE_ARTIFACT PRESENT", "OFFLINE_SUBCHECK_EXECUTED"]
     seed = (root / "database" / "policies" / "001_project_b_rls_seed.sql").read_text()
     if "using (true)" not in seed:
         lines.append("FAIL historical_scaffold_missing")
@@ -295,6 +431,7 @@ def run_t44(root):
     lines.append("ROLE_TEST NOT_EXECUTED")
     lines.append("ADMISSION_CLAIM REJECTED")
     lines.append("A09_STATUS NOT_EXECUTED")
+    lines.append("T44_FULL_ORACLE NOT_EXECUTED reason=sql_rls_not_run")
     lines.append("FULL_A09_PASS ABSENT")
     lines.append("SUBCHECK_PASS case=A09-T44")
     return lines, 0
@@ -313,7 +450,7 @@ def classify_evidence(baseline, rows):
 
 
 def run_t48(root):
-    lines = ["CASE A09-T48", "CASE_ARTIFACT PRESENT", "TEST_EXECUTION EXECUTED"]
+    lines = ["CASE A09-T48", "CASE_ARTIFACT PRESENT", "OFFLINE_SUBCHECK_EXECUTED"]
     manifest = json.loads((root / "contracts" / "arcava" / "contract-manifest.json").read_text())
     declared = manifest["invariants"]["requirement_baseline"]
     mapping = json.loads(
@@ -327,6 +464,7 @@ def run_t48(root):
     lines.append("UNMAPPED 86")
     lines.append("UNKNOWN_ADMISSIONS OPEN")
     lines.append("A09_STATUS NOT_EXECUTED")
+    lines.append("T48_FULL_ORACLE NOT_EXECUTED reason=requirement_evidence_incomplete")
     lines.append("FULL_A09_PASS ABSENT")
     if kind != "SUBCHECK" or mapping.get("baseline") != BASELINE or mapping.get("unmapped") != 86:
         lines.append("FAIL " + reason)
@@ -437,6 +575,12 @@ def self_check():
         "SQL_APPLY NOT_EXECUTED",
         "REGISTRY_48 NOT_MATERIALIZED",
         "UNKNOWN_ADMISSIONS OPEN",
+        "OFFLINE_SUBCHECK_EXECUTED",
+        "LEDGER_RESULT LOCAL_PLAN reason=checksums_agree",
+        "APPLIED_DATABASE_STATE ABSENT",
+        "BYTE_BIND PASS reason=bytes_match_pins",
+        "T44_FULL_ORACLE NOT_EXECUTED reason=sql_rls_not_run",
+        "T48_FULL_ORACLE NOT_EXECUTED reason=requirement_evidence_incomplete",
     ]
     text = "\n".join(lines)
     for marker in required:
@@ -445,6 +589,9 @@ def self_check():
             return 1
     if "A09 PASS" in text or "ADMISSION ADMITTED" in text or "T150 PASS" in text:
         print("FAIL a partial subcheck was promoted")
+        return 1
+    if "TEST_EXECUTION EXECUTED" in text:
+        print("FAIL ambiguous execution marker")
         return 1
 
     payload = EXCERPT.read_bytes()
@@ -534,6 +681,59 @@ def self_check():
         {"ARCAVA_MANDATE_EXCERPT": str(EXCERPT)},
     ):
         return 1
+    golden = SYNTHETIC / "A09-T01" / "golden"
+    for name in ("ledger-missing.json", "ledger-unknown.json", "ledger-duplicate.json", "ledger-digest.json"):
+        fixture = load_json(golden / name)
+        _lines, code, reason = evaluate_ledger(ROOT, fixture)
+        if code == 0 or reason != fixture["expected"]["reason"]:
+            print("FAIL ledger " + name + " reason=" + reason)
+            return 1
+        print("NEGATIVE " + name[:-5] + " exit=1")
+    match = load_json(golden / "ledger-match.json")
+    with tempfile.TemporaryDirectory() as raw:
+        temp_root = Path(raw)
+        for _migration_id, relative in KNOWN_MIGRATIONS:
+            source = ROOT / relative
+            target = temp_root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(source.read_bytes())
+        flipped = temp_root / KNOWN_MIGRATIONS[0][1]
+        payload = bytearray(flipped.read_bytes())
+        payload[0] = (payload[0] + 1) % 256
+        flipped.write_bytes(bytes(payload))
+        _lines, code, reason = evaluate_ledger(temp_root, match)
+        if code == 0 or reason != "digest_mismatch":
+            print("FAIL a changed migration byte was accepted")
+            return 1
+        print("NEGATIVE byte_drift exit=1")
+    base_pins = load_json(SYNTHETIC / "A09-T04" / "byte-pins.json")
+    for name in ("byte-drift.json", "missing-file.json", "binding.json", "illegal-path.json"):
+        overlay = load_json(SYNTHETIC / "A09-T04" / "golden" / name)
+        trial = json.loads(json.dumps(base_pins))
+        trial["pins"][overlay["replace_index"]] = overlay["pin"]
+        _lines, code, reason = bind_contracts(ROOT, trial)
+        if code == 0 or reason != overlay["expected"]["reason"]:
+            print("FAIL contract " + name + " reason=" + reason)
+            return 1
+        print("NEGATIVE " + name[:-5] + " exit=1")
+    first = subprocess.run(
+        [sys.executable, str(Path(__file__).resolve())],
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
+        timeout=5,
+    )
+    second = subprocess.run(
+        [sys.executable, str(Path(__file__).resolve())],
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
+        timeout=5,
+    )
+    if first.returncode != 0 or first.stdout != second.stdout or first.returncode != second.returncode:
+        print("FAIL oracle output was not reproducible")
+        return 1
+    print("REPRODUCIBLE fresh_process=2")
     discovery = subprocess.run(
         [sys.executable, str(ROOT / "scripts" / "a09_case_discovery.py")],
         capture_output=True,
