@@ -1,8 +1,8 @@
-# KDB current pointer, 2026-10-30 P14 offline review-inbox read model
+# KDB current pointer, 2026-10-30 P15 offline review case detail
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: KDB-M01-P14-OFFLINE-REVIEW-INBOX-READMODEL-01
+Active packet: KDB-M01-P15-OFFLINE-REVIEW-CASE-DETAIL-01
 DF adoption: DF-20261029-01 evidence matrix. Twelve physical SQL001 tables. ATC-10 named 18 remain UNCONFIRMED. No 18/18 logical claim.
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2`, PR #21 `2ba7ae44` remain frozen.
@@ -71,4 +71,13 @@ P13R keeps that preview path and rejects duplicate JSON keys, oversized or deep 
 ```
 python3 services/kdb/offline_review_inbox_cli.py tests/kdb/fixtures/p14_inbox_two_eligible.json
 python3 tests/kdb/pg17_p14_review_inbox.py
+```
+
+## P15 offline review case detail
+
+`offline_review_case_detail.py` plus `offline_review_case_detail_cli.py` open one selected `review_work_item_id` after the full P14 batch is re-evaluated. The receipt is `DETAIL_ONLY`, `SNAPSHOT_UNTRUSTED`, and `NOT_ASSIGNED`. A denied, stale, or revoked item cannot be selected by paging or filtering. Physical PostgreSQL 17 coverage reuses the two linked Source-to-Review chains.
+
+```
+python3 services/kdb/offline_review_case_detail_cli.py tests/kdb/fixtures/p14_inbox_two_eligible.json --work-item-id aaaaaaaa-bbbb-4ccc-8ddd-777777777777
+python3 tests/kdb/pg17_p15_review_case_detail.py
 ```

@@ -24,5 +24,7 @@ python3 services/kdb/offline_diagnostic_cli.py tests/kdb/fixtures/p10_stage_cohe
 
 `offline_review_inbox.py` plus `offline_review_inbox_cli.py` aggregate those previews into a sorted, filterable inbox. The read model is a non-normative internal preview. It stays `SNAPSHOT_UNTRUSTED` and `NOT_ASSIGNED`. Cross-tenant input and duplicate work items yield no cards. Rights revocation wins for the same SourceID. FINAL remains NOT_ADMITTED.
 
+`offline_review_case_detail.py` plus `offline_review_case_detail_cli.py` open one selected work item after that full inbox re-evaluation. The receipt is `DETAIL_ONLY` and still `NOT_ASSIGNED`. Denied items are not selectable. FINAL remains NOT_ADMITTED.
+
 `digest_v2.py` is the KDB-owned SQL-v2 adapter. It does not grant producers database EXECUTE.
 `signed_ingress.py` is a test-only synthetic HMAC verifier. A local pass is `LOCAL_SIGNED_INGRESS_VERIFIED`, never `DB_COMMAND_ADMITTED`.

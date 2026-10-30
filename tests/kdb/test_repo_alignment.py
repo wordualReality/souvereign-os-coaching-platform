@@ -44,6 +44,10 @@ class RepoAlignment(unittest.TestCase):
             FLAGS["offline_review_inbox_readmodel"],
             "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
         )
+        self.assertEqual(
+            FLAGS["offline_review_case_detail"],
+            "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
+        )
     def test_no_human_review_writer(self):
         self.assertNotIn("INSERT INTO kdb_governance.human_review_decision", S3)
         self.assertNotIn("INSERT INTO kdb_canonical.protocol_version", S3)
