@@ -1,8 +1,8 @@
-# KDB current pointer, 2026-10-31 P22 portable current-case evidence demo
+# KDB current pointer, 2026-10-31 P23 reproducible offline demo acceptance kit
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: KDB-M01-P22-PORTABLE-CURRENT-CASE-EVIDENCE-DEMO-01
+Active packet: KDB-M01-P23-REPRODUCIBLE-OFFLINE-DEMO-ACCEPTANCE-KIT-01
 DF adoption: DF-20261029-01 evidence matrix. Twelve physical SQL001 tables. ATC-10 named 18 remain UNCONFIRMED. No 18/18 logical claim.
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2`, PR #21 `2ba7ae44` remain frozen.
@@ -143,6 +143,17 @@ is `LOCAL_BYTES_AND_SPANS_BOUNDED`, `SNAPSHOT_UNTRUSTED`, `NOT_ASSIGNED`, and
 python3 services/kdb/offline_evidence_bound_review_cli.py tests/kdb/fixtures/p20_inbox_byte_spans.json --work-item-id aaaaaaaa-bbbb-4ccc-8ddd-777777777777 --source-file tests/kdb/fixtures/p20_source_a.bin
 python3 tests/kdb/pg17_p21_evidence_bound_review.py
 ```
+
+## P23 reproducible offline demo acceptance kit
+
+`offline_demo_acceptance_kit.py` builds the existing P22 seven-file opt-in
+bundle into a deterministic ZIP with normalized metadata, verifies its exact
+members and manifest hashes without automatic extraction, and performs a real
+headless-browser navigation smoke. CI publishes the ZIP as a workflow
+artifact. Operator commands, expected tree, and the M01 Steps 2–9 local
+evidence/delta ledger are in `P23_OFFLINE_DEMO_ACCEPTANCE.md`. All activation,
+hosted, security, admission, assignment, publication and production gates stay
+closed.
 
 ## P22 portable current-case evidence demo
 

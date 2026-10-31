@@ -71,3 +71,12 @@ python3 services/kdb/offline_review_demo_pack_cli.py \
   --work-item-id aaaaaaaa-bbbb-4ccc-8ddd-777777777777 \
   --source-file tests/kdb/fixtures/p20_source_a.bin
 ```
+
+# P23 reproducible offline demo acceptance kit
+
+`offline_demo_acceptance_kit.py` packages the existing P22 output as a
+deterministic seven-file ZIP, verifies the exact member set and manifest
+hashes without untrusted extraction, and runs a real local headless-browser
+navigation smoke. Full commands and the M01 Steps 2–9 delta ledger are in
+`docs/kdb/m01/P23_OFFLINE_DEMO_ACCEPTANCE.md`. CI publishes the generated ZIP
+as a bounded-retention workflow artifact; generated binaries are not committed.

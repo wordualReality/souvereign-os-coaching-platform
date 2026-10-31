@@ -89,6 +89,7 @@ jobs:
           python3 tests/kdb/test_offline_source_bytes_proof.py
           python3 tests/kdb/test_offline_evidence_bound_review.py
           python3 tests/kdb/test_offline_current_case_evidence_demo.py
+          python3 tests/kdb/test_offline_demo_acceptance_kit.py
           python3 tests/kdb/test_piac_fail_closed.py
           python3 tests/kdb/kdb_m01_06_security_static.py
           python3 tests/kdb/hosted_recovery_preflight_diff.py
@@ -236,3 +237,17 @@ jobs:
           PGUSER: kdb_local_super
           PGDATABASE: kdb_m01_disposable
         run: python3 tests/kdb/pg17_p22_current_case_evidence_demo.py
+      - name: P23 reproducible offline demo acceptance kit
+        run: |
+          mkdir -p tests/kdb/demo-artifacts
+          cp tests/kdb/fixtures/p20_inbox_byte_spans.json tests/kdb/demo-artifacts/p23-current.json
+          python3 services/kdb/offline_demo_acceptance_kit.py build tests/kdb/fixtures/p20_inbox_byte_spans.json tests/kdb/demo-artifacts/p23-current.json --work-item-id aaaaaaaa-bbbb-4ccc-8ddd-777777777777 --source-file tests/kdb/fixtures/p20_source_a.bin --output tests/kdb/demo-artifacts/kdb-p23-offline-demo.zip --commit "${{ github.sha }}"
+          python3 services/kdb/offline_demo_acceptance_kit.py verify tests/kdb/demo-artifacts/kdb-p23-offline-demo.zip
+          python3 services/kdb/offline_demo_acceptance_kit.py smoke tests/kdb/demo-artifacts/kdb-p23-offline-demo.zip
+      - name: Publish P23 offline demo ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: kdb-p23-offline-demo-${{ github.sha }}
+          path: tests/kdb/demo-artifacts/kdb-p23-offline-demo.zip
+          if-no-files-found: error
+          retention-days: 30
