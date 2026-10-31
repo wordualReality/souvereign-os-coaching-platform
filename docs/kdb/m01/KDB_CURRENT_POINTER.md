@@ -1,8 +1,8 @@
-# KDB current pointer, 2026-10-30 P20 offline source-bytes evidence proof
+# KDB current pointer, 2026-10-31 P21 offline evidence-bound review
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: KDB-M01-P20-OFFLINE-SOURCE-BYTES-EVIDENCE-PROOF-01
+Active packet: KDB-M01-P21-OFFLINE-EVIDENCE-BOUND-REVIEW-01
 DF adoption: DF-20261029-01 evidence matrix. Twelve physical SQL001 tables. ATC-10 named 18 remain UNCONFIRMED. No 18/18 logical claim.
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2`, PR #21 `2ba7ae44` remain frozen.
@@ -125,5 +125,22 @@ python3 tests/kdb/pg17_p19_review_viewmodel.py
 ```
 python3 services/kdb/offline_source_bytes_proof_cli.py tests/kdb/fixtures/p20_inbox_match.json --work-item-id aaaaaaaa-bbbb-4ccc-8ddd-777777777777 --source-file tests/kdb/fixtures/p20_source_a.bin
 python3 tests/kdb/pg17_p20_source_bytes_proof.py
+```
+
+## P21 offline evidence-bound review
+
+`offline_evidence_bound_review.py` plus its CLI compose full P14 batch guards,
+P15 current-case selection, P20 local source-byte binding, and canonical
+EvidenceSpan reconciliation. Canonical `bytes:first-last` locators are mapped
+to zero-based end-exclusive offsets and must agree with optional integer
+offsets. Each valid slice receives a local SHA-256 proof without source bytes,
+paths, or declared source hash. Unknown locator dialects, mismatches,
+duplicates, overlaps, revocation, and tenant conflicts fail closed. The result
+is `LOCAL_BYTES_AND_SPANS_BOUNDED`, `SNAPSHOT_UNTRUSTED`, `NOT_ASSIGNED`, and
+`NOT_ADMITTED`.
+
+```
+python3 services/kdb/offline_evidence_bound_review_cli.py tests/kdb/fixtures/p20_inbox_byte_spans.json --work-item-id aaaaaaaa-bbbb-4ccc-8ddd-777777777777 --source-file tests/kdb/fixtures/p20_source_a.bin
+python3 tests/kdb/pg17_p21_evidence_bound_review.py
 ```
 

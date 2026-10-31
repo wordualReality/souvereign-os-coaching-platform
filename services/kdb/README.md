@@ -38,3 +38,20 @@ python3 services/kdb/offline_diagnostic_cli.py tests/kdb/fixtures/p10_stage_cohe
 
 `digest_v2.py` is the KDB-owned SQL-v2 adapter. It does not grant producers database EXECUTE.
 `signed_ingress.py` is a test-only synthetic HMAC verifier. A local pass is `LOCAL_SIGNED_INGRESS_VERIFIED`, never `DB_COMMAND_ADMITTED`.
+# P21 offline evidence-bound review
+
+`offline_evidence_bound_review.py` composes the full P14 inbox guard, current
+P15 selection, P20 exact local-byte proof, and canonical `bytes:first-last`
+EvidenceSpan reconciliation. The CLI emits a deterministic, redacted
+`LOCAL_BYTES_AND_SPANS_BOUNDED` internal preview or a fail-closed denial:
+
+```sh
+python3 services/kdb/offline_evidence_bound_review_cli.py \
+  tests/kdb/fixtures/p20_inbox_byte_spans.json \
+  --work-item-id aaaaaaaa-bbbb-4ccc-8ddd-777777777777 \
+  --source-file tests/kdb/fixtures/p20_source_a.bin
+```
+
+Slice hashes prove only the bounded bytes in the repo-local synthetic file.
+They do not attest source custody, rights, semantic correctness, reviewer
+assignment, publication, or hosted admission.
