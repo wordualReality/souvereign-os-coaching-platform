@@ -41,6 +41,12 @@ EXPECTED_CONTRACTS = (
     "CT-ARC-004",
     "CT-ARC-R03-REM-001",
 )
+EXPECTED_EDGES = {
+    "CT-ARC-002": ("E08",),
+    "CT-ARC-003": ("E09",),
+    "CT-ARC-004": ("E08",),
+    "CT-ARC-R03-REM-001": ("E10",),
+}
 BASELINE = "86 = 47 P0 + 39 P1"
 CALLER_FLAGS = (
     "--authorization",
@@ -254,6 +260,30 @@ def evaluate_ledger(root, fixture):
     if fixture.get("execute") is True:
         return ledger_lines("MUTATION_PLAN_BLOCKED", "execute_requested", []), 1, "execute_requested"
     known = {migration_id: path for migration_id, path in KNOWN_MIGRATIONS}
+    expected_paths = {path for _migration_id, path in KNOWN_MIGRATIONS}
+    migration_root = root / "database" / "migrations"
+    if not migration_root.is_dir():
+        return ledger_lines("MUTATION_PLAN_BLOCKED", "missing_entry", []), 1, "missing_entry"
+    physical_paths = set()
+    for file_path in migration_root.glob("*.sql"):
+        relative = file_path.relative_to(root).as_posix()
+        if file_path.is_symlink():
+            return ledger_lines("MUTATION_PLAN_BLOCKED", "illegal_path", []), 1, "illegal_path"
+        if not file_path.is_file():
+            continue
+        try:
+            allowed_path(root, relative)
+        except ValueError:
+            return ledger_lines("MUTATION_PLAN_BLOCKED", "illegal_path", []), 1, "illegal_path"
+        physical_paths.add(relative)
+    if physical_paths - expected_paths:
+        return (
+            ledger_lines("MUTATION_PLAN_BLOCKED", "unrecognized_physical_migration", []),
+            1,
+            "unrecognized_physical_migration",
+        )
+    if expected_paths - physical_paths:
+        return ledger_lines("MUTATION_PLAN_BLOCKED", "missing_entry", []), 1, "missing_entry"
     reasons = []
     plan = []
     listed = set()
@@ -342,9 +372,33 @@ def bind_contracts(root, pins):
     common = {item["path"]: item["sha256"] for item in manifest["common_components"]}
     if "CT-ARC-007" in contracts:
         return ["BYTE_BIND FAIL reason=e16_presented_active"], 1, "e16_presented_active"
+    expected_schema_paths = set(common)
+    expected_contract_keys = set()
+    for contract_id, contract in contracts.items():
+        if tuple(contract.get("consumer_edges", ())) != EXPECTED_EDGES.get(contract_id):
+            return ["BYTE_BIND FAIL reason=binding_mismatch"], 1, "binding_mismatch"
+        for item in contract["physical_schemas"]:
+            expected_schema_paths.add(item["path"])
+            expected_contract_keys.add(
+                (contract_id, contract["profile_version"], item["kind"], item["path"])
+            )
+    actual_schema_paths = {
+        "contracts/arcava/" + relative for relative in schema_files(root)
+    }
+    if actual_schema_paths != expected_schema_paths:
+        return ["BYTE_BIND FAIL reason=registry_drift"], 1, "registry_drift"
+    supplied = pins.get("pins")
+    if not isinstance(supplied, list):
+        return ["BYTE_BIND FAIL reason=binding_mismatch"], 1, "binding_mismatch"
+    seen_paths = set()
+    seen_contract_keys = set()
+    manifest_count = 0
     schema_count = 0
-    for pin in pins.get("pins", []):
+    for pin in supplied:
         relative = pin.get("path", "")
+        if relative in seen_paths:
+            return ["BYTE_BIND FAIL reason=duplicate_pin"], 1, "duplicate_pin"
+        seen_paths.add(relative)
         try:
             allowed_path(root, relative)
         except ValueError:
@@ -359,6 +413,7 @@ def bind_contracts(root, pins):
             return ["BYTE_BIND FAIL reason=digest_mismatch"], 1, "digest_mismatch"
         kind = pin.get("set")
         if kind == "manifest":
+            manifest_count += 1
             if relative != "contracts/arcava/contract-manifest.json" or pin.get("version") != manifest["manifest_version"]:
                 return ["BYTE_BIND FAIL reason=binding_mismatch"], 1, "binding_mismatch"
             continue
@@ -382,8 +437,19 @@ def bind_contracts(root, pins):
             return ["BYTE_BIND FAIL reason=binding_mismatch"], 1, "binding_mismatch"
         if matches[0]["sha256"] != digest or matches[0]["kind"] != pin["kind"]:
             return ["BYTE_BIND FAIL reason=binding_mismatch"], 1, "binding_mismatch"
+        key = (pin.get("contract_id"), pin.get("version"), pin.get("kind"), relative)
+        if key in seen_contract_keys:
+            return ["BYTE_BIND FAIL reason=duplicate_pin"], 1, "duplicate_pin"
+        seen_contract_keys.add(key)
         schema_count += 1
-    if schema_count != 16 or len(contracts) != 4:
+    supplied_schema_paths = seen_paths - {"contracts/arcava/contract-manifest.json"}
+    if (
+        manifest_count != 1
+        or supplied_schema_paths != expected_schema_paths
+        or seen_contract_keys != expected_contract_keys
+        or schema_count != 16
+        or len(contracts) != 4
+    ):
         return ["BYTE_BIND FAIL reason=registry_drift"], 1, "registry_drift"
     return ["BYTE_BIND PASS reason=bytes_match_pins"], 0, "bytes_match_pins"
 
@@ -442,10 +508,20 @@ def classify_evidence(baseline, rows):
         return "FAIL", "baseline"
     if not isinstance(rows, list):
         return "FAIL", "rows"
+    ids = []
+    priorities = []
     for row in rows:
+        if not isinstance(row, dict) or not row.get("id"):
+            return "FAIL", "row_shape"
+        ids.append(row["id"])
+        priorities.append(row.get("priority"))
         status = str(row.get("status", "")).upper()
         if status in ("EXECUTED", "PASS", "ADMITTED"):
             return "FAIL", "acceptance_simulator"
+    if len(ids) != len(set(ids)):
+        return "FAIL", "duplicate_id"
+    if rows and (len(rows) != 86 or priorities.count("P0") != 47 or priorities.count("P1") != 39):
+        return "FAIL", "priority_split"
     return "SUBCHECK", "open"
 
 
@@ -459,14 +535,23 @@ def run_t48(root):
         ).read_text()
     )
     kind, reason = classify_evidence(declared, mapping.get("rows"))
+    rows = mapping.get("rows", [])
+    mapped = len(rows) if isinstance(rows, list) else 0
+    unmapped = 86 - mapped
     lines.append("BASELINE_DECLARED " + declared)
-    lines.append("EVIDENCE_ROWS_EXECUTED 0")
-    lines.append("UNMAPPED 86")
+    lines.append("SOURCE_BASELINE " + mapping.get("source_baseline_status", "UNKNOWN"))
+    lines.append("EVIDENCE_ROWS_EXECUTED " + str(mapped))
+    lines.append("UNMAPPED " + str(unmapped))
     lines.append("UNKNOWN_ADMISSIONS OPEN")
     lines.append("A09_STATUS NOT_EXECUTED")
     lines.append("T48_FULL_ORACLE NOT_EXECUTED reason=requirement_evidence_incomplete")
     lines.append("FULL_A09_PASS ABSENT")
-    if kind != "SUBCHECK" or mapping.get("baseline") != BASELINE or mapping.get("unmapped") != 86:
+    if (
+        kind != "SUBCHECK"
+        or mapping.get("baseline") != BASELINE
+        or mapping.get("source_baseline_status") != "SOURCE_BASELINE_INCOMPLETE"
+        or mapping.get("unmapped") != unmapped
+    ):
         lines.append("FAIL " + reason)
         return lines, 1
     if mapping.get("acceptance_simulator") is not False:
@@ -575,6 +660,7 @@ def self_check():
         "SQL_APPLY NOT_EXECUTED",
         "REGISTRY_48 NOT_MATERIALIZED",
         "UNKNOWN_ADMISSIONS OPEN",
+        "SOURCE_BASELINE SOURCE_BASELINE_INCOMPLETE",
         "OFFLINE_SUBCHECK_EXECUTED",
         "LEDGER_RESULT LOCAL_PLAN reason=checksums_agree",
         "APPLIED_DATABASE_STATE ABSENT",
@@ -660,6 +746,25 @@ def self_check():
         print("FAIL an acceptance row was accepted")
         return 1
     print("NEGATIVE acceptance_simulator exit=1")
+    duplicated, duplicated_reason = classify_evidence(
+        BASELINE,
+        [
+            {"id": "synthetic-duplicate", "priority": "P0", "status": "UNKNOWN"},
+            {"id": "synthetic-duplicate", "priority": "P0", "status": "UNKNOWN"},
+        ],
+    )
+    if duplicated != "FAIL" or duplicated_reason != "duplicate_id":
+        print("FAIL duplicate evidence ids were accepted")
+        return 1
+    print("NEGATIVE duplicate_evidence_id exit=1")
+    wrong_split, wrong_split_reason = classify_evidence(
+        BASELINE,
+        [{"id": "synthetic-only", "priority": "P1", "status": "UNKNOWN"}],
+    )
+    if wrong_split != "FAIL" or wrong_split_reason != "priority_split":
+        print("FAIL an incomplete priority split was accepted")
+        return 1
+    print("NEGATIVE incomplete_priority_split exit=1")
 
     cli = [
         (["--authorization", "self"], 1, "caller_authorization"),
@@ -706,6 +811,20 @@ def self_check():
             print("FAIL a changed migration byte was accepted")
             return 1
         print("NEGATIVE byte_drift exit=1")
+    with tempfile.TemporaryDirectory() as raw:
+        temp_root = Path(raw)
+        for _migration_id, relative in KNOWN_MIGRATIONS:
+            source = ROOT / relative
+            target = temp_root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(source.read_bytes())
+        extra = temp_root / "database" / "migrations" / "003_unrecognized.sql"
+        extra.write_text("-- must remain unrecognized\n")
+        _lines, code, reason = evaluate_ledger(temp_root, match)
+        if code == 0 or reason != "unrecognized_physical_migration":
+            print("FAIL an extra physical migration was accepted")
+            return 1
+        print("NEGATIVE extra_physical_migration exit=1")
     base_pins = load_json(SYNTHETIC / "A09-T04" / "byte-pins.json")
     for name in ("byte-drift.json", "missing-file.json", "binding.json", "illegal-path.json"):
         overlay = load_json(SYNTHETIC / "A09-T04" / "golden" / name)
@@ -716,6 +835,27 @@ def self_check():
             print("FAIL contract " + name + " reason=" + reason)
             return 1
         print("NEGATIVE " + name[:-5] + " exit=1")
+    duplicate = json.loads(json.dumps(base_pins))
+    duplicate["pins"][1] = json.loads(json.dumps(duplicate["pins"][0]))
+    _lines, code, reason = bind_contracts(ROOT, duplicate)
+    if code == 0 or reason != "duplicate_pin":
+        print("FAIL a duplicate common pin was accepted reason=" + reason)
+        return 1
+    print("NEGATIVE duplicate_common_pin exit=1")
+    duplicate = json.loads(json.dumps(base_pins))
+    duplicate["pins"][5] = json.loads(json.dumps(duplicate["pins"][4]))
+    _lines, code, reason = bind_contracts(ROOT, duplicate)
+    if code == 0 or reason != "duplicate_pin":
+        print("FAIL a duplicate contract pin was accepted reason=" + reason)
+        return 1
+    print("NEGATIVE duplicate_contract_pin exit=1")
+    missing_manifest = json.loads(json.dumps(base_pins))
+    missing_manifest["pins"] = [pin for pin in missing_manifest["pins"] if pin.get("set") != "manifest"]
+    _lines, code, reason = bind_contracts(ROOT, missing_manifest)
+    if code == 0 or reason != "registry_drift":
+        print("FAIL a missing manifest pin was accepted reason=" + reason)
+        return 1
+    print("NEGATIVE missing_manifest_pin exit=1")
     first = subprocess.run(
         [sys.executable, str(Path(__file__).resolve())],
         capture_output=True,
