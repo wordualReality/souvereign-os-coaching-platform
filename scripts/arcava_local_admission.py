@@ -48,6 +48,11 @@ EXPECTED_EDGES = {
     "CT-ARC-R03-REM-001": ("E10",),
 }
 BASELINE = "86 = 47 P0 + 39 P1"
+SOURCE_CATALOG_DIGEST = "f4411c4e281a52608cf8b4cb336be66b997b954a79de2656dd3b182461b0dcff"
+SOURCE_CATALOG_REVISIONS = {
+    "1R17hnCTvQzR7O2uYfMOQM2Qn_kUMfj5IWBzNzh1gIfw": "AHj4eMRthubMvmq9WyTr1JG3wXIfHzvHvRMeEvwmT6hWQDAdCrrYEpljOi7kHNtlK5DTHK5gtRqGC-fXHqkk2UoyFkz01uxSEjPWLI7bI-Y",
+    "1fMNWA1BmIbBr_-RSd-w_42WPYj0TKQrIG3Wo9XA2qeo": "AHj4eMRHJ7EwYWmO9cxSZ9Hx3LXnSmyYp1mwrBioJhwjbjOMpz9WFaohNSA9vw26b38l5EFSrIjg4UgEIkyamYPUVYVZpmWL074ZBNXumzc",
+}
 CALLER_FLAGS = (
     "--authorization",
     "--digest",
@@ -525,6 +530,54 @@ def classify_evidence(baseline, rows):
     return "SUBCHECK", "open"
 
 
+def normalized_source_catalog_digest(catalog):
+    payload = json.dumps(
+        {"sources": catalog.get("sources"), "rows": catalog.get("rows")},
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return sha256_bytes(payload)
+
+
+def validate_source_catalog(catalog):
+    if catalog.get("catalog_class") != "FROZEN_OFFLINE_SOURCE_SNAPSHOT":
+        return "FAIL", "catalog_class"
+    if catalog.get("source_live_reread") != "UNVERIFIED_IN_CI":
+        return "FAIL", "live_reread_claim"
+    if catalog.get("implementation_authority") != "NONE":
+        return "FAIL", "false_authority"
+    sources = catalog.get("sources")
+    rows = catalog.get("rows")
+    if not isinstance(sources, list) or not isinstance(rows, list):
+        return "FAIL", "shape"
+    revisions = {item.get("document_id"): item.get("revision_id") for item in sources}
+    for document_id, revision_id in SOURCE_CATALOG_REVISIONS.items():
+        if revisions.get(document_id) != revision_id:
+            return "FAIL", "source_revision"
+    ids = [row.get("id") for row in rows if isinstance(row, dict)]
+    if len(ids) != len(rows) or any(not requirement_id for requirement_id in ids):
+        return "FAIL", "row_shape"
+    if len(ids) != len(set(ids)):
+        return "FAIL", "duplicate_id"
+    if len(rows) != 86:
+        return "FAIL", "row_count"
+    priorities = [row.get("priority") for row in rows]
+    if priorities.count("P0") != 47 or priorities.count("P1") != 39:
+        return "FAIL", "priority_split"
+    for row in rows:
+        if not row.get("source_owner"):
+            return "FAIL", "owner_missing"
+        if any(key in row for key in ("status", "executed", "admitted", "authority")):
+            return "FAIL", "evidence_or_authority_claim"
+    digest = normalized_source_catalog_digest(catalog)
+    if catalog.get("normalized_sources_rows_sha256") != SOURCE_CATALOG_DIGEST:
+        return "FAIL", "declared_digest"
+    if digest != SOURCE_CATALOG_DIGEST:
+        return "FAIL", "catalog_drift"
+    return "PASS", "source_catalog_bound"
+
+
 def run_t48(root):
     lines = ["CASE A09-T48", "CASE_ARTIFACT PRESENT", "OFFLINE_SUBCHECK_EXECUTED"]
     manifest = json.loads((root / "contracts" / "arcava" / "contract-manifest.json").read_text())
@@ -534,25 +587,40 @@ def run_t48(root):
             root / "docs" / "arcava" / "admission" / "synthetic" / "A09-T48" / "evidence-map.json"
         ).read_text()
     )
+    catalog = json.loads(
+        (
+            root / "docs" / "arcava" / "admission" / "synthetic" / "A09-T48" / "source-catalog.json"
+        ).read_text()
+    )
+    catalog_kind, catalog_reason = validate_source_catalog(catalog)
     kind, reason = classify_evidence(declared, mapping.get("rows"))
     rows = mapping.get("rows", [])
     mapped = len(rows) if isinstance(rows, list) else 0
     unmapped = 86 - mapped
     lines.append("BASELINE_DECLARED " + declared)
+    catalog_rows = catalog.get("rows", [])
+    lines.append("SOURCE_LIVE_REREAD UNVERIFIED")
     lines.append("SOURCE_BASELINE " + mapping.get("source_baseline_status", "UNKNOWN"))
-    lines.append("EVIDENCE_ROWS_EXECUTED " + str(mapped))
-    lines.append("UNMAPPED " + str(unmapped))
+    lines.append("SOURCE_CATALOG_ROWS " + str(len(catalog_rows)))
+    lines.append("SOURCE_CATALOG_PRIORITY P0=" + str(sum(row.get("priority") == "P0" for row in catalog_rows)) + " P1=" + str(sum(row.get("priority") == "P1" for row in catalog_rows)))
+    lines.append("SOURCE_CATALOG_DIGEST " + normalized_source_catalog_digest(catalog))
+    lines.append("REAL_EVIDENCE_ROWS_EXECUTED " + str(mapped))
+    lines.append("REAL_EVIDENCE_UNMAPPED " + str(unmapped))
     lines.append("UNKNOWN_ADMISSIONS OPEN")
     lines.append("A09_STATUS NOT_EXECUTED")
     lines.append("T48_FULL_ORACLE NOT_EXECUTED reason=requirement_evidence_incomplete")
     lines.append("FULL_A09_PASS ABSENT")
     if (
-        kind != "SUBCHECK"
+        catalog_kind != "PASS"
+        or kind != "SUBCHECK"
         or mapping.get("baseline") != BASELINE
-        or mapping.get("source_baseline_status") != "SOURCE_BASELINE_INCOMPLETE"
+        or mapping.get("source_baseline_status") != "SOURCE_BASELINE_VERIFIED_OFFLINE_SNAPSHOT"
+        or mapping.get("source_catalog")
+        != "docs/arcava/admission/synthetic/A09-T48/source-catalog.json"
+        or mapping.get("source_catalog_normalized_sha256") != SOURCE_CATALOG_DIGEST
         or mapping.get("unmapped") != unmapped
     ):
-        lines.append("FAIL " + reason)
+        lines.append("FAIL " + (catalog_reason if catalog_kind != "PASS" else reason))
         return lines, 1
     if mapping.get("acceptance_simulator") is not False:
         lines.append("FAIL acceptance_simulator")
@@ -660,7 +728,11 @@ def self_check():
         "SQL_APPLY NOT_EXECUTED",
         "REGISTRY_48 NOT_MATERIALIZED",
         "UNKNOWN_ADMISSIONS OPEN",
-        "SOURCE_BASELINE SOURCE_BASELINE_INCOMPLETE",
+        "SOURCE_BASELINE SOURCE_BASELINE_VERIFIED_OFFLINE_SNAPSHOT",
+        "SOURCE_CATALOG_ROWS 86",
+        "SOURCE_CATALOG_PRIORITY P0=47 P1=39",
+        "REAL_EVIDENCE_ROWS_EXECUTED 0",
+        "REAL_EVIDENCE_UNMAPPED 86",
         "OFFLINE_SUBCHECK_EXECUTED",
         "LEDGER_RESULT LOCAL_PLAN reason=checksums_agree",
         "APPLIED_DATABASE_STATE ABSENT",
@@ -765,6 +837,41 @@ def self_check():
         print("FAIL an incomplete priority split was accepted")
         return 1
     print("NEGATIVE incomplete_priority_split exit=1")
+
+    source_catalog = load_json(SYNTHETIC / "A09-T48" / "source-catalog.json")
+    source_trials = []
+    trial = json.loads(json.dumps(source_catalog))
+    trial["sources"][0]["revision_id"] = "wrong-revision"
+    source_trials.append((trial, "source_revision", "source_revision"))
+    trial = json.loads(json.dumps(source_catalog))
+    trial["rows"][1] = json.loads(json.dumps(trial["rows"][0]))
+    source_trials.append((trial, "duplicate_id", "duplicate_id"))
+    trial = json.loads(json.dumps(source_catalog))
+    trial["rows"][0]["id"] = "R02-FR-PLAT-999"
+    source_trials.append((trial, "catalog_drift", "replaced_id"))
+    trial = json.loads(json.dumps(source_catalog))
+    trial["rows"][0]["priority"] = "P1"
+    source_trials.append((trial, "priority_split", "priority_drift"))
+    trial = json.loads(json.dumps(source_catalog))
+    trial["rows"][0]["source_owner"] = "Invented Owner"
+    source_trials.append((trial, "catalog_drift", "owner_drift"))
+    trial = json.loads(json.dumps(source_catalog))
+    trial["rows"].append(
+        {"id": "R03-FR-INVENTED-087", "priority": "P1", "source_owner": "Invented Owner"}
+    )
+    source_trials.append((trial, "row_count", "invented_87th_id"))
+    trial = json.loads(json.dumps(source_catalog))
+    trial["rows"][0]["status"] = "PASS"
+    source_trials.append((trial, "evidence_or_authority_claim", "fabricated_pass"))
+    trial = json.loads(json.dumps(source_catalog))
+    trial["implementation_authority"] = "OWNER_APPROVED"
+    source_trials.append((trial, "false_authority", "false_authority"))
+    for trial, expected_reason, label in source_trials:
+        trial_kind, trial_reason = validate_source_catalog(trial)
+        if trial_kind != "FAIL" or trial_reason != expected_reason:
+            print("FAIL source catalog " + label + " reason=" + trial_reason)
+            return 1
+        print("NEGATIVE source_catalog_" + label + " exit=1")
 
     cli = [
         (["--authorization", "self"], 1, "caller_authorization"),

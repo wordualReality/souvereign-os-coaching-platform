@@ -1,7 +1,8 @@
 {
   "baseline": "86 = 47 P0 + 39 P1",
-  "source_baseline_status": "SOURCE_BASELINE_INCOMPLETE",
-  "missing_source": "Canonical frozen source proves only the aggregate 86 = 47 P0 + 39 P1; the 86 individual requirement IDs and a revision-bound ID inventory were not physically verified.",
+  "source_baseline_status": "SOURCE_BASELINE_VERIFIED_OFFLINE_SNAPSHOT",
+  "source_catalog": "docs/arcava/admission/synthetic/A09-T48/source-catalog.json",
+  "source_catalog_normalized_sha256": "f4411c4e281a52608cf8b4cb336be66b997b954a79de2656dd3b182461b0dcff",
   "rows": [],
   "unmapped": 86,
   "unknown_admissions": "OPEN",
