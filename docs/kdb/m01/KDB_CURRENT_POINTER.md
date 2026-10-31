@@ -1,8 +1,8 @@
-# KDB current pointer, 2026-10-31 P21 offline evidence-bound review
+# KDB current pointer, 2026-10-31 P22 portable current-case evidence demo
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: KDB-M01-P21-OFFLINE-EVIDENCE-BOUND-REVIEW-01
+Active packet: KDB-M01-P22-PORTABLE-CURRENT-CASE-EVIDENCE-DEMO-01
 DF adoption: DF-20261029-01 evidence matrix. Twelve physical SQL001 tables. ATC-10 named 18 remain UNCONFIRMED. No 18/18 logical claim.
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2`, PR #21 `2ba7ae44` remain frozen.
@@ -143,4 +143,14 @@ is `LOCAL_BYTES_AND_SPANS_BOUNDED`, `SNAPSHOT_UNTRUSTED`, `NOT_ASSIGNED`, and
 python3 services/kdb/offline_evidence_bound_review_cli.py tests/kdb/fixtures/p20_inbox_byte_spans.json --work-item-id aaaaaaaa-bbbb-4ccc-8ddd-777777777777 --source-file tests/kdb/fixtures/p20_source_a.bin
 python3 tests/kdb/pg17_p21_evidence_bound_review.py
 ```
+
+## P22 portable current-case evidence demo
+
+P22 is an explicit opt-in extension of the existing P18 local bundle. The
+default remains the same six files. With both evidence CLI arguments present,
+the builder recomputes P21 locally, links a redacted machine-readable receipt
+from `index.html` and `current.html`, and hashes the additional artifact in the
+manifest. No source bytes, local paths, external locators, rights secrets, or
+denied identities enter the bundle. Hosted, security, assignment, admission,
+C04/C05, outbox, and production gates remain closed.
 

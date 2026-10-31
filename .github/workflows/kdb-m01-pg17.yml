@@ -88,6 +88,7 @@ jobs:
           python3 tests/kdb/test_offline_review_viewmodel.py
           python3 tests/kdb/test_offline_source_bytes_proof.py
           python3 tests/kdb/test_offline_evidence_bound_review.py
+          python3 tests/kdb/test_offline_current_case_evidence_demo.py
           python3 tests/kdb/test_piac_fail_closed.py
           python3 tests/kdb/kdb_m01_06_security_static.py
           python3 tests/kdb/hosted_recovery_preflight_diff.py
@@ -227,3 +228,11 @@ jobs:
           PGUSER: kdb_local_super
           PGDATABASE: kdb_m01_disposable
         run: python3 tests/kdb/pg17_p21_evidence_bound_review.py
+      - name: P22 portable current-case evidence demo
+        env:
+          KDB_PG17_MODE: libpq
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGUSER: kdb_local_super
+          PGDATABASE: kdb_m01_disposable
+        run: python3 tests/kdb/pg17_p22_current_case_evidence_demo.py

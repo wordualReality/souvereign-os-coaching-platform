@@ -22,5 +22,6 @@
   "offline_review_demo_pack": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
   "offline_review_viewmodel": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
   "offline_source_bytes_proof": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
-  "offline_evidence_bound_review": "INACTIVE_VERSION_CONTROLLED_CANDIDATE"
+  "offline_evidence_bound_review": "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
+  "offline_portable_current_case_evidence_demo": "INACTIVE_VERSION_CONTROLLED_CANDIDATE"
 }

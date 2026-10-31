@@ -55,3 +55,19 @@ python3 services/kdb/offline_evidence_bound_review_cli.py \
 Slice hashes prove only the bounded bytes in the repo-local synthetic file.
 They do not attest source custody, rights, semantic correctness, reviewer
 assignment, publication, or hosted admission.
+
+# P22 optional portable current-case evidence demo
+
+The P18 six-file output remains the default. Supplying both
+`--work-item-id` and `--source-file` explicitly enables the P22 variant. It
+recomputes P21, links a redacted `current-case-evidence.json` from the local
+index and current-case pages, and records deterministic hashes in the
+manifest. It remains `PREVIEW_ONLY`, `SNAPSHOT_UNTRUSTED`, `NOT_ADMITTED`, and
+`NON_EXECUTABLE`.
+
+```sh
+python3 services/kdb/offline_review_demo_pack_cli.py \
+  tests/kdb/fixtures/p20_inbox_byte_spans.json current-copy.json \
+  --work-item-id aaaaaaaa-bbbb-4ccc-8ddd-777777777777 \
+  --source-file tests/kdb/fixtures/p20_source_a.bin
+```

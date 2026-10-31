@@ -19,6 +19,8 @@ from offline_review_case_detail import UUID_RE
 from offline_review_inbox import MAX_CHARS, parse_inbox_json
 from offline_review_snapshot_delta import PACKET as DELTA_PACKET, snapshot_delta
 from offline_review_viewmodel import PACKET as VIEWMODEL_PACKET, viewmodel
+from offline_evidence_bound_review import evidence_bound_review
+from offline_source_bytes_proof import _read_source_bytes
 from offline_review_workbench import (
     BANNER,
     GATES,
@@ -41,6 +43,8 @@ from review_handoff_preview import (
 )
 
 PACKET = "KDB-M01-P18-PORTABLE-OFFLINE-REVIEW-DEMO-PACK-01"
+EVIDENCE_PACKET = "KDB-M01-P22-PORTABLE-CURRENT-CASE-EVIDENCE-DEMO-01"
+EVIDENCE_FILE = "current-case-evidence.json"
 FIXED_FILES = (
     "index.html",
     "current.html",
@@ -49,6 +53,7 @@ FIXED_FILES = (
     "manifest.json",
     "README.txt",
 )
+EVIDENCE_FILES = FIXED_FILES + (EVIDENCE_FILE,)
 DIR_NAME_RE = r"^[A-Za-z0-9._-]{1,64}$"
 DEMO_ROOT = REPO_ROOT / "tests" / "kdb" / "demo-artifacts"
 CHANGE_LABELS = "POSSIBLE_CHANGE_ONLY SNAPSHOT_ORDER_NOT_ATTESTED EVENT_WATERMARK_UNKNOWN"
@@ -347,6 +352,111 @@ def demo_pack(
     }
 
 
+def _evidence_section(receipt: Mapping[str, Any]) -> str:
+    spans = receipt.get("evidence_spans")
+    if not isinstance(spans, list) or not spans:
+        _deny_parse("EVIDENCE_DEMO_DENIED")
+    items = []
+    for span in spans:
+        if not isinstance(span, dict):
+            _deny_parse("EVIDENCE_DEMO_DENIED")
+        items.append(
+            "<li>byte_start "
+            + _t(span.get("byte_start"))
+            + " byte_end_exclusive "
+            + _t(span.get("byte_end_exclusive"))
+            + " LOCAL_SOURCE_SLICE_ONLY</li>\n"
+        )
+    return (
+        '<section id="current-case-evidence">\n'
+        "<h2>Lokaler Evidence-Nachweis. Synthetische Vorschau</h2>\n"
+        "<p>LOCAL_BYTES_AND_SPANS_BOUNDED. Keine Provenienz-, Rechte- oder Security-Freigabe.</p>\n"
+        "<ul>\n"
+        + "".join(items)
+        + "</ul>\n"
+        + f'<p><a href="{EVIDENCE_FILE}">Maschinenlesbarer Evidence-Receipt</a></p>\n'
+        "</section>\n"
+    )
+
+
+def _insert_before_main_end(page: str, section: str) -> str:
+    marker = "</main>"
+    if page.count(marker) != 1:
+        _deny_parse("PREVIEW_LEAK")
+    return page.replace(marker, section + marker, 1)
+
+
+def demo_pack_with_evidence(
+    baseline: Mapping[str, Any] | None,
+    current: Mapping[str, Any] | None,
+    work_item_id: Any,
+    source_bytes: bytes,
+    *,
+    commit: str = "UNPINNED_LOCAL",
+    hide_extra: tuple[str, ...] = (),
+) -> dict[str, Any]:
+    """Build the optional P22 variant without changing the P18 default pack."""
+    base = demo_pack(baseline, current, commit=commit)
+    receipt = evidence_bound_review(
+        current,
+        work_item_id,
+        source_bytes,
+        commit=base["source_commit"],
+        hide_extra=hide_extra,
+    )
+    if receipt.get("review_status") != "LOCAL_BYTES_AND_SPANS_BOUNDED":
+        _deny_parse(str(receipt.get("deny_code") or "EVIDENCE_DEMO_DENIED"))
+    model = receipt.pop("integrated_preview", None)
+    if not isinstance(model, dict) or model.get("viewmodel_status") != "PREVIEW_ONLY":
+        _deny_parse("EVIDENCE_DEMO_DENIED")
+    evidence_text = json.dumps(receipt, indent=2, sort_keys=True) + "\n"
+    section = _evidence_section(receipt)
+    staged = dict(base["artifacts"])
+    staged["index.html"] = _insert_before_main_end(staged["index.html"], section)
+    staged["current.html"] = _insert_before_main_end(staged["current.html"], section)
+    staged["review-viewmodel.json"] = json.dumps(model, indent=2, sort_keys=True) + "\n"
+    staged["README.txt"] += (
+        "\nP22 EXPLICIT_OPT_IN evidence mode\n"
+        f"{EVIDENCE_FILE}\n"
+        "LOCAL_BYTES_AND_SPANS_BOUNDED\n"
+        "No source custody, rights, semantic correctness, security, or admission attestation.\n"
+    )
+    staged[EVIDENCE_FILE] = evidence_text
+    staged.pop("manifest.json")
+    file_sha256 = {name: _sha256_text(text) for name, text in staged.items()}
+    manifest = dict(base["manifest"])
+    manifest.update(
+        {
+            "packet": EVIDENCE_PACKET,
+            "base_packet": PACKET,
+            "evidence_mode": "EXPLICIT_OPT_IN",
+            "evidence_status": "LOCAL_BYTES_AND_SPANS_BOUNDED",
+            "evidence_artifact": EVIDENCE_FILE,
+            "evidence_span_count": receipt["evidence_span_count"],
+            "files": file_sha256,
+        }
+    )
+    staged["manifest.json"] = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    for name in EVIDENCE_FILES:
+        _assert_redacted(staged[name])
+        if "READY" in staged[name]:
+            _deny_parse("PREVIEW_LEAK")
+    bundle = "".join(staged[name] for name in EVIDENCE_FILES)
+    _assert_redacted(bundle)
+    for token in hide_extra:
+        if token and token in bundle:
+            _deny_parse("PREVIEW_LEAK")
+    return {
+        **base,
+        "packet": EVIDENCE_PACKET,
+        "manifest": manifest,
+        "artifacts": staged,
+        "file_sha256": file_sha256,
+        "evidence_mode": "EXPLICIT_OPT_IN",
+        "evidence_status": "LOCAL_BYTES_AND_SPANS_BOUNDED",
+    }
+
+
 def _load_payload(path: str | Path) -> tuple[dict[str, Any], Path]:
     location = _safe_local_file(path)
     if location.stat().st_size > MAX_CHARS:
@@ -370,6 +480,31 @@ def demo_pack_files(
     if baseline_location.resolve() == current_location.resolve():
         _deny_parse("SAME_SNAPSHOT_PATH")
     return demo_pack(baseline, current, commit=pin)
+
+
+def demo_pack_files_with_evidence(
+    baseline_path: str | Path,
+    current_path: str | Path,
+    work_item_id: Any,
+    source_path: str | Path,
+    *,
+    commit: str = "UNPINNED_LOCAL",
+) -> dict[str, Any]:
+    pin = bound_commit(commit)
+    baseline, baseline_location = _load_payload(baseline_path)
+    current, current_location = _load_payload(current_path)
+    if baseline_location.resolve() == current_location.resolve():
+        _deny_parse("SAME_SNAPSHOT_PATH")
+    data = _read_source_bytes(source_path)
+    source = Path(str(source_path))
+    return demo_pack_with_evidence(
+        baseline,
+        current,
+        work_item_id,
+        data,
+        commit=pin,
+        hide_extra=(source.name, source.as_posix()),
+    )
 
 
 def _ensure_demo_root() -> Path:
@@ -432,7 +567,10 @@ def write_demo_pack(artifacts: Mapping[str, str], out_dir: str | Path) -> Path:
     try:
         os.mkdir(dest, mode=0o700)
         created = True
-        for name in FIXED_FILES:
+        names = EVIDENCE_FILES if EVIDENCE_FILE in artifacts else FIXED_FILES
+        if set(artifacts) != set(names):
+            _deny_parse("UNEXPECTED_ARTIFACT")
+        for name in names:
             if name not in artifacts:
                 _deny_parse("MISSING_ARTIFACT")
             _write_exclusive(dest / name, artifacts[name])

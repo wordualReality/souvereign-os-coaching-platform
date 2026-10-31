@@ -19,7 +19,11 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from offline_review_demo_pack import demo_pack_files, write_demo_pack  # noqa: E402
+from offline_review_demo_pack import (  # noqa: E402
+    demo_pack_files,
+    demo_pack_files_with_evidence,
+    write_demo_pack,
+)
 from review_handoff_preview import PreviewParseError  # noqa: E402
 
 EXIT_OK = 0
@@ -46,17 +50,38 @@ def _parser() -> argparse.ArgumentParser:
         default="",
         help="Optional new relative directory under tests/kdb/demo-artifacts. Existing directories are not overwritten.",
     )
+    parser.add_argument(
+        "--work-item-id",
+        default="",
+        help="Explicitly opt into P22 evidence mode for this eligible work item.",
+    )
+    parser.add_argument(
+        "--source-file",
+        default="",
+        help="Repo-local source file for P22 byte/span recomputation.",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
-        receipt = demo_pack_files(
-            args.baseline_json,
-            args.current_json,
-            commit=args.commit,
-        )
+        if bool(args.work_item_id) != bool(args.source_file):
+            raise PreviewParseError("INCOMPLETE_EVIDENCE_OPT_IN")
+        if args.work_item_id:
+            receipt = demo_pack_files_with_evidence(
+                args.baseline_json,
+                args.current_json,
+                args.work_item_id,
+                args.source_file,
+                commit=args.commit,
+            )
+        else:
+            receipt = demo_pack_files(
+                args.baseline_json,
+                args.current_json,
+                commit=args.commit,
+            )
         if args.out_dir:
             write_demo_pack(receipt["artifacts"], args.out_dir)
         json.dump(receipt["manifest"], sys.stdout, indent=2, sort_keys=True)
