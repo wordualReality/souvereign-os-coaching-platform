@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "packet": "KDB-M01-P24-INTEGRATION-BASELINE-ADOPTION-AND-ADR-MAPPING-01",
+  "repo_head_at_adoption_start": "366fb7d6db01b09d21c74d3c40cd3d30d13b281d",
+  "manifest_policy": "SELF_HASH_EXCLUDED",
+  "external_original_status": "EXTERNAL_ORIGINAL_ARCHIVE_SHA_RECORDED",
+  "files": {
+    "M01_KEEP_ADAPT_SUPERSEDE_CREATE.md": "cf5da74a7788da8f367c8ee03dfdf92a75eb76bfc320e351e250ed25c68a3d95",
+    "integration_main_2026-10-22.json": "a211d5543279939ff962d06b9ecf55b20c11066bc551bede2ae0710b37d92b29",
+    "kdb_dev_2026-10-23.json": "e6cda763618dd15843a81946345f655153c2e6b4dfbf2fc264a7292a6dc3b1a2"
+  },
+  "external_sources": {
+    "integration_offline_candidate_archive": {
+      "sha256": "306ed8b6f75883d11b3f6785def8c95608dfc62848b8cff99be4aa32db4528cd",
+      "source_member": "01_AUTHORITY_ENVIRONMENT_FREEZE.md",
+      "source_member_sha256": "473a06cf752931ae1c9c19a210c21a807cafb742c442f985b0263e3e61af7817",
+      "verification_scope": "RECORDED_FROM_FROZEN_SOURCE_NOT_REVERIFIED_IN_CI"
+    },
+    "dedicated_dev_evidence_archive": {
+      "sha256": "74ba04934de6cb13b7f6ea9d0f983234853b26c49d404f43f2681347346944b0",
+      "source_member": "reports/live-dev-sanitized-snapshot.json",
+      "source_member_sha256": "34a755217f9fe41687d56a58c23fc929645241922708756ea56991f27ca0f523",
+      "verification_scope": "RECORDED_HISTORICAL_OWNER_VERIFICATION_NOT_REVERIFIED_IN_CI"
+    },
+    "archived_17_table_handover": {
+      "sha256": "2dd1235c5da117ff732d06f77904c4358785da4c6a6807d5bdc9deefc58c4518",
+      "verification_scope": "RECORDED_FOR_SUPERSEDE_MAPPING_NO_DEPLOY"
+    }
+  },
+  "authority": "NOT_ADMITTED",
+  "hosted_verified": "HOSTED_VERIFIED_NO",
+  "security_status": "NOT_SECURITY_PASS"
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "snapshot_id": "KDB_INTEGRATION_MAIN_2026-10-22",
+  "source_capture_status": "SOURCE_CAPTURE_HISTORICAL",
+  "currency": "NOT_CURRENTLY_REVERIFIED",
+  "observed_at": "2026-10-22",
+  "environment_class": "KDB_INTEGRATION_MAIN",
+  "project_id": "zobjpmyccszkabybdmsf",
+  "database_engine": "PostgreSQL",
+  "database_version_observed": "17.6",
+  "evidence_uri": "https://docs.google.com/document/d/1Lz6ip6pDgXCwNhsO_DIg75fJFSciOPbe5B05uNzk48U/edit",
+  "source_member": {"path": "01_AUTHORITY_ENVIRONMENT_FREEZE.md", "sha256": "473a06cf752931ae1c9c19a210c21a807cafb742c442f985b0263e3e61af7817", "bytes": 7584},
+  "frozen_architecture_candidate": {"archive_sha256": "306ed8b6f75883d11b3f6785def8c95608dfc62848b8cff99be4aa32db4528cd", "archive_bytes": 40670, "archive_members": 25, "classification": "OFFLINE_CANDIDATE_NOT_DEPLOYED"},
+  "catalog_scope": {
+    "schemas": ["canonical", "dev_staging", "public"],
+    "relations": ["canonical.protocol", "canonical.protocol_dependencies", "canonical.topic", "dev_staging.protocol_candidate"],
+    "relations_rls_enabled": true,
+    "relations_force_rls": false,
+    "legacy_public_security_definer_functions": ["get_project_state", "get_pending_protocols", "update_protocol_review", "get_generation_context", "get_protocols_by_module", "insert_protocol_candidate"],
+    "legacy_function_acl_observation": "service_role EXECUTE",
+    "registered_migration_count": 15
+  },
+  "limits_and_unknowns": ["DATED_READ_ONLY_METADATA_SNAPSHOT_ONLY", "NO_CURRENT_2026_10_31_CATALOG_CLAIM", "NO_RAW_ROW_BODY_CAPTURED", "NO_CREDENTIAL_OR_DSN_CAPTURED", "NO_DEFAULT_ACL_CREATOR_PROOF", "NO_HOSTED_ADMISSION", "LEGACY_OBJECTS_NOT_NEW_KDB_NAMESPACE"],
+  "final_authority": "NOT_ADMITTED",
+  "security_status": "NOT_SECURITY_PASS"
+}

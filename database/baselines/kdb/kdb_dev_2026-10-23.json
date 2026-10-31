@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "snapshot_id": "KDB_DEV_2026-10-23",
+  "source_capture_status": "SOURCE_CAPTURE_HISTORICAL",
+  "currency": "NOT_CURRENTLY_REVERIFIED",
+  "observed_at": "2026-10-23",
+  "environment_class": "DEDICATED_KDB_DEV",
+  "project_id": "ujdzahwlximlmndexgmx",
+  "database_engine": "PostgreSQL",
+  "database_version_observed": "17.11",
+  "evidence_uri": "https://docs.google.com/document/d/17BDLChHrn0MRbDMrKPq8pfvhnKH1gUDxzwFoOJtBbKo/edit",
+  "evidence_archive": {"uri": "https://drive.google.com/file/d/1ucevtIbxJuAry-NbrL78AV6AH5mDNmlV/view", "sha256": "74ba04934de6cb13b7f6ea9d0f983234853b26c49d404f43f2681347346944b0", "bytes": 263297, "archive_members": 173, "manifest_hashed_files": 171, "verification_record": "HISTORICAL_OWNER_READBACK_CRC_AND_171_HASHES_PASS"},
+  "source_member": {"path": "reports/live-dev-sanitized-snapshot.json", "sha256": "34a755217f9fe41687d56a58c23fc929645241922708756ea56991f27ca0f523", "bytes": 1264},
+  "catalog_scope": {"legacy_relation": "canonical.protocol", "estimated_rows": 1, "row_provenance": "UNKNOWN", "registered_migration_count": 6, "latest_migration_label": "rollback_objects_test_v2", "kdb_routine_count": 0, "observed_kdb_role_count": 3, "observed_kdb_roles": "NOLOGIN_NOBYPASSRLS", "queried_kdb_policy_count": 0},
+  "limits_and_unknowns": ["DEV_NOT_INTEGRATION_BASELINE_SUBSTITUTE", "DATED_READ_ONLY_METADATA_SNAPSHOT_ONLY", "LEGACY_ROW_PROVENANCE_UNKNOWN", "NO_RAW_ROW_BODY_CAPTURED", "NO_CREDENTIAL_OR_DSN_CAPTURED", "NO_HOSTED_DDL_AUTHORITY", "NO_CURRENT_2026_10_31_CATALOG_CLAIM"],
+  "final_authority": "NOT_ADMITTED",
+  "security_status": "NOT_SECURITY_PASS"
+}

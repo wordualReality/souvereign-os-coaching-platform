@@ -90,6 +90,7 @@ jobs:
           python3 tests/kdb/test_offline_evidence_bound_review.py
           python3 tests/kdb/test_offline_current_case_evidence_demo.py
           python3 tests/kdb/test_offline_demo_acceptance_kit.py
+          python3 tests/kdb/test_m01_baseline_adoption.py
           python3 tests/kdb/test_piac_fail_closed.py
           python3 tests/kdb/kdb_m01_06_security_static.py
           python3 tests/kdb/hosted_recovery_preflight_diff.py

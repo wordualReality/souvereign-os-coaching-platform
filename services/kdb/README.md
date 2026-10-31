@@ -80,3 +80,13 @@ hashes without untrusted extraction, and runs a real local headless-browser
 navigation smoke. Full commands and the M01 Steps 2–9 delta ledger are in
 `docs/kdb/m01/P23_OFFLINE_DEMO_ACCEPTANCE.md`. CI publishes the generated ZIP
 as a bounded-retention workflow artifact; generated binaries are not committed.
+
+# P24 historical integration baseline adoption
+
+`database/baselines/kdb/` version-controls metadata-only historical snapshots
+for the distinct 2026-10-22 integration and 2026-10-23 dedicated-dev captures,
+their nonrecursive SHA-256 manifest, and the object-level
+KEEP/ADAPT/SUPERSEDE/CREATE comparison to the accepted 12-table ADR. CI
+recomputes repository file hashes and validates dates, environment separation,
+legacy non-mutation and unresolved gates without any live database access.
+External archive hashes are recorded provenance, not bytes reverified by CI.

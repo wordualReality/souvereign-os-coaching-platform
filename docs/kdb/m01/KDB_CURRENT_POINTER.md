@@ -1,8 +1,8 @@
-# KDB current pointer, 2026-10-31 P23 reproducible offline demo acceptance kit
+# KDB current pointer, 2026-10-31 P24 integration baseline adoption
 
 Active grant: THREE_LANE_BUILD_TO_BETA_2026-10-23.md
 https://drive.google.com/file/d/1lrV8_CD94ETnrKF-PrCiugWev9kps03g/view
-Active packet: KDB-M01-P23-REPRODUCIBLE-OFFLINE-DEMO-ACCEPTANCE-KIT-01
+Active packet: KDB-M01-P24-INTEGRATION-BASELINE-ADOPTION-AND-ADR-MAPPING-01
 DF adoption: DF-20261029-01 evidence matrix. Twelve physical SQL001 tables. ATC-10 named 18 remain UNCONFIRMED. No 18/18 logical claim.
 
 P1 PR #6 `bed66883`, P2 PR #9 `3692a275`, P3 PR #13 `51b67fba`, P4 PR #15 `348f638`, P5 PR #17 `a5f6727`, repair PR #20 `a2b55c2`, PR #21 `2ba7ae44` remain frozen.
@@ -154,6 +154,18 @@ artifact. Operator commands, expected tree, and the M01 Steps 2–9 local
 evidence/delta ledger are in `P23_OFFLINE_DEMO_ACCEPTANCE.md`. All activation,
 hosted, security, admission, assignment, publication and production gates stay
 closed.
+
+## P24 integration baseline adoption and ADR mapping
+
+`database/baselines/kdb/` preserves synthetic-safe, metadata-only historical
+snapshots for the distinct integration and dedicated-dev environments. A
+nonrecursive manifest pins the repository files and records external archive
+and source-member hashes without claiming CI reverified the external bytes.
+The object mapping keeps all observed legacy relations and RPCs unchanged,
+supersedes the archived 17-table layout for deployment purposes, and treats
+the accepted four-schema/12-table foundation as gated candidate creation only.
+Step 2/3/4 evidence progresses at scoped repository level; hosted, security,
+default-ACL, 18/18 and full original M01 acceptance remain open.
 
 ## P22 portable current-case evidence demo
 
