@@ -1,0 +1,8 @@
+{
+  "case_id": "A09-T01",
+  "units": ["ARC09-U00", "ARC09-U12"],
+  "fixture_class": "SYNTHETIC_OFFLINE",
+  "entrypoint": "A09-T01",
+  "ledger": "ABSENT",
+  "sql_execution": "NOT_EXECUTED"
+}

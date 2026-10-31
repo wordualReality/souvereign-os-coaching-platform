@@ -1,0 +1,10 @@
+{
+  "case_id": "A09-T04",
+  "units": ["ARC09-U01", "ARC09-U14"],
+  "fixture_class": "SYNTHETIC_OFFLINE",
+  "entrypoint": "A09-T04",
+  "physical_schema_files": 16,
+  "registry_contracts_materialized": 4,
+  "registry_48": "NOT_MATERIALIZED",
+  "e16": "INACTIVE"
+}

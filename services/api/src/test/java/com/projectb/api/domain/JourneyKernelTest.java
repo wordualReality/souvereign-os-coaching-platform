@@ -54,6 +54,8 @@ public final class JourneyKernelTest {
     rejects(ErrorCode.FORBIDDEN, () -> kernel.readAssignedVersion(otherClient,"tenant-a",a.assignmentId()));
     rejects(ErrorCode.FORBIDDEN, () -> kernel.readAssignedVersion(clientA,"tenant-b",a.assignmentId()));
     check(kernel.withdraw(coachA,"tenant-a",published.journeyVersionId()).status().equals("revoked"),"withdraw");
+    check(kernel.publish(coachA,"tenant-a",draft.draftId(),2,"publish-1").status().equals("revoked"), "publish replay returns current revoked state");
+    rejects(ErrorCode.WITHDRAWN, () -> kernel.assign(coachA,"tenant-a","client-a",published.journeyVersionId(),true,"assign-1"));
     rejects(ErrorCode.WITHDRAWN, () -> kernel.readAssignedVersion(clientA,"tenant-a",a.assignmentId()));
     rejects(ErrorCode.WITHDRAWN, () -> kernel.assign(coachA,"tenant-a","client-b",published.journeyVersionId(),true,"assign-after-withdrawal"));
     DraftView invalid = kernel.createDraft(coachA,"tenant-a","No proof","create-bad-proof");

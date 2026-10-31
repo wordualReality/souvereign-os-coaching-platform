@@ -81,18 +81,27 @@ public final class JourneyKernel {
 
   public synchronized DraftView createDraft(Actor actor, String tenantId,
                                             String title, String key) {
+    return createDraft(actor, tenantId, title, key, null);
+  }
+
+  public synchronized DraftView peekCreate(Actor actor, String tenantId, String title, String key) {
     coach(actor, tenantId); required(title, "title");
-    String fingerprint = "create|" + tenantId + "|" + actor.subjectId + "|" + title;
+    return replay(actor, key, createFingerprint(actor, tenantId, title), DraftView.class);
+  }
+
+  public synchronized DraftView createDraft(Actor actor, String tenantId,
+                                            String title, String key, UUID draftId) {
+    coach(actor, tenantId); required(title, "title");
+    String fingerprint = createFingerprint(actor, tenantId, title);
     DraftView prior = replay(actor, key, fingerprint, DraftView.class);
     if (prior != null) return prior;
-    Draft draft = new Draft(tenantId, UUID.randomUUID(), title);
+    Draft draft = new Draft(tenantId, draftId == null ? UUID.randomUUID() : draftId, title);
     drafts.put(draft.id, draft);
     return remember(actor, key, fingerprint, draft.view());
   }
 
-  public synchronized DraftView updateDraft(Actor actor, String tenantId,
-                                            UUID id, long expectedRevision,
-                                            String title, List<Step> steps) {
+  public synchronized void validateUpdateDraft(Actor actor, String tenantId, UUID id, long expectedRevision,
+                                               String title, List<Step> steps) {
     coach(actor, tenantId);
     Draft draft = draft(tenantId, id);
     if (!"draft".equals(draft.status)) throw fail(ErrorCode.INVALID, "draft is immutable after publish");
@@ -102,19 +111,37 @@ public final class JourneyKernel {
     if (steps.isEmpty()) throw fail(ErrorCode.INVALID, "at least one step required");
     if (steps.stream().map(Step::stepId).distinct().count() != steps.size())
       throw fail(ErrorCode.INVALID, "duplicate step identifier");
+  }
+
+  public synchronized DraftView readDraft(Actor actor, UUID id) {
+    coach(actor, actor.tenantId());
+    return draft(actor.tenantId(), id).view();
+  }
+
+  public synchronized DraftView updateDraft(Actor actor, String tenantId,
+                                            UUID id, long expectedRevision,
+                                            String title, List<Step> steps) {
+    validateUpdateDraft(actor, tenantId, id, expectedRevision, title, steps);
+    Draft draft = draft(tenantId, id);
     draft.steps = List.copyOf(steps);
     draft.title = title;
     draft.revision++;
     return draft.view();
   }
 
-  public synchronized PublishedView publish(Actor actor, String tenantId, UUID draftId,
-                                            long expectedRevision, String key) {
+  public synchronized PublishedView peekPublish(Actor actor, String tenantId, UUID draftId,
+                                                long expectedRevision, String key) {
+    coach(actor, tenantId);
+    PublishedView prior = replay(actor, key, publishFingerprint(tenantId, draftId, expectedRevision), PublishedView.class);
+    if (prior == null) return null;
+    PublishedView current = published.get(prior.journeyVersionId());
+    if (current == null) throw fail(ErrorCode.NOT_FOUND, "published version missing");
+    return current;
+  }
+
+  public synchronized void validatePublish(Actor actor, String tenantId, UUID draftId, long expectedRevision) {
     coach(actor, tenantId);
     Draft draft = draft(tenantId, draftId);
-    String fingerprint = "publish|" + tenantId + "|" + draftId + "|" + expectedRevision;
-    PublishedView prior = replay(actor, key, fingerprint, PublishedView.class);
-    if (prior != null) return prior;
     if (draft.revision != expectedRevision) throw fail(ErrorCode.STALE_REVISION, "stale publish request");
     if (!"draft".equals(draft.status) || draft.steps.isEmpty())
       throw fail(ErrorCode.INVALID, "draft is not publishable");
@@ -124,6 +151,20 @@ public final class JourneyKernel {
           !pin.receiptSha256().matches("[0-9a-f]{64}"))
         throw fail(ErrorCode.UNPUBLISHED_CANONICAL, "approved, rights-bound KDB pin required");
     }
+  }
+
+  public synchronized PublishedView publish(Actor actor, String tenantId, UUID draftId,
+                                            long expectedRevision, String key) {
+    coach(actor, tenantId);
+    Draft draft = draft(tenantId, draftId);
+    String fingerprint = publishFingerprint(tenantId, draftId, expectedRevision);
+    PublishedView prior = replay(actor, key, fingerprint, PublishedView.class);
+    if (prior != null) {
+      PublishedView current = published.get(prior.journeyVersionId());
+      if (current == null) throw fail(ErrorCode.NOT_FOUND, "published version missing");
+      return current;
+    }
+    validatePublish(actor, tenantId, draftId, expectedRevision);
     UUID versionId = UUID.nameUUIDFromBytes((tenantId + "/" + draftId + "/" + expectedRevision)
                                            .getBytes(StandardCharsets.UTF_8));
     PublishedView version = new PublishedView(tenantId, versionId, draftId,
@@ -135,14 +176,44 @@ public final class JourneyKernel {
 
   public synchronized AssignmentView assign(Actor actor, String tenantId, String clientId,
                                             UUID versionId, boolean consentVerified, String key) {
+    return assign(actor, tenantId, clientId, versionId, consentVerified, key, null);
+  }
+
+  public synchronized AssignmentView peekAssign(Actor actor, String tenantId, String clientId,
+                                                UUID versionId, boolean consentVerified, String key) {
     coach(actor, tenantId); required(clientId, "clientId");
-    String fingerprint = "assign|" + tenantId + "|" + clientId + "|" + versionId + "|" + consentVerified;
-    AssignmentView prior = replay(actor, key, fingerprint, AssignmentView.class);
-    if (prior != null) return prior;
+    AssignmentView prior = replay(actor, key, assignFingerprint(tenantId, clientId, versionId, consentVerified),
+        AssignmentView.class);
+    if (prior == null) return null;
+    PublishedView current = version(tenantId, prior.journeyVersionId());
+    if (!"published".equals(current.status()))
+      throw fail(ErrorCode.WITHDRAWN, "replay does not authorize withdrawn content");
+    return prior;
+  }
+
+  public synchronized void validateAssign(Actor actor, String tenantId, String clientId,
+                                          UUID versionId, boolean consentVerified) {
+    coach(actor, tenantId); required(clientId, "clientId");
     if (!consentVerified) throw fail(ErrorCode.CONSENT_REQUIRED, "verified client consent is required");
-    PublishedView version = version(tenantId, versionId);
-    if (!"published".equals(version.status())) throw fail(ErrorCode.WITHDRAWN, "journey version withdrawn");
-    AssignmentView result = new AssignmentView(tenantId, UUID.randomUUID(), clientId, versionId, "active");
+    PublishedView current = version(tenantId, versionId);
+    if (!"published".equals(current.status())) throw fail(ErrorCode.WITHDRAWN, "journey version withdrawn");
+  }
+
+  public synchronized AssignmentView assign(Actor actor, String tenantId, String clientId,
+                                            UUID versionId, boolean consentVerified, String key,
+                                            UUID assignmentId) {
+    coach(actor, tenantId); required(clientId, "clientId");
+    String fingerprint = assignFingerprint(tenantId, clientId, versionId, consentVerified);
+    AssignmentView prior = replay(actor, key, fingerprint, AssignmentView.class);
+    if (prior != null) {
+      PublishedView current = version(tenantId, prior.journeyVersionId());
+      if (!"published".equals(current.status()))
+        throw fail(ErrorCode.WITHDRAWN, "replay does not authorize withdrawn content");
+      return prior;
+    }
+    validateAssign(actor, tenantId, clientId, versionId, consentVerified);
+    AssignmentView result = new AssignmentView(tenantId,
+        assignmentId == null ? UUID.randomUUID() : assignmentId, clientId, versionId, "active");
     assignments.put(result.assignmentId(), result);
     return remember(actor, key, fingerprint, result);
   }
@@ -156,6 +227,11 @@ public final class JourneyKernel {
     return withdrawn;
   }
 
+  public synchronized PublishedView readPublishedForCoach(Actor actor, UUID versionId) {
+    coach(actor, actor.tenantId());
+    return version(actor.tenantId(), versionId);
+  }
+
   public synchronized PublishedView readAssignedVersion(Actor actor, String tenantId,
                                                         UUID assignmentId) {
     if (!tenantId.equals(actor.tenantId())) throw fail(ErrorCode.FORBIDDEN, "tenant mismatch");
@@ -166,6 +242,18 @@ public final class JourneyKernel {
     PublishedView v = version(tenantId, a.journeyVersionId());
     if (!"published".equals(v.status())) throw fail(ErrorCode.WITHDRAWN, "journey version withdrawn");
     return v;
+  }
+
+  private static String createFingerprint(Actor actor, String tenantId, String title) {
+    return "create|" + tenantId + "|" + actor.subjectId + "|" + title;
+  }
+
+  private static String publishFingerprint(String tenantId, UUID draftId, long expectedRevision) {
+    return "publish|" + tenantId + "|" + draftId + "|" + expectedRevision;
+  }
+
+  private static String assignFingerprint(String tenantId, String clientId, UUID versionId, boolean consentVerified) {
+    return "assign|" + tenantId + "|" + clientId + "|" + versionId + "|" + consentVerified;
   }
 
   private Draft draft(String tenant, UUID id) {

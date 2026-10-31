@@ -1,0 +1,45 @@
+{
+  "package": "ARC36P25-EXECUTABLE-JAR-PACKAGE-LIFECYCLE-01",
+  "parent": "45e001fce81c4d8f969acf934a2ecea76bd62110",
+  "pointer": "ARC-36/P25 step 7/10",
+  "baseline_repackage": "Unable to find a single main class from the following candidates [com.projectb.api.Application, com.projectb.api.inactive.InactiveBootstrap]",
+  "main_class_decision": "com.projectb.api.Application",
+  "inactive_fixture": "com.projectb.api.inactive.InactiveBootstrap",
+  "artifact": "services/api/target/projectb-api-0.1.0-SNAPSHOT.jar",
+  "manifest": {
+    "Main-Class": "org.springframework.boot.loader.launch.JarLauncher",
+    "Start-Class": "com.projectb.api.Application",
+    "Spring-Boot-Version": "4.1.1",
+    "Build-Jdk-Spec": "25"
+  },
+  "local_sha256": "07c3e79b6b23c7d4c9be976e914587ad1c3eaa098139a084a818eef451ee9e0c",
+  "commands": {
+    "package": "mvn -B -f services/api/pom.xml package",
+    "package_exit": 0,
+    "maven_tests": "8 tests, 0 failures",
+    "smoke": "services/api/scripts/jar-lifecycle-smoke.sh services/api/target/projectb-api-0.1.0-SNAPSHOT.jar",
+    "smoke_exit": 0
+  },
+  "java_jar_lifecycle": {
+    "jdk": "25.0.3+9",
+    "pids": [6785, 6875],
+    "live": 200,
+    "ready": 503,
+    "absent_bearer": 401,
+    "fixture_bearer": "403 LIVE_AUTHORITY_CLOSED",
+    "journal": "unchanged",
+    "stop_exit": 143,
+    "port_after_stop": "connection refused",
+    "restart": "closed readiness repeated",
+    "non_loopback_exit": 1
+  },
+  "gates": {
+    "T150": "PARTIAL",
+    "T020": "NOT_ADMITTED",
+    "T050": "NOT_ADMITTED",
+    "T160": "NOT_ADMITTED",
+    "PIAC_KDB_TRUSTED_TRANSPORT": "NOT_CONNECTED",
+    "SOV_CONSUMER_READY": "NO"
+  },
+  "independent_delta_qs": "REQUIRED_SEPARATE_REVIEWER"
+}

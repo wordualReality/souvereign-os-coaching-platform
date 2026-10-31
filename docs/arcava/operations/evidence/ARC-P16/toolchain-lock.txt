@@ -1,0 +1,6 @@
+ARC-P16 TOOLCHAIN LOCK — PRE-CANONICAL
+canonical_python=3.12.14
+local_diagnostic_python=Python 3.13.5
+local_jsonschema=4.26.0
+classification=PASS_NON_CANONICAL
+canonical_runtime_evidence=REQUIRED
