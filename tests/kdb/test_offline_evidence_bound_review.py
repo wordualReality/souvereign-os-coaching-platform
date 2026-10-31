@@ -59,6 +59,14 @@ class OfflineEvidenceBoundReview(unittest.TestCase):
         self.assertNotIn("p20_source_a.bin", text)
         self.assertNotIn("synthetic://", text)
         self.assertNotIn("9035ebdbe11b2732f76c5aa77dfeeb209da8153dabf2a4b225c2319180596a9b", text)
+        preview = receipt["integrated_preview"]
+        selected = [case for case in preview["current_cases"] if case["review_work_item_id"] == WORK_A]
+        self.assertEqual(len(selected), 1)
+        self.assertEqual(
+            selected[0]["evidence_bound_review"]["status"],
+            "LOCAL_BYTES_AND_SPANS_BOUNDED",
+        )
+        self.assertEqual(selected[0]["evidence_bound_review"]["final_authority"], "NOT_ADMITTED")
         self.assertEqual(receipt, evidence_bound_review_files(FIXTURE, WORK_A, SOURCE_A, commit="p21-test"))
 
     def test_cli_is_machine_readable_and_non_authoritative(self) -> None:
@@ -124,6 +132,7 @@ class OfflineEvidenceBoundReview(unittest.TestCase):
         denied = evidence_bound_review(revoked, WORK_A, SOURCE_A.read_bytes())
         self.assertEqual(denied["review_status"], "EVIDENCE_BOUND_REVIEW_DENIED")
         self.assertNotIn(WORK_A, blob(denied))
+        self.assertNotIn("integrated_preview", denied)
         other = evidence_bound_review(revoked, WORK_B, SOURCE_B.read_bytes())
         self.assertEqual(other["review_status"], "LOCAL_BYTES_AND_SPANS_BOUNDED")
 

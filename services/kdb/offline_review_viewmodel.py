@@ -391,6 +391,53 @@ def viewmodel(
     return _seal(model, removed_tokens)
 
 
+def viewmodel_with_evidence(
+    baseline: Mapping[str, Any] | None,
+    current: Mapping[str, Any] | None,
+    evidence_receipt: Mapping[str, Any] | None,
+    *,
+    commit: str = "UNPINNED_LOCAL",
+) -> dict[str, Any]:
+    """Attach one verified-local P21 evidence receipt to its current P19 case.
+
+    Existing P19 output remains unchanged unless this explicit integration
+    entrypoint is used. Denied or inconsistent receipts fail closed.
+    """
+    model = viewmodel(baseline, current, commit=commit)
+    if model.get("viewmodel_status") != "PREVIEW_ONLY":
+        return model
+    if not isinstance(evidence_receipt, dict):
+        _deny_parse("EVIDENCE_RECEIPT_INVALID")
+    if evidence_receipt.get("review_status") != "LOCAL_BYTES_AND_SPANS_BOUNDED":
+        _deny_parse("EVIDENCE_RECEIPT_DENIED")
+    if evidence_receipt.get("final_authority") != "NOT_ADMITTED":
+        _deny_parse("EVIDENCE_RECEIPT_INVALID")
+    work_id = evidence_receipt.get("review_work_item_id")
+    version_id = evidence_receipt.get("source_version_id")
+    matches = [case for case in model["current_cases"] if case.get("review_work_item_id") == work_id]
+    if len(matches) != 1 or matches[0].get("source_version_id") != version_id:
+        _deny_parse("EVIDENCE_RECEIPT_IDENTITY_MISMATCH")
+    spans = evidence_receipt.get("evidence_spans")
+    if not isinstance(spans, list) or not spans:
+        _deny_parse("EVIDENCE_RECEIPT_INVALID")
+    integrated_spans: list[dict[str, Any]] = []
+    for span in spans:
+        if not isinstance(span, dict) or set(span) != {
+            "ordinal", "byte_start", "byte_end_exclusive", "byte_length",
+            "local_slice_proof_sha256", "proof_scope",
+        }:
+            _deny_parse("EVIDENCE_RECEIPT_INVALID")
+        integrated_spans.append(dict(span))
+    matches[0]["evidence_bound_review"] = {
+        "status": "LOCAL_BYTES_AND_SPANS_BOUNDED",
+        "span_semantics": "ZERO_BASED_END_EXCLUSIVE_RECONCILED",
+        "source_scope": "LOCAL_SYNTHETIC_FILE_ONLY",
+        "final_authority": "NOT_ADMITTED",
+        "spans": integrated_spans,
+    }
+    return _seal(model, ())
+
+
 def _load_payload(path: str | Path) -> tuple[dict[str, Any], Path]:
     location = _safe_local_file(path)
     if location.stat().st_size > MAX_CHARS:

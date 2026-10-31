@@ -24,7 +24,9 @@ from offline_review_viewmodel import (  # noqa: E402
     validate_viewmodel,
     viewmodel,
     viewmodel_files,
+    viewmodel_with_evidence,
 )
+from offline_evidence_bound_review import evidence_bound_review  # noqa: E402
 from review_handoff_preview import PreviewParseError  # noqa: E402
 
 FIXTURE = REPO / "tests" / "kdb" / "fixtures" / "p14_inbox_two_eligible.json"
@@ -298,6 +300,19 @@ class OfflineReviewViewmodel(unittest.TestCase):
             FLAGS["offline_review_demo_pack"],
             "INACTIVE_VERSION_CONTROLLED_CANDIDATE",
         )
+
+    def test_p21_evidence_receipt_integrates_only_into_matching_current_case(self) -> None:
+        payload = _load()
+        source = (REPO / "tests/kdb/fixtures/p20_source_a.bin").read_bytes()
+        payload["entries"][0]["candidate_chain"]["source_version"]["content_sha256"] = hashlib.sha256(source).hexdigest()
+        span = payload["entries"][0]["candidate_chain"]["candidate_revision"]["evidence_span_refs"][0]
+        span.update({"locator": "bytes:0-31", "start": 0, "end": 32})
+        receipt = evidence_bound_review(payload, WORK_A, source, commit="test-commit")
+        model = viewmodel_with_evidence(payload, deepcopy(payload), receipt, commit="test-commit")
+        selected = [case for case in model["current_cases"] if case["review_work_item_id"] == WORK_A]
+        self.assertEqual(selected[0]["evidence_bound_review"]["status"], "LOCAL_BYTES_AND_SPANS_BOUNDED")
+        self.assertNotIn("evidence_bound_review", model["current_cases"][1])
+        validate_viewmodel(model)
 
 
 if __name__ == "__main__":

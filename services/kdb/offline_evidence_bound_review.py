@@ -20,6 +20,7 @@ from offline_source_bytes_proof import (
     source_bytes_proof,
 )
 from offline_review_case_detail import bound_work_item_id
+from offline_review_viewmodel import viewmodel_with_evidence
 from review_handoff_preview import PreviewParseError, bound_commit
 
 PACKET = "KDB-M01-P21-OFFLINE-EVIDENCE-BOUND-REVIEW-01"
@@ -167,6 +168,12 @@ def evidence_bound_review(
         "logical_objects_claimed": "NOT_18_OF_18",
         "explicit_gaps": list(GAPS),
     }
+    receipt["integrated_preview"] = viewmodel_with_evidence(
+        payload,
+        payload,
+        receipt,
+        commit=pin,
+    )
     blob = json.dumps(receipt, sort_keys=True)
     for token in hide_extra:
         if token and token in blob:
