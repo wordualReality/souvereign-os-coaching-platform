@@ -90,3 +90,13 @@ KEEP/ADAPT/SUPERSEDE/CREATE comparison to the accepted 12-table ADR. CI
 recomputes repository file hashes and validates dates, environment separation,
 legacy non-mutation and unresolved gates without any live database access.
 External archive hashes are recorded provenance, not bytes reverified by CI.
+
+# P25 creator-specific default ACL hardening
+
+`tests/kdb/pg17_p25_creator_default_acl.py` proves the real direct-LOGIN
+creator-session behavior in disposable PostgreSQL 17. The NON_APPLY fixture
+closes global future PUBLIC function EXECUTE for that creator, then grants the
+intended test principal only in the bounded schema. Wrong creator, wrong
+schema, membership, SET ROLE ambiguity, reconnect/reapply/rollback and
+SQLSTATE-42501 negatives are covered with `ZERO_RESIDUAL`. Hosted creator and
+independent Security QS remain explicitly unproven.
