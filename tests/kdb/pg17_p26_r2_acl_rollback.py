@@ -59,6 +59,18 @@ def main():
         acl_after = db.must(S, f"SELECT coalesce(string_agg(a.grantor::regrole::text||':'||a.grantee::regrole::text||':'||a.privilege_type||':'||a.is_grantable,',' ORDER BY a.grantor,a.grantee,a.privilege_type),'') FROM pg_proc p CROSS JOIN LATERAL aclexplode(p.proacl) a WHERE p.oid='{SCHEMA}.new()'::regprocedure")
         check(acl_after, acl_before, 'GRANTOR_GRANT_OPTION_PREIMAGE')
         print('FUNCTION_ACL_GRANTOR_AND_GRANT_OPTION PREIMAGE_RESTORED')
+        # A delegated grant has a different grantor. Restore via that direct
+        # identity, not by silently replaying it as owner.
+        db.must(W, f'GRANT EXECUTE ON FUNCTION {SCHEMA}.new() TO kdb_ingest_runtime;')
+        delegated_before = db.must(S, f"SELECT coalesce(string_agg(a.grantor::regrole::text||':'||a.grantee::regrole::text||':'||a.privilege_type||':'||a.is_grantable,',' ORDER BY a.grantor,a.grantee,a.privilege_type),'') FROM pg_proc p CROSS JOIN LATERAL aclexplode(p.proacl) a WHERE p.oid='{SCHEMA}.new()'::regprocedure")
+        if f'{W}:kdb_ingest_runtime:EXECUTE:false' not in delegated_before:
+            raise SystemExit(f'FAIL_CLOSED DELEGATED_GRANT_MISSING: {delegated_before}')
+        db.must(W, f'REVOKE EXECUTE ON FUNCTION {SCHEMA}.new() FROM kdb_ingest_runtime;')
+        db.must(W, f'GRANT EXECUTE ON FUNCTION {SCHEMA}.new() TO kdb_ingest_runtime;')
+        delegated_after = db.must(S, f"SELECT coalesce(string_agg(a.grantor::regrole::text||':'||a.grantee::regrole::text||':'||a.privilege_type||':'||a.is_grantable,',' ORDER BY a.grantor,a.grantee,a.privilege_type),'') FROM pg_proc p CROSS JOIN LATERAL aclexplode(p.proacl) a WHERE p.oid='{SCHEMA}.new()'::regprocedure")
+        check(delegated_after, delegated_before, 'DELEGATED_GRANTOR_PREIMAGE')
+        print('DELEGATED_GRANTOR PREIMAGE_RESTORED')
+        db.must(W, f'REVOKE EXECUTE ON FUNCTION {SCHEMA}.new() FROM kdb_ingest_runtime;')
         denied('kdb_ingest_runtime', 'SELECT * FROM kdb_canonical.protocol', 'TABLE_SELECT')
         denied('kdb_ingest_runtime', 'INSERT INTO kdb_governance.human_review_decision DEFAULT VALUES', 'C04_INSERT')
         print('CATALOG ' + db.must(S, f"SELECT jsonb_build_object('schema_acl',(SELECT nspacl::text FROM pg_namespace WHERE nspname='{SCHEMA}'),'functions',(SELECT jsonb_agg(jsonb_build_object('name',p.proname,'owner',pg_get_userbyid(p.proowner),'acl',p.proacl::text) ORDER BY p.proname) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='{SCHEMA}'),'default',(SELECT defaclacl::text FROM pg_default_acl WHERE defaclrole='{R}'::regrole AND defaclnamespace=0 AND defaclobjtype='f'))::text"))
