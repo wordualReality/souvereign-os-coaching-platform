@@ -1,1 +1,32 @@
-{"case_id":"A09-T01","fixture":"bounded synthetic substitute for A09-FX-v1","equivalence":"PARTIAL","admission":"NOT_ADMITTED"}
+{
+  "case_id": "A09-T01",
+  "fixture_id": "A09-FX-v1-T01-scoped",
+  "fixture_version": "1.0",
+  "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+  "source_base_sha": "d1f9a2818330967f82a1e168a2dbbd4f5defb06d",
+  "seed": 0,
+  "clock": "2026-11-02T00:00:00Z",
+  "clock_scope": "scenario inputs fixed; actual database applied_at is execution audit time",
+  "typed_ids": {"sentinel_uuid":"00000000-0000-4000-8000-000000000001"},
+  "role": "arcava_test_owner",
+  "environment": "fresh PG17 cluster, private Unix socket, synthetic databases only",
+  "migration_sha256": {
+    "001_project_b_baseline_schema.sql":"04338b0f8c78c4a97f947996ac72d6cf81a182c75d1f3184ab0a7a0a221e5e36",
+    "002_project_b_journey_provisioning_hardening.sql":"7bd4c9685baf12ccfc02573cdae1c1df0191a6101e41b3d8558dd1621243275a"
+  },
+  "expected": {"absent":"APPLY_PENDING","compatible":"APPLY_PENDING","replay":"SKIP_VERIFIED","conflicting":"BLOCK_CONFLICTING","unknown":"BLOCK_UNKNOWN","rollback":"NONZERO_AND_UNCHANGED"},
+  "fingerprints": {"catalog_ledger":"capture before/after in receipt","nonowner":"same SHA256 before/after every scenario"},
+  "equivalence_matrix": [
+    {"requirement":"clock, seed, typed IDs, versions, source hashes, role, expected state digests","status":"APPLICABLE_T01","proof":"this manifest, pinned migrations and scenario receipt"},
+    {"requirement":"owner state and foreign-owner digest, environment, exact input/result, reviewer","status":"APPLICABLE_T01","proof":"receipt; independent reviewer remains pending"},
+    {"requirement":"two tenants/clients/coaches; assignment, consent/share/provider/entitlement variants","status":"NOT_APPLICABLE_T01","reason":"migration ledger oracle has no business actor authorization operations"},
+    {"requirement":"KDB T1/T2 PV1/PV2 lifecycle; JV1/JV2 bindings and drafts/approval","status":"NOT_APPLICABLE_T01","reason":"no live domain reference or publication operation"},
+    {"requirement":"overlapping slot/race; reminder modes/provider results; DST/cadence","status":"NOT_APPLICABLE_T01","reason":"booking/reminder/schedule oracles outside T01"},
+    {"requirement":"events/corrections/retractions/duplicate envelopes/RuntimeOutcome/watermarks","status":"NOT_APPLICABLE_T01","reason":"no event transport in migration oracle"},
+    {"requirement":"media/tombstone/activity/pack variants; model/provider doubles","status":"NOT_APPLICABLE_T01","reason":"no corresponding domain inputs"},
+    {"requirement":"crash points before/after commit/publish/ACK and backup/restore checkpoint","status":"UNPROVEN","reason":"transaction SQL-error rollback covered; crash/restore fixture equivalence not established"},
+    {"requirement":"approved whole-suite A09-FX-v1 physical manifest and hash","status":"UNPROVEN","reason":"original describes target but supplies no approved materialized fixture bytes"}
+  ],
+  "equivalence": "PARTIAL",
+  "admission": "NOT_ADMITTED"
+}

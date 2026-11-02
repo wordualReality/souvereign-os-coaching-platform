@@ -26,6 +26,10 @@ def main():
             raise RuntimeError(r.stderr)
         return r
     sha = run(['git','-C',str(ROOT),'rev-parse','HEAD']).stdout.strip()
+    fixture_path=ROOT/'tests/migration/arcava/A09-T01.case.json'
+    fixture=json.loads(fixture_path.read_text())
+    code_hash=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    fixture_hash=hashlib.sha256(fixture_path.read_bytes()).hexdigest()
     versions = {n:run([str(BIN/n),'--version']).stdout.strip() for n in ('postgres','psql','pg_ctl','initdb','createdb','pg_config')}
     assert all('17.11' in v for v in versions.values())
     paths = [ROOT/'database/migrations'/n for n,h in PINS]
@@ -53,6 +57,7 @@ def main():
     role,port = 'arcava_test_owner','55479'
     receipt = {'source_sha':sha,'versions':versions,'migrations':dict(PINS),'scenarios':{},'commands':[], 'original_T01':'PARTIAL','fixture':'bounded synthetic substitute; full A09-FX-v1 equivalence unproven','admission':'NOT_ADMITTED'}
     receipt['negative_source_inventory']=negative_inventory
+    receipt.update({'execution_code_sha256':code_hash,'fixture_sha256':fixture_hash,'fixture_manifest':fixture})
     started=False
     try:
         run([str(BIN/'initdb'),'-D',str(data),'-U',role,'--auth-local=trust','--auth-host=reject'])
@@ -71,6 +76,7 @@ def main():
         def identity(db):
             v=sql(db,"select current_setting('server_version_num'),current_setting('data_directory'),inet_server_addr() is null,current_database(),current_user").split('|')
             assert 170000<=int(v[0])<180000 and Path(v[1]).resolve()==data.resolve() and v[2:]==['t',db,role]
+            receipt.setdefault('target_identities',{})[db]={'server_version_num':v[0],'data_directory':'<TMP_ROOT>/data','socket':'<TMP_ROOT>/s','database':db,'role':role,'inet_server_addr_null':True}
         identity('postgres')
         try:
             sql('external_target','select 1')
@@ -82,45 +88,55 @@ def main():
         def snapshot(db):
             c=sql(db,"select n.nspname,c.relname,c.relkind,pg_get_userbyid(c.relowner) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname in ('project_b','arcava_test') order by 1,2,3")
             l=sql(db,'select seq,migration_id,sha256,source_sha from arcava_test.ledger order by seq') if sql(db,"select to_regclass('arcava_test.ledger') is not null")=='t' else ''
-            return {'catalog':c,'ledger':l,'sha256':hashlib.sha256((c+l).encode()).hexdigest()}
+            foreign=sql(db,"select n.nspname,c.relname,c.relkind,pg_get_userbyid(c.relowner) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='synthetic_nonowner' order by 1,2,3")+'\n'+sql(db,'select id,payload from synthetic_nonowner.sentinel order by id')
+            return {'catalog':c,'ledger':l,'sha256':hashlib.sha256((c+l).encode()).hexdigest(),'nonowner_sha256':hashlib.sha256(foreign.encode()).hexdigest()}
         def plan(db):
             if sql(db,"select to_regclass('arcava_test.ledger') is not null")!='t':
-                return [] if sql(db,"select exists(select 1 from pg_namespace where nspname='project_b')")=='t' else [0,1]
+                return {'verdict':'BLOCK_UNKNOWN','reason':'schema_without_approved_ledger','pending':[],'exit':1} if sql(db,"select exists(select 1 from pg_namespace where nspname='project_b')")=='t' else {'verdict':'APPLY_PENDING','reason':'ABSENT','pending':[0,1],'exit':0}
             rows=sql(db,'select seq,migration_id,sha256 from arcava_test.ledger order by seq').splitlines()
             expected=[f'{i+1}|{n}|{h}' for i,(n,h) in enumerate(PINS)]
-            return list(range(len(rows),2)) if rows==expected[:len(rows)] and len(rows)<=2 else []
+            if rows!=expected[:len(rows)] or len(rows)>2:
+                return {'verdict':'BLOCK_CONFLICTING','reason':'ledger_checksum_or_sequence_mismatch','pending':[],'exit':1}
+            return {'verdict':'APPLY_PENDING' if len(rows)<2 else 'SKIP_VERIFIED','reason':'verified_ledger_prefix','pending':list(range(len(rows),2)),'exit':0}
         def apply(db,i):
             n,h=PINS[i]
             ledger=temp/'ledger.sql'
             ledger.write_text("create schema if not exists arcava_test; create table if not exists arcava_test.ledger(seq int primary key,migration_id text unique,sha256 text,applied_at timestamptz default now(),source_sha text,environment text);"+f"insert into arcava_test.ledger(seq,migration_id,sha256,source_sha,environment) values({i+1},'{n}','{h}','{sha}','{db}');")
             sql(db,files=(paths[i],ledger))
+        sql('postgres','create role synthetic_foreign_owner nologin')
         for db in ('absent','compatible','conflicting','unknown','rollback'):
             run([str(BIN/'createdb'),'-h',str(sock),'-p',port,'-U',role,db]);identity(db)
+            sql(db,"create schema synthetic_nonowner authorization synthetic_foreign_owner; create table synthetic_nonowner.sentinel(id uuid primary key,payload text); alter table synthetic_nonowner.sentinel owner to synthetic_foreign_owner; insert into synthetic_nonowner.sentinel values('00000000-0000-4000-8000-000000000001','synthetic immutable owner sentinel')")
         for db in ('absent','compatible'):
             before=snapshot(db)
             if db=='compatible': apply(db,0)
-            pending=plan(db)
-            assert pending==([0,1] if db=='absent' else [1])
-            for i in pending: apply(db,i)
+            verdict=plan(db)
+            assert verdict['verdict']=='APPLY_PENDING' and verdict['pending']==([0,1] if db=='absent' else [1])
+            for i in verdict['pending']: apply(db,i)
             after=snapshot(db)
             assert len(after['ledger'].splitlines())==2 and 'provisioning_sessions' in after['catalog']
-            assert plan(db)==[] and snapshot(db)==after
-            receipt['scenarios'][db]={'before':before,'after':after,'replay':'SKIP_WITH_VERIFIED_CHECKSUM'}
+            assert plan(db)['verdict']=='SKIP_VERIFIED' and snapshot(db)==after
+            assert before['nonowner_sha256']==after['nonowner_sha256']
+            receipt['scenarios'][db]={'expected':'APPLY_PENDING','actual':verdict,'before':before,'after':after,'replay':plan(db)}
         apply('conflicting',0);sql('conflicting',"update arcava_test.ledger set sha256='conflict'")
         sql('unknown','create schema project_b; create table project_b.unrecognized(id int)')
         for db in ('conflicting','unknown'):
             before=snapshot(db)
-            assert plan(db)==[] and snapshot(db)==before
-            receipt['scenarios'][db]={'denied':True,'before':before,'after':snapshot(db)}
+            expected='BLOCK_CONFLICTING' if db=='conflicting' else 'BLOCK_UNKNOWN'
+            verdict=plan(db)
+            assert verdict['verdict']==expected and verdict['exit']==1 and snapshot(db)==before
+            receipt['scenarios'][db]={'expected':expected,'actual':verdict,'before':before,'after':snapshot(db)}
         bad=temp/'bad.sql';bad.write_text('select 1/0;')
         before=snapshot('rollback')
-        assert sql('rollback',files=(paths[0],bad),check=False)!=0 and snapshot('rollback')==before
+        rollback_exit=sql('rollback',files=(paths[0],bad),check=False)
+        assert rollback_exit!=0 and snapshot('rollback')==before
+        receipt['rollback']={'exit':rollback_exit,'before':before,'after':snapshot('rollback')}
         receipt['atomic_rollback']=True
         receipt['result']='LOCAL_MIGRATION_ORACLE_PASS_PARTIAL_FIXTURE'
     finally:
         if started: run([str(BIN/'pg_ctl'),'-D',str(data),'-m','fast','-w','stop'])
         receipt['cleanup']='OWNED_CLUSTER_STOPPED'
-        output=ROOT/'docs/arcava/operations/evidence/A09-T01-local-pg17/tests/A09-T01.json'
+        output=ROOT/'docs/arcava/operations/evidence/A09-T01-closure/tests/A09-T01.json'
         output.parent.mkdir(parents=True,exist_ok=True)
         output.write_text(json.dumps(receipt,indent=2)+'\n')
         shutil.rmtree(temp)
