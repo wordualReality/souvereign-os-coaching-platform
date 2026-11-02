@@ -247,6 +247,14 @@ jobs:
           PGUSER: kdb_local_super
           PGDATABASE: kdb_m01_disposable
         run: python3 tests/kdb/pg17_p25_creator_default_acl.py
+      - name: P26 future runner creator and owner transfer
+        env:
+          KDB_PG17_MODE: libpq
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGUSER: kdb_local_super
+          PGDATABASE: kdb_m01_disposable
+        run: python3 tests/kdb/pg17_p26_runner.py
       - name: P23 reproducible offline demo acceptance kit
         run: |
           mkdir -p tests/kdb/demo-artifacts
