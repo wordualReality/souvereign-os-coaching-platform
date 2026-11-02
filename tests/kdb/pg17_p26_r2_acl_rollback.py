@@ -50,6 +50,15 @@ def main():
         denied('kdb_ingest_runtime', f'SELECT {SCHEMA}.new()', 'FUNCTION_EXECUTE')
         db.must(R, f'GRANT EXECUTE ON FUNCTION {SCHEMA}.new() TO kdb_ingest_runtime;')
         check(db.must('kdb_ingest_runtime', f'SELECT {SCHEMA}.new()'), '2', 'RUNTIME_POSITIVE')
+        # Exercise actual grant-option restoration with a named grantee. A
+        # scalar has_function_privilege check alone would miss this difference.
+        db.must(R, f'GRANT EXECUTE ON FUNCTION {SCHEMA}.new() TO {W} WITH GRANT OPTION;')
+        acl_before = db.must(S, f"SELECT coalesce(string_agg(a.grantor::regrole::text||':'||a.grantee::regrole::text||':'||a.privilege_type||':'||a.is_grantable,',' ORDER BY a.grantor,a.grantee,a.privilege_type),'') FROM pg_proc p CROSS JOIN LATERAL aclexplode(p.proacl) a WHERE p.oid='{SCHEMA}.new()'::regprocedure")
+        db.must(R, f'REVOKE EXECUTE ON FUNCTION {SCHEMA}.new() FROM {W};')
+        db.must(R, f'GRANT EXECUTE ON FUNCTION {SCHEMA}.new() TO {W} WITH GRANT OPTION;')
+        acl_after = db.must(S, f"SELECT coalesce(string_agg(a.grantor::regrole::text||':'||a.grantee::regrole::text||':'||a.privilege_type||':'||a.is_grantable,',' ORDER BY a.grantor,a.grantee,a.privilege_type),'') FROM pg_proc p CROSS JOIN LATERAL aclexplode(p.proacl) a WHERE p.oid='{SCHEMA}.new()'::regprocedure")
+        check(acl_after, acl_before, 'GRANTOR_GRANT_OPTION_PREIMAGE')
+        print('FUNCTION_ACL_GRANTOR_AND_GRANT_OPTION PREIMAGE_RESTORED')
         denied('kdb_ingest_runtime', 'SELECT * FROM kdb_canonical.protocol', 'TABLE_SELECT')
         denied('kdb_ingest_runtime', 'INSERT INTO kdb_governance.human_review_decision DEFAULT VALUES', 'C04_INSERT')
         print('CATALOG ' + db.must(S, f"SELECT jsonb_build_object('schema_acl',(SELECT nspacl::text FROM pg_namespace WHERE nspname='{SCHEMA}'),'functions',(SELECT jsonb_agg(jsonb_build_object('name',p.proname,'owner',pg_get_userbyid(p.proowner),'acl',p.proacl::text) ORDER BY p.proname) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='{SCHEMA}'),'default',(SELECT defaclacl::text FROM pg_default_acl WHERE defaclrole='{R}'::regrole AND defaclnamespace=0 AND defaclobjtype='f'))::text"))
