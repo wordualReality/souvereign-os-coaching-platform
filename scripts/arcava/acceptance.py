@@ -12,6 +12,12 @@ ROOT = Path(__file__).resolve().parents[2]
 BIN = Path('/opt/homebrew/opt/postgresql@17/bin')
 PINS = [('001_project_b_baseline_schema.sql','04338b0f8c78c4a97f947996ac72d6cf81a182c75d1f3184ab0a7a0a221e5e36'),('002_project_b_journey_provisioning_hardening.sql','7bd4c9685baf12ccfc02573cdae1c1df0191a6101e41b3d8558dd1621243275a')]
 
+def validate_inventory(items, source_sha):
+    if len(source_sha)!=40 or any(c not in '0123456789abcdef' for c in source_sha):
+        raise ValueError('malformed_source_metadata')
+    if items != PINS:
+        raise ValueError('migration_inventory_or_checksum_mismatch')
+
 def main():
     env = {k:v for k,v in os.environ.items() if not k.startswith(('PG','SUPABASE_')) and k!='DATABASE_URL'}
     def run(args, check=True):
@@ -23,6 +29,19 @@ def main():
     versions = {n:run([str(BIN/n),'--version']).stdout.strip() for n in ('postgres','psql','pg_ctl','initdb','createdb','pg_config')}
     assert all('17.11' in v for v in versions.values())
     paths = [ROOT/'database/migrations'/n for n,h in PINS]
+    validate_inventory(PINS,sha)
+    negative_inventory={}
+    for label,items,revision in (
+        ('missing',PINS[:1],sha),('reorder',list(reversed(PINS)),sha),
+        ('duplicate',[PINS[0],PINS[0]],sha),('extra',PINS+[('003.sql','0'*64)],sha),
+        ('sha_mismatch',[(PINS[0][0],'0'*64),PINS[1]],sha),
+        ('metadata',PINS,'invalid')):
+        try:
+            validate_inventory(items,revision)
+        except ValueError as error:
+            negative_inventory[label]={'exit':1,'reason':str(error)}
+        else:
+            raise AssertionError(label)
     assert {p.name for p in (ROOT/'database/migrations').glob('*.sql')} == {n for n,h in PINS}
     for p,(_,h) in zip(paths,PINS):
         assert not p.is_symlink() and hashlib.sha256(p.read_bytes()).hexdigest()==h
@@ -33,6 +52,7 @@ def main():
     sock.mkdir(mode=0o700)
     role,port = 'arcava_test_owner','55479'
     receipt = {'source_sha':sha,'versions':versions,'migrations':dict(PINS),'scenarios':{},'commands':[], 'original_T01':'PARTIAL','fixture':'bounded synthetic substitute; full A09-FX-v1 equivalence unproven','admission':'NOT_ADMITTED'}
+    receipt['negative_source_inventory']=negative_inventory
     started=False
     try:
         run([str(BIN/'initdb'),'-D',str(data),'-U',role,'--auth-local=trust','--auth-host=reject'])
@@ -52,6 +72,12 @@ def main():
             v=sql(db,"select current_setting('server_version_num'),current_setting('data_directory'),inet_server_addr() is null,current_database(),current_user").split('|')
             assert 170000<=int(v[0])<180000 and Path(v[1]).resolve()==data.resolve() and v[2:]==['t',db,role]
         identity('postgres')
+        try:
+            sql('external_target','select 1')
+        except AssertionError:
+            receipt['cross_target_denied_before_connection']=True
+        else:
+            raise AssertionError('external target accepted')
         receipt['isolation']={'data':'<TMP_ROOT>/data','socket':'<TMP_ROOT>/s','tcp':False,'pid':(data/'postmaster.pid').read_text().splitlines()[0]}
         def snapshot(db):
             c=sql(db,"select n.nspname,c.relname,c.relkind,pg_get_userbyid(c.relowner) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname in ('project_b','arcava_test') order by 1,2,3")
