@@ -7,6 +7,7 @@ SUPER = db.USER_SUPER
 RUNNER = 'kdb_migration_runner'
 OWNER = 'kdb_command_owner'
 RUNTIME = 'kdb_ingest_runtime'
+GUARD = "DO $$ BEGIN IF session_user <> 'kdb_migration_runner' OR current_user <> 'kdb_migration_runner' THEN RAISE EXCEPTION 'IDENTITY_DRIFT'; END IF; END $$; "
 
 
 def check(value, expected, label):
@@ -35,9 +36,9 @@ def main():
     db.must(SUPER, 'CREATE ROLE kdb_migration_runner LOGIN NOINHERIT NOBYPASSRLS NOSUPERUSER NOCREATEROLE NOCREATEDB; GRANT USAGE, CREATE ON SCHEMA kdb_ops TO kdb_migration_runner;')
     try:
         identity()
-        db.must(RUNNER, 'CREATE FUNCTION kdb_ops.p26_before() RETURNS integer LANGUAGE sql AS $$ SELECT 1 $$;')
+        db.must(RUNNER, GUARD + 'CREATE FUNCTION kdb_ops.p26_before() RETURNS integer LANGUAGE sql AS $$ SELECT 1 $$;')
         check(db.must(SUPER, "SELECT has_function_privilege('public','kdb_ops.p26_before()','EXECUTE')"), 't', 'PUBLIC_PREIMAGE')
-        db.must(RUNNER, 'ALTER DEFAULT PRIVILEGES REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;')
+        db.must(RUNNER, GUARD + 'ALTER DEFAULT PRIVILEGES REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;')
         # The pre-existing function is not retroactively changed; OR REPLACE
         # also preserves its original ACL instead of applying new defaults.
         check(db.must(SUPER, "SELECT has_function_privilege('public','kdb_ops.p26_before()','EXECUTE')"), 't', 'EXISTING_ACL')
@@ -46,7 +47,7 @@ def main():
         db.must(RUNNER, 'BEGIN; ALTER DEFAULT PRIVILEGES GRANT EXECUTE ON FUNCTIONS TO PUBLIC; ROLLBACK; ALTER DEFAULT PRIVILEGES REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;')
         check(db.must(SUPER, "SELECT count(*) FROM pg_default_acl d WHERE d.defaclrole='kdb_migration_runner'::regrole AND d.defaclnamespace=0 AND d.defaclobjtype='f' AND NOT EXISTS (SELECT 1 FROM aclexplode(d.defaclacl) a WHERE a.grantee=0 AND a.privilege_type='EXECUTE')"), '1', 'DEFAULT_ACL')
         identity()
-        db.must(RUNNER, "CREATE FUNCTION kdb_ops.p26_o1() RETURNS integer LANGUAGE sql SECURITY DEFINER SET search_path=pg_catalog AS $$ SELECT 26 $$; REVOKE ALL ON FUNCTION kdb_ops.p26_o1() FROM PUBLIC, anon, authenticated, service_role; GRANT EXECUTE ON FUNCTION kdb_ops.p26_o1() TO kdb_ingest_runtime;")
+        db.must(RUNNER, GUARD + "CREATE FUNCTION kdb_ops.p26_o1() RETURNS integer LANGUAGE sql SECURITY DEFINER SET search_path=pg_catalog AS $$ SELECT 26 $$; REVOKE ALL ON FUNCTION kdb_ops.p26_o1() FROM PUBLIC, anon, authenticated, service_role; GRANT EXECUTE ON FUNCTION kdb_ops.p26_o1() TO kdb_ingest_runtime;")
         for role in ('public', 'anon', 'authenticated', 'service_role'):
             check(db.must(SUPER, f"SELECT has_function_privilege('{role}','kdb_ops.p26_o1()','EXECUTE')"), 'f', role)
         check(db.must(SUPER, "SELECT has_schema_privilege('kdb_ingest_runtime','kdb_ops','USAGE') AND NOT has_schema_privilege('kdb_ingest_runtime','kdb_ops','CREATE')"), 't', 'RUNTIME_SCHEMA')
@@ -75,7 +76,7 @@ def main():
         identity()
         check(db.must(RUNNER, 'SET ROLE kdb_command_owner; SELECT session_user||\'|\'||current_user'), 'kdb_migration_runner|kdb_command_owner', 'SET_ROLE_RISK')
         identity()
-        db.must(RUNNER, 'ALTER FUNCTION kdb_ops.p26_o1() OWNER TO kdb_command_owner;')
+        db.must(RUNNER, GUARD + 'ALTER FUNCTION kdb_ops.p26_o1() OWNER TO kdb_command_owner;')
         check(db.must(SUPER, "SELECT pg_get_userbyid(proowner) FROM pg_proc WHERE oid='kdb_ops.p26_o1()'::regprocedure"), OWNER, 'OWNER_TRANSFER')
         print('ACL_AFTER_TRANSFER ' + db.must(SUPER, "SELECT coalesce(string_agg(pg_get_userbyid(a.grantor)||':'||coalesce(pg_get_userbyid(a.grantee),'PUBLIC')||':'||a.privilege_type,',' ORDER BY a.grantee),'') FROM pg_proc p CROSS JOIN LATERAL aclexplode(p.proacl) a WHERE p.oid='kdb_ops.p26_o1()'::regprocedure"))
         check(db.must(SUPER, "SELECT count(*) FROM pg_proc p CROSS JOIN LATERAL aclexplode(p.proacl) a WHERE p.oid='kdb_ops.p26_o1()'::regprocedure AND a.grantor <> 'kdb_command_owner'::regrole"), '0', 'GRANTOR_AFTER')
