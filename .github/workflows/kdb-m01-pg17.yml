@@ -263,6 +263,14 @@ jobs:
           PGUSER: kdb_local_super
           PGDATABASE: kdb_m01_disposable
         run: python3 tests/kdb/pg17_p26_r1_operator.py
+      - name: P26 R2 local ACL and rollback
+        env:
+          KDB_PG17_MODE: libpq
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGUSER: kdb_local_super
+          PGDATABASE: kdb_m01_disposable
+        run: python3 tests/kdb/pg17_p26_r2_acl_rollback.py
       - name: P23 reproducible offline demo acceptance kit
         run: |
           mkdir -p tests/kdb/demo-artifacts
