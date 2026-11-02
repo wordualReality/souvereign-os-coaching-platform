@@ -39,6 +39,19 @@ Do not blindly drop roles, reset default ACLs or replace a captured ACL with ass
 
 Local PG17 counterexample: a function whose raw `proacl` is NULL retains an explicit ACL array after `REVOKE EXECUTE ... FROM PUBLIC` followed by `GRANT EXECUTE ... TO PUBLIC`. Its effective PUBLIC EXECUTE is restored, but raw catalog equality is not. Therefore the inverse shown conceptually above is not a complete raw-preimage rollback. `FAIL_CLOSED RAW_NULL_FUNCTION_ACL_NOT_RESTORED_BY_GRANT_INVERSE`; no direct catalog update or hosted mutation is authorized. A separately reviewed decision is needed on the required parity definition or another proven recovery method. The local test additionally checks a grant-option entry and a separate delegated grantor, but does not claim a general-purpose ACL restoration algorithm.
 
+## Preimage-class decision — NON_APPLY
+
+| Preimage | Current decision |
+| --- | --- |
+| Existing function with `proacl IS NULL` | No committed ACL mutation under the current raw-parity contract. A same-session rollback before commit preserves NULL locally; it is an abort control, not postcommit recovery. |
+| Explicit non-NULL ACL with one authorized grantor | Conditional replay only after recording exact raw ACL and sorted grantor, grantee, privilege and grant-option entries, owner and dependencies, and proving replay on an isolated copy. The limited local examples do not prove general parity. |
+| Multiple grantors, delegated grant options, role dependencies or multiple creator sessions | FAIL_CLOSED until the actual identities, dependency chain and postcommit exact restoration are independently proven; no substitution of an administrator as grantor. |
+| Newly created disposable role/function | A scoped transaction rollback or controlled removal only when ownership and dependencies are proved and the exact preimage can be compared. This is not authority to remove hosted objects. |
+
+The PG17 test runs BEGIN, REVOKE, observations and ROLLBACK in one authenticated creator session. It observes raw NULL and PUBLIC EXECUTE before, an explicit ACL and denied PUBLIC EXECUTE during, and the original NULL and allowed EXECUTE after rollback and after reconnect. PostgreSQL transactions belong to one database session: separate creator/grantor logins cannot be joined into one ordinary transaction by concatenating their BEGIN and COMMIT commands. `MULTI_SESSION_ATOMIC_RECOVERY_UNPROVEN`; no two-phase commit, prepared transaction or privileged broker is proposed.
+
+Founder decision candidate: retain strict physical raw-catalog parity and prohibit committed mutations of existing NULL-preimage function ACLs, or separately review and authorize a different parity/release strategy with its consequences. The latter is not assumed approved. The existing owner-transfer broker versus runner-ownership decision is a separate decision.
+
 ## Founder architecture decision — neither option approved
 
 A: independently design and security-review a fixed-code, auditable privileged broker with a database-enforced allowlist and explicit trust boundary. B: consider runner as final owner, with a documented least-privilege and operational-risk analysis. Either requires a separate Founder decision; the current NOLOGIN command-owner architecture is unchanged.

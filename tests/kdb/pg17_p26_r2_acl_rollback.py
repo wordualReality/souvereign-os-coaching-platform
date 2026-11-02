@@ -41,6 +41,22 @@ def main():
         db.must(R, f"CREATE FUNCTION {SCHEMA}.old() RETURNS integer LANGUAGE sql AS $$ SELECT 1 $$; ALTER DEFAULT PRIVILEGES REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;")
         check(db.must(S, f"SELECT count(*) FROM pg_default_acl d WHERE d.defaclrole='{R}'::regrole AND d.defaclnamespace=0 AND d.defaclobjtype='f' AND NOT EXISTS (SELECT 1 FROM aclexplode(d.defaclacl) a WHERE a.grantee=0 AND a.privilege_type='EXECUTE')"), '1', 'GLOBAL_DEFAULT')
         db.must(R, f"CREATE FUNCTION {SCHEMA}.new() RETURNS integer LANGUAGE sql AS $$ SELECT 2 $$; CREATE OR REPLACE FUNCTION {SCHEMA}.old() RETURNS integer LANGUAGE sql AS $$ SELECT 3 $$;")
+        # One psql invocation means BEGIN, mutation, observation and ROLLBACK
+        # run on the same directly authenticated PostgreSQL session.
+        tx = db.must(R, f"""
+SELECT 'IDENTITY|'||session_user||'|'||current_user;
+BEGIN;
+SELECT 'BEFORE|'||(proacl IS NULL)||'|'||coalesce(proacl::text,'<NULL>')||'|'||has_function_privilege('public',oid,'EXECUTE') FROM pg_proc WHERE oid='{SCHEMA}.old()'::regprocedure;
+REVOKE EXECUTE ON FUNCTION {SCHEMA}.old() FROM PUBLIC;
+SELECT 'DURING|'||(proacl IS NULL)||'|'||coalesce(proacl::text,'<NULL>')||'|'||has_function_privilege('public',oid,'EXECUTE') FROM pg_proc WHERE oid='{SCHEMA}.old()'::regprocedure;
+ROLLBACK;
+SELECT 'AFTER|'||(proacl IS NULL)||'|'||coalesce(proacl::text,'<NULL>')||'|'||has_function_privilege('public',oid,'EXECUTE') FROM pg_proc WHERE oid='{SCHEMA}.old()'::regprocedure;
+""").splitlines()
+        if len(tx) != 4 or tx[0] != f'IDENTITY|{R}|{R}' or tx[1] != 'BEFORE|true|<NULL>|true' or not tx[2].startswith('DURING|false|') or not tx[2].endswith('|false') or tx[3] != 'AFTER|true|<NULL>|true':
+            raise SystemExit(f'FAIL_CLOSED TX_RAW_ACL: {tx!r}')
+        check(db.must(R, f"SELECT (proacl IS NULL)||'|'||coalesce(proacl::text,'<NULL>')||'|'||has_function_privilege('public',oid,'EXECUTE') FROM pg_proc WHERE oid='{SCHEMA}.old()'::regprocedure"), 'true|<NULL>|true', 'RECONNECT_RAW_ACL')
+        print('TX_ABORT_RAW_NULL_PRESERVED_SCOPED ' + ' '.join(tx))
+        print('MULTI_SESSION_ATOMIC_RECOVERY_UNPROVEN')
         # Observe whether the SQL inverse restores the physical NULL ACL
         # preimage as well as its effective privileges.
         check(db.must(S, f"SELECT proacl IS NULL FROM pg_proc WHERE oid='{SCHEMA}.old()'::regprocedure"), 't', 'NULL_ACL_PREIMAGE')
