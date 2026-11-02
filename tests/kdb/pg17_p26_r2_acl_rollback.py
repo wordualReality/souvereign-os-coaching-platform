@@ -41,6 +41,12 @@ def main():
         db.must(R, f"CREATE FUNCTION {SCHEMA}.old() RETURNS integer LANGUAGE sql AS $$ SELECT 1 $$; ALTER DEFAULT PRIVILEGES REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;")
         check(db.must(S, f"SELECT count(*) FROM pg_default_acl d WHERE d.defaclrole='{R}'::regrole AND d.defaclnamespace=0 AND d.defaclobjtype='f' AND NOT EXISTS (SELECT 1 FROM aclexplode(d.defaclacl) a WHERE a.grantee=0 AND a.privilege_type='EXECUTE')"), '1', 'GLOBAL_DEFAULT')
         db.must(R, f"CREATE FUNCTION {SCHEMA}.new() RETURNS integer LANGUAGE sql AS $$ SELECT 2 $$; CREATE OR REPLACE FUNCTION {SCHEMA}.old() RETURNS integer LANGUAGE sql AS $$ SELECT 3 $$;")
+        # Observe whether the SQL inverse restores the physical NULL ACL
+        # preimage as well as its effective privileges.
+        check(db.must(S, f"SELECT proacl IS NULL FROM pg_proc WHERE oid='{SCHEMA}.old()'::regprocedure"), 't', 'NULL_ACL_PREIMAGE')
+        db.must(R, f'REVOKE EXECUTE ON FUNCTION {SCHEMA}.old() FROM PUBLIC; GRANT EXECUTE ON FUNCTION {SCHEMA}.old() TO PUBLIC;')
+        check(db.must(S, f"SELECT proacl IS NULL FROM pg_proc WHERE oid='{SCHEMA}.old()'::regprocedure"), 'f', 'NULL_ACL_NOT_RESTORED')
+        print('FAIL_CLOSED RAW_NULL_FUNCTION_ACL_NOT_RESTORED_BY_GRANT_INVERSE')
         db.must(W, f"CREATE FUNCTION {SCHEMA}.other() RETURNS integer LANGUAGE sql AS $$ SELECT 4 $$;")
         for name, expected in [('old','t'),('new','f'),('other','t')]:
             check(db.must(S, f"SELECT has_function_privilege('public','{SCHEMA}.{name}()','EXECUTE')"), expected, name)
