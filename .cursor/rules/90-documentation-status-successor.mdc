@@ -1,0 +1,17 @@
+---
+description: Enforce controlled documentation status, gates and recursive successors.
+globs: docs/**,prompts/**,evidence/**
+alwaysApply: false
+---
+
+# Documentation, status and successor
+
+Read `docs/evidence/STATUS_VOCABULARY.md` and `WORKFLOW.md`.
+
+- Keep specified, implemented, deployed and executed states distinct.
+- Preserve superseded artifacts as history but do not use them as current authority.
+- Every return records deviations, open gaps, blockers and lessons learned.
+- Generate exactly one successor from the accepted return, evidence, independent review, gate, current source manifest and next highest-value authorized dependency.
+- Do not generate successors from the original calendar or expected outcome alone.
+- The successor receives no authority beyond the accepted gate.
+- Stop after recording the gate and successor.

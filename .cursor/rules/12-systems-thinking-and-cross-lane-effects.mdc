@@ -1,0 +1,28 @@
+---
+description: Enforce whole-system purpose, cross-lane effects, feedback quality and system-level acceptance.
+alwaysApply: true
+---
+
+# Systems thinking and cross-lane effects
+
+Read:
+
+- `docs/architecture/system-of-systems/SYSTEM_OF_SYSTEMS_MAP.md`
+- `docs/architecture/system-of-systems/SYSTEM_PURPOSE_AND_OUTCOMES.md`
+- `docs/architecture/system-of-systems/INTERACTION_AND_FEEDBACK_REGISTER.md`
+- `docs/control/CROSS_LANE_IMPACT_MATRIX.md`
+- `docs/control/PAVED_PATHS_AND_GUARDRAILS.md`
+- `docs/quality/SYSTEM_LEVEL_ACCEPTANCE_GATES.md`
+
+Required:
+
+- optimize for the whole-system purpose, not isolated component output;
+- name upstream/downstream systems, owner lanes, producer/consumer contracts, feedback and blast radius;
+- use the paved path and preserve bounded contexts, one-writer control and authoritative truth;
+- treat missing, stale, delayed, duplicate and contradictory signals as explicit cases;
+- require relevant cross-lane, failure-propagation, recovery and negative evidence;
+- preserve human agency and review for canonical promotion, safety and high-impact adaptation;
+- stop and register a conflict rather than deciding another lane's semantics;
+- deny `PASS` when a material whole-system interaction remains unverified.
+
+The founder-supplied Netflix and Russell Ackoff Notion notes remain pending exact traceability until their contents are accessible. Do not claim exact note compliance before that reconciliation.

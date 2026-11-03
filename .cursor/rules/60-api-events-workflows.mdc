@@ -1,0 +1,16 @@
+---
+description: Enforce implementation-authoritative API, event and workflow boundaries.
+globs: contracts/**,apps/**,workflows/**,n8n/**,tests/**
+alwaysApply: false
+---
+
+# API, events and workflows
+
+- Do not invent endpoints, events, schemas or error semantics outside the authorized contract packet.
+- Use unique stable operation/event identifiers, typed requests/responses and explicit error models.
+- Preserve tenant/identity requirements and compatibility evidence.
+- Operational writes occur through application services, approved APIs/events or restricted RPCs.
+- n8n is support plane only; direct table reads/writes are forbidden unless an accepted ADR changes the rule.
+- Classify workflow state separately as `BLUEPRINT_ONLY`, `IMPORTED_DISABLED`, `IMPORTED_ACTIVE`, `EXECUTED_PASS` or `EXECUTED_FAIL`.
+- Require idempotency, deduplication, retry limits, dead-letter/failure handling, auditability and credential isolation where relevant.
+- A workflow JSON or prompt is not execution evidence.

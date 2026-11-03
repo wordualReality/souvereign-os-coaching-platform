@@ -1,0 +1,17 @@
+---
+description: Enforce database owner, migration, RLS, grant and restricted RPC controls.
+globs: database/**,supabase/**,contracts/**,tests/**
+alwaysApply: false
+---
+
+# Database, RLS and RPC controls
+
+- Database/Canonical or Shared Database Control must authorize database packets and own applicable migration/RLS/RPC paths.
+- Use one ordered migration history and one writer per packet.
+- No remote Supabase mutation without an explicit environment gate.
+- Local changes must be rebuildable from zero with deterministic synthetic seed data.
+- Enable and test RLS for exposed tenant-sensitive tables; prohibit unconditional tenant read policies.
+- Centralize reviewed JWT/claim helpers instead of duplicating expressions.
+- Require own-tenant positive and cross-tenant/unauthorized negative tests.
+- Restricted RPCs must validate tenant/actor context, least privilege, errors and audit behavior.
+- Project B must not redefine Canonical truth or KDB-owned schema semantics.

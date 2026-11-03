@@ -1,0 +1,17 @@
+---
+description: Require bounded tests, evidence and independent review.
+globs: apps/**,contracts/**,database/**,tests/**,scripts/**,evidence/**,docs/quality/**,docs/evidence/**
+alwaysApply: false
+---
+
+# Testing, evidence and review
+
+Read `docs/quality/DEFINITION_OF_DONE.md`, `docs/quality/QUALITY_GATE_MATRIX.md` and `docs/evidence/EVIDENCE_RETURN_PROTOCOL.md`.
+
+- Run the tests appropriate to the changed behavior, including mandatory negative cases.
+- Capture exact commands and exit codes, base/result SHA, worktree before/after and diff.
+- Distinguish static validation, unit, integration, database, E2E, security, accessibility and runtime evidence.
+- Static validators cannot prove runtime behavior, tenant isolation or deployment readiness.
+- Redact secrets and personal data.
+- Perform independent review for scope, architecture, contracts, security/privacy, database/RLS and UX as applicable.
+- Issue only an allowed gate value and do not inflate status.

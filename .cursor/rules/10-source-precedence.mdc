@@ -1,0 +1,19 @@
+---
+description: Apply current source precedence and supersession rules.
+alwaysApply: true
+---
+
+# Source precedence
+
+Read `docs/control/CURRENT_SOURCE_MANIFEST.md` and `docs/control/SUPERSESSION_REGISTER.md`.
+
+Use this order:
+
+1. accepted executed evidence;
+2. accepted owner decisions, ADRs, gates and producer contracts;
+3. exact repository reality;
+4. current integrated system documentation and source manifest;
+5. official current technical documentation;
+6. historical/community sources.
+
+Do not choose a source only because it has a newer timestamp. When sources conflict, name both exact locations, stop the affected path and request the owner/shared alignment resolution.

@@ -1,0 +1,29 @@
+---
+description: Apply Sovereign OS prompt and packet quality requirements when creating or reviewing prompts, implementation packets, returns, gates or successors.
+globs: prompts/**,docs/control/**,docs/evidence/**,docs/standards/**
+alwaysApply: false
+---
+
+# Prompt and packet quality
+
+Read `docs/standards/PROMPT_ENGINEERING_STANDARD.md` before creating or reviewing a masterprompt, execution packet, return, gate or successor.
+
+Required:
+
+- State role, owner lane and bounded authority.
+- State exact objective, current verified state and source precedence.
+- Separate functional requirements, non-functional requirements and constraints.
+- Declare in-scope, explicit non-goals, allowed paths and forbidden actions.
+- Provide exact output and return schema.
+- Require relevant positive and negative tests plus evidence.
+- Define stop conditions, independent review, allowed gate values and exactly one successor.
+- Derive successors from actual return, evidence, gate, blockers and lessons learned.
+
+Do not:
+
+- request private chain of thought; request concise rationale, assumptions, options, evidence and uncertainties instead;
+- treat PromptGenius or another community source as architecture, security or implementation authority;
+- accept `production-ready`, `secure`, `compliant`, `implemented` or equivalent status without executed evidence;
+- allow a prompt to self-authorize later work.
+
+Secondary method reference: https://promptgenius.net/prompts/chatgpt/technical

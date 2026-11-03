@@ -1,31 +1,50 @@
-# Project B Repository Cut v0.1
+# Sovereign OS — Project B Coaching Platform
 
-Status: repository cut from `ProjectB_Final_DevHandoff_Bundle_v1_1_2026-06-04.zip`.
+Status: **PRE-IMPLEMENTATION GOVERNANCE**. The repository contains architecture/contract/database/application skeletons and validation assets. It is not evidence of a completed or deployed application.
 
-This repository is the transition from architecture truth to technical execution. It contains contracts, database migrations, RLS seeds, app/API skeletons, validation scripts, CI wiring, traceability matrices, Cursor prompts and MVP Slice 01 test skeleton.
+## Current implementation authority
 
-## Leading truth order
+The current bounded block is FPS-00C: repository governance, Cursor Rules, source precedence, standards, Definition of Ready/Done, evidence and traceability controls.
 
-1. Project B Final Dev-Handoff Bundle v1.1
-2. Journey Builder & Client Provisioning Hardening v1.1
-3. Final Dev-Handoff Bundle v1.0 baseline
-4. G1-G14 completion packs
+No feature implementation, SQL/migration, workflow activation, deployment or production access is authorized until the FPS-00C pull request is independently reviewed and accepted.
 
-## Validate locally
+## Start here
+
+1. Read `AGENTS.md`.
+2. Read `docs/control/READ_FIRST.md`.
+3. Read `docs/control/CURRENT_SOURCE_MANIFEST.md` and `docs/control/SUPERSESSION_REGISTER.md`.
+4. Read `docs/quality/DEFINITION_OF_READY.md` and the packet-specific prompt.
+5. Work on one isolated branch or worktree and return evidence under `docs/evidence/EVIDENCE_RETURN_PROTOCOL.md`.
+
+## Source precedence
+
+1. Accepted executed evidence.
+2. Accepted owner decisions, ADRs, gates and producer-owned contracts.
+3. Exact repository reality at the base SHA.
+4. PB-RDH-09 integrated system documentation and current supporting packs.
+5. Official current technical documentation.
+6. Historical handoffs and community prompt resources.
+
+The earlier v1.0/v1.1 handoff order and direct P01 start instruction are superseded for implementation control.
+
+## Repository ownership
+
+- Project B owns tenant, coach, client, journey, assignment, enrollment, delivery, reflection/progress and application experience.
+- Database/Canonical shares this repository for the bounded sprint but remains a separate owner lane and sole writer for KDB-owned migrations/canonical semantics during its packets.
+- Shared Database Control governs ordered migrations, shared roles, RLS conventions, audit/outbox conventions and environment baseline.
+
+## Validation
+
+The existing validators perform structural/static checks. Run them as required, but do not treat them as proof of builds, runtime behavior, tenant isolation, migration execution, workflow execution or deployment readiness.
 
 ```bash
-python scripts/validate_repo.py
-python scripts/validate_openapi.py
-python scripts/validate_json_schemas.py
-python scripts/validate_sql_static.py
-python scripts/validate_rls_static.py
-python scripts/validate_mvp_slice_01.py
+npm run validate:all
 ```
 
-## First Cursor execution
+## Control sources
 
-Start with:
+- Final sprint workspace: https://drive.google.com/drive/folders/1ikUNh1RGEzWLxC6caunmbRLFjgW3ojjS
+- Shared three-lane register: https://docs.google.com/document/d/1AYXt0qswYMgCBKB_VZzKea03OsRrF2jQCG0Ld2tlUrw/edit
+- Final production masterprompt: https://docs.google.com/document/d/1Qd2p3qFIZfrJ_dp8w6d3Nhm0ybfdVV_2x6mDrsLUA-Y/edit
 
-`prompts/cursor/PB-CURSOR-JH-001-MANUAL-CLIENT-PROVISIONING.md`
-
-Then continue through the v1.1 hardening prompts before baseline v1.0 implementation prompts.
+Git is implementation truth. Local/CI execution is proof. Drive/Notion are durable documentation and control planes.
