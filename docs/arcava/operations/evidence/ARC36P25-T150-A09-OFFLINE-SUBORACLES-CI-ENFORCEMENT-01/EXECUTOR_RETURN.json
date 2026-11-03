@@ -1,0 +1,169 @@
+{
+  "RETURN_ID": "ARC36P25-T150-A09-OFFLINE-SUBORACLES-CI-ENFORCEMENT-01",
+  "LANE": "ARCAVA",
+  "STATUS": "OFFLINE_SUBORACLES_CI_ENFORCED_PENDING_OWNER_QS",
+  "BASE_SHA": "c612d582db8dfd1cc8cc30588466c26c6e5365fd",
+  "EXECUTION_SOURCE_SHA": "a66e0993f52e7a22ae574869b1dcd5cb49882013",
+  "EVIDENCE_COMMIT_PARENT_SHA": "a66e0993f52e7a22ae574869b1dcd5cb49882013",
+  "WORKFLOW_PATH": ".github/workflows/arcava-a09-offline-assurance.yml",
+  "WORKFLOW_SHA256": "1bdbadb30c76d51eae82ac94dc9c3e62f4836b6c03202d7ef1363d35faa3a56d",
+  "CHANGED_FILES": [
+    ".github/workflows/arcava-a09-offline-assurance.yml",
+    "docs/arcava/operations/evidence/ARC36P25-T150-A09-OFFLINE-SUBORACLES-CI-ENFORCEMENT-01/EXECUTOR_RETURN.json"
+  ],
+  "CI": [
+    {
+      "event": "push",
+      "run": 41605337777,
+      "job": 125813648974,
+      "conclusion": "SUCCESS"
+    },
+    {
+      "event": "pull_request",
+      "run": 41605344854,
+      "job": 125813671910,
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "VERIFIED_JOB_STEPS": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 1
+    },
+    {
+      "name": "Checkout source",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 2
+    },
+    {
+      "name": "Set up Python 3.12.3",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 3
+    },
+    {
+      "name": "Record offline source and input identity",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 4
+    },
+    {
+      "name": "Validate FX-v1 candidate",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5
+    },
+    {
+      "name": "Test FX-v1 repeatability and denial variants",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6
+    },
+    {
+      "name": "Validate T04 physical subset",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 7
+    },
+    {
+      "name": "Test T04 physical denial variants",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8
+    },
+    {
+      "name": "Validate T44 authority denial",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 9
+    },
+    {
+      "name": "Test T44 authority denial variants",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 10
+    },
+    {
+      "name": "Post Set up Python 3.12.3",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 19
+    },
+    {
+      "name": "Post Checkout source",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 20
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 21
+    }
+  ],
+  "LOG_VERIFICATION": {
+    "python": "3.12.3",
+    "commands_exit0": 6,
+    "unittest_suites": 3,
+    "unittest_methods": 6,
+    "negative_variants": 34,
+    "SQL": "NOT_EXECUTED"
+  },
+  "COMMANDS": [
+    [
+      "python3 scripts/arcava/validate_a09_fx_v1_candidate.py --manifest docs/arcava/admission/synthetic/A09-FX-v1/manifest.candidate.json --matrix docs/arcava/admission/synthetic/A09-FX-v1/applicability.json",
+      0
+    ],
+    [
+      "python3 -m unittest discover -s tests/migration/arcava -p test_a09_fx_v1_candidate.py -v",
+      0
+    ],
+    [
+      "python3 scripts/arcava/validate_a09_t04_physical.py",
+      0
+    ],
+    [
+      "python3 -m unittest discover -s tests/arcava/contracts -p test_a09_t04_physical.py -v",
+      0
+    ],
+    [
+      "python3 scripts/arcava/validate_a09_t44_policy_authority.py",
+      0
+    ],
+    [
+      "python3 -m unittest discover -s tests/arcava/security -p test_a09_t44_policy_authority.py -v",
+      0
+    ]
+  ],
+  "OTHER_CI": [
+    {
+      "run": 41605337632,
+      "conclusion": "SUCCESS"
+    },
+    {
+      "run": 41605344777,
+      "conclusion": "SUCCESS"
+    },
+    {
+      "run": 41605344585,
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "SCOPE": "stdlib offline checks; no new test cases or accepted code changes; no SQL/PG17/Hosted execution; PR merge checkout SHA may differ from branch execution SHA",
+  "OPEN_GATES": [
+    "T01 PARTIAL_NOT_ADMITTED",
+    "T04/T44/T48 NOT_EXECUTED",
+    "T48 0/86",
+    "T150 PARTIAL",
+    "approved whole-suite FX-v1 manifest absent",
+    "full 48 contracts/16 families not admitted",
+    "Arcava-owned RLS source and real admission receipts absent",
+    "Security/Hosted/Production/Merge/Deploy NOT_GRANTED"
+  ],
+  "BLOCKER": "NONE_FOR_CI_INTEGRATION",
+  "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA"
+}
