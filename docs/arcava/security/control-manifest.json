@@ -1,0 +1,86 @@
+{
+  "manifest_version": "1.0",
+  "decision_id": "ARC36P25-ARCAVA-RLS-BINDING-CONTRACT-DRAFT-01",
+  "status": "PROPOSED_NOT_ADMITTED",
+  "scope": "ARC-07 owner-domain sensitive client read; ARC10-T110 foundation only",
+  "source_base_sha": "c07d7e671ef5018fb28751fd0f53493f6e6ed428",
+  "sources": [
+    {
+      "id": "ARC-07",
+      "url": "https://docs.google.com/document/d/1i9NEnvB3Kk9WK4zBNdDzo5eV7xYroW1qJ95ZEQmpZsM/edit",
+      "sections": [
+        "ROLE_AND_SERVICE_IDENTITY_MATRIX",
+        "RLS_ACL_FUNCTION_CONTROLS",
+        "PRIVACY_LIFECYCLE"
+      ]
+    },
+    {
+      "id": "ATC-07",
+      "url": "https://docs.google.com/document/d/1oNv0gaHdh0skkzana9KmuagggbOXdjwwdsoDW8c_3Ns/edit",
+      "sections": [
+        "AUTHORIZATION_DECISION_MATRIX",
+        "SEPARATE_CONTROL_GATES"
+      ]
+    },
+    {
+      "id": "ARC09-U11",
+      "url": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit"
+    },
+    {
+      "id": "ARC10-T110",
+      "url": "https://docs.google.com/document/d/1bwZrdGHeQXZcU2V5kSQeGypNnMVUAp6I3aAgVY8fHKQ/edit"
+    }
+  ],
+  "components": {
+    "services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java": "0930589e3ebd1f6ae069d73f24e99a82687d2b2d73eadda5a991aab4be708a96",
+    "services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java": "44d528f7f3e2d28b484ae41d4ebe8adf3e9f006fd51bce0834b06607d90c4223",
+    "services/api/src/main/java/com/projectb/api/arcava/security/RoleScopePolicy.java": "85d60f7c99d305e0e1fa5a955ad8920fb4d8cfc184f74cf6c07379b41c246057",
+    "services/api/src/main/java/com/projectb/api/arcava/services/CoachClientAccessService.java": "8697aa6b342bf806824c98bc6c9f7f5a57a1c5c950380661f0bc698cea01096e",
+    "services/api/src/test/java/com/projectb/api/arcava/security/OwnerGuardContractTest.java": "205db8501abc80f03a53d7942e56f0bb029e18106f46405fbfc10ee10a1e75a7",
+    "docs/arcava/security/owner-guard-rls-binding-contract-draft.md": "15108a581861d136d43ae68d279ef7684247209b7c5862687c4f1e1c25364a77"
+  },
+  "gates": [
+    "SESSION",
+    "TENANT_MEMBERSHIP",
+    "ACCESS",
+    "ASSIGNMENT_COACH_ONLY",
+    "CONSENT",
+    "SHARE",
+    "ENTITLEMENT"
+  ],
+  "production_trust": "NO_LIVE_ADAPTER / PIAC_NOT_CONNECTED",
+  "synthetic_factory": "test sources only / SYNTHETIC_TEST_ONLY",
+  "operations": {
+    "SENSITIVE_CLIENT_READ": {
+      "COACH": "exact assignment and independent gates",
+      "CLIENT": "own subject and independent gates",
+      "OTHER_ROLES": "DENY"
+    }
+  },
+  "unresolved_decisions": [
+    {
+      "id": "Q1",
+      "status": "OPEN",
+      "question": "exact Arcava table/schema/migration ownership"
+    },
+    {
+      "id": "Q2",
+      "status": "OPEN",
+      "question": "trusted PIAC envelope/authentication/expiry/revocation and backend binding"
+    },
+    {
+      "id": "Q3",
+      "status": "OPEN",
+      "question": "PostgreSQL login/scoped-role/ACL and non-spoofable session binding"
+    },
+    {
+      "id": "Q4",
+      "status": "OPEN",
+      "question": "separate owner-approved policy source and actual SQL test authority"
+    }
+  ],
+  "SQL_EXECUTION": "NONE",
+  "live_PIAC_KDB": "NONE",
+  "security_acceptance": "NOT_GRANTED",
+  "T150": "PARTIAL"
+}
