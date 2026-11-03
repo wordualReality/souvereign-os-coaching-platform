@@ -1,0 +1,9 @@
+# Step 9 local guard durability and race — TEST ONLY
+
+`RIGHTS_REVOCATION_RACE_UNCLOSED / OPEN_BYPASS / NOT_ADMITTED / NOT_SECURITY_PASS`. No hosted DDL is proposed. The fixture installs the unchanged Step 8 trigger candidate under an isolated test schema in disposable PG17; its functions are SECURITY INVOKER, schema access and PUBLIC function execute are revoked, and the test actor is the disposable database superuser. The role is not an admitted review principal.
+
+The local test compares trigger OIDs, `pg_get_triggerdef` and `pg_get_functiondef` before commit, after commit and after a new connection. It inserts synthetic C04, C05 and PUBLISHED rows, exercises guard denials after reconnect, and records DELETE paths that remain allowed when no foreign-key dependents exist. SQLSTATE 23514 is the test guard, 23503 is existing FK protection; neither proves signature or human authority.
+
+Two separate READ COMMITTED sessions demonstrate a TOCTOU counterexample: A updates source rights to REVOKED but does not commit, with a granted RowExclusiveLock on the source relation; B sees the previously committed ADMITTED state and commits the synthetic C04/C05/PUBLISHED chain while A is open; A then commits. The final joined state is `REVOKED|PUBLISHED`. This is a specific observed schedule, not a proof about all schedules. A simple SELECT trigger does not close it. No locking remedy is claimed or installed.
+
+The test deletes only explicitly identified synthetic rows, drops only its named triggers/functions/schema without CASCADE, then reapplies and removes the guard. Its bounded preimage comparison checks named fixture rows, namespace, functions, triggers, test-named roles/memberships and total outbox count. It does not establish arbitrary hosted schema/ACL restoration. Accepted frozen SQL remains unchanged. Independent identity, cryptographic signature, authorization, concurrency controls and hosted review remain open.
