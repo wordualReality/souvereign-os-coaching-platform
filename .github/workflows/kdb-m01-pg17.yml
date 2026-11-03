@@ -296,6 +296,14 @@ jobs:
           PGUSER: kdb_local_super
           PGDATABASE: kdb_m01_disposable
         run: python3 tests/kdb/pg17_step9_guard_race.py
+      - name: Step 9 R1 row locks and append-only oracles
+        env:
+          KDB_PG17_MODE: libpq
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGUSER: kdb_local_super
+          PGDATABASE: kdb_m01_disposable
+        run: python3 tests/kdb/pg17_step9r1_lock_append.py
       - name: P23 reproducible offline demo acceptance kit
         run: |
           mkdir -p tests/kdb/demo-artifacts
