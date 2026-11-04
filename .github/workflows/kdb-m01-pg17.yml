@@ -312,6 +312,14 @@ jobs:
           PGUSER: kdb_local_super
           PGDATABASE: kdb_m01_disposable
         run: python3 tests/kdb/pg17_step9r2_split_transactions.py
+      - name: Step 6 R3 multi-creator default ACL boundary
+        env:
+          KDB_PG17_MODE: libpq
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGUSER: kdb_local_super
+          PGDATABASE: kdb_m01_disposable
+        run: python3 tests/kdb/pg17_step6_r3_multi_creator.py
       - name: P23 reproducible offline demo acceptance kit
         run: |
           mkdir -p tests/kdb/demo-artifacts
