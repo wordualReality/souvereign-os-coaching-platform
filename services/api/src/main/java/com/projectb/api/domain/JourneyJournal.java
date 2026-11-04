@@ -152,6 +152,11 @@ public final class JourneyJournal {
 
   public synchronized EnrollmentLink enrollment(UUID enrollmentId) { return enrollments.get(enrollmentId); }
 
+  /** Internal read-only lookup; callers still need owner guards and full stored binding checks. */
+  public synchronized AssignmentView assignmentSnapshot(UUID assignmentId) {
+    return kernel.assignmentSnapshot(assignmentId);
+  }
+
   public synchronized boolean stepPresent(Projection projection, String stepId) {
     Object parsed = JsonMini.parse(projection.phasesJson());
     if (!(parsed instanceof List<?> phases)) return false;

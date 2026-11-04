@@ -8,6 +8,7 @@ import com.projectb.api.domain.JourneyJournal.EnrollmentLink;
 import com.projectb.api.domain.JourneyJournal.Projection;
 import com.projectb.api.arcava.repositories.ClientRelationshipRepository.EnrollmentSnapshot;
 import com.projectb.api.domain.JourneyKernel;
+import com.projectb.api.domain.JourneyKernel.AssignmentView;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.*;
@@ -109,7 +110,8 @@ class ClientEnrollmentGuardedReadIntegrationTest {
   static EnrollmentSnapshot snapshot(JourneyJournal source, UUID id) {
     synchronized (source) {
       var entry = source.enrollment(id);
-      return new EnrollmentSnapshot(entry, entry == null ? null : source.projection(UUID.fromString(entry.versionId())));
+      return new EnrollmentSnapshot(entry, entry == null ? null : source.projection(UUID.fromString(entry.versionId())),
+          entry == null ? null : source.assignmentSnapshot(UUID.fromString(entry.assignmentId())));
     }
   }
 
@@ -141,7 +143,7 @@ class ClientEnrollmentGuardedReadIntegrationTest {
   }
   @Test void substitutedStoredEnrollmentIdCannotReturnPayload() {
     var swapped = new EnrollmentLink(link.tenantId(), link.clientId(), link.versionId(), link.assignmentId(), OTHER.toString());
-    var result = service(coach(), new ClientRelationshipRepository(id -> new EnrollmentSnapshot(swapped, journal.projection(UUID.fromString(link.versionId()))))).readEnrollment(request(coach()));
+    var result = service(coach(), new ClientRelationshipRepository(id -> new EnrollmentSnapshot(swapped, journal.projection(UUID.fromString(link.versionId())), journal.assignmentSnapshot(UUID.fromString(link.assignmentId()))))).readEnrollment(request(coach()));
     assertEquals(NOT_FOUND, result.status()); assertNull(result.view());
   }
   @Test void everyMissingIndependentGateDeniesBeforeLookupAndAfterReplay() throws Exception {
@@ -188,7 +190,7 @@ class ClientEnrollmentGuardedReadIntegrationTest {
     for (int field = 0; field < valid.length; field++) for (String invalid : Arrays.asList(null, "", "private-malicious-id", "1-1-1-1-1", new UUID(0, 0).toString())) {
       String[] values = valid.clone(); values[field] = invalid;
       var malformed = new EnrollmentLink(values[0], values[1], values[2], values[3], values[4]);
-      var result = service(coach(), new ClientRelationshipRepository(id -> new EnrollmentSnapshot(malformed, journal.projection(UUID.fromString(link.versionId()))))).readEnrollment(request(coach()));
+      var result = service(coach(), new ClientRelationshipRepository(id -> new EnrollmentSnapshot(malformed, journal.projection(UUID.fromString(link.versionId())), journal.assignmentSnapshot(UUID.fromString(link.assignmentId()))))).readEnrollment(request(coach()));
       assertEquals(STORED_DATA_INVALID, result.status()); assertNull(result.view());
       assertFalse(result.toString().contains("private-malicious-id"));
     }
@@ -250,7 +252,7 @@ class ClientEnrollmentGuardedReadIntegrationTest {
     for (String id : Arrays.asList(null, "", "private-malformed-id", "1-1-1-1-1", new UUID(0, 0).toString()))
       invalid.add(new Projection(p.tenantId(), id, p.versionId(), p.phasesJson(), p.contentHash(), p.publishedAt(), "PUBLISHED"));
     for (Projection value : invalid) {
-      var result = service(coach(), new ClientRelationshipRepository(id -> new EnrollmentSnapshot(link, value))).readEnrollment(request(coach()));
+      var result = service(coach(), new ClientRelationshipRepository(id -> new EnrollmentSnapshot(link, value, journal.assignmentSnapshot(UUID.fromString(link.assignmentId()))))).readEnrollment(request(coach()));
       assertEquals(NOT_FOUND, result.status()); assertNull(result.view());
       assertFalse(result.toString().contains("private"));
     }
@@ -303,5 +305,82 @@ class ClientEnrollmentGuardedReadIntegrationTest {
       reader.join(5000);
       assertFalse(reader.isAlive());
     }
+  }
+
+  @Test void actualAssignmentSnapshotMatchesEnrollmentForBothRolesAfterReplay() throws Exception {
+    byte[] before = Files.readAllBytes(path);
+    UUID assignmentId = UUID.fromString(link.assignmentId());
+    var expected = new AssignmentView(TENANT.toString(), assignmentId, CLIENT.toString(), UUID.fromString(link.versionId()), "active");
+    for (var source : List.of(journal, JourneyJournal.open(path))) {
+      assertEquals(expected, source.assignmentSnapshot(assignmentId));
+      assertEquals(expected, source.kernel().assignmentSnapshot(assignmentId));
+      assertNull(source.assignmentSnapshot(OTHER));
+      assertNull(source.assignmentSnapshot(null));
+      for (Role role : List.of(Role.COACH, Role.CLIENT))
+        assertEquals(ALLOWED, read(synthetic(role, TENANT, CLIENT, enrollment), source).status());
+    }
+    assertArrayEquals(before, Files.readAllBytes(path));
+  }
+
+  @Test void missingForeignChangedAndInactiveAssignmentSnapshotsDenyAfterReplay() throws Exception {
+    byte[] before = Files.readAllBytes(path);
+    for (var source : List.of(journal, JourneyJournal.open(path))) {
+      var real = snapshot(source, enrollment);
+      AssignmentView a = real.assignment();
+      List<AssignmentView> invalid = new ArrayList<>();
+      invalid.add(null);
+      for (String value : Arrays.asList(null, "", "private-malformed-id", "1-1-1-1-1", OTHER.toString(), new UUID(0, 0).toString())) {
+        invalid.add(new AssignmentView(value, a.assignmentId(), a.clientId(), a.journeyVersionId(), "active"));
+        invalid.add(new AssignmentView(a.tenantId(), a.assignmentId(), value, a.journeyVersionId(), "active"));
+      }
+      for (UUID value : Arrays.asList(null, OTHER, new UUID(0, 0))) {
+        invalid.add(new AssignmentView(a.tenantId(), value, a.clientId(), a.journeyVersionId(), "active"));
+        invalid.add(new AssignmentView(a.tenantId(), a.assignmentId(), a.clientId(), value, "active"));
+      }
+      // SYNTHETIC_TEST_ONLY storage corruption: source has no assignment-revoke API.
+      for (String status : Arrays.asList(null, "", "UNKNOWN", "revoked", "inactive", "ACTIVE", "private-status"))
+        invalid.add(new AssignmentView(a.tenantId(), a.assignmentId(), a.clientId(), a.journeyVersionId(), status));
+      for (Role role : List.of(Role.COACH, Role.CLIENT)) {
+        var c = synthetic(role, TENANT, CLIENT, enrollment);
+        for (AssignmentView bad : invalid) {
+          var repository = new ClientRelationshipRepository(id -> new EnrollmentSnapshot(real.enrollment(), real.projection(), bad));
+          var result = service(c, repository).readEnrollment(request(c));
+          assertEquals(NOT_FOUND, result.status()); assertNull(result.view());
+          assertFalse(result.toString().contains("private"));
+        }
+        // A valid-shaped but changed enrollment assignment reference cannot resolve to the old record.
+        var changed = new EnrollmentLink(link.tenantId(), link.clientId(), link.versionId(), OTHER.toString(), link.enrollmentId());
+        var repository = new ClientRelationshipRepository(id -> new EnrollmentSnapshot(changed, real.projection(), a));
+        assertEquals(NOT_FOUND, service(c, repository).readEnrollment(request(c)).status());
+      }
+    }
+    assertArrayEquals(before, Files.readAllBytes(path));
+  }
+
+  @Test void assignmentLinkageCannotBypassGuardOrPublicationWithdrawal() throws Exception {
+    withdraw();
+    byte[] before = Files.readAllBytes(path);
+    for (var source : List.of(journal, JourneyJournal.open(path))) {
+      var real = snapshot(source, enrollment);
+      assertEquals("active", real.assignment().status(), "withdrawal does not revoke the local assignment");
+      for (Role role : List.of(Role.COACH, Role.CLIENT)) {
+        var c = synthetic(role, TENANT, CLIENT, enrollment);
+        assertEquals(NOT_FOUND, read(c, source).status(), "active assignment cannot defeat withdrawn projection");
+      }
+      for (Role role : List.of(Role.TENANT_ADMIN, Role.ARCAVA_APPLICATION_SERVICE)) {
+        var c = synthetic(role, TENANT, CLIENT, enrollment);
+        assertGuardDeniesBeforeLookup(c, request(c));
+      }
+      AtomicInteger calls = new AtomicInteger();
+      var unavailable = new ClientRelationshipRepository(id -> { calls.incrementAndGet(); throw new IllegalStateException("private-assignment-source"); });
+      var result = service(coach(), unavailable).readEnrollment(request(coach()));
+      assertEquals(READ_UNAVAILABLE, result.status()); assertNull(result.view());
+      assertEquals(1, calls.get()); assertFalse(result.toString().contains("private"));
+      var c = proof(coach(), Gate.ASSIGNMENT, null);
+      calls.set(0);
+      assertEquals(ACCESS_DENIED, service(c, unavailable).readEnrollment(request(c)).status());
+      assertEquals(0, calls.get());
+    }
+    assertArrayEquals(before, Files.readAllBytes(path));
   }
 }

@@ -218,6 +218,11 @@ public final class JourneyKernel {
     return remember(actor, key, fingerprint, result);
   }
 
+  /** Internal immutable storage snapshot, not an authorization decision or external attestation. */
+  public synchronized AssignmentView assignmentSnapshot(UUID assignmentId) {
+    return assignments.get(assignmentId);
+  }
+
   public synchronized PublishedView withdraw(Actor actor, String tenantId, UUID versionId) {
     coach(actor, tenantId);
     PublishedView prev = version(tenantId, versionId);

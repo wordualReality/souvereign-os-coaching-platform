@@ -4,13 +4,14 @@ import com.projectb.api.arcava.domain.ClientRelationshipModel;
 import com.projectb.api.domain.JourneyJournal;
 import com.projectb.api.domain.JourneyJournal.EnrollmentLink;
 import com.projectb.api.domain.JourneyJournal.Projection;
+import com.projectb.api.domain.JourneyKernel.AssignmentView;
 import java.util.Objects;
 import java.util.UUID;
 
 /** Local read-only adapter. Lookup is storage, never an authorization source. */
 public final class ClientRelationshipRepository {
   /** Immutable storage observations, not a trusted publication/identity attestation. */
-  public record EnrollmentSnapshot(EnrollmentLink enrollment, Projection projection) {}
+  public record EnrollmentSnapshot(EnrollmentLink enrollment, Projection projection, AssignmentView assignment) {}
   @FunctionalInterface public interface SnapshotLookup { EnrollmentSnapshot enrollment(UUID id); }
   public enum Status { FOUND, NOT_FOUND, INVALID_STORED_DATA, UNAVAILABLE }
   public record Lookup(Status status, ClientRelationshipModel model) {}
@@ -19,15 +20,17 @@ public final class ClientRelationshipRepository {
   public ClientRelationshipRepository(JourneyJournal journal) {
     Objects.requireNonNull(journal);
     this.lookup = id -> {
-      // Both journal methods and withdraw synchronize on this exact monitor.
+      // All three journal reads, assign and withdraw synchronize on this exact monitor.
       // Snapshot values are immutable records; no PUBLISHED result is cached.
       synchronized (journal) {
         EnrollmentLink link = journal.enrollment(id);
-        if (link == null) return new EnrollmentSnapshot(null, null);
-        UUID version;
-        try { version = UUID.fromString(link.versionId()); }
-        catch (RuntimeException malformed) { return new EnrollmentSnapshot(link, null); }
-        return new EnrollmentSnapshot(link, journal.projection(version));
+        if (link == null) return new EnrollmentSnapshot(null, null, null);
+        UUID version, assignment;
+        try {
+          version = UUID.fromString(link.versionId());
+          assignment = UUID.fromString(link.assignmentId());
+        } catch (RuntimeException malformed) { return new EnrollmentSnapshot(link, null, null); }
+        return new EnrollmentSnapshot(link, journal.projection(version), journal.assignmentSnapshot(assignment));
       }
     };
   }
@@ -54,6 +57,13 @@ public final class ClientRelationshipRepository {
         || !model.versionId().toString().equals(projection.versionId())
         || !canonicalIdentity(projection.journeyId())
         || !"PUBLISHED".equals(projection.publicationState())) return new Lookup(Status.NOT_FOUND, null);
+    AssignmentView assignment = snapshot.assignment();
+    // Source supports local "active" only; this is linkage, not trusted PIAC assignment evidence.
+    if (assignment == null || !model.assignmentId().equals(assignment.assignmentId())
+        || !model.tenantId().toString().equals(assignment.tenantId())
+        || !model.clientId().toString().equals(assignment.clientId())
+        || !model.versionId().equals(assignment.journeyVersionId())
+        || !"active".equals(assignment.status())) return new Lookup(Status.NOT_FOUND, null);
     return new Lookup(Status.FOUND, model);
   }
 

@@ -41,7 +41,8 @@ implementations and JAR lifecycle are unchanged.
 
 `ArcavaAccessService.readEnrollment` applies the unchanged OwnerGuard before any
 repository lookup. `ClientRelationshipRepository` reads only the existing
-`com.projectb.api.domain.JourneyJournal` enrollment and associated projection.
+`com.projectb.api.domain.JourneyJournal` enrollment, associated projection and
+actual internal assignment snapshot.
 `ClientRelationshipModel` validates all five existing EnrollmentLink identifiers
 as canonical, non-nil UUIDs: tenant, client, version, assignment and enrollment.
 Unsupported historical string IDs fail closed; no backfill or SQL schema is added.
@@ -55,8 +56,9 @@ The storage seam grants no authority. Coach assignment evidence is independently
 bound to the exact requested tenant/client/enrollment by OwnerGuard; the existing
 context has no separate assignment-ID attestation. This slice neither asserts
 that a PIAC decision attests the stored assignmentId nor adds such a claim. The
-stored assignment/version IDs are validated, not promoted to verified external
-authority. EnrollmentLink has no lifecycle/revocation/revision state; associated
+stored assignment/version IDs are validated and independently linked to the
+actual local assignment, not promoted to verified external authority.
+EnrollmentLink has no lifecycle/revocation/revision state; associated
 publication state is checked below. This is not the full CT-ARC-001/003 or
 enrollment lifecycle implementation.
 
@@ -79,10 +81,11 @@ has been added by this local developer-integration slice.
 ### Publication withdrawal fence
 
 After OwnerGuard allows the request, the repository captures the EnrollmentLink
-and the Projection selected by its stored version ID inside one
-`synchronized(journal)` block. The existing enrollment/projection accessors and
-withdraw method use this same monitor. The snapshot contains immutable source
-records, not a caller-provided trust boolean. Both records describe one local
+and the Projection selected by its stored version ID, plus the local AssignmentView
+selected by its stored assignment ID, inside one `synchronized(journal)` block.
+The journal accessors, assign and withdraw use this same monitor. The snapshot
+contains immutable source records, not a caller-provided trust boolean. All three
+records describe one local
 read point; there is no independently cached PUBLISHED result. A concurrent read
 may linearize before a withdrawal, but a read beginning after that withdrawal
 completes must see the withdrawn state. This is a single-JourneyJournal-instance
@@ -104,7 +107,38 @@ are denied, revoked/stale/unknown auth and missing live PIAC deny before lookup
 even after withdrawal, and a bounded monitor/latch test orders withdrawal before
 the blocked reader without sleeps. Reads preserve journal bytes. Projection
 fault fixtures are synthetic storage observations, not PIAC/KDB attestations.
-No Journal/Kernel/OwnerGuard changes, HTTP readiness changes or SQL are needed.
+The withdrawal implementation did not change Journal/Kernel/OwnerGuard behavior.
+The assignment follow-up below adds only read accessors to Journal/Kernel; no
+HTTP readiness, production authority or SQL changes are needed.
+
+### Local assignment-link consistency
+
+`JourneyKernel.assignmentSnapshot(UUID)` returns the existing immutable map
+entry or null. `JourneyJournal.assignmentSnapshot(UUID)` delegates under its
+monitor. These are internal storage APIs, with no HTTP exposure and no new
+authority registration or mutation. The repository reads them together with
+enrollment and projection under the same journal monitor. No new cache is added.
+
+The referenced record must exist, with assignment ID, tenant, client and journey
+version exactly matching the validated EnrollmentLink UUIDs. Only the existing
+source status `active` is accepted (lowercase, unlike projection `PUBLISHED`).
+Missing, malformed, foreign, swapped, null or unknown assignment fields/status
+return NOT_FOUND with null payload, just like an absent record. Storage faults
+still fail closed without exception text. No new revoke operation is invented:
+withdrawal leaves an assignment locally active, but the separate publication
+fence still denies access. The local record does not attest coach identity,
+consent, entitlement or a trusted PIAC assignment-ID binding; all existing guard
+evidence remains separately required before any storage access.
+
+Three additional integration cases exercise actual assignment creation/readback
+and exact replay for coach and client, 26 synthetic missing/mismatched/invalid
+assignment snapshots plus a changed enrollment reference for both roles before
+and after reopen, and active-assignment/withdrawal/guard/fault interactions.
+Unsupported corruptions and inactive/revoked statuses exist only in labeled
+SYNTHETIC_TEST_ONLY storage fault fixtures, never as newly supported source
+lifecycle operations. Existing denial-before-lookup, no-live-PIAC, revoked/stale
+guard, no-byte-mutation and monitor-ordering withdrawal tests are retained.
+The original 48 Maven regressions remain alongside these three cases.
 
 ## Role contract
 
