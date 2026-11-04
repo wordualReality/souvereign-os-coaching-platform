@@ -1,9 +1,9 @@
 {
-  "manifest_version": "1.0",
+  "manifest_version": "1.1",
   "decision_id": "ARC36P25-ARCAVA-RLS-BINDING-CONTRACT-DRAFT-01",
   "status": "PROPOSED_NOT_ADMITTED",
-  "scope": "ARC-07 owner-domain sensitive client read; ARC10-T110 foundation only",
-  "source_base_sha": "c07d7e671ef5018fb28751fd0f53493f6e6ed428",
+  "scope": "ARC-07 owner guard / ARC10-T110 foundation and local ARC10-T020 guarded enrollment read only",
+  "source_base_sha": "17a2d7339f20ed8879a1c5d119eb84c8e62bf37b",
   "sources": [
     {
       "id": "ARC-07",
@@ -29,6 +29,14 @@
     {
       "id": "ARC10-T110",
       "url": "https://docs.google.com/document/d/1bwZrdGHeQXZcU2V5kSQeGypNnMVUAp6I3aAgVY8fHKQ/edit"
+    },
+    {
+      "id": "ARC10-T020",
+      "url": "https://docs.google.com/document/d/1bwZrdGHeQXZcU2V5kSQeGypNnMVUAp6I3aAgVY8fHKQ/edit"
+    },
+    {
+      "id": "ARC09-U02",
+      "url": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit"
     }
   ],
   "components": {
@@ -37,7 +45,11 @@
     "services/api/src/main/java/com/projectb/api/arcava/security/RoleScopePolicy.java": "85d60f7c99d305e0e1fa5a955ad8920fb4d8cfc184f74cf6c07379b41c246057",
     "services/api/src/main/java/com/projectb/api/arcava/services/CoachClientAccessService.java": "8697aa6b342bf806824c98bc6c9f7f5a57a1c5c950380661f0bc698cea01096e",
     "services/api/src/test/java/com/projectb/api/arcava/security/OwnerGuardContractTest.java": "205db8501abc80f03a53d7942e56f0bb029e18106f46405fbfc10ee10a1e75a7",
-    "docs/arcava/security/owner-guard-rls-binding-contract-draft.md": "15108a581861d136d43ae68d279ef7684247209b7c5862687c4f1e1c25364a77"
+    "docs/arcava/security/owner-guard-rls-binding-contract-draft.md": "3480ffcb14eb124943f49351cd73ce94c8d388ba131dfed490ff4d20ece18654",
+    "services/api/src/main/java/com/projectb/api/arcava/domain/ClientRelationshipModel.java": "343d991742a84117c921d3df049f42e32b4dffaff1bcdce15d9df2d2e06ede18",
+    "services/api/src/main/java/com/projectb/api/arcava/repositories/ClientRelationshipRepository.java": "38aa3de6a0dd2ce887fd38eadff1eaf9ca3500a7b4064e8d2c92024e9f6c67bb",
+    "services/api/src/main/java/com/projectb/api/arcava/services/ArcavaAccessService.java": "621e5514befb145ef0df9641d0cee182b6d6cee468c6d9bd9df8e77b70e7f68b",
+    "services/api/src/test/java/com/projectb/api/arcava/security/ClientEnrollmentGuardedReadIntegrationTest.java": "78046627ef112c0ce7c5a014ee4be93c9b254b91b21d4a8ab359d766c2375938"
   },
   "gates": [
     "SESSION",
@@ -82,5 +94,29 @@
   "SQL_EXECUTION": "NONE",
   "live_PIAC_KDB": "NONE",
   "security_acceptance": "NOT_GRANTED",
-  "T150": "PARTIAL"
+  "T150": "PARTIAL",
+  "enrollment_read": {
+    "service": "ArcavaAccessService.readEnrollment",
+    "storage": "JourneyJournal.enrollment(UUID) read-only",
+    "order": [
+      "OwnerGuard.authorize",
+      "repository lookup",
+      "stored tenant/client/enrollment exact binding",
+      "minimized immutable view"
+    ],
+    "view_fields": [
+      "enrollmentId",
+      "journeyVersionId"
+    ],
+    "missing_or_mismatched": "NOT_FOUND with no payload",
+    "invalid_stored_identity": "STORED_DATA_INVALID with no raw values",
+    "storage_fault": "READ_UNAVAILABLE with no exception payload",
+    "stored_ids": "canonical non-nil UUIDs only; unsupported strings rejected",
+    "assignment_scope": "guard evidence bound to resource; no separate stored assignmentId attestation or invented claim",
+    "replay": "real create/update/publish/assign; exact persisted identities after reopen",
+    "live_adapter": "NONE",
+    "T020_FULL": "NOT_ADMITTED",
+    "T110_FULL": "NOT_ADMITTED",
+    "A09_T07_T08_T09_T44_ORIGINAL": "NOT_EXECUTED"
+  }
 }

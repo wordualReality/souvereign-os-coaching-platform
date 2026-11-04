@@ -37,6 +37,44 @@ Package access is a code-organization boundary, not a cryptographic attestation;
 a future adapter requires separate source/identity review. Current PIAC/KDB NONE
 implementations and JAR lifecycle are unchanged.
 
+## Local T020 enrollment read integration
+
+`ArcavaAccessService.readEnrollment` applies the unchanged OwnerGuard before any
+repository lookup. `ClientRelationshipRepository` reads only the existing
+`com.projectb.api.domain.JourneyJournal.enrollment(UUID)` snapshot.
+`ClientRelationshipModel` validates all five existing EnrollmentLink identifiers
+as canonical, non-nil UUIDs: tenant, client, version, assignment and enrollment.
+Unsupported historical string IDs fail closed; no backfill or SQL schema is added.
+After authorization the service independently compares stored tenant/client/
+enrollment with request tenant/subject/resource. Missing and mismatched entries
+both return NOT_FOUND without payload. Invalid stored values and storage faults
+return safe typed statuses with no raw values or exceptions. Successful reads
+expose only enrollment and journey-version identifiers in an immutable view.
+
+The storage seam grants no authority. Coach assignment evidence is independently
+bound to the exact requested tenant/client/enrollment by OwnerGuard; the existing
+context has no separate assignment-ID attestation. This slice neither asserts
+that a PIAC decision attests the stored assignmentId nor adds such a claim. The
+stored assignment/version IDs are validated, not promoted to verified external
+authority. EnrollmentLink has no lifecycle/revocation/revision state, so this is
+not the full CT-ARC-001/003 or enrollment lifecycle implementation.
+
+The integration suite actually creates, updates, publishes and assigns through
+the existing journal APIs with SYNTHETIC_TEST_ONLY canonical pins and consent.
+Principal/tenant/client IDs and trust clock are fixed. The journal generates its
+own draft/assignment IDs and publication timestamp; tests preserve those exact
+persisted values across reopen instead of inventing an unsupported clock/ID API.
+Positive and negative reads are checked after journal replay, including unchanged
+bytes and denied-before-lookup counters. Malformed stored links use a storage
+fault-injection seam; unsupported client IDs are also persisted/replayed through
+the actual source APIs. No caller body, header or bearer is trusted.
+
+Trace: ARC10-T020 TENANT_CLIENT_ACCESS; ARC09-U02/U11; ARC-07 and ATC-07
+independent owner guards. T020 and T110 full acceptance remain NOT_ADMITTED;
+original A09-T07/T08/T09/T44 remain NOT_EXECUTED. Q1–Q4 below remain OPEN and
+PROPOSED_NOT_ADMITTED. No live route, production bean, PIAC/KDB adapter or SQL
+has been added by this local developer-integration slice.
+
 ## Role contract
 
 | Domain role | Grounded scope | This sensitive-read service |
