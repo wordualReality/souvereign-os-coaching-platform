@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kdb:draft:c08:seasonal-botanical-preview:v1",
+  "title": "KDB C08 B01 synthetic offline preview — draft, not an admitted cross-lane API",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "scope", "mode", "execution", "admission", "snapshot_trust", "decision", "reason", "provenance"],
+  "properties": {
+    "schema_version": {"const": "kdb.c08.seasonal-botanical.preview.v1"},
+    "scope": {"const": "SYNTHETIC_TEST_ONLY"},
+    "mode": {"const": "PREVIEW_ONLY"},
+    "execution": {"const": "NON_EXECUTABLE"},
+    "admission": {"const": "NOT_ADMITTED"},
+    "snapshot_trust": {"const": "UNTRUSTED_SYNTHETIC_SNAPSHOT"},
+    "decision": {"enum": ["PREVIEW", "ABSTAIN"]},
+    "reason": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["availability"],
+      "properties": {
+        "availability": {"enum": ["UNAVAILABLE", "PINNED_UNTRUSTED"]},
+        "source_id": {"type": "string", "pattern": "^SYN-SRC-[A-Z0-9-]+$"},
+        "source_version_id": {"type": "string", "pattern": "^SYN-VER-[A-Z0-9-]+$"},
+        "current_version_id": {"type": "string"},
+        "rights_status": {"const": "ADMITTED"},
+        "license_status": {"const": "SYNTHETIC_FIXTURE_ONLY"},
+        "rights_checked_as_of": {"type": "string", "format": "date"},
+        "content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "lifecycle_disposition": {"const": "SYNTHETIC_PREVIEW"},
+        "knowledge_as_of": {"type": "string", "format": "date"},
+        "statement_id": {"type": "string"},
+        "evidence_locator": {"type": "string", "pattern": "^fixture://"}
+      },
+      "allOf": [
+        {"if": {"properties": {"availability": {"const": "PINNED_UNTRUSTED"}}, "required": ["availability"]}, "then": {"required": ["source_id", "source_version_id", "current_version_id", "rights_status", "license_status", "rights_checked_as_of", "content_sha256", "lifecycle_disposition", "knowledge_as_of", "statement_id", "evidence_locator"]}},
+        {"if": {"properties": {"availability": {"const": "UNAVAILABLE"}}, "required": ["availability"]}, "then": {"maxProperties": 1}}
+      ]
+    },
+    "plant_id": {"type": "string", "pattern": "^SYNTHETIC:"},
+    "scientific_name": {"type": "string", "pattern": "^Synthetic species "},
+    "identity_status": {"const": "UNAMBIGUOUS_SYNTHETIC"},
+    "lookalike_status": {"const": "NO_LOOKALIKE_IN_SYNTHETIC_FIXTURE"},
+    "plant_part": {"enum": ["LEAF", "FRUIT", "ROOT"]},
+    "region": {"type": ["string", "null"], "description": "Optional coarse synthetic source region, never user location."},
+    "hemisphere": {"enum": ["NORTH", "SOUTH"]},
+    "month": {"type": "integer", "minimum": 1, "maximum": 12},
+    "typical_months": {"type": "array", "items": {"type": "integer", "minimum": 1, "maximum": 12}, "minItems": 1, "uniqueItems": true},
+    "in_typical_season": {"type": "boolean"},
+    "uncertainty": {"enum": ["SYNTHETIC_STABLE", "UNCERTAIN", "DISPUTED"]},
+    "interpretation": {"const": "TYPICAL_NOT_REALTIME_INVENTORY"}
+  },
+  "allOf": [{
+    "if": {"properties": {"decision": {"const": "PREVIEW"}}, "required": ["decision"]},
+    "then": {"required": ["provenance", "plant_id", "scientific_name", "identity_status", "lookalike_status", "plant_part", "region", "hemisphere", "month", "typical_months", "in_typical_season", "uncertainty", "interpretation"], "properties": {"reason": {"const": "SYNTHETIC_TYPICAL_SEASON"}, "uncertainty": {"const": "SYNTHETIC_STABLE"}, "provenance": {"properties": {"availability": {"const": "PINNED_UNTRUSTED"}}}}}
+  }]
+}

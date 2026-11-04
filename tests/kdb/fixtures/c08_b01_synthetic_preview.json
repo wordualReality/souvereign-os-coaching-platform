@@ -1,0 +1,46 @@
+{
+  "snapshot": {
+    "schema_version": "kdb.c08.seasonal-botanical.preview.v1",
+    "tenant_scope": "SYNTHETIC_TENANT",
+    "purpose": "SYNTHETIC_KNOWLEDGE_PREVIEW",
+    "knowledge_as_of": "2026-11-04",
+    "sources": [{
+      "source_id": "SYN-SRC-ALPHA",
+      "source_version_id": "SYN-VER-ALPHA-1",
+      "current_version_id": "SYN-VER-ALPHA-1",
+      "tenant_scope": "SYNTHETIC_TENANT",
+      "purpose": "SYNTHETIC_KNOWLEDGE_PREVIEW",
+      "rights_status": "ADMITTED",
+      "license_status": "SYNTHETIC_FIXTURE_ONLY",
+      "rights_checked_as_of": "2026-11-04",
+      "lifecycle_disposition": "SYNTHETIC_PREVIEW",
+      "content_sha256": "5968b56fdb04f74431ba07107652f5b6affde86bcbccdea2eb15a34b2d199abd",
+      "content": {
+        "plant_id": "SYNTHETIC:ALPHA",
+        "scientific_name": "Synthetic species ALPHA",
+        "identity_status": "UNAMBIGUOUS_SYNTHETIC",
+        "lookalike_status": "NO_LOOKALIKE_IN_SYNTHETIC_FIXTURE",
+        "documented_parts": ["LEAF"],
+        "statement_id": "SYN-STMT-ALPHA-1",
+        "evidence_locator": "fixture://synthetic-source/alpha#season-1",
+        "season_records": [
+          {"region": "SYN-AA", "hemisphere": "NORTH", "months": [3, 4, 5], "uncertainty": "SYNTHETIC_STABLE"},
+          {"region": "SYN-AA", "hemisphere": "SOUTH", "months": [9, 10, 11], "uncertainty": "SYNTHETIC_STABLE"},
+          {"region": "SYN-BB", "hemisphere": "NORTH", "months": [6, 7], "uncertainty": "UNCERTAIN"}
+        ]
+      }
+    }]
+  },
+  "query": {
+    "tenant_scope": "SYNTHETIC_TENANT",
+    "purpose": "SYNTHETIC_KNOWLEDGE_PREVIEW",
+    "knowledge_as_of": "2026-11-04",
+    "source_id": "SYN-SRC-ALPHA",
+    "source_version_id": "SYN-VER-ALPHA-1",
+    "plant_id": "SYNTHETIC:ALPHA",
+    "region": "SYN-AA",
+    "hemisphere": "NORTH",
+    "month": 4,
+    "plant_part": "LEAF"
+  }
+}

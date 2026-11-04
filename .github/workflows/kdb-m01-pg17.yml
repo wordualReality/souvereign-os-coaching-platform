@@ -47,6 +47,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install contract validation dependencies
+        run: python3 -m pip install -r requirements-dev.txt
       - name: Install psql client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
       - uses: actions/setup-node@v4
@@ -93,6 +95,7 @@ jobs:
           python3 tests/kdb/test_m01_baseline_adoption.py
           python3 tests/kdb/test_p25_creator_default_acl.py
           python3 tests/kdb/test_offline_governance_promotion.py
+          python3 tests/kdb/test_offline_seasonal_botanical.py
           python3 tests/kdb/test_piac_fail_closed.py
           python3 tests/kdb/kdb_m01_06_security_static.py
           python3 tests/kdb/hosted_recovery_preflight_diff.py
