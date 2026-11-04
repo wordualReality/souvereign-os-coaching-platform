@@ -41,7 +41,7 @@ implementations and JAR lifecycle are unchanged.
 
 `ArcavaAccessService.readEnrollment` applies the unchanged OwnerGuard before any
 repository lookup. `ClientRelationshipRepository` reads only the existing
-`com.projectb.api.domain.JourneyJournal.enrollment(UUID)` snapshot.
+`com.projectb.api.domain.JourneyJournal` enrollment and associated projection.
 `ClientRelationshipModel` validates all five existing EnrollmentLink identifiers
 as canonical, non-nil UUIDs: tenant, client, version, assignment and enrollment.
 Unsupported historical string IDs fail closed; no backfill or SQL schema is added.
@@ -56,8 +56,9 @@ bound to the exact requested tenant/client/enrollment by OwnerGuard; the existin
 context has no separate assignment-ID attestation. This slice neither asserts
 that a PIAC decision attests the stored assignmentId nor adds such a claim. The
 stored assignment/version IDs are validated, not promoted to verified external
-authority. EnrollmentLink has no lifecycle/revocation/revision state, so this is
-not the full CT-ARC-001/003 or enrollment lifecycle implementation.
+authority. EnrollmentLink has no lifecycle/revocation/revision state; associated
+publication state is checked below. This is not the full CT-ARC-001/003 or
+enrollment lifecycle implementation.
 
 The integration suite actually creates, updates, publishes and assigns through
 the existing journal APIs with SYNTHETIC_TEST_ONLY canonical pins and consent.
@@ -74,6 +75,36 @@ independent owner guards. T020 and T110 full acceptance remain NOT_ADMITTED;
 original A09-T07/T08/T09/T44 remain NOT_EXECUTED. Q1–Q4 below remain OPEN and
 PROPOSED_NOT_ADMITTED. No live route, production bean, PIAC/KDB adapter or SQL
 has been added by this local developer-integration slice.
+
+### Publication withdrawal fence
+
+After OwnerGuard allows the request, the repository captures the EnrollmentLink
+and the Projection selected by its stored version ID inside one
+`synchronized(journal)` block. The existing enrollment/projection accessors and
+withdraw method use this same monitor. The snapshot contains immutable source
+records, not a caller-provided trust boolean. Both records describe one local
+read point; there is no independently cached PUBLISHED result. A concurrent read
+may linearize before a withdrawal, but a read beginning after that withdrawal
+completes must see the withdrawn state. This is a single-JourneyJournal-instance
+consistency boundary, not multi-process file coordination or SQL isolation.
+
+Only exact PUBLISHED allows a view. Missing projection, WITHDRAWN, null/unknown/
+lowercase state, projection tenant/version mismatch and malformed projection
+identifiers return NOT_FOUND without payload. Projection tenant and version must
+exactly match the already validated enrollment UUIDs; journey ID must also be a
+canonical non-nil UUID. Raw phases, hashes, timestamps and errors are never
+returned. A malformed enrollment still fails closed and storage faults return
+READ_UNAVAILABLE. The existing service additionally checks request tenant,
+subject and enrollment identity before returning its minimized view.
+
+Regression tests keep the existing 13 integration cases and add four cases:
+real journal withdrawal denies coach and client before/after replay, repeated
+withdrawal is idempotent and keeps the enrollment, invalid publication snapshots
+are denied, revoked/stale/unknown auth and missing live PIAC deny before lookup
+even after withdrawal, and a bounded monitor/latch test orders withdrawal before
+the blocked reader without sleeps. Reads preserve journal bytes. Projection
+fault fixtures are synthetic storage observations, not PIAC/KDB attestations.
+No Journal/Kernel/OwnerGuard changes, HTTP readiness changes or SQL are needed.
 
 ## Role contract
 

@@ -5,12 +5,15 @@ import com.projectb.api.arcava.services.ArcavaAccessService;
 import com.projectb.api.arcava.services.ArcavaAccessService.Result;
 import com.projectb.api.domain.JourneyJournal;
 import com.projectb.api.domain.JourneyJournal.EnrollmentLink;
+import com.projectb.api.domain.JourneyJournal.Projection;
+import com.projectb.api.arcava.repositories.ClientRelationshipRepository.EnrollmentSnapshot;
 import com.projectb.api.domain.JourneyKernel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -93,7 +96,7 @@ class ClientEnrollmentGuardedReadIntegrationTest {
     for (var source : List.of(journal, JourneyJournal.open(path))) {
       AtomicInteger calls = new AtomicInteger();
       var repository = new ClientRelationshipRepository(id -> {
-        calls.incrementAndGet(); return source.enrollment(id);
+        calls.incrementAndGet(); return snapshot(source, id);
       });
       var result = service(c, repository).readEnrollment(request);
       assertEquals(ACCESS_DENIED, result.status()); assertNull(result.view());
@@ -101,6 +104,13 @@ class ClientEnrollmentGuardedReadIntegrationTest {
       assertFalse(result.toString().contains("synthetic-policy"));
     }
     assertArrayEquals(before, Files.readAllBytes(path));
+  }
+
+  static EnrollmentSnapshot snapshot(JourneyJournal source, UUID id) {
+    synchronized (source) {
+      var entry = source.enrollment(id);
+      return new EnrollmentSnapshot(entry, entry == null ? null : source.projection(UUID.fromString(entry.versionId())));
+    }
   }
 
   @Test void assignedCoachReadsPersistedEnrollmentAndExactReplay() throws Exception {
@@ -131,7 +141,7 @@ class ClientEnrollmentGuardedReadIntegrationTest {
   }
   @Test void substitutedStoredEnrollmentIdCannotReturnPayload() {
     var swapped = new EnrollmentLink(link.tenantId(), link.clientId(), link.versionId(), link.assignmentId(), OTHER.toString());
-    var result = service(coach(), new ClientRelationshipRepository(id -> swapped)).readEnrollment(request(coach()));
+    var result = service(coach(), new ClientRelationshipRepository(id -> new EnrollmentSnapshot(swapped, journal.projection(UUID.fromString(link.versionId()))))).readEnrollment(request(coach()));
     assertEquals(NOT_FOUND, result.status()); assertNull(result.view());
   }
   @Test void everyMissingIndependentGateDeniesBeforeLookupAndAfterReplay() throws Exception {
@@ -162,7 +172,7 @@ class ClientEnrollmentGuardedReadIntegrationTest {
   @Test void noLivePiacNeverLooksUpEvenAnExistingEnrollment() throws Exception {
     byte[] before = Files.readAllBytes(path);
     AtomicInteger calls = new AtomicInteger();
-    var repository = new ClientRelationshipRepository(id -> { calls.incrementAndGet(); return link; });
+    var repository = new ClientRelationshipRepository(id -> { calls.incrementAndGet(); return snapshot(journal, id); });
     var result = new ArcavaAccessService(new OwnerGuard(CLOCK), repository).readEnrollment(request(coach()));
     assertEquals(ACCESS_DENIED, result.status()); assertNull(result.view()); assertEquals(0, calls.get());
     assertArrayEquals(before, Files.readAllBytes(path));
@@ -178,7 +188,7 @@ class ClientEnrollmentGuardedReadIntegrationTest {
     for (int field = 0; field < valid.length; field++) for (String invalid : Arrays.asList(null, "", "private-malicious-id", "1-1-1-1-1", new UUID(0, 0).toString())) {
       String[] values = valid.clone(); values[field] = invalid;
       var malformed = new EnrollmentLink(values[0], values[1], values[2], values[3], values[4]);
-      var result = service(coach(), new ClientRelationshipRepository(id -> malformed)).readEnrollment(request(coach()));
+      var result = service(coach(), new ClientRelationshipRepository(id -> new EnrollmentSnapshot(malformed, journal.projection(UUID.fromString(link.versionId()))))).readEnrollment(request(coach()));
       assertEquals(STORED_DATA_INVALID, result.status()); assertNull(result.view());
       assertFalse(result.toString().contains("private-malicious-id"));
     }
@@ -201,5 +211,97 @@ class ClientEnrollmentGuardedReadIntegrationTest {
     var result = service(coach(), repository).readEnrollment(request(coach()));
     assertEquals(READ_UNAVAILABLE, result.status()); assertNull(result.view());
     assertFalse(result.toString().contains("private-journal-data"));
+  }
+
+  void withdraw() throws Exception {
+    journal.withdraw(new JourneyKernel.Actor(TENANT.toString(), COACH.toString(), JourneyKernel.Role.COACH), UUID.fromString(link.versionId()));
+  }
+
+  @Test void withdrawalDeniesCoachAndSelfClientOnSameServiceAndAfterReplay() throws Exception {
+    for (Role role : List.of(Role.COACH, Role.CLIENT)) {
+      var c = synthetic(role, TENANT, CLIENT, enrollment);
+      assertBeforeAndAfterReplay(c, ALLOWED);
+    }
+    var c = coach();
+    var sameService = service(c, new ClientRelationshipRepository(journal));
+    assertEquals(ALLOWED, sameService.readEnrollment(request(c)).status());
+    withdraw();
+    assertEquals(link, journal.enrollment(enrollment), "enrollment remains persisted");
+    assertEquals("WITHDRAWN", journal.projection(UUID.fromString(link.versionId())).publicationState());
+    for (Role role : List.of(Role.COACH, Role.CLIENT))
+      assertBeforeAndAfterReplay(synthetic(role, TENANT, CLIENT, enrollment), NOT_FOUND);
+    assertEquals(NOT_FOUND, sameService.readEnrollment(request(c)).status(), "must not cache PUBLISHED");
+    byte[] after = Files.readAllBytes(path);
+    withdraw(); // supported idempotent repeat, no new record
+    assertArrayEquals(after, Files.readAllBytes(path));
+    assertEquals(link, JourneyJournal.open(path).enrollment(enrollment));
+  }
+
+  @Test void allUnknownMissingAndMalformedPublicationSnapshotsFailClosed() {
+    Projection p = journal.projection(UUID.fromString(link.versionId()));
+    List<Projection> invalid = new ArrayList<>();
+    invalid.add(null);
+    for (String state : Arrays.asList(null, "", "UNKNOWN", "WITHDRAWN", "published", "private-state"))
+      invalid.add(new Projection(p.tenantId(), p.journeyId(), p.versionId(), p.phasesJson(), p.contentHash(), p.publishedAt(), state));
+    for (String id : Arrays.asList(null, "", "private-malformed-id", "1-1-1-1-1", OTHER.toString(), new UUID(0, 0).toString())) {
+      invalid.add(new Projection(id, p.journeyId(), p.versionId(), p.phasesJson(), p.contentHash(), p.publishedAt(), "PUBLISHED"));
+      invalid.add(new Projection(p.tenantId(), p.journeyId(), id, p.phasesJson(), p.contentHash(), p.publishedAt(), "PUBLISHED"));
+    }
+    for (String id : Arrays.asList(null, "", "private-malformed-id", "1-1-1-1-1", new UUID(0, 0).toString()))
+      invalid.add(new Projection(p.tenantId(), id, p.versionId(), p.phasesJson(), p.contentHash(), p.publishedAt(), "PUBLISHED"));
+    for (Projection value : invalid) {
+      var result = service(coach(), new ClientRelationshipRepository(id -> new EnrollmentSnapshot(link, value))).readEnrollment(request(coach()));
+      assertEquals(NOT_FOUND, result.status()); assertNull(result.view());
+      assertFalse(result.toString().contains("private"));
+    }
+    var missing = service(coach(), new ClientRelationshipRepository(id -> null)).readEnrollment(request(coach()));
+    assertEquals(READ_UNAVAILABLE, missing.status()); assertNull(missing.view());
+  }
+
+  @Test void revokedStaleAndNoLiveIdentityStillDenyBeforeLookupAfterWithdrawal() throws Exception {
+    withdraw();
+    for (Gate gate : Gate.values()) for (State state : List.of(State.REVOKED, State.STALE, State.UNKNOWN)) {
+      var c = coach(); var p = c.evidence.get(gate);
+      var invalid = proof(c, gate, new Evidence(p.gate(), p.principal(), p.tenant(), p.subject(), p.resource(), p.purpose(), p.operation(), p.policyRef(), p.decisionRef(), 1, state, p.effectiveAt(), p.expiresAt(), null));
+      assertGuardDeniesBeforeLookup(invalid, request(invalid));
+    }
+    byte[] before = Files.readAllBytes(path);
+    for (var source : List.of(journal, JourneyJournal.open(path))) {
+      AtomicInteger calls = new AtomicInteger();
+      var repository = new ClientRelationshipRepository(id -> { calls.incrementAndGet(); return snapshot(source, id); });
+      var result = new ArcavaAccessService(new OwnerGuard(CLOCK), repository).readEnrollment(request(coach()));
+      assertEquals(ACCESS_DENIED, result.status()); assertNull(result.view()); assertEquals(0, calls.get());
+    }
+    assertArrayEquals(before, Files.readAllBytes(path));
+  }
+
+  @Test void readWaitsForJournalMonitorAndSeesCommittedWithdrawalWithoutSleeps() throws Exception {
+    var c = coach();
+    var access = service(c, new ClientRelationshipRepository(journal));
+    CompletableFuture<Result> completed = new CompletableFuture<>();
+    CountDownLatch started = new CountDownLatch(1);
+    Thread reader = Thread.ofPlatform().unstarted(() -> {
+      started.countDown();
+      try { completed.complete(access.readEnrollment(request(c))); }
+      catch (Throwable failure) { completed.completeExceptionally(failure); }
+    });
+    try {
+      synchronized (journal) {
+        reader.start();
+        assertTrue(started.await(5, TimeUnit.SECONDS));
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        while (reader.getState() != Thread.State.BLOCKED && !completed.isDone() && System.nanoTime() < deadline)
+          Thread.onSpinWait();
+        assertEquals(Thread.State.BLOCKED, reader.getState(), "reader must use the withdrawal monitor");
+        assertFalse(completed.isDone());
+        withdraw(); // reentrant monitor; commits before reader may snapshot
+      }
+      Result result = completed.get(5, TimeUnit.SECONDS);
+      assertEquals(NOT_FOUND, result.status()); assertNull(result.view());
+      assertBeforeAndAfterReplay(c, NOT_FOUND);
+    } finally {
+      reader.join(5000);
+      assertFalse(reader.isAlive());
+    }
   }
 }
