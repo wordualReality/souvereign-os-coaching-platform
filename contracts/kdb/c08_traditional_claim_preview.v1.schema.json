@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kdb:draft:c08:traditional-claim-preview:v1",
+  "title": "KDB C08 B02 synthetic traditional claim preview — draft, not an admitted API",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "scope", "mode", "execution", "admission", "snapshot_trust", "consumer_preference_handling", "provenance", "decision", "reason"],
+  "properties": {
+    "schema_version": {"const": "kdb.c08.traditional-claim.preview.v1"},
+    "scope": {"const": "SYNTHETIC_TEST_ONLY"},
+    "mode": {"const": "PREVIEW_ONLY"},
+    "execution": {"const": "NON_EXECUTABLE"},
+    "admission": {"const": "NOT_ADMITTED"},
+    "snapshot_trust": {"const": "UNTRUSTED_SYNTHETIC_SNAPSHOT"},
+    "consumer_preference_handling": {"const": "NOT_IMPORTED_AS_KDB_AUTHORITY"},
+    "decision": {"enum": ["PREVIEW_CONTEXT_ONLY", "ABSTAIN"]},
+    "reason": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+    "provenance": {
+      "type": "object", "additionalProperties": false, "required": ["availability"],
+      "properties": {
+        "availability": {"enum": ["UNAVAILABLE", "SOURCE_PINNED_UNTRUSTED", "CLAIM_PINNED_UNTRUSTED"]},
+        "source_id": {"type": "string", "pattern": "^SYN-SRC-[A-Z0-9-]+$"},
+        "source_version_id": {"type": "string", "pattern": "^SYN-VER-[A-Z0-9-]+$"},
+        "source_current_version_id": {"type": "string"},
+        "source_content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "rights_status": {"const": "ADMITTED"},
+        "license_status": {"const": "SYNTHETIC_FIXTURE_ONLY"},
+        "rights_checked_as_of": {"type": "string", "format": "date"},
+        "knowledge_as_of": {"type": "string", "format": "date"},
+        "lifecycle_disposition": {"const": "SYNTHETIC_PREVIEW"},
+        "statement_id": {"type": "string", "pattern": "^SYN-STMT-"},
+        "evidence_locator": {"type": "string", "pattern": "^fixture://"},
+        "claim_id": {"type": "string", "pattern": "^SYN-CLAIM-"},
+        "claim_version_id": {"type": "string", "pattern": "^SYN-CLAIMVER-"},
+        "claim_current_version_id": {"type": "string"},
+        "claim_content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "allOf": [
+        {"if": {"properties": {"availability": {"const": "UNAVAILABLE"}}, "required": ["availability"]}, "then": {"maxProperties": 1}},
+        {"if": {"properties": {"availability": {"enum": ["SOURCE_PINNED_UNTRUSTED", "CLAIM_PINNED_UNTRUSTED"]}}, "required": ["availability"]}, "then": {"required": ["source_id", "source_version_id", "source_current_version_id", "source_content_sha256", "rights_status", "license_status", "rights_checked_as_of", "knowledge_as_of", "lifecycle_disposition", "statement_id", "evidence_locator"]}},
+        {"if": {"properties": {"availability": {"const": "CLAIM_PINNED_UNTRUSTED"}}, "required": ["availability"]}, "then": {"required": ["claim_id", "claim_version_id", "claim_current_version_id", "claim_content_sha256"]}}
+      ]
+    },
+    "claim_type": {"const": "TRADITIONAL_CONTEXT"},
+    "framework": {"enum": ["TCM", "AYURVEDA"]},
+    "statement_code": {"enum": ["SYN-TRAD-ALPHA", "SYN-TRAD-BETA"]},
+    "evidence_type": {"const": "TRADITIONAL_TEXT_SYNTHETIC"},
+    "evidence_uncertainty": {"const": "UNVERIFIED"},
+    "review_status": {"const": "UNVERIFIED_SYNTHETIC"},
+    "evidence_boundary": {"const": "NO_BIOMEDICAL_EFFICACY_OR_DIAGNOSIS_INFERRED"}
+  },
+  "allOf": [{
+    "if": {"properties": {"decision": {"const": "PREVIEW_CONTEXT_ONLY"}}, "required": ["decision"]},
+    "then": {"required": ["claim_type", "framework", "statement_code", "evidence_type", "evidence_uncertainty", "review_status", "evidence_boundary"], "properties": {"reason": {"const": "SYNTHETIC_TRADITIONAL_CONTEXT"}, "provenance": {"properties": {"availability": {"const": "CLAIM_PINNED_UNTRUSTED"}}}}}
+  }]
+}

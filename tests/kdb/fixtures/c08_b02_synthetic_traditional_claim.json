@@ -1,0 +1,55 @@
+{
+  "snapshot": {
+    "schema_version": "kdb.c08.traditional-claim.preview.v1",
+    "tenant_scope": "SYNTHETIC_TENANT",
+    "purpose": "SYNTHETIC_CLAIM_CONTEXT",
+    "knowledge_as_of": "2026-11-04",
+    "sources": [{
+      "source_id": "SYN-SRC-TRAD-ALPHA",
+      "source_version_id": "SYN-VER-TRAD-ALPHA-1",
+      "current_version_id": "SYN-VER-TRAD-ALPHA-1",
+      "tenant_scope": "SYNTHETIC_TENANT",
+      "purpose": "SYNTHETIC_CLAIM_CONTEXT",
+      "rights_status": "ADMITTED",
+      "license_status": "SYNTHETIC_FIXTURE_ONLY",
+      "rights_checked_as_of": "2026-11-04",
+      "lifecycle_disposition": "SYNTHETIC_PREVIEW",
+      "content_sha256": "0bf40daf2ca8b82adf6dd6ecf9c8dbed4e784b9d3fbcce810fe58af8f0b36e91",
+      "content": {
+        "fixture_source_label": "SYN-SOURCE-TRADITION-ALPHA",
+        "statement_id": "SYN-STMT-TRAD-ALPHA-1",
+        "evidence_locator": "fixture://traditional/alpha#statement-1",
+        "framework": "TCM"
+      }
+    }],
+    "claims": [{
+      "claim_id": "SYN-CLAIM-TRAD-ALPHA",
+      "claim_version_id": "SYN-CLAIMVER-TRAD-ALPHA-1",
+      "current_claim_version_id": "SYN-CLAIMVER-TRAD-ALPHA-1",
+      "source_id": "SYN-SRC-TRAD-ALPHA",
+      "source_version_id": "SYN-VER-TRAD-ALPHA-1",
+      "source_content_sha256": "0bf40daf2ca8b82adf6dd6ecf9c8dbed4e784b9d3fbcce810fe58af8f0b36e91",
+      "content_sha256": "49feafb68c1946277408720674a8a6c4a2ae258677467deb393710c64b899735",
+      "content": {
+        "claim_type": "TRADITIONAL_CONTEXT",
+        "framework": "TCM",
+        "statement_code": "SYN-TRAD-ALPHA",
+        "statement_id": "SYN-STMT-TRAD-ALPHA-1",
+        "evidence_locator": "fixture://traditional/alpha#statement-1",
+        "evidence_type": "TRADITIONAL_TEXT_SYNTHETIC",
+        "evidence_uncertainty": "UNVERIFIED",
+        "review_status": "UNVERIFIED_SYNTHETIC"
+      }
+    }]
+  },
+  "query": {
+    "tenant_scope": "SYNTHETIC_TENANT",
+    "purpose": "SYNTHETIC_CLAIM_CONTEXT",
+    "knowledge_as_of": "2026-11-04",
+    "source_id": "SYN-SRC-TRAD-ALPHA",
+    "source_version_id": "SYN-VER-TRAD-ALPHA-1",
+    "claim_id": "SYN-CLAIM-TRAD-ALPHA",
+    "claim_version_id": "SYN-CLAIMVER-TRAD-ALPHA-1",
+    "expected_framework": "TCM"
+  }
+}
