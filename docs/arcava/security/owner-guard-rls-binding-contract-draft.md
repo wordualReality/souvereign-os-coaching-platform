@@ -140,6 +140,55 @@ lifecycle operations. Existing denial-before-lookup, no-live-PIAC, revoked/stale
 guard, no-byte-mutation and monitor-ordering withdrawal tests are retained.
 The original 48 Maven regressions remain alongside these three cases.
 
+## T020 typed tenant/client identity snapshots
+
+`TenantModel.java` represents the bounded ATC-04 AG-ARC-001 BusinessTenant,
+AG-ARC-003 ClientProfile and EN-ARC-002 TenantMembership identity fields.
+Source: [ATC-04 identity/object and state registry](https://docs.google.com/document/d/1DEwzYlvC5etngjUnmAl5MCXQDWFQNgeaogxM1j8egQY/edit),
+ARC09-U02, ARC10-T020 and ARC-07 privacy. Distinct TenantId, ClientId,
+MembershipId and PiacPrincipalRef value types preserve object/owner namespaces.
+They use the existing local canonical non-nil UUID representation; no new
+namespace-prefixed wire ID format is admitted. UUID bytes alone cannot establish
+issuer, external provenance or identity equivalence, even if two namespaces use
+the same UUID. PIAC references are optional on ClientProfile and never import
+PrincipalIdentity or AuthSession ownership into Arcava.
+
+BusinessTenant supports only the four actual SM-ARC-01 labels: PROVISIONING,
+ACTIVE, SUSPENDED, CLOSED. A missing label is an explicit unresolved UNKNOWN;
+even a supplied ACTIVE label remains NOT_VERIFIED. No transitions or activation
+operations are implemented. ClientProfile profile_status values and membership
+lifecycle values are not concretely enumerated in the inspected source. They
+remain explicit UnresolvedLifecycle UNKNOWN/NOT_VERIFIED knowledge metadata,
+not invented domain enums. Their future actual state registries are unresolved
+implementation seams; no active client/membership state is inferred here.
+
+Membership retains a typed parent tenant and external principal reference, an
+explicit supplied created_at and optional exact uint64 revision. No timestamps,
+initial revisions, role labels, effective validity/revocation, current PIAC
+decision, policy or activation evidence are manufactured. Missing required
+identity/provenance fields are rejected; absent optional revision remains absent.
+ARC10's full membership role/validity/revocation and unique(tenant,principal,role)
+constraints require their complete admitted lifecycle/role contract and are not
+claimed by this minimal EN-ARC-002 identity snapshot.
+
+Records and their values are immutable. Scope checks compare tenant/client or
+membership-parent identity only, never authorize a sensitive read. Diagnostic
+strings redact principal/private refs and tenant labels/legal-scope refs; raw
+malformed identity inputs are not included in thrown errors. The model stores
+only an opaque optional SensitiveProfileRef, no private profile body. The actual
+PIAC authority and the existing OwnerGuard remain independent and closed.
+No new type is wired into ClientRelationshipModel/Repository/ArcavaAccessService:
+the full ClientProfile-to-principal equivalence/adapter contract is unresolved.
+
+Nine SYNTHETIC_TEST_ONLY contract tests cover distinct namespaces and optional
+refs, immutable values, malformed/nil/foreign-format identifiers, cross-tenant/
+wrong-client scope, required status/provenance, uint64 boundaries, redaction and
+default-closed sensitive-read decisions for every source TenantState label.
+The prior 51 Maven cases, including tenant-admin/service denial, assignment and
+withdrawal/replay regressions, are retained. No model grants tenant-admin blanket
+client access. This is a source-scoped developer model, not an admitted stored
+aggregate lifecycle, PIAC decision, T020/T110 completion or Security Acceptance.
+
 ## Role contract
 
 | Domain role | Grounded scope | This sensitive-read service |

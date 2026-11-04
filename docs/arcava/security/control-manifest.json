@@ -1,9 +1,9 @@
 {
-  "manifest_version": "1.3",
+  "manifest_version": "1.4",
   "decision_id": "ARC36P25-ARCAVA-RLS-BINDING-CONTRACT-DRAFT-01",
   "status": "PROPOSED_NOT_ADMITTED",
   "scope": "ARC-07 owner guard / ARC10-T110 foundation and local ARC10-T020 guarded enrollment read only",
-  "source_base_sha": "d46ac47182c33862fe3d3eaad236efadb1b12a23",
+  "source_base_sha": "802f9f2990ce040624d334db50a5e768ab43de7d",
   "sources": [
     {
       "id": "ARC-07",
@@ -37,6 +37,17 @@
     {
       "id": "ARC09-U02",
       "url": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit"
+    },
+    {
+      "id": "ATC-04",
+      "url": "https://docs.google.com/document/d/1DEwzYlvC5etngjUnmAl5MCXQDWFQNgeaogxM1j8egQY/edit",
+      "sections": [
+        "N1",
+        "AG-ARC-001",
+        "EN-ARC-002",
+        "AG-ARC-003",
+        "SM-ARC-01"
+      ]
     }
   ],
   "components": {
@@ -45,13 +56,15 @@
     "services/api/src/main/java/com/projectb/api/arcava/security/RoleScopePolicy.java": "85d60f7c99d305e0e1fa5a955ad8920fb4d8cfc184f74cf6c07379b41c246057",
     "services/api/src/main/java/com/projectb/api/arcava/services/CoachClientAccessService.java": "8697aa6b342bf806824c98bc6c9f7f5a57a1c5c950380661f0bc698cea01096e",
     "services/api/src/test/java/com/projectb/api/arcava/security/OwnerGuardContractTest.java": "205db8501abc80f03a53d7942e56f0bb029e18106f46405fbfc10ee10a1e75a7",
-    "docs/arcava/security/owner-guard-rls-binding-contract-draft.md": "798987b189a0d0a18bae52054e90bc6f044f9acdcdf11e5c8378f22c8d095587",
+    "docs/arcava/security/owner-guard-rls-binding-contract-draft.md": "25e9414dcbfb9c1205fe964ce2dbef7ae204bf0ce07ec325a1b111a5372a2090",
     "services/api/src/main/java/com/projectb/api/arcava/domain/ClientRelationshipModel.java": "343d991742a84117c921d3df049f42e32b4dffaff1bcdce15d9df2d2e06ede18",
     "services/api/src/main/java/com/projectb/api/arcava/repositories/ClientRelationshipRepository.java": "4904abbf96dee18ddd036739d68e87f2ff3cf0878777756036567e1ab55f5fb1",
     "services/api/src/main/java/com/projectb/api/arcava/services/ArcavaAccessService.java": "621e5514befb145ef0df9641d0cee182b6d6cee468c6d9bd9df8e77b70e7f68b",
     "services/api/src/test/java/com/projectb/api/arcava/security/ClientEnrollmentGuardedReadIntegrationTest.java": "3bfb78c4c6a805902cc271dd3aeeeeac8c16eee46c47ba42bd763a51216cc4bb",
     "services/api/src/main/java/com/projectb/api/domain/JourneyKernel.java": "97a11f218510eefd1bc1793d87bd3cc7041fa4218623e02edd93b8d2e258a431",
-    "services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java": "7d6d4fd69485fcbcac7ed7a1ea50caeac7f9e8629a8cc95b1fdde3742f2740eb"
+    "services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java": "7d6d4fd69485fcbcac7ed7a1ea50caeac7f9e8629a8cc95b1fdde3742f2740eb",
+    "services/api/src/main/java/com/projectb/api/arcava/domain/TenantModel.java": "69e658bf018a883d1b22cb42834bf10b6814f482924d88a2a64188e33a7053cf",
+    "services/api/src/test/java/com/projectb/api/arcava/domain/TenantModelContractTest.java": "37e529ced16aaa74c9560be28781ec1ca051c38db4a9088e24104443c2c41906"
   },
   "gates": [
     "SESSION",
@@ -152,5 +165,34 @@
       "source_revoke_operation": "NONE; unsupported state variants are SYNTHETIC_TEST_ONLY faults",
       "external_attestation": "NONE"
     }
+  },
+  "tenant_client_domain": {
+    "scope": "immutable owner-local ATC-04 identity snapshots only",
+    "objects": [
+      "BusinessTenant AG-ARC-001",
+      "ClientProfile AG-ARC-003",
+      "TenantMembership EN-ARC-002"
+    ],
+    "ids": "distinct TenantId/ClientId/MembershipId ARCAVA types and external PiacPrincipalRef PIAC type; canonical non-nil local UUIDs",
+    "issuer_verification": "NONE; UUID bytes do not establish namespace provenance or identity equivalence",
+    "tenant_states": [
+      "PROVISIONING",
+      "ACTIVE",
+      "SUSPENDED",
+      "CLOSED"
+    ],
+    "missing_tenant_status": "UNKNOWN; never default ACTIVE",
+    "client_and_membership_lifecycle": "UNKNOWN or NOT_VERIFIED knowledge metadata only; exact state enums unresolved",
+    "verification": "NOT_VERIFIED for every snapshot, including ACTIVE tenant label",
+    "membership_fields": "id, parent tenant, external principal ref, explicit created_at, optional uint64 revision; no invented role/validity/revocation",
+    "authorization": "NONE; independent existing OwnerGuard still required and production default closed",
+    "connection_to_enrollment_path": "NONE; exact ClientProfile/principal authority mapping unresolved",
+    "privacy": "opaque private ref only; diagnostic redaction; validation does not echo raw malformed IDs",
+    "unresolved_seams": [
+      "ClientProfile profile_status enum",
+      "TenantMembership actual lifecycle/role/validity/revocation registry",
+      "current trusted external decision and activation provenance",
+      "ClientProfile to PIAC principal/adapter binding"
+    ]
   }
 }
