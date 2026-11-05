@@ -177,8 +177,9 @@ strings redact principal/private refs and tenant labels/legal-scope refs; raw
 malformed identity inputs are not included in thrown errors. The model stores
 only an opaque optional SensitiveProfileRef, no private profile body. The actual
 PIAC authority and the existing OwnerGuard remain independent and closed.
-No new type is wired into ClientRelationshipModel/Repository/ArcavaAccessService:
-the full ClientProfile-to-principal equivalence/adapter contract is unresolved.
+Full tenant/client snapshots are not wired into the repository or access service:
+the ClientProfile-to-principal equivalence/adapter contract is unresolved. The
+identity-only model projection described below reuses the distinct ID types.
 
 Nine SYNTHETIC_TEST_ONLY contract tests cover distinct namespaces and optional
 refs, immutable values, malformed/nil/foreign-format identifiers, cross-tenant/
@@ -233,7 +234,42 @@ JourneyJournal AssignmentView and EnrollmentLink are not replaced or converted;
 there is no second mutable store, live adapter, controller, bean or SQL change.
 Residual seams: exact assignment role, authenticated producer decisions,
 assignment/enrollment activation/transition provenance, and any future reviewed
-mapping to the existing local persisted records. Full T020/T110 remains NOT_ADMITTED.
+full-aggregate mapping to existing persisted records beyond the identity-only
+bridge below. Full T020/T110 remains NOT_ADMITTED.
+
+## Pure typed journal identity bridge
+
+`ClientRelationshipModel.typedIdentity()` maps only its five already validated
+UUID fields to JournalIdentity, in their existing source order: TenantId,
+ClientId, JourneyVersionRef, AssignmentId, EnrollmentId. This is an immutable
+read-only identity projection with local requireScope and requireSameIdentity
+comparisons. It performs no I/O or storage lookup and does not assert that a
+snapshot is current, internally consistent or authorized. Its diagnostic string
+redacts identity values; mismatch errors contain no raw values.
+
+The journal does not supply an admitted assignment role, trusted validity,
+PIAC principal/decision, effectiveAt or activation provenance. The bridge
+therefore constructs neither full CoachAssignment nor full Enrollment and does
+not map local `active` to admitted AssignmentState.ACTIVE. It supplies no role,
+time, lifecycle status, issuer or trust boolean. A previously obtained typed ID
+can still name a withdrawn resource; the identity alone never authorizes a read.
+
+OwnerGuard, ArcavaAccessService, ClientRelationshipRepository and Journal/Kernel
+are unchanged. Guard-before-storage, the order of the atomic journal reads,
+PUBLISHED-only fence, exact local active assignment linkage and legacy UUID
+EnrollmentView remain unchanged. The mapping is a method on the existing model;
+it does not expose a new route, adapter registration or alternate read path.
+
+Five pure contract tests verify exact mapping, distinct object/PIAC namespaces
+even with equal UUID bytes, malformed/nil/missing inputs, mismatch in each of the
+five IDs and redacted diagnostics. Two additional integration cases use actual
+Journal create/update/publish/assign and reopen: exact mapping after a synthetic
+guarded read, no model payload for inconsistent local assignment or actual
+withdrawal, and no-live-PIAC denial before lookup even with a prior typed identity.
+Reads preserve journal bytes. Unsupported assignment corruption uses only the
+existing SYNTHETIC_TEST_ONLY storage seam. The prior 68 Maven tests are retained.
+No original A09 admission or production trust is inferred. Full T020/T110,
+Q1-Q4, trusted producer/PIAC binding and the previously listed seams remain open.
 
 ## Role contract
 

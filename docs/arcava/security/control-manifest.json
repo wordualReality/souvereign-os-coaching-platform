@@ -1,9 +1,9 @@
 {
-  "manifest_version": "1.5",
+  "manifest_version": "1.6",
   "decision_id": "ARC36P25-ARCAVA-RLS-BINDING-CONTRACT-DRAFT-01",
   "status": "PROPOSED_NOT_ADMITTED",
   "scope": "ARC-07 owner guard / ARC10-T110 foundation and local ARC10-T020 guarded enrollment read only",
-  "source_base_sha": "02f362ff9295dac950cdc92c9bb0dd1d84ee5b21",
+  "source_base_sha": "0a263fa744de84951c5e5a5961e28d2539e46f79",
   "sources": [
     {
       "id": "ARC-07",
@@ -60,17 +60,18 @@
     "services/api/src/main/java/com/projectb/api/arcava/security/RoleScopePolicy.java": "85d60f7c99d305e0e1fa5a955ad8920fb4d8cfc184f74cf6c07379b41c246057",
     "services/api/src/main/java/com/projectb/api/arcava/services/CoachClientAccessService.java": "8697aa6b342bf806824c98bc6c9f7f5a57a1c5c950380661f0bc698cea01096e",
     "services/api/src/test/java/com/projectb/api/arcava/security/OwnerGuardContractTest.java": "205db8501abc80f03a53d7942e56f0bb029e18106f46405fbfc10ee10a1e75a7",
-    "docs/arcava/security/owner-guard-rls-binding-contract-draft.md": "152e9b75ab680c01c0b21c0399f470bde1f992376b3bfd4319329490fcc2b471",
-    "services/api/src/main/java/com/projectb/api/arcava/domain/ClientRelationshipModel.java": "343d991742a84117c921d3df049f42e32b4dffaff1bcdce15d9df2d2e06ede18",
+    "docs/arcava/security/owner-guard-rls-binding-contract-draft.md": "c4f2a5e1fa5c1905ea34668f91278200f0d3c74c47a90e440d554beca72ebb14",
+    "services/api/src/main/java/com/projectb/api/arcava/domain/ClientRelationshipModel.java": "131e2a74e8f2658fedd81b74f890d94db4b6cd903d3c5353a952c7c050ac7c88",
     "services/api/src/main/java/com/projectb/api/arcava/repositories/ClientRelationshipRepository.java": "4904abbf96dee18ddd036739d68e87f2ff3cf0878777756036567e1ab55f5fb1",
     "services/api/src/main/java/com/projectb/api/arcava/services/ArcavaAccessService.java": "621e5514befb145ef0df9641d0cee182b6d6cee468c6d9bd9df8e77b70e7f68b",
-    "services/api/src/test/java/com/projectb/api/arcava/security/ClientEnrollmentGuardedReadIntegrationTest.java": "3bfb78c4c6a805902cc271dd3aeeeeac8c16eee46c47ba42bd763a51216cc4bb",
+    "services/api/src/test/java/com/projectb/api/arcava/security/ClientEnrollmentGuardedReadIntegrationTest.java": "f93cb93913fbcf4d6a1503610bdf10fdfb19ec2421512ff948101a60cfa487ff",
     "services/api/src/main/java/com/projectb/api/domain/JourneyKernel.java": "97a11f218510eefd1bc1793d87bd3cc7041fa4218623e02edd93b8d2e258a431",
     "services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java": "7d6d4fd69485fcbcac7ed7a1ea50caeac7f9e8629a8cc95b1fdde3742f2740eb",
     "services/api/src/main/java/com/projectb/api/arcava/domain/TenantModel.java": "69e658bf018a883d1b22cb42834bf10b6814f482924d88a2a64188e33a7053cf",
     "services/api/src/test/java/com/projectb/api/arcava/domain/TenantModelContractTest.java": "37e529ced16aaa74c9560be28781ec1ca051c38db4a9088e24104443c2c41906",
     "services/api/src/main/java/com/projectb/api/arcava/domain/CoachEnrollmentModel.java": "1d811bfe61860cc4610599c960cf69616f93415e8db7308cf5520903d085d1ec",
-    "services/api/src/test/java/com/projectb/api/arcava/domain/CoachEnrollmentModelContractTest.java": "4de859edd8a249d40778dbeceb15d845b17cfe58fcf32fe832b1457f55db3dde"
+    "services/api/src/test/java/com/projectb/api/arcava/domain/CoachEnrollmentModelContractTest.java": "4de859edd8a249d40778dbeceb15d845b17cfe58fcf32fe832b1457f55db3dde",
+    "services/api/src/test/java/com/projectb/api/arcava/domain/JournalIdentityBindingContractTest.java": "20d7c71defc2ba5470706a87a8ead813291f1cdda159533041cd9c77a1914844"
   },
   "gates": [
     "SESSION",
@@ -192,7 +193,7 @@
     "verification": "NOT_VERIFIED for every snapshot, including ACTIVE tenant label",
     "membership_fields": "id, parent tenant, external principal ref, explicit created_at, optional uint64 revision; no invented role/validity/revocation",
     "authorization": "NONE; independent existing OwnerGuard still required and production default closed",
-    "connection_to_enrollment_path": "NONE; exact ClientProfile/principal authority mapping unresolved",
+    "connection_to_enrollment_path": "Identity-only ClientRelationshipModel projection reuses ID types; no full model/PIAC authority binding",
     "privacy": "opaque private ref only; diagnostic redaction; validation does not echo raw malformed IDs",
     "unresolved_seams": [
       "ClientProfile profile_status enum",
@@ -227,7 +228,31 @@
       "exact assignment role",
       "authenticated current identity/access/consent/share/entitlement decisions",
       "activation and transition provenance",
-      "reviewed mapping to existing persisted records"
+      "reviewed full-aggregate mapping to existing persisted records beyond identity-only projection"
     ]
+  },
+  "typed_journal_identity_bridge": {
+    "entrypoint": "ClientRelationshipModel.typedIdentity()",
+    "source_fields_in_order": [
+      "tenantId",
+      "clientId",
+      "versionId",
+      "assignmentId",
+      "enrollmentId"
+    ],
+    "target_types_in_order": [
+      "TenantModel.TenantId",
+      "TenantModel.ClientId",
+      "CoachEnrollmentModel.JourneyVersionRef",
+      "CoachEnrollmentModel.AssignmentId",
+      "CoachEnrollmentModel.EnrollmentId"
+    ],
+    "operations": "pure immutable identity mapping, exact local scope/identity comparisons only",
+    "not_proven": "current storage linkage, authorization, provenance or lifecycle",
+    "aggregate_construction": "NONE; Journal lacks required role/PIAC/time/activation fields",
+    "state_conversion": "NONE; local active is not admitted AssignmentState.ACTIVE",
+    "storage_and_wire_changes": "NONE; existing lookup order, atomic monitor, guard, PUBLISHED fence, active linkage and UUID view unchanged",
+    "privacy": "new typed projection diagnostic redaction; safe mismatch messages",
+    "tests": "5 pure contracts + 2 real journal/replay/guard-denial cases; prior 68 retained"
   }
 }

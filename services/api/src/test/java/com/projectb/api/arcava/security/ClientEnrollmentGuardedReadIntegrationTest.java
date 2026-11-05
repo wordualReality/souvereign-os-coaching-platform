@@ -9,6 +9,7 @@ import com.projectb.api.domain.JourneyJournal.Projection;
 import com.projectb.api.arcava.repositories.ClientRelationshipRepository.EnrollmentSnapshot;
 import com.projectb.api.domain.JourneyKernel;
 import com.projectb.api.domain.JourneyKernel.AssignmentView;
+import com.projectb.api.arcava.domain.ClientRelationshipModel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.*;
@@ -382,5 +383,54 @@ class ClientEnrollmentGuardedReadIntegrationTest {
       assertEquals(0, calls.get());
     }
     assertArrayEquals(before, Files.readAllBytes(path));
+  }
+
+  @Test void publishedJournalIdentityMapsExactlyAfterGuardedReadAndReplay() throws Exception {
+    byte[] before = Files.readAllBytes(path);
+    var expected = ClientRelationshipModel.from(link).typedIdentity();
+    for (var source : List.of(journal, JourneyJournal.open(path))) for (Role role : List.of(Role.COACH, Role.CLIENT)) {
+      var c = synthetic(role, TENANT, CLIENT, enrollment);
+      var repository = new ClientRelationshipRepository(source);
+      var result = service(c, repository).readEnrollment(request(c));
+      assertEquals(ALLOWED, result.status());
+      var stored = repository.enrollment(enrollment);
+      assertEquals(ClientRelationshipRepository.Status.FOUND, stored.status());
+      var typed = stored.model().typedIdentity();
+      assertDoesNotThrow(() -> typed.requireSameIdentity(expected));
+      assertEquals(result.view().enrollmentId(), typed.enrollmentId().value());
+      assertEquals(result.view().journeyVersionId(), typed.versionId().value());
+      assertEquals(UUID.fromString(link.assignmentId()), typed.assignmentId().value());
+      assertEquals(TENANT, typed.tenantId().value()); assertEquals(CLIENT, typed.clientId().value());
+    }
+    assertArrayEquals(before, Files.readAllBytes(path));
+  }
+
+  @Test void typedReferencesCannotAdmitMismatchedWithdrawnOrUntrustedJournalRead() throws Exception {
+    byte[] before = Files.readAllBytes(path);
+    // SYNTHETIC_TEST_ONLY storage fault seam; a typed identity is not a current linkage proof.
+    for (var source : List.of(journal, JourneyJournal.open(path))) {
+      var real = snapshot(source, enrollment);
+      var a = real.assignment();
+      var wrong = new AssignmentView(a.tenantId(), OTHER, a.clientId(), a.journeyVersionId(), a.status());
+      var repository = new ClientRelationshipRepository(id -> new EnrollmentSnapshot(real.enrollment(), real.projection(), wrong));
+      var result = service(coach(), repository).readEnrollment(request(coach()));
+      assertEquals(NOT_FOUND, result.status()); assertNull(result.view());
+      assertNull(repository.enrollment(enrollment).model(), "no identity bridge payload from failed linkage");
+    }
+    assertArrayEquals(before, Files.readAllBytes(path));
+    var priorTyped = ClientRelationshipModel.from(link).typedIdentity();
+    withdraw();
+    byte[] withdrawn = Files.readAllBytes(path);
+    for (var source : List.of(journal, JourneyJournal.open(path))) {
+      var repository = new ClientRelationshipRepository(source);
+      assertEquals(NOT_FOUND, read(coach(), source).status());
+      assertNull(repository.enrollment(priorTyped.enrollmentId().value()).model());
+      AtomicInteger calls = new AtomicInteger();
+      var counted = new ClientRelationshipRepository(id -> { calls.incrementAndGet(); return snapshot(source, id); });
+      var result = new ArcavaAccessService(new OwnerGuard(CLOCK), counted).readEnrollment(request(coach()));
+      assertEquals(ACCESS_DENIED, result.status()); assertNull(result.view()); assertEquals(0, calls.get());
+      assertFalse(result.toString().contains(link.assignmentId()));
+    }
+    assertArrayEquals(withdrawn, Files.readAllBytes(path));
   }
 }
