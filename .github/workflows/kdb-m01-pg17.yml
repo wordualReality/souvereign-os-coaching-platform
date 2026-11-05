@@ -100,6 +100,7 @@ jobs:
           python3 tests/kdb/test_offline_acupressure_protocol.py
           python3 tests/kdb/test_offline_research_extraction.py
           python3 tests/kdb/test_step10_handover.py
+          python3 tests/kdb/test_step10_gc01_handoff.py
           python3 tests/kdb/test_piac_fail_closed.py
           python3 tests/kdb/kdb_m01_06_security_static.py
           python3 tests/kdb/hosted_recovery_preflight_diff.py
