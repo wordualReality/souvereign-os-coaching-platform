@@ -1,0 +1,28 @@
+{
+  "schema_version": "kdb.c08.research-candidate.preview.v1",
+  "tenant": "SYNTHETIC_TENANT",
+  "purpose": "KDB_HUMAN_REVIEW",
+  "as_of": "2026-01-01",
+  "sources": [{
+    "source_id": "SYN-SOURCE-ALPHA",
+    "source_version_id": "syn-source-version-1",
+    "current_version_id": "syn-source-version-1",
+    "tenant": "SYNTHETIC_TENANT",
+    "purpose": "KDB_HUMAN_REVIEW",
+    "source_text": "SYNTHETIC-FIXTURE: alpha café.",
+    "content_sha256": "d1a2d945e6060cec9d215a2a839f26ff52bf7e7071e5eddffd2310032e516f8a",
+    "rights_snapshot": {"source_version_id":"syn-source-version-1","tenant":"SYNTHETIC_TENANT","purpose":"KDB_HUMAN_REVIEW","status":"ADMITTED","license":"SYNTHETIC_FIXTURE_ONLY","checked_as_of":"2026-01-01","authority":"UNTRUSTED_SYNTHETIC"},
+    "rights_sha256": "e8d03919bd31c0896500fade6b84a95027734ffc1d9f4583d46acd97d3e3a823"
+  }],
+  "candidate": {
+    "candidate_revision_id": "SYN-CANDIDATE-REV-1",
+    "candidate_revision_sha256": "f1554e7ddeb5ea6949fcb3cd0160b38a303809523f13e22abc90a9ce6860f81d",
+    "content": {
+      "source_id":"SYN-SOURCE-ALPHA","source_version_id":"syn-source-version-1",
+      "source_sha256":"d1a2d945e6060cec9d215a2a839f26ff52bf7e7071e5eddffd2310032e516f8a",
+      "rights_sha256":"e8d03919bd31c0896500fade6b84a95027734ffc1d9f4583d46acd97d3e3a823",
+      "claim_code":"SYN-CANDIDATE-ALPHA","safety_review":"NOT_REVIEWED",
+      "evidence_span_refs":[{"source_version_id":"syn-source-version-1","locator":"bytes:19-23","start":19,"end":24,"slice_sha256":"8ed3f6ad685b959ead7022518e1af76cd816f8e8ec7ccdda1ed4018e8f2223f8"}]
+    }
+  }
+}
