@@ -189,6 +189,52 @@ withdrawal/replay regressions, are retained. No model grants tenant-admin blanke
 client access. This is a source-scoped developer model, not an admitted stored
 aggregate lifecycle, PIAC decision, T020/T110 completion or Security Acceptance.
 
+## Typed CoachAssignment and Enrollment snapshots
+
+`CoachEnrollmentModel` adds immutable source-local ATC-04 AG-ARC-004/005
+snapshots, reusing TenantModel TenantId, ClientId and PiacPrincipalRef. Distinct
+AssignmentId, EnrollmentId and JourneyVersionRef wrap canonical non-nil UUIDs
+with ARCAVA namespace metadata. JourneyVersionRef is an exact local identity
+reference, not verified publication, rights or KDB evidence. Equal UUID bytes in
+different object/owner types do not imply identity equivalence or issuer proof.
+
+SM-ARC-02 defines exactly PENDING, ACTIVE, ENDED, REVOKED for assignments;
+SM-ARC-03 defines PENDING, ACTIVE, COMPLETED, CANCELLED, REVOKED for enrollments.
+These are snapshot labels only. No transition, activation, revoke command or
+assignment grant is implemented. The source does not enumerate assignment roles:
+RoleKnowledge UNKNOWN/NOT_VERIFIED is unresolved metadata, not a guessed role.
+
+CoachAssignment holds its ID, tenant/client, external coach principal reference,
+unresolved role, exact source state, required validFrom and optional validUntil.
+A declared end must be strictly after the start; zero/reversed windows reject.
+The explicit requireCurrentWindow(at) check uses start-inclusive/end-exclusive
+bounds and rejects a missing clock instant, future start and expiry. An absent
+end is a declared open interval, not a trusted validity assertion. Historical
+expired snapshots remain representable without silently using the host clock;
+their current-window check fails. Passing it never grants access or activates a
+PENDING state. Enrollment carries ID, tenant/client scope, exact JourneyVersion
+reference, source state and required effectiveAt; no timestamp is manufactured.
+
+Both snapshots verify local ClientProfile tenant/client links when explicitly
+requested, without equating the profile ID with a PIAC principal. They always
+remain NOT_VERIFIED, including ACTIVE labels and current windows. No trusted
+evidence field or caller-supplied trusted boolean is introduced. Missing, expired,
+revoked or ambiguous authority remains rejected by the unchanged OwnerGuard;
+the model cannot issue or register PIAC/session/consent/share/entitlement proof.
+Diagnostics omit client and coach identifiers and validation does not echo raw
+malformed inputs. Required null identities/states/times/role metadata reject.
+
+Eight SYNTHETIC_TEST_ONLY tests cover canonical identity and scope, exact source
+enums, malformed/nil/foreign-format IDs, wrong tenant/client, null required fields,
+temporal boundaries, non-authorizing ACTIVE/expired snapshots and immutable,
+redacted diagnostics. Prior 60 Maven tests are retained, including independent
+stale/revoked/unbound evidence denial and persisted withdrawal/assignment replay.
+JourneyJournal AssignmentView and EnrollmentLink are not replaced or converted;
+there is no second mutable store, live adapter, controller, bean or SQL change.
+Residual seams: exact assignment role, authenticated producer decisions,
+assignment/enrollment activation/transition provenance, and any future reviewed
+mapping to the existing local persisted records. Full T020/T110 remains NOT_ADMITTED.
+
 ## Role contract
 
 | Domain role | Grounded scope | This sensitive-read service |

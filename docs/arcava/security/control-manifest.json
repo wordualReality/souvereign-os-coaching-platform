@@ -1,9 +1,9 @@
 {
-  "manifest_version": "1.4",
+  "manifest_version": "1.5",
   "decision_id": "ARC36P25-ARCAVA-RLS-BINDING-CONTRACT-DRAFT-01",
   "status": "PROPOSED_NOT_ADMITTED",
   "scope": "ARC-07 owner guard / ARC10-T110 foundation and local ARC10-T020 guarded enrollment read only",
-  "source_base_sha": "802f9f2990ce040624d334db50a5e768ab43de7d",
+  "source_base_sha": "02f362ff9295dac950cdc92c9bb0dd1d84ee5b21",
   "sources": [
     {
       "id": "ARC-07",
@@ -46,7 +46,11 @@
         "AG-ARC-001",
         "EN-ARC-002",
         "AG-ARC-003",
-        "SM-ARC-01"
+        "SM-ARC-01",
+        "AG-ARC-004",
+        "AG-ARC-005",
+        "SM-ARC-02",
+        "SM-ARC-03"
       ]
     }
   ],
@@ -56,7 +60,7 @@
     "services/api/src/main/java/com/projectb/api/arcava/security/RoleScopePolicy.java": "85d60f7c99d305e0e1fa5a955ad8920fb4d8cfc184f74cf6c07379b41c246057",
     "services/api/src/main/java/com/projectb/api/arcava/services/CoachClientAccessService.java": "8697aa6b342bf806824c98bc6c9f7f5a57a1c5c950380661f0bc698cea01096e",
     "services/api/src/test/java/com/projectb/api/arcava/security/OwnerGuardContractTest.java": "205db8501abc80f03a53d7942e56f0bb029e18106f46405fbfc10ee10a1e75a7",
-    "docs/arcava/security/owner-guard-rls-binding-contract-draft.md": "25e9414dcbfb9c1205fe964ce2dbef7ae204bf0ce07ec325a1b111a5372a2090",
+    "docs/arcava/security/owner-guard-rls-binding-contract-draft.md": "152e9b75ab680c01c0b21c0399f470bde1f992376b3bfd4319329490fcc2b471",
     "services/api/src/main/java/com/projectb/api/arcava/domain/ClientRelationshipModel.java": "343d991742a84117c921d3df049f42e32b4dffaff1bcdce15d9df2d2e06ede18",
     "services/api/src/main/java/com/projectb/api/arcava/repositories/ClientRelationshipRepository.java": "4904abbf96dee18ddd036739d68e87f2ff3cf0878777756036567e1ab55f5fb1",
     "services/api/src/main/java/com/projectb/api/arcava/services/ArcavaAccessService.java": "621e5514befb145ef0df9641d0cee182b6d6cee468c6d9bd9df8e77b70e7f68b",
@@ -64,7 +68,9 @@
     "services/api/src/main/java/com/projectb/api/domain/JourneyKernel.java": "97a11f218510eefd1bc1793d87bd3cc7041fa4218623e02edd93b8d2e258a431",
     "services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java": "7d6d4fd69485fcbcac7ed7a1ea50caeac7f9e8629a8cc95b1fdde3742f2740eb",
     "services/api/src/main/java/com/projectb/api/arcava/domain/TenantModel.java": "69e658bf018a883d1b22cb42834bf10b6814f482924d88a2a64188e33a7053cf",
-    "services/api/src/test/java/com/projectb/api/arcava/domain/TenantModelContractTest.java": "37e529ced16aaa74c9560be28781ec1ca051c38db4a9088e24104443c2c41906"
+    "services/api/src/test/java/com/projectb/api/arcava/domain/TenantModelContractTest.java": "37e529ced16aaa74c9560be28781ec1ca051c38db4a9088e24104443c2c41906",
+    "services/api/src/main/java/com/projectb/api/arcava/domain/CoachEnrollmentModel.java": "1d811bfe61860cc4610599c960cf69616f93415e8db7308cf5520903d085d1ec",
+    "services/api/src/test/java/com/projectb/api/arcava/domain/CoachEnrollmentModelContractTest.java": "4de859edd8a249d40778dbeceb15d845b17cfe58fcf32fe832b1457f55db3dde"
   },
   "gates": [
     "SESSION",
@@ -193,6 +199,35 @@
       "TenantMembership actual lifecycle/role/validity/revocation registry",
       "current trusted external decision and activation provenance",
       "ClientProfile to PIAC principal/adapter binding"
+    ]
+  },
+  "coach_enrollment_domain": {
+    "scope": "immutable ATC-04 AG-ARC-004/005 local snapshots only",
+    "ids": "distinct ARCAVA AssignmentId/EnrollmentId/JourneyVersionRef; reuse TenantId/ClientId/PiacPrincipalRef; canonical non-nil UUIDs",
+    "assignment_states": [
+      "PENDING",
+      "ACTIVE",
+      "ENDED",
+      "REVOKED"
+    ],
+    "enrollment_states": [
+      "PENDING",
+      "ACTIVE",
+      "COMPLETED",
+      "CANCELLED",
+      "REVOKED"
+    ],
+    "role": "UNKNOWN/NOT_VERIFIED knowledge metadata; concrete source role unresolved",
+    "time": "required validFrom/effectiveAt; optional validUntil strictly after validFrom; explicit start-inclusive/end-exclusive current-window check; no implicit host clock or fabricated times",
+    "scope_checks": "exact tenant/client links; no ClientProfile/PIAC principal equivalence inferred",
+    "verification": "NOT_VERIFIED even ACTIVE or within declared interval",
+    "authority": "NONE; independent existing OwnerGuard and real producer proof still required",
+    "persisted_source": "AssignmentView/EnrollmentLink unchanged; no conversion or second mutable store",
+    "residual_seams": [
+      "exact assignment role",
+      "authenticated current identity/access/consent/share/entitlement decisions",
+      "activation and transition provenance",
+      "reviewed mapping to existing persisted records"
     ]
   }
 }
