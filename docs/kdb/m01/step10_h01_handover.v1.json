@@ -1,0 +1,62 @@
+{
+  "schema_version": "kdb.step10.handover.v1",
+  "baseline_sha": "f7d093b58d1c91861d871294cc5392806c1206b4",
+  "scope": "SYNTHETIC_TEST_ONLY",
+  "admission": "NOT_ADMITTED",
+  "target_gate": "KDB-M01-STEP10-O1O2O3-REVIEW-HANDOFF-CONTRACT-01",
+  "target_gate_status": "OPEN",
+  "missing_criteria": ["REAL_O1_O2_O3_UUID_ENVELOPES", "FULL_PROVENANCE_ELIGIBILITY_CHAIN"],
+  "cross_slice_boundary": "UNSUPPORTED_CONTRACT_BOUNDARY",
+  "ownership": {
+    "KDB": "source, version, provenance, claim and candidate",
+    "ARCAVA": "consumer presentation, journey and private preferences",
+    "SOV": "provider, privacy, costs, authorization and runtime",
+    "HUMAN_REVIEWER": "actual publication decisions"
+  },
+  "slices": [
+    {
+      "id":"B01","owner":"KDB","source_sha":"b01ac6a25b71cfe7d469db4fafee081b98a3e3f2",
+      "contract_version":"kdb.c08.seasonal-botanical.preview.v1",
+      "resolver":"services/kdb/offline_seasonal_botanical.py",
+      "contract":"contracts/kdb/c08_seasonal_botanical_preview.v1.schema.json",
+      "fixture":"tests/kdb/fixtures/c08_b01_synthetic_preview.json",
+      "tests":"tests/kdb/test_offline_seasonal_botanical.py",
+      "input_mode":"SYNTHETIC_TEST_ONLY","output_mode":"PREVIEW_ONLY","decision":"PREVIEW",
+      "boundary":"Synthetic rights and local consistency only; not live food, foraging or plant safety.",
+      "gate_dependency":"SOURCE_CUSTODY_AND_RIGHTS_NOT_VERIFIED"
+    },
+    {
+      "id":"B02","owner":"KDB","source_sha":"7f4d8b6eb4ce8a0c3cbb2526dacfa3e7c003deb8",
+      "contract_version":"kdb.c08.traditional-claim.preview.v1",
+      "resolver":"services/kdb/offline_traditional_claims.py",
+      "contract":"contracts/kdb/c08_traditional_claim_preview.v1.schema.json",
+      "fixture":"tests/kdb/fixtures/c08_b02_synthetic_traditional_claim.json",
+      "tests":"tests/kdb/test_offline_traditional_claims.py",
+      "input_mode":"SYNTHETIC_TEST_ONLY","output_mode":"PREVIEW_ONLY","decision":"PREVIEW_CONTEXT_ONLY",
+      "boundary":"Traditional context is not clinical efficacy; fixture rights and evidence are untrusted.",
+      "gate_dependency":"SOURCE_CUSTODY_AND_RIGHTS_NOT_VERIFIED"
+    },
+    {
+      "id":"B03","owner":"KDB","source_sha":"47a3c327976f9ccd0809bb21d870d0c866567f0a",
+      "contract_version":"kdb.c08.acupressure-protocol.preview.v1",
+      "resolver":"services/kdb/offline_acupressure_protocol.py",
+      "contract":"contracts/kdb/c08_acupressure_protocol_preview.v1.schema.json",
+      "fixture":"tests/kdb/fixtures/c08_b03_synthetic_protocol.json",
+      "tests":"tests/kdb/test_offline_acupressure_protocol.py",
+      "input_mode":"SYNTHETIC_TEST_ONLY","output_mode":"PREVIEW_ONLY","decision":"PREVIEW_METADATA_ONLY",
+      "boundary":"UNKNOWN safety and contraindications are not professional clearance; no executable protocol.",
+      "gate_dependency":"HUMAN_REVIEW_AND_EVIDENCE_NOT_VERIFIED"
+    },
+    {
+      "id":"B04","owner":"KDB","source_sha":"f7d093b58d1c91861d871294cc5392806c1206b4",
+      "contract_version":"kdb.c08.research-candidate.preview.v1",
+      "resolver":"services/kdb/offline_research_extraction.py",
+      "contract":"contracts/kdb/c08_research_candidate_preview.v1.schema.json",
+      "fixture":"tests/kdb/fixtures/c08_b04_synthetic_research.json",
+      "tests":"tests/kdb/test_offline_research_extraction.py",
+      "input_mode":"SYNTHETIC_TEST_ONLY","output_mode":"PREVIEW_ONLY","decision":"CANDIDATE_PREVIEW_ONLY",
+      "boundary":"Fixture placeholder IDs are not UUID envelopes; full provenance eligibility is not invoked.",
+      "gate_dependency":"O1_O2_O3_AND_FULL_PROVENANCE_NOT_IMPLEMENTED"
+    }
+  ]
+}
