@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Synthetic non-executable protocol metadata preview",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "scope", "execution", "admission", "decision", "reason", "provenance"],
+  "properties": {
+    "schema_version": {"const": "kdb.c08.acupressure-protocol.preview.v1"},
+    "scope": {"const": "SYNTHETIC_TEST_ONLY"},
+    "execution": {"const": "NON_EXECUTABLE"},
+    "admission": {"const": "NOT_ADMITTED"},
+    "decision": {"enum": ["PREVIEW_METADATA_ONLY", "ABSTAIN"]},
+    "reason": {"type": "string", "minLength": 1},
+    "provenance": {
+      "oneOf": [
+        {"type":"object","additionalProperties":false,"required":["availability"],"properties":{"availability":{"const":"UNAVAILABLE"}}},
+        {
+          "type":"object","additionalProperties":false,
+          "required":["availability","source_id","source_version_id","source_sha256","rights_status","license_status","rights_checked_as_of","claim_id","claim_version_id","claim_sha256","evidence_locator","protocol_id","protocol_version_id","protocol_sha256","category","review_status","safety_status","contraindication_status","eligibility","lifecycle","disclosure"],
+          "properties":{
+            "availability":{"const":"PINNED_UNTRUSTED"},
+            "source_id":{"const":"SYN-SRC-ALPHA"},"source_version_id":{"const":"SYN-SRCVER-1"},
+            "source_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+            "rights_status":{"const":"ADMITTED"},"license_status":{"const":"SYNTHETIC_FIXTURE_ONLY"},"rights_checked_as_of":{"const":"2026-01-01"},
+            "claim_id":{"const":"SYN-CLAIM-ALPHA"},"claim_version_id":{"const":"SYN-CLAIMVER-1"},"claim_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+            "evidence_locator":{"const":"fixture://source/alpha#evidence"},
+            "protocol_id":{"const":"SYN-PROTOCOL-ALPHA"},"protocol_version_id":{"const":"SYN-PROTOCOLVER-1"},"protocol_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+            "category":{"const":"SYNTHETIC_LABEL"},"review_status":{"const":"NOT_REVIEWED"},"safety_status":{"const":"UNKNOWN"},"contraindication_status":{"const":"UNKNOWN"},
+            "eligibility":{"const":"NOT_ELIGIBLE_FOR_EXECUTION"},"lifecycle":{"const":"SYNTHETIC_PREVIEW"},"disclosure":{"const":"NO_PROFESSIONAL_REVIEW_OR_INSTRUCTION"}
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {"if":{"properties":{"decision":{"const":"PREVIEW_METADATA_ONLY"}}},"then":{"properties":{"reason":{"const":"SYNTHETIC_METADATA_ONLY"},"provenance":{"properties":{"availability":{"const":"PINNED_UNTRUSTED"}}}}}},
+    {"if":{"properties":{"decision":{"const":"ABSTAIN"}}},"then":{"properties":{"provenance":{"properties":{"availability":{"const":"UNAVAILABLE"}}}}}}
+  ]
+}

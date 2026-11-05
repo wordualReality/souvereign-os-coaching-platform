@@ -97,6 +97,7 @@ jobs:
           python3 tests/kdb/test_offline_governance_promotion.py
           python3 tests/kdb/test_offline_seasonal_botanical.py
           python3 tests/kdb/test_offline_traditional_claims.py
+          python3 tests/kdb/test_offline_acupressure_protocol.py
           python3 tests/kdb/test_piac_fail_closed.py
           python3 tests/kdb/kdb_m01_06_security_static.py
           python3 tests/kdb/hosted_recovery_preflight_diff.py
