@@ -1,0 +1,330 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:arcava:CT-ARC-R03-REM-001:1.0:event",
+  "title": "CT-ARC-R03-REM-001 ReminderDue event v1.0",
+  "allOf": [
+    {
+      "$ref": "urn:arcava:types:1.0:EventEnvelope#/$defs/eventEnvelopeBase"
+    },
+    {
+      "type": "object",
+      "required": [
+        "idempotency_key"
+      ],
+      "properties": {
+        "event_type": {
+          "const": "EV-R03-REM-DUE"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "producer": {
+          "const": "ARCAVA"
+        },
+        "producer_namespace": {
+          "const": "ARCAVA"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "due_intent_id",
+            "reminder_plan_ref",
+            "reminder_plan_revision",
+            "owner_record_ref",
+            "recipient_scope",
+            "recipient_delivery_ref",
+            "scheduled_window",
+            "channel",
+            "purpose",
+            "template_ref",
+            "safe_parameter_refs",
+            "execution_mode",
+            "intent_revision",
+            "intent_hash"
+          ],
+          "properties": {
+            "due_intent_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "reminder_plan_ref": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "producer_namespace",
+                "object_type",
+                "stable_id"
+              ],
+              "properties": {
+                "producer_namespace": {
+                  "const": "ARCAVA"
+                },
+                "object_type": {
+                  "const": "ReminderPlan"
+                },
+                "stable_id": {
+                  "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                }
+              }
+            },
+            "reminder_plan_revision": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            },
+            "owner_record_ref": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "producer_namespace",
+                "object_type",
+                "stable_id"
+              ],
+              "properties": {
+                "producer_namespace": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "object_type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "stable_id": {
+                  "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                }
+              }
+            },
+            "appointment_ref": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "producer_namespace",
+                "object_type",
+                "stable_id"
+              ],
+              "properties": {
+                "producer_namespace": {
+                  "const": "ARCAVA"
+                },
+                "object_type": {
+                  "const": "Appointment"
+                },
+                "stable_id": {
+                  "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                }
+              }
+            },
+            "recipient_scope": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "kind",
+                    "subject_principal_id"
+                  ],
+                  "properties": {
+                    "kind": {
+                      "const": "PERSONAL"
+                    },
+                    "subject_principal_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "not": {
+                        "const": "latest"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "kind",
+                    "tenant_id"
+                  ],
+                  "properties": {
+                    "kind": {
+                      "const": "TENANT"
+                    },
+                    "tenant_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "not": {
+                        "const": "latest"
+                      }
+                    },
+                    "client_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "not": {
+                        "const": "latest"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "kind"
+                  ],
+                  "properties": {
+                    "kind": {
+                      "const": "PUBLIC"
+                    }
+                  }
+                }
+              ]
+            },
+            "recipient_delivery_ref": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "producer_namespace",
+                "object_type",
+                "stable_id"
+              ],
+              "properties": {
+                "producer_namespace": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "object_type": {
+                  "const": "AuthorizedRecipientDelivery"
+                },
+                "stable_id": {
+                  "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                }
+              }
+            },
+            "scheduled_window": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "start",
+                "end",
+                "timezone",
+                "local_start",
+                "local_end",
+                "utc_offset_start",
+                "utc_offset_end",
+                "dst_resolution"
+              ],
+              "properties": {
+                "start": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                "end": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                "timezone": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "local_start": {
+                  "type": "string"
+                },
+                "local_end": {
+                  "type": "string"
+                },
+                "utc_offset_start": {
+                  "type": "string"
+                },
+                "utc_offset_end": {
+                  "type": "string"
+                },
+                "dst_resolution": {
+                  "enum": [
+                    "UNAMBIGUOUS",
+                    "EARLIER",
+                    "LATER",
+                    "SHIFT_FORWARD",
+                    "SKIP"
+                  ]
+                }
+              }
+            },
+            "channel": {
+              "type": "string",
+              "minLength": 1
+            },
+            "purpose": {
+              "type": "string",
+              "minLength": 1
+            },
+            "template_ref": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "producer_namespace",
+                "object_type",
+                "stable_id",
+                "immutable_version_id"
+              ],
+              "properties": {
+                "producer_namespace": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "object_type": {
+                  "const": "NotificationTemplate"
+                },
+                "stable_id": {
+                  "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                },
+                "immutable_version_id": {
+                  "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                }
+              }
+            },
+            "safe_parameter_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "producer_namespace",
+                  "object_type",
+                  "stable_id"
+                ],
+                "properties": {
+                  "producer_namespace": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "object_type": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "stable_id": {
+                    "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                  }
+                }
+              }
+            },
+            "execution_mode": {
+              "const": "SOV_DELEGATED"
+            },
+            "intent_revision": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            },
+            "intent_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "unevaluatedProperties": false
+}

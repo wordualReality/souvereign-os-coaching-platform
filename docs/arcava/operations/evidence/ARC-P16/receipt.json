@@ -1,0 +1,139 @@
+{
+  "package_id": "ARC-P16",
+  "status": "PASS_WITH_CANONICAL_RUNTIME_PENDING",
+  "repo": "wordualReality/souvereign-os-coaching-platform",
+  "repo_head": "dd0b145e5f429ff3f8f36f79c2709646d77982a3",
+  "preimage_classification": {
+    "contracts/arcava/types/1.0/QueryEnvelope.schema.json": "ABSENT",
+    "contracts/arcava/types/1.0/ResponseEnvelope.schema.json": "ABSENT",
+    "contracts/arcava/types/1.0/EventEnvelope.schema.json": "ABSENT",
+    "contracts/arcava/CT-ARC-002/1.0/request.schema.json": "ABSENT",
+    "contracts/arcava/CT-ARC-002/1.0/result.schema.json": "ABSENT",
+    "contracts/arcava/CT-ARC-002/1.0/error.schema.json": "ABSENT",
+    "contracts/arcava/CT-ARC-003/1.0/request.schema.json": "ABSENT",
+    "contracts/arcava/CT-ARC-003/1.0/result.schema.json": "ABSENT",
+    "contracts/arcava/CT-ARC-003/1.0/error.schema.json": "ABSENT",
+    "contracts/arcava/CT-ARC-004/1.0/request.schema.json": "ABSENT",
+    "contracts/arcava/CT-ARC-004/1.0/result.schema.json": "ABSENT",
+    "contracts/arcava/CT-ARC-004/1.0/error.schema.json": "ABSENT",
+    "contracts/arcava/CT-ARC-R03-REM-001/1.0/request.schema.json": "ABSENT",
+    "contracts/arcava/CT-ARC-R03-REM-001/1.0/result.schema.json": "ABSENT",
+    "contracts/arcava/CT-ARC-R03-REM-001/1.0/event.schema.json": "ABSENT",
+    "contracts/arcava/CT-ARC-R03-REM-001/1.0/error.schema.json": "ABSENT",
+    "contracts/arcava/contract-manifest.json": "ABSENT",
+    "tests/arcava/contracts/arc_p16_cases.json": "ABSENT",
+    "scripts/arcava/validate_arc_p16.py": "ABSENT",
+    "docs/traceability/ARC-P16-sov-priority-producer-contract-physicalization.md": "ABSENT",
+    "docs/arcava/operations/evidence/ARC-P16/receipt.json": "ABSENT",
+    "docs/arcava/operations/evidence/ARC-P16/test-results.json": "ABSENT",
+    "docs/arcava/operations/evidence/ARC-P16/source-extract.txt": "ABSENT",
+    "docs/arcava/operations/evidence/ARC-P16/toolchain-lock.txt": "ABSENT"
+  },
+  "allowlist": [
+    "contracts/arcava/types/1.0/QueryEnvelope.schema.json",
+    "contracts/arcava/types/1.0/ResponseEnvelope.schema.json",
+    "contracts/arcava/types/1.0/EventEnvelope.schema.json",
+    "contracts/arcava/CT-ARC-002/1.0/request.schema.json",
+    "contracts/arcava/CT-ARC-002/1.0/result.schema.json",
+    "contracts/arcava/CT-ARC-002/1.0/error.schema.json",
+    "contracts/arcava/CT-ARC-003/1.0/request.schema.json",
+    "contracts/arcava/CT-ARC-003/1.0/result.schema.json",
+    "contracts/arcava/CT-ARC-003/1.0/error.schema.json",
+    "contracts/arcava/CT-ARC-004/1.0/request.schema.json",
+    "contracts/arcava/CT-ARC-004/1.0/result.schema.json",
+    "contracts/arcava/CT-ARC-004/1.0/error.schema.json",
+    "contracts/arcava/CT-ARC-R03-REM-001/1.0/request.schema.json",
+    "contracts/arcava/CT-ARC-R03-REM-001/1.0/result.schema.json",
+    "contracts/arcava/CT-ARC-R03-REM-001/1.0/event.schema.json",
+    "contracts/arcava/CT-ARC-R03-REM-001/1.0/error.schema.json",
+    "contracts/arcava/contract-manifest.json",
+    "tests/arcava/contracts/arc_p16_cases.json",
+    "scripts/arcava/validate_arc_p16.py",
+    "docs/traceability/ARC-P16-sov-priority-producer-contract-physicalization.md",
+    "docs/arcava/operations/evidence/ARC-P16/receipt.json",
+    "docs/arcava/operations/evidence/ARC-P16/test-results.json",
+    "docs/arcava/operations/evidence/ARC-P16/source-extract.txt",
+    "docs/arcava/operations/evidence/ARC-P16/toolchain-lock.txt"
+  ],
+  "manifest_sha256": "e0dfef2598eef6885221521a768a46d85f46beac8c47b17fd9447a90bcba88d8",
+  "source_refs": [
+    {
+      "document_id": "1bwZrdGHeQXZcU2V5kSQeGypNnMVUAp6I3aAgVY8fHKQ",
+      "revision_id": "AHj4eMRvY37JqQDTG18YBPQsEcO5HHusT8gTcN-NNXqEtT1YfMPEP1E5gbc56Z-mCGgbNN0taMtRCFVwA0Lv3rg6p1BRnHM3ohv0wNiK248",
+      "role": "ARC-10 owner materialization source"
+    },
+    {
+      "document_id": "1HUn9DThuSaWeWhw4eQEfUMAZw8omCPvcy0rIoITL_iU",
+      "revision_id": "AHj4eMQcKEHGwLPGc_kMRaUR7-b5hADe1XpZbYlkjBkn6rIrnlV4e95-f0dkHw11j1FUOMeckfb1k0bdWL-wtXTfIVSWX_wBpBK7A1yzwwo",
+      "role": "ATC-05 P1-P4 / E08-E10"
+    },
+    {
+      "document_id": "1SkrqFPuCMDhcfIfrMohCArqupjNwj7peHKgRtO6irqk",
+      "revision_id": "ANLCKQkSLhkaYIQHv61ig6fP1UlslzdOQwKUzGAF2TRNwD9Wa_EGvW5_1lt7H-5bIxKG9UQUktu_aDuoRkhCp_j1k_RX1rntnCTKnv2dgQM",
+      "role": "FZ-04 contract outcome registry"
+    },
+    {
+      "document_id": "1DEwzYlvC5etngjUnmAl5MCXQDWFQNgeaogxM1j8egQY",
+      "revision_id": "ANLCKQlpqAEprRUIE3ADwcbgCjR5WO--bejLa3jCH388GCtcT0i16ZeucuozpJADUndfm8Uv8gIgF8crhp9O5uV-3g1xRDuA9cxrXIn6740",
+      "role": "ATC-04 lifecycle states"
+    },
+    {
+      "document_id": "1af7vWihYv7fqNGHCk4W3qUtfYh0AwrWZYre8QqxYfzU",
+      "revision_id": "ANLCKQkgvK3UjlHk3DM-pmYf6pS7pBwKcQK91XUFBbX4pxuYvlaCq0OgW-Scf1wgAquqBTCC3KN4DImltVzC91dzCtYxINpILLjl5mtEvL0",
+      "role": "SOV-34 physical-artifact blocker"
+    }
+  ],
+  "frozen_test_counts": {
+    "groups": 14,
+    "subcases": 96
+  },
+  "physical_status": "MATERIALIZED_OFFLINE_CANONICAL_RUNTIME_PENDING",
+  "runtime_producer_ready": false,
+  "cross_lane": {
+    "SOV_T17": "PHYSICAL_ARTIFACT_BLOCKER_NOT_LIFTED_UNTIL_CANONICAL_PASS",
+    "SOV_T12": "RUNTIME_PROVIDER_BLOCKER_REMAINS"
+  },
+  "invariants": {
+    "requirement_baseline": "86 = 47 P0 + 39 P1",
+    "food_scan_dosha_ai": "DEFERRED",
+    "no_requirement_87": true,
+    "no_arc_sem_02": true,
+    "no_xlm_rerun": true,
+    "no_commit_push_pr_sql_migration_deployment": true
+  },
+  "local_diagnostic": {
+    "classification": "PASS_NON_CANONICAL",
+    "python": "Python 3.13.5",
+    "groups": 14,
+    "subcases": 96,
+    "pass": 96,
+    "fail": 0,
+    "exit_code": 0,
+    "stderr_empty": true
+  },
+  "created_file_sha256_excluding_receipt": {
+    "contracts/arcava/types/1.0/QueryEnvelope.schema.json": "5995eaa5cafcd91e73e96ad05bba05d6bb5df2cae5ece3b528281cf444033f21",
+    "contracts/arcava/types/1.0/ResponseEnvelope.schema.json": "01e03e2155747ebfc996f09fc8cfd109b79402c7684f47f8a293e5a802488944",
+    "contracts/arcava/types/1.0/EventEnvelope.schema.json": "42e2afd366c234cc102c22a528fc5e0848e00b9dfa7f7cff2aa593b16e85baaa",
+    "contracts/arcava/CT-ARC-002/1.0/request.schema.json": "23b388323182cac055da79f9a2ef5941c2760e82ee5bc742d5e9ad2f945c7cc8",
+    "contracts/arcava/CT-ARC-002/1.0/result.schema.json": "58df835bef388bed435be4410610afa64c9a9f20e612ce54a9e9d95ec7b83595",
+    "contracts/arcava/CT-ARC-002/1.0/error.schema.json": "1c19a0ef3ba552c564320aa44563feaab5968b4f8fcb7e152d5148c24d614eeb",
+    "contracts/arcava/CT-ARC-003/1.0/request.schema.json": "4cee43f582d99b8d15e07eefc93090b2a4d2ea6f3bfdf5472226185116b9866c",
+    "contracts/arcava/CT-ARC-003/1.0/result.schema.json": "d4ad8de0747e1a3f546eb2835bc3454d560bcaa300a4fb2817eaa8ef5859699c",
+    "contracts/arcava/CT-ARC-003/1.0/error.schema.json": "d0bb1c8774a0efc8de46e90e053b661c0a3b25b272320b9069e6b67bd4e2caf1",
+    "contracts/arcava/CT-ARC-004/1.0/request.schema.json": "622ec3f7f683246530ac268ec1b93a7466f2c295d590974883134722ad5739e6",
+    "contracts/arcava/CT-ARC-004/1.0/result.schema.json": "7d58687bb732643a31b4f3b099180f3d823a41d7e1f1b800e4af606e553a9265",
+    "contracts/arcava/CT-ARC-004/1.0/error.schema.json": "6a927120dcaf3d9c9f39f81a04c7199496ceea251b7e03564568c7e0bd20e830",
+    "contracts/arcava/CT-ARC-R03-REM-001/1.0/request.schema.json": "fa572d44d19a7bd1cf56c7a7f230f5add1e89f8d53e9ff02251d0c353f8367f1",
+    "contracts/arcava/CT-ARC-R03-REM-001/1.0/result.schema.json": "42b08029205dcf4eb24fc3815669ee20cee61dd4b396937cb1c1f166d96fabd2",
+    "contracts/arcava/CT-ARC-R03-REM-001/1.0/event.schema.json": "13aae6b52adb1da71624472ae382522e3516745fb58acda2104ef7c0604e6db1",
+    "contracts/arcava/CT-ARC-R03-REM-001/1.0/error.schema.json": "f2c61f8cbbeafb8f5a906aee8a41bc0e7e2cf69c54b1ce0274d97bcbd5e565d0",
+    "contracts/arcava/contract-manifest.json": "e0dfef2598eef6885221521a768a46d85f46beac8c47b17fd9447a90bcba88d8",
+    "tests/arcava/contracts/arc_p16_cases.json": "da211ce0f7e8113409cef9f0f18210716839d5497b28f0afee60a5a6540b9785",
+    "scripts/arcava/validate_arc_p16.py": "5b5da4e10c7da72deb97715217db91f177ec5231a0c860e7723bb132d1643498",
+    "docs/traceability/ARC-P16-sov-priority-producer-contract-physicalization.md": "bc421a3ee09bc0016ba051543753cf9d9a00190d3e0bb38ea53410ea21f22b56",
+    "docs/arcava/operations/evidence/ARC-P16/test-results.json": "53779978d6952d3349c58a6ee2c5618fc03422f8fb09e4039b4adea59b39af5c",
+    "docs/arcava/operations/evidence/ARC-P16/source-extract.txt": "7c3d1e79e905614a95ed26c3aa384fc0c25c68cff4ef32941cd3113c5cd5598c",
+    "docs/arcava/operations/evidence/ARC-P16/toolchain-lock.txt": "67a79491a93da5ec03d2767a7a232063cf18dc7aba2879820e57115dd666e127"
+  }
+}

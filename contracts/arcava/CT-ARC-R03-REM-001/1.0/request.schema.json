@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:arcava:CT-ARC-R03-REM-001:1.0:request",
+  "title": "CT-ARC-R03-REM-001 request v1.0",
+  "allOf": [
+    {
+      "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/queryEnvelopeBase"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_id": {
+          "const": "CT-ARC-R03-REM-001"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "projection_or_resource": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "due_intent_id",
+            "intent_revision",
+            "intent_hash"
+          ],
+          "properties": {
+            "due_intent_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "intent_revision": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            },
+            "intent_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "unevaluatedProperties": false
+}

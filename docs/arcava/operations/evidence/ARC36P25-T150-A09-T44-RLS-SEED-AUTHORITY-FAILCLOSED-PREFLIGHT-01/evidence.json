@@ -1,0 +1,113 @@
+{
+  "SQL_EXECUTION": "NOT_EXECUTED",
+  "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+  "input_errors": [],
+  "original_T44": "NOT_EXECUTED",
+  "reasons": [
+    "historical_seed_NOT_ACCEPTED",
+    "project_b_source_not_admitted_Arcava_owner_policy",
+    "trusted_owner_accepted_manifest_and_hash_absent",
+    "JWT_adaptation_incomplete",
+    "PUBLIC_default_ACL_and_foreign_denial_runtime_unproven"
+  ],
+  "security_acceptance": "NOT_GRANTED",
+  "source_sha256": {
+    "database/policies/001_project_b_rls_seed.sql": "1d77f1e932fee3f9b15d9d64e6bb482983b234054b239e6c0d528e975337fe48",
+    "docs/arcava/admission/synthetic/A09-T44/case.json": "2bf0272e23f827911bd1db06b45fcf354b4d5824cf772a5b0381aa001e228882",
+    "docs/arcava/admission/synthetic/A09-T44/engine.json": "f3f01c7d950f5b6f80d0b51e7e1969cc41b63cb40a0f3948531cdedc33b9cf69"
+  },
+  "static_observations_only": {
+    "adaptation_marker": true,
+    "project_b_reference": true,
+    "using_true": true
+  },
+  "status": "OFFLINE_POLICY_AUTHORITY_DENIAL_VERIFIED",
+  "execution_source_sha": "4382f37143f2bce52d8aca8c6c6a75cc6643be53",
+  "commands": [
+    {
+      "command": "python3 scripts/arcava/validate_a09_t44_policy_authority.py",
+      "exit": 0
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/arcava/security -p test_a09_t44_policy_authority.py -v",
+      "exit": 0,
+      "tests": 2,
+      "negative_subcases": 11
+    }
+  ],
+  "negatives": [
+    {
+      "name": "owner_pin",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "changed_bytes",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "missing_case",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "missing_sql",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "source_location",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "approval",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "live_success",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "foreign_schema",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "public_grant",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "engine",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "symlink",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    }
+  ],
+  "unexecuted_original_expectations": [
+    "real SQL apply",
+    "roles/RLS/function positive-negative",
+    "PUBLIC grants/default ACL",
+    "direct foreign denial",
+    "runtime audit/trace chain"
+  ]
+}

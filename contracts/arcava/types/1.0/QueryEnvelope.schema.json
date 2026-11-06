@@ -1,0 +1,1094 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:arcava:types:1.0:QueryEnvelope",
+  "title": "Arcava QueryEnvelope v1.0 — abstract component",
+  "description": "Abstract reusable component. Direct validation is intentionally forbidden; concrete profiles close projection_or_resource.",
+  "not": {},
+  "$defs": {
+    "ID": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+        "const": "latest"
+      }
+    },
+    "Code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Text": {
+      "type": "string"
+    },
+    "Revision": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "Count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "Hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "SchemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "Instant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "Zone": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "producer_namespace",
+        "object_type",
+        "stable_id"
+      ],
+      "properties": {
+        "producer_namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stable_id": {
+          "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+        }
+      }
+    },
+    "Exact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "producer_namespace",
+        "object_type",
+        "stable_id",
+        "immutable_version_id"
+      ],
+      "properties": {
+        "producer_namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stable_id": {
+          "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+        },
+        "immutable_version_id": {
+          "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+        }
+      }
+    },
+    "Scope": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "subject_principal_id"
+          ],
+          "properties": {
+            "kind": {
+              "const": "PERSONAL"
+            },
+            "subject_principal_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "tenant_id"
+          ],
+          "properties": {
+            "kind": {
+              "const": "TENANT"
+            },
+            "tenant_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "client_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "const": "PUBLIC"
+            }
+          }
+        }
+      ]
+    },
+    "Validity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "valid_from",
+        "valid_until",
+        "revocation_state"
+      ],
+      "properties": {
+        "valid_from": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "valid_until": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revocation_state": {
+          "enum": [
+            "ACTIVE",
+            "REVOKED",
+            "EXPIRED"
+          ]
+        }
+      }
+    },
+    "Decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_id",
+        "principal_id",
+        "scope",
+        "purpose",
+        "policy_version",
+        "decision",
+        "reason_codes",
+        "validity",
+        "evidence_ref"
+      ],
+      "properties": {
+        "decision_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "latest"
+          }
+        },
+        "principal_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "latest"
+          }
+        },
+        "scope": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "subject_principal_id"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "PERSONAL"
+                },
+                "subject_principal_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "tenant_id"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "TENANT"
+                },
+                "tenant_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                },
+                "client_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "PUBLIC"
+                }
+              }
+            }
+          ]
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_version": {
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "ALLOW",
+            "DENY"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "validity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "valid_from",
+            "valid_until",
+            "revocation_state"
+          ],
+          "properties": {
+            "valid_from": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "valid_until": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "revocation_state": {
+              "enum": [
+                "ACTIVE",
+                "REVOKED",
+                "EXPIRED"
+              ]
+            }
+          }
+        },
+        "evidence_ref": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "producer_namespace",
+            "object_type",
+            "stable_id"
+          ],
+          "properties": {
+            "producer_namespace": {
+              "type": "string",
+              "minLength": 1
+            },
+            "object_type": {
+              "const": "ProducerAuditRecord"
+            },
+            "stable_id": {
+              "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+            }
+          }
+        }
+      }
+    },
+    "ProgrammeBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "binding_id",
+        "programme_id",
+        "binding_revision",
+        "binding_hash",
+        "taxonomy_version_id",
+        "os_module_id",
+        "validity"
+      ],
+      "properties": {
+        "binding_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "latest"
+          }
+        },
+        "programme_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "latest"
+          }
+        },
+        "binding_revision": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "binding_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "taxonomy_version_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "latest"
+          }
+        },
+        "os_module_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "latest"
+          }
+        },
+        "validity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "valid_from",
+            "valid_until",
+            "revocation_state"
+          ],
+          "properties": {
+            "valid_from": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "valid_until": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "revocation_state": {
+              "enum": [
+                "ACTIVE",
+                "REVOKED",
+                "EXPIRED"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "TrackingSource": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "variant",
+            "protocol_id",
+            "protocol_version_id",
+            "owning_module_id",
+            "taxonomy_version_id",
+            "relation_ids"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": 1
+            },
+            "variant": {
+              "const": "KDB_PROTOCOL_VERSION"
+            },
+            "protocol_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "protocol_version_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "owning_module_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "taxonomy_version_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "relation_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "not": {
+                  "const": "latest"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "variant",
+            "journey_version_id",
+            "journey_step_id"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": 1
+            },
+            "variant": {
+              "const": "ARCAVA_DELIVERY_BINDING"
+            },
+            "journey_version_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "journey_step_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "journey_step_version": {
+              "type": "string"
+            },
+            "programme_module_binding_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "programme_binding_revision": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            },
+            "programme_binding_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "required": [
+                  "programme_module_binding_id"
+                ]
+              },
+              "then": {
+                "required": [
+                  "programme_binding_revision",
+                  "programme_binding_hash"
+                ]
+              }
+            },
+            {
+              "if": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "programme_binding_revision"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "programme_binding_hash"
+                    ]
+                  }
+                ]
+              },
+              "then": {
+                "required": [
+                  "programme_module_binding_id",
+                  "programme_binding_revision",
+                  "programme_binding_hash"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "LocalWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end",
+        "timezone",
+        "local_start",
+        "local_end",
+        "utc_offset_start",
+        "utc_offset_end",
+        "dst_resolution"
+      ],
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "local_start": {
+          "type": "string"
+        },
+        "local_end": {
+          "type": "string"
+        },
+        "utc_offset_start": {
+          "type": "string"
+        },
+        "utc_offset_end": {
+          "type": "string"
+        },
+        "dst_resolution": {
+          "enum": [
+            "UNAMBIGUOUS",
+            "EARLIER",
+            "LATER",
+            "SHIFT_FORWARD",
+            "SKIP"
+          ]
+        }
+      }
+    },
+    "Canonical": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_ref",
+        "object_type",
+        "publication_state",
+        "rights_state",
+        "allowed_use",
+        "evidence_class",
+        "safety_state",
+        "policy_version",
+        "safety_constraint_refs",
+        "provenance",
+        "lifecycle_revision",
+        "integrity_hash",
+        "binding_hash",
+        "relation_refs"
+      ],
+      "properties": {
+        "canonical_ref": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "producer_namespace",
+            "object_type",
+            "stable_id",
+            "immutable_version_id"
+          ],
+          "properties": {
+            "producer_namespace": {
+              "const": "KDB"
+            },
+            "object_type": {
+              "const": "CanonicalKnowledgeItem"
+            },
+            "stable_id": {
+              "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+            },
+            "immutable_version_id": {
+              "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+            }
+          }
+        },
+        "object_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "publication_state": {
+          "enum": [
+            "DRAFT",
+            "IN_REVIEW",
+            "PUBLISHED",
+            "SUPERSEDED",
+            "WITHDRAWN"
+          ]
+        },
+        "rights_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allowed_use": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "evidence_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "safety_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_version": {
+          "type": "string"
+        },
+        "safety_constraint_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "producer_namespace",
+              "object_type",
+              "stable_id"
+            ],
+            "properties": {
+              "producer_namespace": {
+                "type": "string",
+                "minLength": 1
+              },
+              "object_type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "stable_id": {
+                "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+              }
+            }
+          }
+        },
+        "provenance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "source_version_ref",
+              "kind",
+              "locator"
+            ],
+            "properties": {
+              "source_version_ref": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "producer_namespace",
+                  "object_type",
+                  "stable_id",
+                  "immutable_version_id"
+                ],
+                "properties": {
+                  "producer_namespace": {
+                    "const": "KDB"
+                  },
+                  "object_type": {
+                    "const": "SourceVersion"
+                  },
+                  "stable_id": {
+                    "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                  },
+                  "immutable_version_id": {
+                    "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                  }
+                }
+              },
+              "kind": {
+                "enum": [
+                  "PAGE",
+                  "TIMECODE",
+                  "SECTION",
+                  "URI"
+                ]
+              },
+              "locator": {
+                "type": "string"
+              },
+              "derivation_ref": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "producer_namespace",
+                  "object_type",
+                  "stable_id"
+                ],
+                "properties": {
+                  "producer_namespace": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "object_type": {
+                    "const": "DerivationArtifact"
+                  },
+                  "stable_id": {
+                    "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "lifecycle_revision": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "integrity_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "binding_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "taxonomy_version_ref": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "producer_namespace",
+            "object_type",
+            "stable_id",
+            "immutable_version_id"
+          ],
+          "properties": {
+            "producer_namespace": {
+              "const": "KDB"
+            },
+            "object_type": {
+              "const": "TaxonomyVersion"
+            },
+            "stable_id": {
+              "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+            },
+            "immutable_version_id": {
+              "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+            }
+          }
+        },
+        "owning_module_ref": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "producer_namespace",
+            "object_type",
+            "stable_id"
+          ],
+          "properties": {
+            "producer_namespace": {
+              "const": "KDB"
+            },
+            "object_type": {
+              "const": "Module"
+            },
+            "stable_id": {
+              "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+            }
+          }
+        },
+        "relation_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "producer_namespace",
+              "object_type",
+              "stable_id"
+            ],
+            "properties": {
+              "producer_namespace": {
+                "const": "KDB"
+              },
+              "object_type": {
+                "const": "CanonicalRelation"
+              },
+              "stable_id": {
+                "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+              }
+            }
+          }
+        }
+      }
+    },
+    "queryEnvelopeBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_id",
+        "schema_version",
+        "query_id",
+        "principal_context_ref",
+        "purpose",
+        "correlation_id",
+        "requested_at",
+        "projection_or_resource"
+      ],
+      "properties": {
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "query_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "latest"
+          }
+        },
+        "principal_context_ref": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "producer_namespace",
+            "object_type",
+            "stable_id"
+          ],
+          "properties": {
+            "producer_namespace": {
+              "const": "PIAC"
+            },
+            "object_type": {
+              "const": "PrincipalIdentity"
+            },
+            "stable_id": {
+              "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+            }
+          }
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "correlation_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "latest"
+          }
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "projection_or_resource": {},
+        "tenant_scope": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "subject_principal_id"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "PERSONAL"
+                },
+                "subject_principal_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "tenant_id"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "TENANT"
+                },
+                "tenant_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                },
+                "client_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "PUBLIC"
+                }
+              }
+            }
+          ]
+        },
+        "consent_decision_ref": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "producer_namespace",
+            "object_type",
+            "stable_id"
+          ],
+          "properties": {
+            "producer_namespace": {
+              "const": "PIAC"
+            },
+            "object_type": {
+              "const": "ConsentGrant"
+            },
+            "stable_id": {
+              "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+            }
+          }
+        },
+        "entitlement_decision_ref": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "producer_namespace",
+            "object_type",
+            "stable_id"
+          ],
+          "properties": {
+            "producer_namespace": {
+              "const": "PIAC"
+            },
+            "object_type": {
+              "const": "EntitlementGrant"
+            },
+            "stable_id": {
+              "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+            }
+          }
+        },
+        "page": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "cursor": {
+              "type": "string"
+            },
+            "page_size": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          }
+        }
+      }
+    }
+  }
+}

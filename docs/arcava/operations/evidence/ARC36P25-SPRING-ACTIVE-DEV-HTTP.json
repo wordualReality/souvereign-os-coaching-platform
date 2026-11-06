@@ -1,0 +1,33 @@
+{
+  "package": "ARC36P25-SPRING-ACTIVE-RUNTIME-TRUSTED-PORTS-01",
+  "parent": "dbe66d1a701397b333e7d25751381b38347e0f17",
+  "pointer": "ARC-36/P25 step 7/10",
+  "spring_boot": "4.1.1",
+  "role": "ACTIVE_DEV_HTTP",
+  "inactive_role": "NON_WEB_INACTIVE_BOOTSTRAP",
+  "bind": "127.0.0.1",
+  "health_live": 200,
+  "health_ready_while_authorities_absent": 503,
+  "piac_transport": "NOT_ADMITTED",
+  "kdb_transport": "NOT_ADMITTED",
+  "fixture_bearer_authorizes_active_profile": false,
+  "local": {
+    "jdk": "25.0.3",
+    "maven": "3.9.16",
+    "mvn_test": "8 tests, 0 failures",
+    "prior_suites": "PASS",
+    "javac_release_21": 0,
+    "jdk_21_runtime_local": false
+  },
+  "gates": {
+    "T150": "PARTIAL",
+    "T020": "NOT_ADMITTED",
+    "T050": "NOT_ADMITTED",
+    "T160": "NOT_ADMITTED",
+    "ACTIVE_SPRING_RUNTIME": "NOT_ACCEPTED",
+    "PiacTrustedTransport": "NOT_ADMITTED",
+    "KdbPublicationVerifier": "NOT_ADMITTED",
+    "SOV_CONSUMER_READY": "NO"
+  },
+  "independent_delta_qs": "REQUIRED_SEPARATE_REVIEWER"
+}
