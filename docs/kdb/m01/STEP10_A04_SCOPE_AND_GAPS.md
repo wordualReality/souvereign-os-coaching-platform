@@ -49,3 +49,25 @@ backup and postcommit restore; verify signed PIAC, tenant and replay behavior;
 conduct separate non-author independent P25/security review; and obtain explicit
 founder authorization for the precise hosted action. These prerequisites remain
 open. BL-KDB-02 OPEN, BL-KDB-03 TO_CLARIFY, NOT_ADMITTED, NOT_SECURITY_PASS.
+
+## Creator/default-ACL and raw-ACL local delta
+
+In the disposable PG17 test, functions created as `postgres` and as
+`kdb_migrator` have PUBLIC EXECUTE removed by their configured global
+function defaults. Functions created as `kdb_schema_owner`,
+`kdb_command_owner`, or the unconfigured `a04_other_creator` retain
+PUBLIC EXECUTE. In this test the laboratory schema denies PUBLIC USAGE,
+so effective visibility is false even though the function ACL is permissive.
+The test does not establish who can create in a real target or authenticate a
+live runner; ownership after transfer is not evidence of the original creator.
+
+The transactional-abort oracle compares the exact scoped JSON snapshot of raw
+`pg_proc.proacl`, function grantor/grantee/grant-option entries, table raw
+ACL and grants, schema raw ACL, creator default-function ACLs, and synthetic
+role memberships and options. It includes an original NULL function ACL and
+named function/table grants with grant option. A pre-COMMIT rollback restores
+that scoped snapshot exactly. A separate committed REVOKE followed by GRANT
+restores effective PUBLIC EXECUTE but leaves the originally NULL `proacl`
+non-NULL. The separate candidate cleanup also restores its previously
+defined limited snapshot in this fixture. None proves universal postcommit
+raw-ACL inversion, cross-session recovery, a backup or a hosted restore.

@@ -215,7 +215,117 @@ def main():
           THEN RAISE EXCEPTION 'OTHER_CREATOR_CHARACTERIZATION_UNEXPECTED'; END IF;
         END $check$;
         """)
+        # Defaults belong to the effective creator, not to the eventual owner.
+        # Scope grants only to this synthetic laboratory and remove it below.
         psql("kdb_a04_disposable", """
+        CREATE ROLE a04_acl_reader NOLOGIN;
+        CREATE SCHEMA a04_acl_lab;
+        GRANT USAGE,CREATE ON SCHEMA a04_acl_lab TO kdb_migrator,kdb_schema_owner,kdb_command_owner,a04_other_creator;
+        CREATE FUNCTION a04_acl_lab.created_by_postgres() RETURNS integer LANGUAGE sql AS 'SELECT 1';
+        SET ROLE kdb_migrator;
+        CREATE FUNCTION a04_acl_lab.created_by_migrator() RETURNS integer LANGUAGE sql AS 'SELECT 1';
+        RESET ROLE;
+        SET ROLE kdb_schema_owner;
+        CREATE FUNCTION a04_acl_lab.created_by_schema_owner() RETURNS integer LANGUAGE sql AS 'SELECT 1';
+        RESET ROLE;
+        SET ROLE kdb_command_owner;
+        CREATE FUNCTION a04_acl_lab.created_by_command_owner() RETURNS integer LANGUAGE sql AS 'SELECT 1';
+        RESET ROLE;
+        SET ROLE a04_other_creator;
+        CREATE FUNCTION a04_acl_lab.created_by_other() RETURNS integer LANGUAGE sql AS 'SELECT 1';
+        CREATE FUNCTION a04_acl_lab.raw_null() RETURNS integer LANGUAGE sql AS 'SELECT 1';
+        CREATE FUNCTION a04_acl_lab.named_grant() RETURNS integer LANGUAGE sql AS 'SELECT 1';
+        GRANT EXECUTE ON FUNCTION a04_acl_lab.named_grant() TO a04_acl_reader WITH GRANT OPTION;
+        CREATE TABLE a04_acl_lab.raw_table(id integer);
+        GRANT SELECT ON TABLE a04_acl_lab.raw_table TO a04_acl_reader WITH GRANT OPTION;
+        RESET ROLE;
+        GRANT a04_acl_reader TO a04_other_creator WITH INHERIT FALSE, SET FALSE;
+        """)
+        creator_matrix = json.loads(psql("kdb_a04_disposable", """
+        SELECT jsonb_object_agg(p.proname,jsonb_build_object(
+          'creator',pg_get_userbyid(p.proowner),
+          'public_execute',has_function_privilege('public',p.oid,'EXECUTE'),
+          'public_visible',has_schema_privilege('public',n.oid,'USAGE') AND has_function_privilege('public',p.oid,'EXECUTE'),
+          'raw_acl',p.proacl::text) ORDER BY p.proname)::text
+        FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='a04_acl_lab';
+        """).stdout)
+        for item in ("created_by_postgres", "created_by_migrator"):
+            if creator_matrix[item]["public_execute"]:
+                raise AssertionError("CONFIGURED_CREATOR_PUBLIC_EXECUTE: " + item)
+        for item in ("created_by_schema_owner", "created_by_command_owner", "created_by_other"):
+            if not creator_matrix[item]["public_execute"]:
+                raise AssertionError("UNCONFIGURED_CREATOR_EXPOSURE_NOT_OBSERVED: " + item)
+            if creator_matrix[item]["public_visible"]:
+                raise AssertionError("SYNTHETIC_LAB_SCHEMA_UNEXPECTEDLY_PUBLIC")
+        if creator_matrix["raw_null"]["raw_acl"] is not None:
+            raise AssertionError("NULL_ACL_PREIMAGE_NOT_OBSERVED")
+        raw_snapshot_sql = """
+        SELECT jsonb_build_object(
+          'functions',(SELECT jsonb_agg(jsonb_build_object(
+            'name',p.proname,'owner',pg_get_userbyid(p.proowner),'raw',p.proacl::text,
+            'grants',coalesce((SELECT jsonb_agg(jsonb_build_object(
+              'grantor',pg_get_userbyid(a.grantor),'grantee',CASE WHEN a.grantee=0 THEN 'PUBLIC' ELSE pg_get_userbyid(a.grantee) END,
+              'privilege',a.privilege_type,'grantable',a.is_grantable) ORDER BY a.grantor,a.grantee,a.privilege_type)
+              FROM aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a),'[]'::jsonb)
+          ) ORDER BY p.proname) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='a04_acl_lab'),
+          'tables',(SELECT jsonb_agg(jsonb_build_object(
+            'name',c.relname,'owner',pg_get_userbyid(c.relowner),'raw',c.relacl::text,
+            'grants',coalesce((SELECT jsonb_agg(jsonb_build_object(
+              'grantor',pg_get_userbyid(a.grantor),'grantee',CASE WHEN a.grantee=0 THEN 'PUBLIC' ELSE pg_get_userbyid(a.grantee) END,
+              'privilege',a.privilege_type,'grantable',a.is_grantable) ORDER BY a.grantor,a.grantee,a.privilege_type)
+              FROM aclexplode(coalesce(c.relacl,acldefault('r',c.relowner))) a),'[]'::jsonb)
+          ) ORDER BY c.relname) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+            WHERE n.nspname='a04_acl_lab' AND c.relkind='r'),
+          'schema_acl',(SELECT nspacl::text FROM pg_namespace WHERE nspname='a04_acl_lab'),
+          'memberships',(SELECT coalesce(jsonb_agg(jsonb_build_object(
+            'role',pg_get_userbyid(m.roleid),'member',pg_get_userbyid(m.member),
+            'grantor',pg_get_userbyid(m.grantor),'admin',m.admin_option,'inherit',m.inherit_option,'set',m.set_option)
+            ORDER BY m.roleid,m.member),'[]'::jsonb) FROM pg_auth_members m
+            WHERE pg_get_userbyid(m.roleid)='a04_acl_reader'),
+          'defaults',(SELECT coalesce(jsonb_agg(jsonb_build_object('creator',pg_get_userbyid(d.defaclrole),
+            'schema',coalesce(n.nspname,'GLOBAL'),'kind',d.defaclobjtype::text,'raw',d.defaclacl::text)
+            ORDER BY d.defaclrole,d.defaclnamespace,d.defaclobjtype),'[]'::jsonb)
+            FROM pg_default_acl d LEFT JOIN pg_namespace n ON n.oid=d.defaclnamespace
+            WHERE pg_get_userbyid(d.defaclrole) IN ('postgres','kdb_migrator','kdb_schema_owner','kdb_command_owner','a04_other_creator'))
+        )::text;
+        """
+        raw_before = psql("kdb_a04_disposable", raw_snapshot_sql).stdout.strip()
+        baseline_raw = json.loads(raw_before)
+        named = next(row for row in baseline_raw["functions"] if row["name"] == "named_grant")
+        if not any(g["grantor"] == "a04_other_creator" and g["grantee"] == "a04_acl_reader" and g["grantable"] and g["privilege"] == "EXECUTE" for g in named["grants"]):
+            raise AssertionError("NAMED_GRANTOR_GRANT_OPTION_NOT_ESTABLISHED")
+        if not any(g["grantor"] == "a04_other_creator" and g["grantee"] == "a04_acl_reader" and g["grantable"] and g["privilege"] == "SELECT" for g in baseline_raw["tables"][0]["grants"]):
+            raise AssertionError("TABLE_GRANTOR_GRANT_OPTION_NOT_ESTABLISHED")
+        psql("kdb_a04_disposable", """
+        BEGIN;
+        REVOKE EXECUTE ON FUNCTION a04_acl_lab.raw_null() FROM PUBLIC;
+        REVOKE EXECUTE ON FUNCTION a04_acl_lab.named_grant() FROM a04_acl_reader CASCADE;
+        REVOKE SELECT ON TABLE a04_acl_lab.raw_table FROM a04_acl_reader CASCADE;
+        ALTER DEFAULT PRIVILEGES FOR ROLE a04_other_creator REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
+        REVOKE CREATE ON SCHEMA a04_acl_lab FROM kdb_command_owner;
+        REVOKE a04_acl_reader FROM a04_other_creator;
+        ROLLBACK;
+        """)
+        raw_after_abort = psql("kdb_a04_disposable", raw_snapshot_sql).stdout.strip()
+        if raw_after_abort != raw_before:
+            raise AssertionError("RAW_ACL_TRANSACTION_ROLLBACK_MISMATCH")
+        psql("kdb_a04_disposable", """
+        REVOKE EXECUTE ON FUNCTION a04_acl_lab.raw_null() FROM PUBLIC;
+        GRANT EXECUTE ON FUNCTION a04_acl_lab.raw_null() TO PUBLIC;
+        """)
+        restored = json.loads(psql("kdb_a04_disposable", """
+        SELECT jsonb_build_object('raw_is_null',proacl IS NULL,
+          'public_execute',has_function_privilege('public',oid,'EXECUTE'))::text
+        FROM pg_proc WHERE oid='a04_acl_lab.raw_null()'::regprocedure;
+        """).stdout)
+        if restored != {"raw_is_null": False, "public_execute": True}:
+            raise AssertionError("POSTCOMMIT_NULL_ACL_COUNTEREXAMPLE_NOT_OBSERVED")
+        print("CREATOR_MATRIX=" + json.dumps(creator_matrix, sort_keys=True))
+        print("RAW_ACL_TX_ABORT_EXACT=PASS / POSTCOMMIT_EFFECTIVE_PUBLIC=TRUE / ORIGINAL_NULL_ACL_RESTORED=FALSE")
+        psql("kdb_a04_disposable", """
+        DROP SCHEMA a04_acl_lab CASCADE;
+        REVOKE a04_acl_reader FROM a04_other_creator;
+        DROP ROLE a04_acl_reader;
         DROP SCHEMA synthetic_other_creator CASCADE;
         DROP ROLE a04_other_creator;
         DROP SCHEMA kdb_canonical, kdb_staging, kdb_governance, kdb_ops CASCADE;
