@@ -133,6 +133,17 @@ def main():
             if "public.digest(" in derivative or "extensions.digest(" not in derivative:
                 raise AssertionError("DIGEST_NAMESPACE_DERIVATIVE_MISMATCH")
             psql("kdb_a04_disposable", "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + derivative)
+            exposure = psql("kdb_a04_disposable", """
+              SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+              WHERE n.nspname='kdb_ops' AND p.proname IN ('ingest_source','propose_candidate','request_review_handoff')
+              AND (has_function_privilege('public',p.oid,'EXECUTE')
+                OR has_function_privilege('anon',p.oid,'EXECUTE')
+                OR has_function_privilege('authenticated',p.oid,'EXECUTE')
+                OR has_function_privilege('service_role',p.oid,'EXECUTE')
+                OR has_function_privilege('kdb_ingest_runtime',p.oid,'EXECUTE'));
+            """).stdout.strip()
+            if exposure != "0":
+                raise AssertionError("INTERMEDIATE_COMMAND_EXECUTE_REACHABLE")
         assertions = """
         DO $check$ DECLARE n int; BEGIN
           SELECT count(*) INTO n FROM pg_class c JOIN pg_namespace s ON s.oid=c.relnamespace JOIN pg_roles r ON r.oid=c.relowner
