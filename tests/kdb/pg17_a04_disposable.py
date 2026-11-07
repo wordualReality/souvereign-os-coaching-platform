@@ -1,6 +1,7 @@
 """A04 disposable-only Docker oracle; no remote connection or customer data."""
 import json
 import hashlib
+import copy
 import os
 import subprocess
 import time
@@ -341,6 +342,115 @@ def main():
         baseline = json.loads(before)
         if recovered["ledger"] != baseline["ledger"] or recovered["protocol_count"] != baseline["protocol_count"]:
             raise AssertionError("LEGACY_FIXTURE_POSTCOMMIT_RECOVERY_MISMATCH")
+        # R1: one transaction composes immutable A04 steps and the additive
+        # creator patch; no intermediate step is committed independently.
+        r1_manifest = json.loads((ROOT / "docs/kdb/m01/a04_r1_creator_admission.v1.json").read_text())
+        for pin in (r1_manifest["base_manifest"], r1_manifest["patch"], r1_manifest["catalog_query"], r1_manifest["synthetic_evidence"], r1_manifest["preflight"], r1_manifest["unit_tests"]):
+            path = (ROOT / pin["path"]).resolve()
+            if not path.is_relative_to(ROOT) or hashlib.sha256(path.read_bytes()).hexdigest() != pin["sha256"]:
+                raise AssertionError("R1_MANIFEST_HASH_MISMATCH")
+        patch_sql = (ROOT / r1_manifest["patch"]["path"]).read_text()
+        query_sql = (ROOT / r1_manifest["catalog_query"]["path"]).read_text()
+        if candidate.count("COMMIT;") != 1:
+            raise AssertionError("R1_BASE_TRANSACTION_AMBIGUOUS")
+        base_transaction = candidate.replace("COMMIT;", "")
+        for injection in (
+            "CREATE ROLE a04_unknown NOLOGIN; GRANT CREATE ON SCHEMA kdb_ops TO a04_unknown;",
+            "CREATE ROLE a04_unknown NOLOGIN; GRANT kdb_command_owner TO a04_unknown WITH SET TRUE, INHERIT FALSE;",
+            "GRANT USAGE ON SCHEMA kdb_ops TO kdb_command_owner WITH GRANT OPTION;",
+            "SET ROLE kdb_schema_owner;",
+            "CREATE FUNCTION kdb_ops.extra() RETURNS integer LANGUAGE sql AS 'SELECT 1';",
+            "DROP FUNCTION kdb_ops.a04_canonical_digest_v2(jsonb); GRANT CREATE ON SCHEMA kdb_ops TO kdb_command_owner; SET ROLE kdb_command_owner; CREATE FUNCTION kdb_ops.a04_canonical_digest_v2(jsonb) RETURNS text LANGUAGE sql AS 'SELECT ''synthetic''::text'; RESET ROLE; REVOKE CREATE ON SCHEMA kdb_ops FROM kdb_command_owner;",
+        ):
+            attempted = psql("kdb_a04_disposable", "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + base_transaction + "\n" + injection + "\n" + patch_sql + "\nCOMMIT;", check=False)
+            if attempted.returncode == 0 or "BLOCKED_CREATOR_AUTHORITY" not in attempted.stderr:
+                raise AssertionError("R1_ADMISSION_INJECTION_NOT_DENIED: " + attempted.stderr.strip())
+        pieces = []
+        for pin in manifest["sql_steps"][1:]:
+            text = (ROOT / pin["file"]).read_text()
+            if text.count("BEGIN;") != 1 or text.count("COMMIT;") != 1:
+                raise AssertionError("R1_DERIVATIVE_TRANSACTION_AMBIGUOUS")
+            pieces.append(text.replace("BEGIN;", "", 1).replace("COMMIT;", "", 1))
+        combined = "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + base_transaction + "\n" + patch_sql + "\n" + "\n".join(pieces) + "\nCOMMIT;"
+        if combined.count("COMMIT;") != 1:
+            raise AssertionError("R1_COMBINED_TRANSACTION_AMBIGUOUS")
+        psql("kdb_a04_disposable", combined.replace("COMMIT;", "ROLLBACK;"))
+        if psql("kdb_a04_disposable", snapshot_query).stdout.strip() != before:
+            raise AssertionError("R1_PRECOMMIT_SNAPSHOT_MISMATCH")
+        psql("kdb_a04_disposable", combined)
+        from a04_r1_creator_admission import evaluate, parse_and_evaluate
+        evidence = json.loads(psql("kdb_a04_disposable", query_sql).stdout)
+        if evidence != json.loads((ROOT / r1_manifest["synthetic_evidence"]["path"]).read_text()):
+            raise AssertionError("R1_SYNTHETIC_EVIDENCE_FIXTURE_MISMATCH")
+        if os.environ.get("KDB_A04_PRINT_SYNTHETIC_EXPORT") == "1":
+            print("R1_SYNTHETIC_EVIDENCE_JSON=" + json.dumps(evidence, sort_keys=True, separators=(",",":")))
+        admission = evaluate(evidence)
+        if admission["status"] != "LOCAL_CREATOR_SAFE_FOR_DISPOSABLE" or admission["apply"] != "NOT_AUTHORIZED" or admission["postcommit_restore"] != "POSTCOMMIT_RESTORE_UNVERIFIED":
+            raise AssertionError("R1_CREATOR_EVIDENCE_NOT_ADMITTED: " + json.dumps(evidence, sort_keys=True))
+        mutations = []
+        changed=copy.deepcopy(evidence); changed["schemas"][0]["creators"].append("unknown"); mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["schemas"][0]["acl_safe"]=False; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["schemas"][0]["acl_entries"][0]["grantor"]="forged"; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["schemas"][0]["acl_entries"][0]["grantable"]=True; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["creators"][0]["global_default_raw"]=None; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["creators"][0]["default_safe"]=False; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["session"]["current_user"]="kdb_schema_owner"; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["memberships"].append({"role":"kdb_schema_owner","member":"unknown","set":True}); mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["functions"][0]["raw_acl"]=None; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["functions"][0]["definition_sha256"]="0"*64; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["functions"][0]["signature"]="forged()"; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["functions"][0]["acl_safe"]=False; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["functions"][0]["acl_entries"][0]["grantor"]="forged"; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["functions"].append(copy.deepcopy(changed["functions"][0])); mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["restore"]["backup"]="VERIFIED"; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["binding"]["attestation"]="PROVIDER_VERIFIED"; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["source"]["patch_sha256"]="0"*64; mutations.append(changed)
+        if any(evaluate(item)["status"] != "BLOCKED_CREATOR_AUTHORITY" for item in mutations):
+            raise AssertionError("R1_FORGED_EVIDENCE_ACCEPTED")
+        if parse_and_evaluate('{"version":"x","version":"y"}')["status"] != "BLOCKED_CREATOR_AUTHORITY":
+            raise AssertionError("R1_DUPLICATE_KEY_ACCEPTED")
+        psql("kdb_a04_disposable", "ALTER DEFAULT PRIVILEGES FOR ROLE kdb_command_owner GRANT EXECUTE ON FUNCTIONS TO PUBLIC;")
+        if evaluate(json.loads(psql("kdb_a04_disposable", query_sql).stdout))["status"] != "BLOCKED_CREATOR_AUTHORITY":
+            raise AssertionError("R1_MISSING_GLOBAL_DEFAULT_NOT_BLOCKED")
+        psql("kdb_a04_disposable", "ALTER DEFAULT PRIVILEGES FOR ROLE kdb_command_owner REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;")
+        if evaluate(json.loads(psql("kdb_a04_disposable", query_sql).stdout))["status"] != "LOCAL_CREATOR_SAFE_FOR_DISPOSABLE":
+            raise AssertionError("R1_RESTORED_GLOBAL_DEFAULT_NOT_RECOGNIZED")
+        psql("kdb_a04_disposable", """
+        CREATE ROLE a04_r1_unknown NOLOGIN NOINHERIT;
+        CREATE SCHEMA a04_r1_lab;
+        GRANT USAGE,CREATE ON SCHEMA a04_r1_lab TO kdb_migrator,kdb_schema_owner,kdb_command_owner,a04_r1_unknown;
+        CREATE FUNCTION a04_r1_lab.by_postgres() RETURNS integer LANGUAGE sql AS 'SELECT 1';
+        SET ROLE kdb_migrator; CREATE FUNCTION a04_r1_lab.by_migrator() RETURNS integer LANGUAGE sql AS 'SELECT 1'; RESET ROLE;
+        SET ROLE kdb_schema_owner; CREATE FUNCTION a04_r1_lab.by_schema_owner() RETURNS integer LANGUAGE sql AS 'SELECT 1'; RESET ROLE;
+        SET ROLE kdb_command_owner; CREATE FUNCTION a04_r1_lab.by_command_owner() RETURNS integer LANGUAGE sql AS 'SELECT 1'; RESET ROLE;
+        SET ROLE a04_r1_unknown; CREATE FUNCTION a04_r1_lab.by_unknown() RETURNS integer LANGUAGE sql AS 'SELECT 1'; RESET ROLE;
+        """)
+        matrix = json.loads(psql("kdb_a04_disposable", """
+        SELECT jsonb_object_agg(p.proname,has_function_privilege('public',p.oid,'EXECUTE'))::text
+        FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='a04_r1_lab';
+        """).stdout)
+        if matrix != {"by_postgres":False,"by_migrator":False,"by_schema_owner":False,"by_command_owner":False,"by_unknown":True}:
+            raise AssertionError("R1_CREATOR_MATRIX_MISMATCH: " + json.dumps(matrix))
+        unknown_create = psql("kdb_a04_disposable", "SET SESSION AUTHORIZATION a04_r1_unknown; CREATE FUNCTION kdb_ops.forbidden() RETURNS integer LANGUAGE sql AS 'SELECT 1';", check=False)
+        if unknown_create.returncode == 0 or "permission denied" not in unknown_create.stderr:
+            raise AssertionError("R1_UNKNOWN_CREATOR_NOT_DENIED")
+        psql("kdb_a04_disposable", "GRANT CREATE ON SCHEMA kdb_ops TO a04_r1_unknown;")
+        if evaluate(json.loads(psql("kdb_a04_disposable", query_sql).stdout))["status"] != "BLOCKED_CREATOR_AUTHORITY":
+            raise AssertionError("R1_ALTERNATE_CREATE_NOT_BLOCKED")
+        psql("kdb_a04_disposable", "REVOKE CREATE ON SCHEMA kdb_ops FROM a04_r1_unknown;")
+        print("R1_CREATOR_MATRIX=" + json.dumps(matrix, sort_keys=True))
+        print("R1_ADMISSION=" + json.dumps(admission, sort_keys=True))
+        print("R1_UNKNOWN_CREATE_DENIED / EXTRA_GRANT_DENIED / ROLE_SWITCH_AND_GRANTOR_DENIED")
+        psql("kdb_a04_disposable", """
+        DROP SCHEMA a04_r1_lab CASCADE; DROP OWNED BY a04_r1_unknown; DROP ROLE a04_r1_unknown;
+        DROP SCHEMA kdb_canonical, kdb_staging, kdb_governance, kdb_ops CASCADE;
+        DROP OWNED BY kdb_migrator; DROP ROLE kdb_migrator;
+        DROP OWNED BY kdb_command_owner; DROP OWNED BY kdb_schema_owner; DROP OWNED BY kdb_ingest_runtime;
+        DROP ROLE kdb_command_owner; DROP ROLE kdb_schema_owner; DROP ROLE kdb_ingest_runtime;
+        ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT EXECUTE ON FUNCTIONS TO PUBLIC;
+        """)
+        if psql("kdb_a04_disposable", snapshot_query).stdout.strip() != before:
+            raise AssertionError("R1_SCOPED_POSTCOMMIT_CLEANUP_MISMATCH")
         print("PASS_DISPOSABLE_PG17_A04_SCOPED: TX_ABORT_SNAPSHOT TABLES_12 FORCE_RLS OWNER RUNTIME_DENIED LEGACY_FIXTURE_POSTCOMMIT DIGEST_VECTOR REAPPLY_DENIED")
         print("POSTCOMMIT_SCOPED_SNAPSHOT_EQUAL=" + str(recovered == baseline).upper())
         print("OPEN: complete raw-ACL parity, verified backup/postcommit restore, other creators, signed PIAC, authoritative target and live grants")

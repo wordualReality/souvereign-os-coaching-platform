@@ -52,6 +52,9 @@ def analyze(text: str) -> dict:
         return result
     if not isinstance(doc, dict):
         return result
+    if doc.get("version") == "kdb.a04-r1.creator-evidence.v1":
+        from a04_r1_creator_admission import evaluate
+        return evaluate(doc)
     if doc.get("version") == "kdb.a04.catalog-export.disposable.v1":
         binding = doc.get("binding")
         if not isinstance(binding, dict) or binding != EXPORTED_PREIMAGE["binding"]:
@@ -109,7 +112,7 @@ def main():
     except (OSError, UnicodeError):
         report = {"status":"ABSTAIN","code":"INVALID_DOCUMENT","apply":"NOT_AUTHORIZED"}
     print(json.dumps(report, sort_keys=True))
-    if report["status"] != "SYNTHETIC_PREIMAGE_MATCH":
+    if report["status"] not in ("SYNTHETIC_PREIMAGE_MATCH", "LOCAL_CREATOR_SAFE_FOR_DISPOSABLE"):
         raise SystemExit(1)
 
 if __name__ == "__main__":

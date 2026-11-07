@@ -1,0 +1,387 @@
+{
+  "binding": {
+    "attestation": "SYNTHETIC_ONLY",
+    "project_ref": "ujdzahwlximlmndexgmx"
+  },
+  "creators": [
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_command_owner",
+          "grantor": "kdb_command_owner",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bypassrls": false,
+      "default_namespace": "GLOBAL",
+      "default_safe": true,
+      "global_default_raw": "{kdb_command_owner=X/kdb_command_owner}",
+      "inherit": false,
+      "login": false,
+      "object_type": "f",
+      "role": "kdb_command_owner",
+      "scoped_defaults_safe": true,
+      "superuser": false
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_migrator",
+          "grantor": "kdb_migrator",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bypassrls": false,
+      "default_namespace": "GLOBAL",
+      "default_safe": true,
+      "global_default_raw": "{kdb_migrator=X/kdb_migrator}",
+      "inherit": false,
+      "login": false,
+      "object_type": "f",
+      "role": "kdb_migrator",
+      "scoped_defaults_safe": true,
+      "superuser": false
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_schema_owner",
+          "grantor": "kdb_schema_owner",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bypassrls": false,
+      "default_namespace": "GLOBAL",
+      "default_safe": true,
+      "global_default_raw": "{kdb_schema_owner=X/kdb_schema_owner}",
+      "inherit": false,
+      "login": false,
+      "object_type": "f",
+      "role": "kdb_schema_owner",
+      "scoped_defaults_safe": true,
+      "superuser": false
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bypassrls": true,
+      "default_namespace": "GLOBAL",
+      "default_safe": true,
+      "global_default_raw": "{postgres=X/postgres}",
+      "inherit": true,
+      "login": true,
+      "object_type": "f",
+      "role": "postgres",
+      "scoped_defaults_safe": true,
+      "superuser": true
+    }
+  ],
+  "functions": [
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_command_owner",
+          "grantor": "kdb_command_owner",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "acl_safe": true,
+      "definition_sha256": "7ea734800d419b9e2810abf82b8ca07fdd71b6faa14e8d8366f2eab102577eeb",
+      "name": "a04_canonical_digest_v2",
+      "owner": "kdb_command_owner",
+      "public_execute": false,
+      "raw_acl": "{kdb_command_owner=X/kdb_command_owner}",
+      "runtime_execute": false,
+      "schema": "kdb_ops",
+      "signature": "kdb_ops.a04_canonical_digest_v2(jsonb)"
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_command_owner",
+          "grantor": "kdb_command_owner",
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantable": false,
+          "grantee": "kdb_migrator",
+          "grantor": "kdb_command_owner",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "acl_safe": true,
+      "definition_sha256": "8cd49e6f0a89ebd5d1d3a7f9f7ab43f23273a8ee54e403d771e8c21c290d794a",
+      "name": "canonical_command_digest",
+      "owner": "kdb_command_owner",
+      "public_execute": false,
+      "raw_acl": "{kdb_command_owner=X/kdb_command_owner,kdb_migrator=X/kdb_command_owner}",
+      "runtime_execute": false,
+      "schema": "kdb_ops",
+      "signature": "kdb_ops.canonical_command_digest(text,uuid,text,text,text,text,text,text,text,text,text,text,uuid)"
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_command_owner",
+          "grantor": "kdb_command_owner",
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantable": false,
+          "grantee": "kdb_migrator",
+          "grantor": "kdb_command_owner",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "acl_safe": true,
+      "definition_sha256": "064cb1e354776e4ad2b2abf83fa820feeaa38bcc3fc0ab955813b607f798818e",
+      "name": "canonical_digest_v2",
+      "owner": "kdb_command_owner",
+      "public_execute": false,
+      "raw_acl": "{kdb_command_owner=X/kdb_command_owner,kdb_migrator=X/kdb_command_owner}",
+      "runtime_execute": false,
+      "schema": "kdb_ops",
+      "signature": "kdb_ops.canonical_digest_v2(jsonb)"
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_command_owner",
+          "grantor": "kdb_command_owner",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "acl_safe": true,
+      "definition_sha256": "949bf590653befb7665456f543be4b43cf6624660221344a3822504f251a725e",
+      "name": "ingest_source",
+      "owner": "kdb_command_owner",
+      "public_execute": false,
+      "raw_acl": "{kdb_command_owner=X/kdb_command_owner}",
+      "runtime_execute": false,
+      "schema": "kdb_ops",
+      "signature": "kdb_ops.ingest_source(uuid,uuid,text,text,text,text,text,text,text,jsonb,text,text,text,text,uuid,timestamp with time zone)"
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_command_owner",
+          "grantor": "kdb_command_owner",
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantable": false,
+          "grantee": "kdb_migrator",
+          "grantor": "kdb_command_owner",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "acl_safe": true,
+      "definition_sha256": "67e357e1019bb405d89fa804da7a6d4f30166207e6ed9ff0850aeff49684671b",
+      "name": "jsonb_sha256",
+      "owner": "kdb_command_owner",
+      "public_execute": false,
+      "raw_acl": "{kdb_command_owner=X/kdb_command_owner,kdb_migrator=X/kdb_command_owner}",
+      "runtime_execute": false,
+      "schema": "kdb_ops",
+      "signature": "kdb_ops.jsonb_sha256(jsonb)"
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_command_owner",
+          "grantor": "kdb_command_owner",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "acl_safe": true,
+      "definition_sha256": "4e6e897d50d07a25d02f7527a6b2cc5feb427748f4677e99312dffd1e32d0ea0",
+      "name": "propose_candidate",
+      "owner": "kdb_command_owner",
+      "public_execute": false,
+      "raw_acl": "{kdb_command_owner=X/kdb_command_owner}",
+      "runtime_execute": false,
+      "schema": "kdb_ops",
+      "signature": "kdb_ops.propose_candidate(uuid,text,uuid,uuid,uuid,bigint,text,text,jsonb,jsonb,text,text,uuid)"
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_command_owner",
+          "grantor": "kdb_command_owner",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "acl_safe": true,
+      "definition_sha256": "42f932ee49630a3a375a964e2c76f866d86d9fd9145255cb012fa1b8ac3bc8ce",
+      "name": "request_review_handoff",
+      "owner": "kdb_command_owner",
+      "public_execute": false,
+      "raw_acl": "{kdb_command_owner=X/kdb_command_owner}",
+      "runtime_execute": false,
+      "schema": "kdb_ops",
+      "signature": "kdb_ops.request_review_handoff(uuid,text,uuid,text,text,text,uuid)"
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_command_owner",
+          "grantor": "kdb_command_owner",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "acl_safe": true,
+      "definition_sha256": "e38d2145b407ddeff18db47ae61e7331ad2cc2645a10eac2d8d63ed9ebd2d7ec",
+      "name": "security_context_ready",
+      "owner": "kdb_command_owner",
+      "public_execute": false,
+      "raw_acl": "{kdb_command_owner=X/kdb_command_owner}",
+      "runtime_execute": false,
+      "schema": "kdb_ops",
+      "signature": "kdb_ops.security_context_ready()"
+    }
+  ],
+  "memberships": [],
+  "restore": {
+    "backup": "UNVERIFIED",
+    "operator": "UNVERIFIED"
+  },
+  "schemas": [
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_schema_owner",
+          "grantor": "kdb_schema_owner",
+          "privilege": "CREATE"
+        },
+        {
+          "grantable": false,
+          "grantee": "kdb_schema_owner",
+          "grantor": "kdb_schema_owner",
+          "privilege": "USAGE"
+        }
+      ],
+      "acl_safe": true,
+      "creators": [
+        "kdb_schema_owner",
+        "postgres"
+      ],
+      "name": "kdb_canonical",
+      "owner": "kdb_schema_owner",
+      "public_create": false
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_schema_owner",
+          "grantor": "kdb_schema_owner",
+          "privilege": "CREATE"
+        },
+        {
+          "grantable": false,
+          "grantee": "kdb_schema_owner",
+          "grantor": "kdb_schema_owner",
+          "privilege": "USAGE"
+        }
+      ],
+      "acl_safe": true,
+      "creators": [
+        "kdb_schema_owner",
+        "postgres"
+      ],
+      "name": "kdb_governance",
+      "owner": "kdb_schema_owner",
+      "public_create": false
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_schema_owner",
+          "grantor": "kdb_schema_owner",
+          "privilege": "CREATE"
+        },
+        {
+          "grantable": false,
+          "grantee": "kdb_schema_owner",
+          "grantor": "kdb_schema_owner",
+          "privilege": "USAGE"
+        },
+        {
+          "grantable": false,
+          "grantee": "kdb_migrator",
+          "grantor": "kdb_schema_owner",
+          "privilege": "CREATE"
+        },
+        {
+          "grantable": false,
+          "grantee": "kdb_migrator",
+          "grantor": "kdb_schema_owner",
+          "privilege": "USAGE"
+        }
+      ],
+      "acl_safe": true,
+      "creators": [
+        "kdb_migrator",
+        "kdb_schema_owner",
+        "postgres"
+      ],
+      "name": "kdb_ops",
+      "owner": "kdb_schema_owner",
+      "public_create": false
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "kdb_schema_owner",
+          "grantor": "kdb_schema_owner",
+          "privilege": "CREATE"
+        },
+        {
+          "grantable": false,
+          "grantee": "kdb_schema_owner",
+          "grantor": "kdb_schema_owner",
+          "privilege": "USAGE"
+        }
+      ],
+      "acl_safe": true,
+      "creators": [
+        "kdb_schema_owner",
+        "postgres"
+      ],
+      "name": "kdb_staging",
+      "owner": "kdb_schema_owner",
+      "public_create": false
+    }
+  ],
+  "session": {
+    "current_user": "postgres",
+    "identity": "SYNTHETIC_SESSION_ONLY_NOT_ATTESTED",
+    "session_user": "postgres"
+  },
+  "source": {
+    "base_manifest_sha256": "235c6b9875a068a82db5c9d3c0bae4305d94fa952ad001bd0d5a2fc5eca6d65e",
+    "base_sha": "67e417a3ee65ffec2b01da2c3a53e92e7b31c07e",
+    "patch_sha256": "a6af6706ace9fb1d3b9226bf499db2911d2c80141b87faaacbe1fbb3e12e06e7"
+  },
+  "version": "kdb.a04-r1.creator-evidence.v1"
+}
