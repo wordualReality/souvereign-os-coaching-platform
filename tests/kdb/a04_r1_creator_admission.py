@@ -60,19 +60,22 @@ def evaluate(evidence):
             expected_acl = {("kdb_schema_owner","CREATE"), ("kdb_schema_owner","USAGE")}
             if item["name"] == "kdb_ops":
                 expected_acl |= {("kdb_migrator","CREATE"), ("kdb_migrator","USAGE")}
-            if set(item) != {"name","owner","public_create","creators","acl_safe","acl_entries"} or item["owner"] != "kdb_schema_owner" or item["public_create"] is not False or item["acl_safe"] is not True or item["creators"] != expected or not acl_matches(item["acl_entries"], "kdb_schema_owner", expected_acl):
+            usage = {"PUBLIC":False,"anon":False,"authenticated":False,"service_role":False,
+                     "kdb_ingest_runtime":False,"kdb_migrator":item["name"] == "kdb_ops",
+                     "kdb_schema_owner":True,"kdb_command_owner":False,"postgres":True}
+            if set(item) != {"name","owner","public_create","creators","acl_safe","acl_entries","effective_usage"} or item["owner"] != "kdb_schema_owner" or item["public_create"] is not False or item["acl_safe"] is not True or item["creators"] != expected or item["effective_usage"] != usage or not acl_matches(item["acl_entries"], "kdb_schema_owner", expected_acl):
                 return result
         creators = evidence["creators"]
         if not isinstance(creators, list) or len(creators) != 4 or {x.get("role") for x in creators} != ROLES:
             return result
         for item in creators:
-            if set(item) != {"role","login","superuser","inherit","bypassrls","global_default_raw","default_namespace","object_type","default_safe","scoped_defaults_safe","acl_entries"}:
+            if set(item) != {"role","login","superuser","inherit","bypassrls","createrole","createdb","global_default_raw","default_namespace","object_type","default_safe","scoped_defaults_safe","acl_entries"}:
                 return result
             if item["global_default_raw"] != "{" + item["role"] + "=X/" + item["role"] + "}" or item["default_namespace"] != "GLOBAL" or item["object_type"] != "f" or item["default_safe"] is not True or item["scoped_defaults_safe"] is not True or not acl_matches(item["acl_entries"], item["role"], {(item["role"],"EXECUTE")}):
                 return result
-            if item["role"] != "postgres" and (item["login"] is not False or item["superuser"] is not False or item["inherit"] is not False or item["bypassrls"] is not False):
+            if item["role"] != "postgres" and (item["login"] is not False or item["superuser"] is not False or item["inherit"] is not False or item["bypassrls"] is not False or item["createrole"] is not False or item["createdb"] is not False):
                 return result
-            if item["role"] == "postgres" and (item["login"] is not True or item["superuser"] is not True):
+            if item["role"] == "postgres" and (item["login"] is not True or item["superuser"] is not True or item["inherit"] is not True or item["bypassrls"] is not True or item["createrole"] is not True or item["createdb"] is not True):
                 return result
         functions = evidence["functions"]
         if not isinstance(functions, list) or len(functions) != len(FUNCTIONS) or {x.get("name") for x in functions} != FUNCTIONS:

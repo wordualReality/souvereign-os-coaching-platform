@@ -14,6 +14,8 @@
         }
       ],
       "bypassrls": false,
+      "createdb": false,
+      "createrole": false,
       "default_namespace": "GLOBAL",
       "default_safe": true,
       "global_default_raw": "{kdb_command_owner=X/kdb_command_owner}",
@@ -34,6 +36,8 @@
         }
       ],
       "bypassrls": false,
+      "createdb": false,
+      "createrole": false,
       "default_namespace": "GLOBAL",
       "default_safe": true,
       "global_default_raw": "{kdb_migrator=X/kdb_migrator}",
@@ -54,6 +58,8 @@
         }
       ],
       "bypassrls": false,
+      "createdb": false,
+      "createrole": false,
       "default_namespace": "GLOBAL",
       "default_safe": true,
       "global_default_raw": "{kdb_schema_owner=X/kdb_schema_owner}",
@@ -74,6 +80,8 @@
         }
       ],
       "bypassrls": true,
+      "createdb": true,
+      "createrole": true,
       "default_namespace": "GLOBAL",
       "default_safe": true,
       "global_default_raw": "{postgres=X/postgres}",
@@ -283,6 +291,17 @@
         "kdb_schema_owner",
         "postgres"
       ],
+      "effective_usage": {
+        "PUBLIC": false,
+        "anon": false,
+        "authenticated": false,
+        "kdb_command_owner": false,
+        "kdb_ingest_runtime": false,
+        "kdb_migrator": false,
+        "kdb_schema_owner": true,
+        "postgres": true,
+        "service_role": false
+      },
       "name": "kdb_canonical",
       "owner": "kdb_schema_owner",
       "public_create": false
@@ -307,6 +326,17 @@
         "kdb_schema_owner",
         "postgres"
       ],
+      "effective_usage": {
+        "PUBLIC": false,
+        "anon": false,
+        "authenticated": false,
+        "kdb_command_owner": false,
+        "kdb_ingest_runtime": false,
+        "kdb_migrator": false,
+        "kdb_schema_owner": true,
+        "postgres": true,
+        "service_role": false
+      },
       "name": "kdb_governance",
       "owner": "kdb_schema_owner",
       "public_create": false
@@ -344,6 +374,17 @@
         "kdb_schema_owner",
         "postgres"
       ],
+      "effective_usage": {
+        "PUBLIC": false,
+        "anon": false,
+        "authenticated": false,
+        "kdb_command_owner": false,
+        "kdb_ingest_runtime": false,
+        "kdb_migrator": true,
+        "kdb_schema_owner": true,
+        "postgres": true,
+        "service_role": false
+      },
       "name": "kdb_ops",
       "owner": "kdb_schema_owner",
       "public_create": false
@@ -368,6 +409,17 @@
         "kdb_schema_owner",
         "postgres"
       ],
+      "effective_usage": {
+        "PUBLIC": false,
+        "anon": false,
+        "authenticated": false,
+        "kdb_command_owner": false,
+        "kdb_ingest_runtime": false,
+        "kdb_migrator": false,
+        "kdb_schema_owner": true,
+        "postgres": true,
+        "service_role": false
+      },
       "name": "kdb_staging",
       "owner": "kdb_schema_owner",
       "public_create": false

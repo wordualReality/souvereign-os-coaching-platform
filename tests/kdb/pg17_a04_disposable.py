@@ -380,10 +380,10 @@ def main():
         psql("kdb_a04_disposable", combined)
         from a04_r1_creator_admission import evaluate, parse_and_evaluate
         evidence = json.loads(psql("kdb_a04_disposable", query_sql).stdout)
-        if evidence != json.loads((ROOT / r1_manifest["synthetic_evidence"]["path"]).read_text()):
-            raise AssertionError("R1_SYNTHETIC_EVIDENCE_FIXTURE_MISMATCH")
         if os.environ.get("KDB_A04_PRINT_SYNTHETIC_EXPORT") == "1":
             print("R1_SYNTHETIC_EVIDENCE_JSON=" + json.dumps(evidence, sort_keys=True, separators=(",",":")))
+        if evidence != json.loads((ROOT / r1_manifest["synthetic_evidence"]["path"]).read_text()):
+            raise AssertionError("R1_SYNTHETIC_EVIDENCE_FIXTURE_MISMATCH")
         admission = evaluate(evidence)
         if admission["status"] != "LOCAL_CREATOR_SAFE_FOR_DISPOSABLE" or admission["apply"] != "NOT_AUTHORIZED" or admission["postcommit_restore"] != "POSTCOMMIT_RESTORE_UNVERIFIED":
             raise AssertionError("R1_CREATOR_EVIDENCE_NOT_ADMITTED: " + json.dumps(evidence, sort_keys=True))
@@ -392,6 +392,7 @@ def main():
         changed=copy.deepcopy(evidence); changed["schemas"][0]["acl_safe"]=False; mutations.append(changed)
         changed=copy.deepcopy(evidence); changed["schemas"][0]["acl_entries"][0]["grantor"]="forged"; mutations.append(changed)
         changed=copy.deepcopy(evidence); changed["schemas"][0]["acl_entries"][0]["grantable"]=True; mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["schemas"][0]["effective_usage"]["anon"]=True; mutations.append(changed)
         changed=copy.deepcopy(evidence); changed["creators"][0]["global_default_raw"]=None; mutations.append(changed)
         changed=copy.deepcopy(evidence); changed["creators"][0]["default_safe"]=False; mutations.append(changed)
         changed=copy.deepcopy(evidence); changed["session"]["current_user"]="kdb_schema_owner"; mutations.append(changed)

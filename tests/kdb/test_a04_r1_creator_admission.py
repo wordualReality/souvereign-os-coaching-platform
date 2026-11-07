@@ -28,6 +28,7 @@ class CreatorAdmissionTest(unittest.TestCase):
         doc=copy.deepcopy(self.doc); doc["schemas"][0]["creators"].append("unknown"); variants.append(doc)
         doc=copy.deepcopy(self.doc); doc["schemas"][0]["acl_entries"][0]["grantor"]="other"; variants.append(doc)
         doc=copy.deepcopy(self.doc); doc["schemas"][0]["acl_entries"][0]["grantable"]=True; variants.append(doc)
+        doc=copy.deepcopy(self.doc); doc["schemas"][0]["effective_usage"]["anon"]=True; variants.append(doc)
         doc=copy.deepcopy(self.doc); doc["creators"][0]["global_default_raw"]=None; variants.append(doc)
         doc=copy.deepcopy(self.doc); doc["creators"][0]["default_safe"]=False; variants.append(doc)
         doc=copy.deepcopy(self.doc); doc["memberships"].append({"role":"kdb_schema_owner","member":"unknown","set":True}); variants.append(doc)

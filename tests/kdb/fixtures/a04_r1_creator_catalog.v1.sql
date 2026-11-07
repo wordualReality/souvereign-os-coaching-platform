@@ -11,6 +11,10 @@ SELECT jsonb_build_object(
    'name',n.nspname,'owner',pg_get_userbyid(n.nspowner),
    'public_create',has_schema_privilege('public',n.oid,'CREATE'),
    'creators',(SELECT coalesce(jsonb_agg(r.rolname ORDER BY r.rolname),'[]'::jsonb) FROM pg_roles r WHERE has_schema_privilege(r.oid,n.oid,'CREATE')),
+   'effective_usage',(SELECT jsonb_object_agg(role_name,
+      CASE WHEN role_name='PUBLIC' THEN has_schema_privilege('public',n.oid,'USAGE')
+        WHEN to_regrole(role_name) IS NULL THEN NULL ELSE has_schema_privilege(role_name,n.oid,'USAGE') END ORDER BY role_name)
+     FROM unnest(ARRAY['PUBLIC','anon','authenticated','service_role','kdb_ingest_runtime','kdb_migrator','kdb_schema_owner','kdb_command_owner','postgres']) AS u(role_name)),
    'acl_entries',(SELECT coalesce(jsonb_agg(jsonb_build_object(
      'grantor',pg_get_userbyid(a.grantor),'grantee',CASE WHEN a.grantee=0 THEN 'PUBLIC' ELSE pg_get_userbyid(a.grantee) END,
      'privilege',a.privilege_type,'grantable',a.is_grantable) ORDER BY a.grantor,a.grantee,a.privilege_type),'[]'::jsonb)
@@ -21,7 +25,7 @@ SELECT jsonb_build_object(
    ) ORDER BY n.nspname),'[]'::jsonb) FROM pg_namespace n
    WHERE n.nspname IN ('kdb_canonical','kdb_staging','kdb_governance','kdb_ops')),
  'creators',(SELECT coalesce(jsonb_agg(jsonb_build_object(
-   'role',r.rolname,'login',r.rolcanlogin,'superuser',r.rolsuper,'inherit',r.rolinherit,'bypassrls',r.rolbypassrls,
+   'role',r.rolname,'login',r.rolcanlogin,'superuser',r.rolsuper,'inherit',r.rolinherit,'bypassrls',r.rolbypassrls,'createrole',r.rolcreaterole,'createdb',r.rolcreatedb,
    'global_default_raw',d.defaclacl::text,'default_namespace','GLOBAL','object_type','f',
    'acl_entries',(SELECT coalesce(jsonb_agg(jsonb_build_object(
      'grantor',pg_get_userbyid(a.grantor),'grantee',CASE WHEN a.grantee=0 THEN 'PUBLIC' ELSE pg_get_userbyid(a.grantee) END,
