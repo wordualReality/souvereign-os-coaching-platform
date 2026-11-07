@@ -105,6 +105,7 @@ jobs:
           python3 tests/kdb/kdb_m01_06_security_static.py
           python3 tests/kdb/hosted_recovery_preflight_diff.py
           python3 tests/kdb/test_hosted_recovery_preflight.py
+          python3 tests/kdb/pg17_a04_disposable.py
           python3 scripts/validate_sql_static.py
           python3 tests/kdb/test_p4_digest_static.py
           python3 tests/kdb/test_p4_oracle_classifier.py

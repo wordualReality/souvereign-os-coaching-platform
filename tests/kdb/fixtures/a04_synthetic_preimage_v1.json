@@ -1,0 +1,30 @@
+{
+  "version":"kdb.a04.synthetic-preimage.v1",
+  "binding":{"claimed_project_ref":"ujdzahwlximlmndexgmx","export_origin":"SYNTHETIC_LOCAL_FIXTURE","attestation":"SYNTHETIC_ONLY"},
+  "ledger":[
+    {"version":"20261022205952","name":"core_foundation","octets":16250,"md5":"bbaac834073823f665a0c7b2cbdccc8d"},
+    {"version":"20261022210203","name":"security_boundary","octets":8898,"md5":"3241767e3d4696acb01716cfdaed5e95"},
+    {"version":"20261022210217","name":"api_boundary","octets":2541,"md5":"d280bbc6bb1bf2b834c824003c8e88d"},
+    {"version":"20261022210310","name":"idempotency_repair","octets":915,"md5":"f2b858e2453922378d6c3839754fbfc4"},
+    {"version":"20261022210536","name":"publication_fk_index","octets":150,"md5":"59fd566c8f4131d7965506cc05dd1cae"},
+    {"version":"20261022211240","name":"rollback_objects_test_v2","octets":1770,"md5":"a52da421c2419244350e13c5cc5216e6"}
+  ],
+  "catalog":{
+    "scope":["canonical","dev_staging","kdb_api","kdb_audit","kdb_canonical","kdb_staging","kdb_governance","kdb_ops"],
+    "present_schemas":["canonical","dev_staging","kdb_api","kdb_audit"],
+    "protected_protocol":{"rows":1,"provenance":"UNKNOWN","owner":"postgres","rls":true,"force_rls":false,"acl":[{"grantor":"postgres","grantee":"postgres","privileges":["ALL"]}]},
+    "legacy_application_tables":[],"kdb_functions":[],"policies":[],
+    "roles":[
+      {"name":"kdb_runtime","login":false,"inherit":false,"bypassrls":false},
+      {"name":"kdb_ingest_writer","login":false,"inherit":false,"bypassrls":false},
+      {"name":"kdb_reviewer","login":false,"inherit":false,"bypassrls":false}
+    ],
+    "memberships":[
+      {"role":"kdb_runtime","member":"postgres","admin":true,"set":false,"inherit":false},
+      {"role":"kdb_ingest_writer","member":"postgres","admin":true,"set":false,"inherit":false},
+      {"role":"kdb_reviewer","member":"postgres","admin":true,"set":false,"inherit":false}
+    ],
+    "schema_acl":[],"default_function_acl":[],"function_acl":[],
+    "pgcrypto":{"extension":"pgcrypto","namespace":"extensions","signature":"digest(bytea,text)","owner_execute":true,"public_execute":false}
+  }
+}

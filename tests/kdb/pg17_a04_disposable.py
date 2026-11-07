@@ -1,0 +1,164 @@
+"""A04 disposable-only Docker oracle; no remote connection or customer data."""
+import json
+import hashlib
+import subprocess
+import time
+import uuid
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+SQL = ROOT / "database/migrations/kdb/candidates/202611070001__a04_disposable_recovery_candidate.sql"
+FIXTURE = ROOT / "tests/kdb/fixtures/a04_synthetic_preimage_v1.json"
+
+def main():
+    manifest = json.loads((ROOT / "docs/kdb/m01/a04_disposable_candidate.v1.json").read_text())
+    for pin in [*manifest["sql_steps"], manifest["derived_from"], manifest["synthetic_fixture"]]:
+        path = (ROOT / pin.get("file", pin.get("path", ""))).resolve()
+        if not path.is_relative_to(ROOT) or hashlib.sha256(path.read_bytes()).hexdigest() != pin["sha256"]:
+            raise RuntimeError("MANIFEST_SOURCE_HASH_MISMATCH")
+    name = "kdb-a04-disposable-" + uuid.uuid4().hex[:12]
+    container = None
+    def invoke(*args, input=None, check=True):
+        return subprocess.run(args, input=input, text=True, capture_output=True, check=check)
+    def psql(db, sql, check=True):
+        return invoke("docker", "exec", "-i", container, "psql", "-U", "postgres", "-X", "-qAt", "-v", "ON_ERROR_STOP=1", "-d", db, input=sql, check=check)
+    try:
+        container = invoke("docker", "run", "-d", "--network", "none", "--name", name, "-e", "POSTGRES_PASSWORD=kdb_disposable_only", "postgres:17").stdout.strip()
+        if len(container) != 64 or not all(c in "0123456789abcdef" for c in container):
+            raise RuntimeError("DOCKER_CONTAINER_ID_INVALID")
+        network = invoke("docker", "inspect", "-f", "{{.HostConfig.NetworkMode}}", container).stdout.strip()
+        if network != "none":
+            raise RuntimeError("DISPOSABLE_NETWORK_GUARD_FAILED")
+        for _ in range(40):
+            ready = invoke("docker", "exec", container, "pg_isready", "-U", "postgres", check=False)
+            if ready.returncode == 0:
+                break
+            time.sleep(0.5)
+        else:
+            raise RuntimeError("DISPOSABLE_POSTGRES_NOT_READY")
+        for _ in range(20):
+            created = invoke("docker","exec",container,"createdb","-U","postgres","kdb_a04_wrong_extension",check=False)
+            if created.returncode == 0:
+                break
+            if "already exists" in created.stderr:
+                break
+            if not any(s in created.stderr for s in ("starting up", "connection", "Connection", "shutting down")):
+                raise RuntimeError("DISPOSABLE_CREATEDB_FAILED: " + created.stderr.strip())
+            time.sleep(0.5)
+        else:
+            raise RuntimeError("DISPOSABLE_CREATEDB_TIMEOUT")
+        bad_setup = psql("kdb_a04_wrong_extension", "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + SQL.read_text(), check=False)
+        if bad_setup.returncode == 0 or "A04_DISPOSABLE_GUARD_REQUIRED" not in bad_setup.stderr:
+            raise AssertionError("WRONG_DATABASE_NOT_DENIED")
+        invoke("docker","exec",container,"createdb","-U","postgres","kdb_a04_disposable")
+        candidate = SQL.read_text()
+        for setup_extension in ("", "CREATE EXTENSION pgcrypto WITH SCHEMA public;"):
+            if setup_extension:
+                psql("kdb_a04_disposable", setup_extension)
+            invalid_ext = psql("kdb_a04_disposable", "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + candidate, check=False)
+            if invalid_ext.returncode == 0 or "A04_PGCRYPTO_NAMESPACE_MISMATCH" not in invalid_ext.stderr:
+                raise AssertionError("WRONG_EXTENSION_NOT_DENIED")
+        psql("kdb_a04_disposable", "DROP EXTENSION pgcrypto;")
+        data = json.loads(FIXTURE.read_text())
+        ledger = ",".join("('%s','%s',%d,'%s')" % (v["version"],v["name"],v["octets"],v["md5"]) for v in data["ledger"])
+        setup = """CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN;
+        CREATE SCHEMA extensions; CREATE EXTENSION pgcrypto WITH SCHEMA extensions;
+        REVOKE EXECUTE ON FUNCTION extensions.digest(bytea,text) FROM PUBLIC;
+        CREATE FUNCTION public.digest(bytea,text) RETURNS bytea LANGUAGE sql AS 'SELECT decode(repeat(''00'',32),''hex'')';
+        CREATE SCHEMA canonical; CREATE TABLE canonical.protocol(id integer);
+        INSERT INTO canonical.protocol VALUES (1); ALTER TABLE canonical.protocol ENABLE ROW LEVEL SECURITY;
+        CREATE SCHEMA dev_staging; CREATE SCHEMA kdb_api; CREATE SCHEMA kdb_audit;
+        CREATE SCHEMA synthetic_migration_registry;
+        CREATE TABLE synthetic_migration_registry.ledger(version text,name text,octets integer,md5 text);
+        INSERT INTO synthetic_migration_registry.ledger VALUES """ + ledger + ";"
+        psql("kdb_a04_disposable", setup)
+        # Deliberately construct the unsafe synthetic preimage to test rejection.
+        psql("kdb_a04_disposable", "GRANT EXECUTE ON FUNCTION extensions.digest(bytea,text) TO PUBLIC;")
+        public_digest = psql("kdb_a04_disposable", "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + candidate, check=False)
+        if public_digest.returncode == 0 or "A04_PGCRYPTO_PUBLIC_EXECUTE" not in public_digest.stderr:
+            raise AssertionError("PUBLIC_DIGEST_NOT_DENIED")
+        psql("kdb_a04_disposable", "REVOKE EXECUTE ON FUNCTION extensions.digest(bytea,text) FROM PUBLIC;")
+        snapshot_query = """
+        SELECT jsonb_build_object(
+          'roles',(SELECT coalesce(jsonb_agg(rolname ORDER BY rolname),'[]'::jsonb) FROM pg_roles WHERE rolname LIKE 'kdb_%'),
+          'schemas',(SELECT coalesce(jsonb_agg(nspname ORDER BY nspname),'[]'::jsonb) FROM pg_namespace WHERE nspname IN ('canonical','dev_staging','kdb_api','kdb_audit','kdb_canonical','kdb_staging','kdb_governance','kdb_ops')),
+          'ledger',(SELECT jsonb_agg(to_jsonb(l) ORDER BY version) FROM synthetic_migration_registry.ledger l),
+          'protocol_count',(SELECT count(*) FROM canonical.protocol),
+          'default_acl',(SELECT coalesce(jsonb_agg(to_jsonb(d) ORDER BY d.oid),'[]'::jsonb) FROM pg_default_acl d),
+          'digest_acl',(SELECT coalesce(proacl::text,'NULL') FROM pg_proc WHERE oid='extensions.digest(bytea,text)'::regprocedure)
+        )::text;
+        """
+        before = psql("kdb_a04_disposable", snapshot_query).stdout.strip()
+        if candidate.count("COMMIT;") != 1:
+            raise AssertionError("UNEXPECTED_TRANSACTION_BOUNDARY")
+        aborted = candidate.replace("COMMIT;", "ROLLBACK;")
+        psql("kdb_a04_disposable", "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + aborted)
+        after_abort = psql("kdb_a04_disposable", snapshot_query).stdout.strip()
+        if before != after_abort:
+            raise AssertionError("TRANSACTIONAL_PREIMAGE_MISMATCH")
+        denied = psql("kdb_a04_disposable", candidate, check=False)
+        if denied.returncode == 0 or "A04_DISPOSABLE_GUARD_REQUIRED" not in denied.stderr:
+            raise AssertionError("MISSING_GUARD_NOT_DENIED")
+        psql("kdb_a04_disposable", "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + candidate)
+        assertions = """
+        DO $check$ DECLARE n int; BEGIN
+          SELECT count(*) INTO n FROM pg_class c JOIN pg_namespace s ON s.oid=c.relnamespace JOIN pg_roles r ON r.oid=c.relowner
+          WHERE s.nspname IN ('kdb_canonical','kdb_staging','kdb_governance','kdb_ops') AND c.relkind='r'
+            AND c.relrowsecurity AND c.relforcerowsecurity AND r.rolname='kdb_schema_owner';
+          IF n <> 12 THEN RAISE EXCEPTION 'TABLE_OWNER_RLS_MISMATCH'; END IF;
+          IF (SELECT count(*) FROM canonical.protocol) <> 1 OR (SELECT count(*) FROM synthetic_migration_registry.ledger) <> 6 THEN RAISE EXCEPTION 'LEGACY_FIXTURE_CHANGED'; END IF;
+          IF has_function_privilege('public','kdb_ops.a04_canonical_digest_v2(jsonb)','EXECUTE') OR has_function_privilege('kdb_ingest_runtime','kdb_ops.a04_canonical_digest_v2(jsonb)','EXECUTE') THEN RAISE EXCEPTION 'RUNTIME_EXECUTE_REACHABLE'; END IF;
+          IF kdb_ops.a04_canonical_digest_v2('["v2",null]'::jsonb)=kdb_ops.a04_canonical_digest_v2('["v2",""]'::jsonb)
+          OR kdb_ops.a04_canonical_digest_v2('["v2","a|b"]'::jsonb)=kdb_ops.a04_canonical_digest_v2('["v2","a","b"]'::jsonb) THEN RAISE EXCEPTION 'DIGEST_AMBIGUOUS'; END IF;
+          IF kdb_ops.a04_canonical_digest_v2('["v2","café"]'::jsonb) <> encode(extensions.digest(convert_to(('["v2","café"]'::jsonb)::text,'UTF8'),'sha256'),'hex') THEN RAISE EXCEPTION 'DIGEST_SHADOW_OR_UTF8_MISMATCH'; END IF;
+          IF encode(extensions.digest(convert_to('abc','UTF8'),'sha256'),'hex') <> 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad' THEN RAISE EXCEPTION 'DIGEST_VECTOR_MISMATCH'; END IF;
+          IF EXISTS (SELECT 1 FROM pg_auth_members m JOIN pg_roles r ON r.oid=m.roleid WHERE r.rolname IN ('kdb_schema_owner','kdb_command_owner','kdb_ingest_runtime')) THEN RAISE EXCEPTION 'UNEXPECTED_ROLE_MEMBERSHIP'; END IF;
+        END $check$;
+        """
+        psql("kdb_a04_disposable", assertions)
+        after_commit_ledger = psql("kdb_a04_disposable", "SELECT jsonb_agg(to_jsonb(l) ORDER BY version)::text FROM synthetic_migration_registry.ledger l;").stdout.strip()
+        if json.loads(after_commit_ledger) != json.loads(before)["ledger"]:
+            raise AssertionError("LEGACY_LEDGER_CHANGED")
+        duplicate = psql("kdb_a04_disposable", "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + candidate, check=False)
+        if duplicate.returncode == 0 or "A04_EXISTING_ROLE_RECONCILIATION_REQUIRED" not in duplicate.stderr:
+            raise AssertionError("EXISTING_ROLE_NOT_DENIED")
+        # SET ROLE from postgres alone retains superuser session_user authority.
+        # SESSION AUTHORIZATION is a local simulation, not a real login proof.
+        role_switch = psql("kdb_a04_disposable", "SET SESSION AUTHORIZATION kdb_ingest_runtime; SET ROLE kdb_schema_owner;", check=False)
+        if role_switch.returncode == 0 or "permission denied to set role" not in role_switch.stderr:
+            raise AssertionError("UNTRUSTED_ROLE_SWITCH_ALLOWED")
+        psql("kdb_a04_disposable", """
+        CREATE ROLE a04_other_creator NOLOGIN;
+        CREATE SCHEMA synthetic_other_creator;
+        GRANT USAGE,CREATE ON SCHEMA synthetic_other_creator TO a04_other_creator;
+        SET ROLE a04_other_creator;
+        CREATE FUNCTION synthetic_other_creator.f() RETURNS integer LANGUAGE sql AS 'SELECT 1';
+        RESET ROLE;
+        DO $check$ BEGIN
+          IF NOT has_function_privilege('public','synthetic_other_creator.f()','EXECUTE')
+          THEN RAISE EXCEPTION 'OTHER_CREATOR_CHARACTERIZATION_UNEXPECTED'; END IF;
+        END $check$;
+        """)
+        psql("kdb_a04_disposable", """
+        DROP SCHEMA synthetic_other_creator CASCADE;
+        DROP ROLE a04_other_creator;
+        DROP SCHEMA kdb_canonical, kdb_staging, kdb_governance, kdb_ops CASCADE;
+        DROP OWNED BY kdb_command_owner;
+        DROP OWNED BY kdb_schema_owner;
+        DROP OWNED BY kdb_ingest_runtime;
+        DROP ROLE kdb_command_owner; DROP ROLE kdb_schema_owner; DROP ROLE kdb_ingest_runtime;
+        ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT EXECUTE ON FUNCTIONS TO PUBLIC;
+        """)
+        recovered = json.loads(psql("kdb_a04_disposable", snapshot_query).stdout.strip())
+        baseline = json.loads(before)
+        if recovered["ledger"] != baseline["ledger"] or recovered["protocol_count"] != baseline["protocol_count"]:
+            raise AssertionError("LEGACY_FIXTURE_POSTCOMMIT_RECOVERY_MISMATCH")
+        print("PASS_DISPOSABLE_PG17_A04_SCOPED: TX_ABORT_SNAPSHOT TABLES_12 FORCE_RLS OWNER RUNTIME_DENIED LEGACY_FIXTURE_POSTCOMMIT DIGEST_VECTOR REAPPLY_DENIED")
+        print("POSTCOMMIT_SCOPED_SNAPSHOT_EQUAL=" + str(recovered == baseline).upper())
+        print("OPEN: complete raw-ACL parity, verified backup/postcommit restore, other creators, signed PIAC, authoritative target and live grants")
+    finally:
+        if container:
+            invoke("docker", "rm", "-f", container, check=False)
+
+if __name__ == "__main__":
+    main()

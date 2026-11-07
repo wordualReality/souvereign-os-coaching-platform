@@ -1,0 +1,10 @@
+{
+  "version":"kdb.a04.disposable-candidate.v1",
+  "status":"DISPOSABLE_ONLY / HOSTED_NOT_AUTHORIZED / INCOMPLETE",
+  "source_start_sha":"0719e6272394ab7f92586999db63b093eb669a6d",
+  "sql_steps":[{"file":"database/migrations/kdb/candidates/202611070001__a04_disposable_recovery_candidate.sql","sha256":"a692788309584ed9dcf3d39c805ad65f3e092a8743dda93d290a1c8fa584d081"}],
+  "derived_from":{"path":"database/migrations/kdb/20261023140000__kdb_m01_001__core_foundation.sql","sha256":"1708e8ca498ac23729c772d5cb7a26fea71c5188a841ae9e740d9144ca418067"},
+  "synthetic_fixture":{"path":"tests/kdb/fixtures/a04_synthetic_preimage_v1.json","sha256":"f37b42142603f632b594e2e179b31b1645501acc51cc0f5fe67a1994627d19d0"},
+  "expected_diff":{"new_schemas":["kdb_canonical","kdb_staging","kdb_governance","kdb_ops"],"tables":12,"force_rls":12,"roles":["kdb_schema_owner","kdb_command_owner","kdb_ingest_runtime"],"command_functions":0,"public_runtime_digest_execute":false},
+  "unverified":["LIVE_TARGET_PROVIDER_BINDING","ACTUAL_LIVE_CATALOG_ACL","ALL_CREATOR_DEFAULT_ACLS","HOSTED_OWNER_TRANSFER","P3_P4_FULL_DERIVATIVE","SIGNED_PIAC","POSTCOMMIT_RESTORE","AUTHENTICATED_DEPLOYER","INDEPENDENT_P25_QS","FOUNDER_HOSTED_MUTATION_GRANT"]
+}
