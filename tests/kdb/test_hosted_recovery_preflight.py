@@ -1,9 +1,10 @@
 """Strict parser adversarial tests; no network or database connection."""
 import copy
 import json
+import re
 import unittest
 from pathlib import Path
-from hosted_recovery_preflight_diff import analyze, TARGET, LEDGER, EXPECTED_CATALOG
+from hosted_recovery_preflight_diff import analyze, TARGET, LEDGER, EXPECTED_CATALOG, EXPORTED_PREIMAGE
 
 def fixture():
     return {"version":"kdb.a04.synthetic-preimage.v1","binding":{"claimed_project_ref":TARGET,"export_origin":"SYNTHETIC_LOCAL_FIXTURE","attestation":"SYNTHETIC_ONLY"},"ledger":copy.deepcopy(LEDGER),"catalog":copy.deepcopy(EXPECTED_CATALOG)}
@@ -65,6 +66,40 @@ class PreflightTest(unittest.TestCase):
                 if mutate=="other_creator": cat["default_function_acl"].append({"creator":"other","grantee":"PUBLIC","execute":True})
                 if mutate=="bool": cat["protected_protocol"]["rows"]=True
                 self.assertEqual(check(doc)["status"], "DRIFT")
+
+    def test_catalog_export_adversarial(self):
+        self.assertEqual(check(EXPORTED_PREIMAGE)["status"], "SYNTHETIC_PREIMAGE_MATCH")
+        variants = []
+        doc=copy.deepcopy(EXPORTED_PREIMAGE); doc["roles"].pop(); variants.append(doc)
+        doc=copy.deepcopy(EXPORTED_PREIMAGE); doc["memberships"][0]["set"]=True; variants.append(doc)
+        doc=copy.deepcopy(EXPORTED_PREIMAGE); doc["relations"][0]["force_rls"]=True; variants.append(doc)
+        doc=copy.deepcopy(EXPORTED_PREIMAGE); doc["relations"][0]["raw_acl"]="forged"; variants.append(doc)
+        doc=copy.deepcopy(EXPORTED_PREIMAGE); doc["functions"].append({"signature":"evil()"}); variants.append(doc)
+        doc=copy.deepcopy(EXPORTED_PREIMAGE); doc["default_function_acl"].append({"creator":"evil"}); variants.append(doc)
+        doc=copy.deepcopy(EXPORTED_PREIMAGE); doc["pgcrypto"]["namespace"]="public"; variants.append(doc)
+        doc=copy.deepcopy(EXPORTED_PREIMAGE); doc["protocol_count"]=True; variants.append(doc)
+        for doc in variants:
+            self.assertEqual(check(doc)["status"], "DRIFT")
+        doc=copy.deepcopy(EXPORTED_PREIMAGE); doc["binding"]["attestation"]="VERIFIED"
+        self.assertEqual(check(doc)["status"], "ABSTAIN")
+
+    def test_p3_p4_derivatives_change_only_scoped_parts(self):
+        root = Path(__file__).resolve().parents[2]
+        pairs = [
+            ("database/migrations/kdb/20261024190000__kdb_m01_p3__fail_closed_security.sql", "database/migrations/kdb/candidates/202611070002__a04_p3_extensions_disposable.sql"),
+            ("database/migrations/kdb/20261024220000__kdb_m01_p4__digest_oracle_integrity.sql", "database/migrations/kdb/candidates/202611070003__a04_p4_extensions_disposable.sql"),
+        ]
+        for index, (source_path, derivative_path) in enumerate(pairs):
+            with self.subTest(source=source_path):
+                source = (root / source_path).read_text().replace("public.digest", "extensions.digest")
+                derived = (root / derivative_path).read_text()
+                derived = derived.removeprefix("-- A04 DERIVATIVE: DISPOSABLE ONLY / HOSTED NOT AUTHORIZED.\n")
+                derived, count = re.subn(r"\n-- A04 isolated harness only\..*?END \$a04_guard\$;\n", "", derived, count=1, flags=re.S)
+                self.assertEqual(count, 1)
+                if index == 0:
+                    derived, count = re.subn(r"DO \$a04_roles\$.*?END \$a04_roles\$;", "CREATE ROLE kdb_migrator NOLOGIN NOBYPASSRLS NOSUPERUSER NOINHERIT;", derived, count=1, flags=re.S)
+                    self.assertEqual(count, 1)
+                self.assertEqual(derived, source)
 
 if __name__ == "__main__":
     unittest.main()

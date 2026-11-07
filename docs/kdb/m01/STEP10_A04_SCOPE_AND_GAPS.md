@@ -3,15 +3,21 @@
 This candidate is **DISPOSABLE_ONLY / HOSTED_NOT_AUTHORIZED**. The SQL file is
 not a hosted migration. Its database-name, server-version and temporary-table
 guards are local safety checks, not target authentication or a security
-boundary against privileged operators. It creates no O1/O2/O3 command
-functions. The existing immutable SQL001 supplies the table definitions; the
+boundary against privileged operators. The foundation step creates no O1/O2/O3
+command functions; the later P3/P4 derivative steps create three functions
+that remain inaccessible to PUBLIC and the synthetic runtime. The existing
+immutable SQL001 supplies the table definitions; the
 candidate pins its own full SQL bytes separately in the versioned manifest.
 Fresh roles are created only when absent; an existing role aborts rather than
 being silently reused. Runtime is NOLOGIN and denied digest EXECUTE.
 
-The local parser accepts only a versioned **synthetic** export. Its comparison
-fixture includes invented ACL placeholders and is not an authoritative hosted
-catalog baseline. Its six version/name/length/MD5 rows are identity metadata,
+The local parser accepts only versioned **synthetic** exports. The newer
+catalog exporter captures scoped schemas, relations, RLS and policies, roles,
+memberships, grantors, effective runtime visibility, function/default ACLs,
+pgcrypto, synthetic migration metadata and only a protocol row count. Its
+fixture was captured from the disposable harness and is not an authoritative
+hosted catalog baseline. The older comparison fixture includes invented ACL
+placeholders. Its six version/name/length/MD5 rows are identity metadata,
 not authenticity signatures. The old ujdz text fixtures and preimage JSON are
 historical, superseded and non-routing. A local match always remains
 AUTHORITATIVE_TARGET_NOT_VERIFIED and APPLY_NOT_AUTHORIZED.
@@ -29,9 +35,10 @@ The isolated fresh pgcrypto installation had PUBLIC digest EXECUTE by default;
 the harness explicitly revokes it inside the disposable database before applying
 this candidate. The candidate refuses a PUBLIC-callable digest function and
 grants its synthetic command owner only the scoped extension access it needs.
-This is not evidence of actual hosted extension privileges. The included v2
-digest primitive is not a full P3/P4 derivative; no hosted compatibility or
-signed PIAC claim follows.
+This is not evidence of actual hosted extension privileges. Complete guarded
+disposable P3/P4 derivatives use qualified extensions.digest and retain
+fail-closed command ACLs; a local test compares v2 null/blank/delimiter
+semantics. No hosted compatibility or signed PIAC claim follows.
 
 Before any separately authorized live mutation: obtain authenticated management
 binding for the exact target and authoritative read-only object/role/ACL,

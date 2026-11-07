@@ -1,0 +1,281 @@
+{
+  "admission": "NOT_AUTHORIZED",
+  "binding": {
+    "attestation": "SYNTHETIC_ONLY",
+    "claimed_project_ref": "ujdzahwlximlmndexgmx",
+    "export_origin": "SYNTHETIC_LOCAL_FIXTURE"
+  },
+  "default_function_acl": [],
+  "functions": [],
+  "ledger": [
+    {
+      "md5": "bbaac834073823f665a0c7b2cbdccc8d",
+      "name": "core_foundation",
+      "octets": 16250,
+      "version": "20261022205952"
+    },
+    {
+      "md5": "3241767e3d4696acb01716cfdaed5e95",
+      "name": "security_boundary",
+      "octets": 8898,
+      "version": "20261022210203"
+    },
+    {
+      "md5": "d280bbc6bb1bf2b834c824003c8e88d",
+      "name": "api_boundary",
+      "octets": 2541,
+      "version": "20261022210217"
+    },
+    {
+      "md5": "f2b858e2453922378d6c3839754fbfc4",
+      "name": "idempotency_repair",
+      "octets": 915,
+      "version": "20261022210310"
+    },
+    {
+      "md5": "59fd566c8f4131d7965506cc05dd1cae",
+      "name": "publication_fk_index",
+      "octets": 150,
+      "version": "20261022210536"
+    },
+    {
+      "md5": "a52da421c2419244350e13c5cc5216e6",
+      "name": "rollback_objects_test_v2",
+      "octets": 1770,
+      "version": "20261022211240"
+    }
+  ],
+  "memberships": [
+    {
+      "admin": true,
+      "grantor": "postgres",
+      "inherit": false,
+      "member": "postgres",
+      "role": "kdb_runtime",
+      "set": false
+    },
+    {
+      "admin": true,
+      "grantor": "postgres",
+      "inherit": false,
+      "member": "postgres",
+      "role": "kdb_ingest_writer",
+      "set": false
+    },
+    {
+      "admin": true,
+      "grantor": "postgres",
+      "inherit": false,
+      "member": "postgres",
+      "role": "kdb_reviewer",
+      "set": false
+    }
+  ],
+  "pgcrypto": {
+    "digest_public_execute": false,
+    "digest_raw_acl": "{postgres=X/postgres}",
+    "digest_signature": "extensions.digest(bytea,text)",
+    "extension": "pgcrypto",
+    "namespace": "extensions"
+  },
+  "policies": [],
+  "protocol_count": 1,
+  "protocol_provenance": "UNKNOWN",
+  "relations": [
+    {
+      "acl": [
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "DELETE"
+        },
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "INSERT"
+        },
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "MAINTAIN"
+        },
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "REFERENCES"
+        },
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "SELECT"
+        },
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "TRIGGER"
+        },
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "UPDATE"
+        }
+      ],
+      "force_rls": false,
+      "kind": "r",
+      "name": "protocol",
+      "owner": "postgres",
+      "raw_acl": null,
+      "rls": true,
+      "schema": "canonical"
+    }
+  ],
+  "roles": [
+    {
+      "bypassrls": false,
+      "createdb": false,
+      "createrole": false,
+      "inherit": false,
+      "login": false,
+      "name": "kdb_ingest_writer",
+      "superuser": false
+    },
+    {
+      "bypassrls": false,
+      "createdb": false,
+      "createrole": false,
+      "inherit": false,
+      "login": false,
+      "name": "kdb_reviewer",
+      "superuser": false
+    },
+    {
+      "bypassrls": false,
+      "createdb": false,
+      "createrole": false,
+      "inherit": false,
+      "login": false,
+      "name": "kdb_runtime",
+      "superuser": false
+    }
+  ],
+  "schemas": [
+    {
+      "acl": [
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "CREATE"
+        },
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "USAGE"
+        }
+      ],
+      "effective_usage": {
+        "PUBLIC": false,
+        "anon": false,
+        "authenticated": false,
+        "kdb_ingest_runtime": null,
+        "service_role": false
+      },
+      "name": "canonical",
+      "owner": "postgres",
+      "raw_acl": null
+    },
+    {
+      "acl": [
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "CREATE"
+        },
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "USAGE"
+        }
+      ],
+      "effective_usage": {
+        "PUBLIC": false,
+        "anon": false,
+        "authenticated": false,
+        "kdb_ingest_runtime": null,
+        "service_role": false
+      },
+      "name": "dev_staging",
+      "owner": "postgres",
+      "raw_acl": null
+    },
+    {
+      "acl": [
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "CREATE"
+        },
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "USAGE"
+        }
+      ],
+      "effective_usage": {
+        "PUBLIC": false,
+        "anon": false,
+        "authenticated": false,
+        "kdb_ingest_runtime": null,
+        "service_role": false
+      },
+      "name": "kdb_api",
+      "owner": "postgres",
+      "raw_acl": null
+    },
+    {
+      "acl": [
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "CREATE"
+        },
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "USAGE"
+        }
+      ],
+      "effective_usage": {
+        "PUBLIC": false,
+        "anon": false,
+        "authenticated": false,
+        "kdb_ingest_runtime": null,
+        "service_role": false
+      },
+      "name": "kdb_audit",
+      "owner": "postgres",
+      "raw_acl": null
+    }
+  ],
+  "version": "kdb.a04.catalog-export.disposable.v1"
+}

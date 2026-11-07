@@ -1,6 +1,7 @@
 """A04 disposable-only Docker oracle; no remote connection or customer data."""
 import json
 import hashlib
+import os
 import subprocess
 import time
 import uuid
@@ -9,10 +10,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SQL = ROOT / "database/migrations/kdb/candidates/202611070001__a04_disposable_recovery_candidate.sql"
 FIXTURE = ROOT / "tests/kdb/fixtures/a04_synthetic_preimage_v1.json"
+EXPORT = ROOT / "tests/kdb/fixtures/a04_catalog_export_disposable.v1.sql"
 
 def main():
     manifest = json.loads((ROOT / "docs/kdb/m01/a04_disposable_candidate.v1.json").read_text())
-    for pin in [*manifest["sql_steps"], manifest["derived_from"], manifest["synthetic_fixture"]]:
+    for pin in [*manifest["sql_steps"], *manifest["derivative_sources"], manifest["derived_from"], manifest["synthetic_fixture"], manifest["catalog_exporter"], manifest["exported_synthetic_fixture"]]:
         path = (ROOT / pin.get("file", pin.get("path", ""))).resolve()
         if not path.is_relative_to(ROOT) or hashlib.sha256(path.read_bytes()).hexdigest() != pin["sha256"]:
             raise RuntimeError("MANIFEST_SOURCE_HASH_MISMATCH")
@@ -62,6 +64,12 @@ def main():
         data = json.loads(FIXTURE.read_text())
         ledger = ",".join("('%s','%s',%d,'%s')" % (v["version"],v["name"],v["octets"],v["md5"]) for v in data["ledger"])
         setup = """CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN;
+        CREATE ROLE kdb_runtime NOLOGIN NOINHERIT NOBYPASSRLS;
+        CREATE ROLE kdb_ingest_writer NOLOGIN NOINHERIT NOBYPASSRLS;
+        CREATE ROLE kdb_reviewer NOLOGIN NOINHERIT NOBYPASSRLS;
+        GRANT kdb_runtime TO postgres WITH ADMIN TRUE, INHERIT FALSE, SET FALSE;
+        GRANT kdb_ingest_writer TO postgres WITH ADMIN TRUE, INHERIT FALSE, SET FALSE;
+        GRANT kdb_reviewer TO postgres WITH ADMIN TRUE, INHERIT FALSE, SET FALSE;
         CREATE SCHEMA extensions; CREATE EXTENSION pgcrypto WITH SCHEMA extensions;
         REVOKE EXECUTE ON FUNCTION extensions.digest(bytea,text) FROM PUBLIC;
         CREATE FUNCTION public.digest(bytea,text) RETURNS bytea LANGUAGE sql AS 'SELECT decode(repeat(''00'',32),''hex'')';
@@ -72,6 +80,26 @@ def main():
         CREATE TABLE synthetic_migration_registry.ledger(version text,name text,octets integer,md5 text);
         INSERT INTO synthetic_migration_registry.ledger VALUES """ + ledger + ";"
         psql("kdb_a04_disposable", setup)
+        exported = json.loads(psql("kdb_a04_disposable", EXPORT.read_text()).stdout)
+        if os.environ.get("KDB_A04_PRINT_SYNTHETIC_EXPORT") == "1":
+            print("SYNTHETIC_EXPORT_JSON=" + json.dumps(exported, sort_keys=True, separators=(",",":")))
+        expected_export_keys = {"version","binding","ledger","protocol_count","protocol_provenance","schemas","relations","policies","roles","memberships","default_function_acl","functions","pgcrypto","admission"}
+        if set(exported) != expected_export_keys or exported["protocol_count"] != 1 or exported["ledger"] != data["ledger"] or exported["admission"] != "NOT_AUTHORIZED":
+            raise AssertionError("SYNTHETIC_EXPORT_INVENTORY_MISMATCH")
+        if len(exported["roles"]) != 3 or len(exported["memberships"]) != 3 or exported["pgcrypto"]["namespace"] != "extensions":
+            raise AssertionError("SYNTHETIC_EXPORT_ROLE_OR_EXTENSION_MISMATCH")
+        from hosted_recovery_preflight_diff import analyze
+        if analyze(json.dumps(exported))["status"] != "SYNTHETIC_PREIMAGE_MATCH":
+            raise AssertionError("SYNTHETIC_RAW_EXPORT_MISMATCH")
+        injected_sql = "BEGIN; CREATE TABLE kdb_api.evil(id integer); CREATE FUNCTION kdb_api.evil() RETURNS integer LANGUAGE sql AS 'SELECT 1';\n" + EXPORT.read_text() + "\nROLLBACK;"
+        injected = json.loads(psql("kdb_a04_disposable", injected_sql).stdout)
+        if not any(r["name"] == "evil" for r in injected["relations"]) or not any("evil()" in f["signature"] for f in injected["functions"]):
+            raise AssertionError("SYNTHETIC_EXPORT_MISSED_EXTRA_OBJECT")
+        injected_function = next(f for f in injected["functions"] if "evil()" in f["signature"])
+        if not any(a["grantee"] == "PUBLIC" and a["privilege"] == "EXECUTE" for a in injected_function["acl"]) or injected_function["effective_visibility"]["PUBLIC"]:
+            raise AssertionError("MASKED_PUBLIC_EXECUTE_NOT_CHARACTERIZED")
+        if analyze(json.dumps(injected))["status"] != "DRIFT":
+            raise AssertionError("SYNTHETIC_EXPORT_DRIFT_NOT_DENIED")
         # Deliberately construct the unsafe synthetic preimage to test rejection.
         psql("kdb_a04_disposable", "GRANT EXECUTE ON FUNCTION extensions.digest(bytea,text) TO PUBLIC;")
         public_digest = psql("kdb_a04_disposable", "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + candidate, check=False)
@@ -100,6 +128,11 @@ def main():
         if denied.returncode == 0 or "A04_DISPOSABLE_GUARD_REQUIRED" not in denied.stderr:
             raise AssertionError("MISSING_GUARD_NOT_DENIED")
         psql("kdb_a04_disposable", "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + candidate)
+        for pin in manifest["sql_steps"][1:]:
+            derivative = (ROOT / pin["file"]).read_text()
+            if "public.digest(" in derivative or "extensions.digest(" not in derivative:
+                raise AssertionError("DIGEST_NAMESPACE_DERIVATIVE_MISMATCH")
+            psql("kdb_a04_disposable", "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + derivative)
         assertions = """
         DO $check$ DECLARE n int; BEGIN
           SELECT count(*) INTO n FROM pg_class c JOIN pg_namespace s ON s.oid=c.relnamespace JOIN pg_roles r ON r.oid=c.relowner
@@ -108,6 +141,19 @@ def main():
           IF n <> 12 THEN RAISE EXCEPTION 'TABLE_OWNER_RLS_MISMATCH'; END IF;
           IF (SELECT count(*) FROM canonical.protocol) <> 1 OR (SELECT count(*) FROM synthetic_migration_registry.ledger) <> 6 THEN RAISE EXCEPTION 'LEGACY_FIXTURE_CHANGED'; END IF;
           IF has_function_privilege('public','kdb_ops.a04_canonical_digest_v2(jsonb)','EXECUTE') OR has_function_privilege('kdb_ingest_runtime','kdb_ops.a04_canonical_digest_v2(jsonb)','EXECUTE') THEN RAISE EXCEPTION 'RUNTIME_EXECUTE_REACHABLE'; END IF;
+          SELECT count(*) INTO n FROM pg_proc p JOIN pg_namespace ns ON ns.oid=p.pronamespace
+            WHERE ns.nspname='kdb_ops' AND p.proname IN ('ingest_source','propose_candidate','request_review_handoff')
+              AND p.prosecdef AND p.proconfig @> ARRAY['search_path=pg_catalog']
+              AND NOT has_function_privilege('public',p.oid,'EXECUTE')
+              AND NOT has_function_privilege('anon',p.oid,'EXECUTE')
+              AND NOT has_function_privilege('authenticated',p.oid,'EXECUTE')
+              AND NOT has_function_privilege('service_role',p.oid,'EXECUTE')
+              AND NOT has_function_privilege('kdb_ingest_runtime',p.oid,'EXECUTE');
+          IF n <> 3 THEN RAISE EXCEPTION 'COMMAND_ACL_OR_SEARCH_PATH_MISMATCH'; END IF;
+          IF kdb_ops.security_context_ready() IS DISTINCT FROM false THEN RAISE EXCEPTION 'PIAC_GUARD_NOT_FAIL_CLOSED'; END IF;
+          IF kdb_ops.canonical_digest_v2('["v2",null]'::jsonb)=kdb_ops.canonical_digest_v2('["v2",""]'::jsonb)
+          OR kdb_ops.canonical_digest_v2('["v2","a|b"]'::jsonb)=kdb_ops.canonical_digest_v2('["v2","a","b"]'::jsonb)
+          THEN RAISE EXCEPTION 'P4_DIGEST_AMBIGUOUS'; END IF;
           IF kdb_ops.a04_canonical_digest_v2('["v2",null]'::jsonb)=kdb_ops.a04_canonical_digest_v2('["v2",""]'::jsonb)
           OR kdb_ops.a04_canonical_digest_v2('["v2","a|b"]'::jsonb)=kdb_ops.a04_canonical_digest_v2('["v2","a","b"]'::jsonb) THEN RAISE EXCEPTION 'DIGEST_AMBIGUOUS'; END IF;
           IF kdb_ops.a04_canonical_digest_v2('["v2","café"]'::jsonb) <> encode(extensions.digest(convert_to(('["v2","café"]'::jsonb)::text,'UTF8'),'sha256'),'hex') THEN RAISE EXCEPTION 'DIGEST_SHADOW_OR_UTF8_MISMATCH'; END IF;
@@ -127,6 +173,25 @@ def main():
         role_switch = psql("kdb_a04_disposable", "SET SESSION AUTHORIZATION kdb_ingest_runtime; SET ROLE kdb_schema_owner;", check=False)
         if role_switch.returncode == 0 or "permission denied to set role" not in role_switch.stderr:
             raise AssertionError("UNTRUSTED_ROLE_SWITCH_ALLOWED")
+        runtime_call = psql("kdb_a04_disposable", "SET SESSION AUTHORIZATION kdb_ingest_runtime; SELECT kdb_ops.request_review_handoff(NULL::uuid,NULL::text,NULL::uuid,NULL::text,NULL::text,NULL::text,NULL::uuid);", check=False)
+        if runtime_call.returncode == 0 or "permission denied" not in runtime_call.stderr:
+            raise AssertionError("UNTRUSTED_COMMAND_NOT_DENIED")
+        psql("kdb_a04_disposable", """
+        CREATE ROLE a04_transfer_runner NOLOGIN NOINHERIT;
+        CREATE SCHEMA synthetic_transfer AUTHORIZATION a04_transfer_runner;
+        SET ROLE a04_transfer_runner;
+        CREATE FUNCTION synthetic_transfer.probe() RETURNS integer LANGUAGE sql AS 'SELECT 1';
+        RESET ROLE;
+        GRANT kdb_command_owner TO a04_transfer_runner WITH INHERIT FALSE, SET FALSE;
+        """)
+        blocked_transfer = psql("kdb_a04_disposable", "\\set VERBOSITY verbose\nSET SESSION AUTHORIZATION a04_transfer_runner; ALTER FUNCTION synthetic_transfer.probe() OWNER TO kdb_command_owner;", check=False)
+        if blocked_transfer.returncode == 0 or "42501" not in blocked_transfer.stderr:
+            raise AssertionError("SET_FALSE_TRANSFER_NOT_DENIED: " + blocked_transfer.stderr.strip())
+        psql("kdb_a04_disposable", "GRANT kdb_command_owner TO a04_transfer_runner WITH INHERIT FALSE, SET TRUE;")
+        exposed = psql("kdb_a04_disposable", "SET SESSION AUTHORIZATION a04_transfer_runner; SET ROLE kdb_command_owner; SELECT current_user;").stdout.strip()
+        if exposed != "kdb_command_owner":
+            raise AssertionError("SET_TRUE_ROLE_EXPOSURE_NOT_OBSERVED")
+        psql("kdb_a04_disposable", "REVOKE kdb_command_owner FROM a04_transfer_runner; DROP SCHEMA synthetic_transfer CASCADE; DROP OWNED BY a04_transfer_runner; DROP ROLE a04_transfer_runner;")
         psql("kdb_a04_disposable", """
         CREATE ROLE a04_other_creator NOLOGIN;
         CREATE SCHEMA synthetic_other_creator;
@@ -143,6 +208,8 @@ def main():
         DROP SCHEMA synthetic_other_creator CASCADE;
         DROP ROLE a04_other_creator;
         DROP SCHEMA kdb_canonical, kdb_staging, kdb_governance, kdb_ops CASCADE;
+        DROP OWNED BY kdb_migrator;
+        DROP ROLE kdb_migrator;
         DROP OWNED BY kdb_command_owner;
         DROP OWNED BY kdb_schema_owner;
         DROP OWNED BY kdb_ingest_runtime;

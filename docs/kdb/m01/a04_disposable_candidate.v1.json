@@ -2,9 +2,19 @@
   "version":"kdb.a04.disposable-candidate.v1",
   "status":"DISPOSABLE_ONLY / HOSTED_NOT_AUTHORIZED / INCOMPLETE",
   "source_start_sha":"0719e6272394ab7f92586999db63b093eb669a6d",
-  "sql_steps":[{"file":"database/migrations/kdb/candidates/202611070001__a04_disposable_recovery_candidate.sql","sha256":"a692788309584ed9dcf3d39c805ad65f3e092a8743dda93d290a1c8fa584d081"}],
+  "sql_steps":[
+    {"file":"database/migrations/kdb/candidates/202611070001__a04_disposable_recovery_candidate.sql","sha256":"a692788309584ed9dcf3d39c805ad65f3e092a8743dda93d290a1c8fa584d081"},
+    {"file":"database/migrations/kdb/candidates/202611070002__a04_p3_extensions_disposable.sql","sha256":"bf2fdb1d37f2bdf0cacc4e2368eb15287625dc3b81a2fb4839198c89b0f6d035"},
+    {"file":"database/migrations/kdb/candidates/202611070003__a04_p4_extensions_disposable.sql","sha256":"7d6de7ce43d5957450399f16267cf830544fac22c2a7240f691911eb5667d3bc"}
+  ],
   "derived_from":{"path":"database/migrations/kdb/20261023140000__kdb_m01_001__core_foundation.sql","sha256":"1708e8ca498ac23729c772d5cb7a26fea71c5188a841ae9e740d9144ca418067"},
   "synthetic_fixture":{"path":"tests/kdb/fixtures/a04_synthetic_preimage_v1.json","sha256":"f37b42142603f632b594e2e179b31b1645501acc51cc0f5fe67a1994627d19d0"},
-  "expected_diff":{"new_schemas":["kdb_canonical","kdb_staging","kdb_governance","kdb_ops"],"tables":12,"force_rls":12,"roles":["kdb_schema_owner","kdb_command_owner","kdb_ingest_runtime"],"command_functions":0,"public_runtime_digest_execute":false},
-  "unverified":["LIVE_TARGET_PROVIDER_BINDING","ACTUAL_LIVE_CATALOG_ACL","ALL_CREATOR_DEFAULT_ACLS","HOSTED_OWNER_TRANSFER","P3_P4_FULL_DERIVATIVE","SIGNED_PIAC","POSTCOMMIT_RESTORE","AUTHENTICATED_DEPLOYER","INDEPENDENT_P25_QS","FOUNDER_HOSTED_MUTATION_GRANT"]
+  "catalog_exporter":{"path":"tests/kdb/fixtures/a04_catalog_export_disposable.v1.sql","sha256":"fee6f2b42e3454de09da172cc9147eb8ed9f932b22c56a80601b5d7144cbbd00"},
+  "exported_synthetic_fixture":{"path":"tests/kdb/fixtures/a04_catalog_export_expected.v1.json","sha256":"1974fd56250178fcbded728c8ea62d7099c068adf084e38f8e786540dfa3de5e"},
+  "derivative_sources":[
+    {"path":"database/migrations/kdb/20261024190000__kdb_m01_p3__fail_closed_security.sql","sha256":"cf58cfdf24a604f01ef9b2bb684ef6f3d973f3cb08f17cf5bdedd4d3b64ffdad"},
+    {"path":"database/migrations/kdb/20261024220000__kdb_m01_p4__digest_oracle_integrity.sql","sha256":"8ec18d80fbb22d2c78f915e60a899e4d7f00d468ba194b0c5eb98fafddfff098"}
+  ],
+  "expected_diff":{"new_schemas":["kdb_canonical","kdb_staging","kdb_governance","kdb_ops"],"tables":12,"force_rls":12,"roles":["kdb_schema_owner","kdb_command_owner","kdb_ingest_runtime","kdb_migrator"],"command_functions":3,"public_runtime_command_execute":false},
+  "unverified":["LIVE_TARGET_PROVIDER_BINDING","ACTUAL_LIVE_CATALOG_ACL","ALL_CREATOR_DEFAULT_ACLS","HOSTED_OWNER_TRANSFER","SIGNED_PIAC","POSTCOMMIT_RESTORE","AUTHENTICATED_DEPLOYER","INDEPENDENT_P25_QS","FOUNDER_HOSTED_MUTATION_GRANT"]
 }

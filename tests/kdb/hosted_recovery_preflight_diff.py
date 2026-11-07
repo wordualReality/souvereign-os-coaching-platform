@@ -11,6 +11,7 @@ FIXTURES = Path(__file__).resolve().parent / "fixtures"
 TARGET = "ujdzahwlximlmndexgmx"
 FORBIDDEN = ("zobjpmyccszkabybdmsf", "wixdcaqdwmpccbfmxyea")
 PREIMAGE = json.loads((FIXTURES / "ujdz_legacy_preimage.json").read_text())
+EXPORTED_PREIMAGE = json.loads((FIXTURES / "a04_catalog_export_expected.v1.json").read_text())
 LEDGER = [
     {"version":"20261022205952","name":"core_foundation","octets":16250,"md5":"bbaac834073823f665a0c7b2cbdccc8d"},
     {"version":"20261022210203","name":"security_boundary","octets":8898,"md5":"3241767e3d4696acb01716cfdaed5e95"},
@@ -49,7 +50,22 @@ def analyze(text: str) -> dict:
         doc = json.loads(text, object_pairs_hook=unique_object)
     except (ValueError, TypeError):
         return result
-    if not isinstance(doc, dict) or set(doc) != {"version","binding","ledger","catalog"} or doc["version"] != "kdb.a04.synthetic-preimage.v1":
+    if not isinstance(doc, dict):
+        return result
+    if doc.get("version") == "kdb.a04.catalog-export.disposable.v1":
+        binding = doc.get("binding")
+        if not isinstance(binding, dict) or binding != EXPORTED_PREIMAGE["binding"]:
+            result["code"] = "TARGET_UNVERIFIED"
+            return result
+        result["claimed_project_ref"] = binding["claimed_project_ref"]
+        canonical = json.dumps(doc, sort_keys=True, separators=(",",":"), ensure_ascii=False)
+        expected = json.dumps(EXPORTED_PREIMAGE, sort_keys=True, separators=(",",":"), ensure_ascii=False)
+        if canonical != expected:
+            result.update(status="DRIFT",code="SCOPED_CATALOG_EXPORT_DRIFT")
+            return result
+        result.update(status="SYNTHETIC_PREIMAGE_MATCH",code="SYNTHETIC_ONLY",document_sha256=hashlib.sha256(canonical.encode("utf-8")).hexdigest())
+        return result
+    if set(doc) != {"version","binding","ledger","catalog"} or doc["version"] != "kdb.a04.synthetic-preimage.v1":
         return result
     binding = doc["binding"]
     if not isinstance(binding, dict) or set(binding) != {"claimed_project_ref","export_origin","attestation"}:
