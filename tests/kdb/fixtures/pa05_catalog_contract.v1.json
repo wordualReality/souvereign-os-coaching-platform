@@ -1,0 +1,27 @@
+{
+  "contractVersion": "PA05_TEST_ONLY_V1",
+  "protocolId": "05000000-0000-4000-8000-000000000009",
+  "protocolVersionId": "05000000-0000-4000-8000-000000000010",
+  "owningModuleId": "05000000-0000-4000-8000-000000000013",
+  "taxonomyVersionId": "05000000-0000-4000-8000-000000000014",
+  "relationIds": [],
+  "versionNo": 1,
+  "sourceVersionId": "05000000-0000-4000-8000-000000000002",
+  "candidateRevisionId": "05000000-0000-4000-8000-000000000005",
+  "contentHash": "f1a8594e8976c89f1e5c028870c3d3764a7a5423473cd8635448d7f6d8cc6574",
+  "canonicalSnapshot": {"synthetic": true},
+  "taxonomyPath": {
+    "area": "05000000-0000-4000-8000-000000000011",
+    "domain": "05000000-0000-4000-8000-000000000012",
+    "module": "05000000-0000-4000-8000-000000000013",
+    "namespace": "TEST_ONLY",
+    "revision": 1
+  },
+  "lifecycle": "PUBLISHED",
+  "rights": "ALLOW",
+  "purpose": "personal-plan-preview",
+  "sourceStatus": "DATABASE_READ_SYNTHETIC_ONLY",
+  "trust": "TEST_ONLY / PREVIEW_ONLY / NON_EXECUTABLE / NOT_ADMITTED / D06_AUTHORITY_NOT_VERIFIED",
+  "refusals": ["INVALID_CONTEXT", "SOURCE_RIGHTS", "PROVENANCE", "TAXONOMY", "LIFECYCLE", "DIGEST", "READER_UNAVAILABLE"],
+  "sovMapping": {"source": "KdbProtocolSource(protocolId, protocolVersionId, owningModuleId, taxonomyVersionId, relationIds)", "consumerTest": "NOT_EXECUTED"}
+}
