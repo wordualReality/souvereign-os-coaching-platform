@@ -3,6 +3,12 @@ import json
 
 SCHEMAS = {"kdb_canonical", "kdb_staging", "kdb_governance", "kdb_ops"}
 ROLES = {"postgres", "kdb_schema_owner", "kdb_command_owner", "kdb_migrator"}
+GRAPH_SEEDS = sorted(ROLES | {"kdb_ingest_runtime"})
+GRAPH_ALLOWLIST = [
+    {"role": name, "member": "postgres", "grantor": "postgres",
+     "admin": True, "inherit": False, "set": False}
+    for name in ("kdb_ingest_writer", "kdb_reviewer", "kdb_runtime")
+]
 FUNCTIONS = {"a04_canonical_digest_v2", "security_context_ready", "jsonb_sha256",
              "canonical_command_digest", "canonical_digest_v2", "ingest_source",
              "propose_candidate", "request_review_handoff"}
@@ -42,15 +48,23 @@ def evaluate(evidence):
               "target":"AUTHORITATIVE_TARGET_NOT_VERIFIED",
               "postcommit_restore":"POSTCOMMIT_RESTORE_UNVERIFIED"}
     try:
-        if not isinstance(evidence, dict) or set(evidence) != {"version","binding","source","session","restore","schemas","creators","memberships","functions"}:
+        if not isinstance(evidence, dict) or set(evidence) != {"version","binding","source","session","restore","schemas","creators","membership_graph","functions"}:
             return result
-        if evidence["version"] != "kdb.a04-r1.creator-evidence.v1" or evidence["binding"] != {"project_ref":"ujdzahwlximlmndexgmx","attestation":"SYNTHETIC_ONLY"}:
+        if evidence["version"] != "kdb.a04-r1.creator-evidence.v2" or evidence["binding"] != {"project_ref":"ujdzahwlximlmndexgmx","attestation":"SYNTHETIC_ONLY"}:
             return result
-        if evidence["source"] != {"base_sha":"67e417a3ee65ffec2b01da2c3a53e92e7b31c07e","base_manifest_sha256":"235c6b9875a068a82db5c9d3c0bae4305d94fa952ad001bd0d5a2fc5eca6d65e","patch_sha256":"a6af6706ace9fb1d3b9226bf499db2911d2c80141b87faaacbe1fbb3e12e06e7"}:
+        if evidence["source"] != {"base_sha":"67e417a3ee65ffec2b01da2c3a53e92e7b31c07e","base_manifest_sha256":"235c6b9875a068a82db5c9d3c0bae4305d94fa952ad001bd0d5a2fc5eca6d65e","patch_sha256":"7b995b9ffca85a80b05300518a8d93692fb22776ec7d165b1ba51630e7c4c678"}:
             return result
         if evidence["session"] != {"session_user":"postgres","current_user":"postgres","identity":"SYNTHETIC_SESSION_ONLY_NOT_ATTESTED"}:
             return result
-        if evidence["restore"] != {"backup":"UNVERIFIED","operator":"UNVERIFIED"} or evidence["memberships"] != []:
+        graph = evidence["membership_graph"]
+        if (not isinstance(graph, dict) or set(graph) != {"version", "seeds", "edges"}
+            or graph["version"] != "connected-component.v1" or graph["seeds"] != GRAPH_SEEDS
+            or not isinstance(graph["edges"], list)
+            or any(not isinstance(e, dict) or set(e) != {"role", "member", "grantor", "admin", "inherit", "set"}
+                   or any(type(e[k]) is not bool for k in ("admin", "inherit", "set")) for e in graph["edges"])
+            or graph["edges"] != GRAPH_ALLOWLIST):
+            return result
+        if evidence["restore"] != {"backup":"UNVERIFIED","operator":"UNVERIFIED"}:
             return result
         schemas = evidence["schemas"]
         if not isinstance(schemas, list) or len(schemas) != 4 or {x.get("name") for x in schemas} != SCHEMAS:

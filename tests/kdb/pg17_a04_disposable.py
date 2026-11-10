@@ -345,7 +345,7 @@ def main():
         # R1: one transaction composes immutable A04 steps and the additive
         # creator patch; no intermediate step is committed independently.
         r1_manifest = json.loads((ROOT / "docs/kdb/m01/a04_r1_creator_admission.v1.json").read_text())
-        for pin in (r1_manifest["base_manifest"], r1_manifest["patch"], r1_manifest["catalog_query"], r1_manifest["synthetic_evidence"], r1_manifest["preflight"], r1_manifest["unit_tests"]):
+        for pin in (r1_manifest["base_manifest"], r1_manifest["patch"], r1_manifest["catalog_query"], r1_manifest["synthetic_evidence"], r1_manifest["preflight"], r1_manifest["unit_tests"], r1_manifest["p3_precreated_derivative"]):
             path = (ROOT / pin["path"]).resolve()
             if not path.is_relative_to(ROOT) or hashlib.sha256(path.read_bytes()).hexdigest() != pin["sha256"]:
                 raise AssertionError("R1_MANIFEST_HASH_MISMATCH")
@@ -354,24 +354,80 @@ def main():
         if candidate.count("COMMIT;") != 1:
             raise AssertionError("R1_BASE_TRANSACTION_AMBIGUOUS")
         base_transaction = candidate.replace("COMMIT;", "")
+        precreate = "CREATE ROLE kdb_migrator NOLOGIN NOBYPASSRLS NOSUPERUSER NOINHERIT;"
+        # Independent oracle: fetch *all* pg_auth_members and walk both
+        # endpoints in Python. It does not reuse the exporter recursive SQL.
+        raw_graph = """SELECT coalesce(jsonb_agg(jsonb_build_object(
+          'role',pg_get_userbyid(roleid),'member',pg_get_userbyid(member),
+          'grantor',pg_get_userbyid(grantor),'admin',admin_option,
+          'inherit',inherit_option,'set',set_option)),'[]'::jsonb)::text FROM pg_auth_members;"""
+        seeds = {'postgres','kdb_schema_owner','kdb_command_owner','kdb_ingest_runtime','kdb_migrator'}
+        from a04_r1_creator_admission import evaluate
+        reference_evidence = json.loads((ROOT / r1_manifest["synthetic_evidence"]["path"]).read_text())
+        graph_cases = {
+            'baseline': '',
+            'roleid_set': 'CREATE ROLE graph_a; GRANT kdb_command_owner TO graph_a WITH SET TRUE, INHERIT FALSE, ADMIN FALSE;',
+            'roleid_inherit': 'CREATE ROLE graph_a; GRANT kdb_schema_owner TO graph_a WITH SET FALSE, INHERIT TRUE, ADMIN FALSE;',
+            'roleid_admin': 'CREATE ROLE graph_a; GRANT kdb_ingest_runtime TO graph_a WITH SET FALSE, INHERIT FALSE, ADMIN TRUE;',
+            'reverse_set': 'CREATE ROLE graph_a; GRANT graph_a TO kdb_command_owner WITH SET TRUE, INHERIT FALSE, ADMIN FALSE;',
+            'reverse_inherit': 'CREATE ROLE graph_a; GRANT graph_a TO kdb_schema_owner WITH SET FALSE, INHERIT TRUE, ADMIN FALSE;',
+            'reverse_admin': 'CREATE ROLE graph_a; GRANT graph_a TO kdb_ingest_runtime WITH SET FALSE, INHERIT FALSE, ADMIN TRUE;',
+            'transitive_parent': 'CREATE ROLE graph_a; CREATE ROLE graph_b; GRANT graph_b TO graph_a WITH SET TRUE, INHERIT TRUE, ADMIN TRUE; GRANT graph_a TO kdb_migrator WITH SET TRUE, INHERIT FALSE;',
+            'transitive_inherit': 'CREATE ROLE graph_a; CREATE ROLE graph_b; GRANT graph_b TO graph_a WITH SET FALSE, INHERIT TRUE, ADMIN FALSE; GRANT graph_a TO kdb_migrator WITH SET FALSE, INHERIT TRUE;',
+            'transitive_admin': 'CREATE ROLE graph_a; CREATE ROLE graph_b; GRANT graph_b TO graph_a WITH SET FALSE, INHERIT FALSE, ADMIN TRUE; GRANT graph_a TO kdb_migrator WITH SET FALSE, INHERIT FALSE, ADMIN TRUE;',
+            'two_hop_descendant': 'CREATE ROLE graph_a; CREATE ROLE graph_b; GRANT kdb_command_owner TO graph_a; GRANT graph_a TO graph_b WITH SET TRUE, INHERIT TRUE, ADMIN TRUE;',
+            'mixed_direction': 'CREATE ROLE graph_a; CREATE ROLE graph_b; GRANT graph_a TO kdb_migrator; GRANT graph_a TO graph_b WITH SET FALSE, INHERIT TRUE, ADMIN TRUE;',
+        }
+        for label, injection in graph_cases.items():
+            prefix = "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + base_transaction + "\n" + precreate + "\n" + injection + "\n"
+            output = psql("kdb_a04_disposable", prefix + query_sql + "\n" + raw_graph + "\nROLLBACK;").stdout.strip().splitlines()
+            exported_graph = json.loads(output[-2])["membership_graph"]
+            all_edges = json.loads(output[-1])
+            reached = set(seeds)
+            while True:
+                expanded = reached | {e[k] for e in all_edges if e['role'] in reached or e['member'] in reached for k in ('role','member')}
+                if expanded == reached:
+                    break
+                reached = expanded
+            expected = sorted((e for e in all_edges if e['role'] in reached and e['member'] in reached),
+                              key=lambda e:(e['role'],e['member'],e['grantor']))
+            if exported_graph["edges"] != expected or exported_graph["seeds"] != sorted(seeds):
+                raise AssertionError("R1_GRAPH_EXPORT_INCOMPLETE: " + label)
+            if label != 'baseline':
+                partial = copy.deepcopy(exported_graph)
+                partial["edges"] = [edge for edge in partial["edges"] if not edge["role"].startswith("graph_") and not edge["member"].startswith("graph_")]
+                if partial["edges"] == expected:
+                    raise AssertionError("R1_GRAPH_PARTIAL_ORACLE_FAILED: " + label)
+                changed = copy.deepcopy(reference_evidence)
+                changed["membership_graph"] = exported_graph
+                if evaluate(changed)["status"] != "BLOCKED_CREATOR_AUTHORITY":
+                    raise AssertionError("R1_GRAPH_EVALUATOR_ACCEPTED: " + label)
+            if label != 'baseline':
+                denied = psql("kdb_a04_disposable", prefix + patch_sql + "\nROLLBACK;", check=False)
+                if denied.returncode == 0 or 'BLOCKED_CREATOR_AUTHORITY' not in denied.stderr:
+                    raise AssertionError("R1_GRAPH_GUARD_NOT_DENIED: " + label + " " + denied.stderr)
+            print("R1_GRAPH_CASE " + label + " EXPORT_COMPLETE / " + ("BASELINE" if label == 'baseline' else "GUARD_DENIED"))
         for injection in (
             "CREATE ROLE a04_unknown NOLOGIN; GRANT CREATE ON SCHEMA kdb_ops TO a04_unknown;",
             "CREATE ROLE a04_unknown NOLOGIN; GRANT kdb_command_owner TO a04_unknown WITH SET TRUE, INHERIT FALSE;",
+            "ALTER ROLE kdb_migrator SUPERUSER;",
+            "DROP ROLE kdb_migrator;",
             "GRANT USAGE ON SCHEMA kdb_ops TO kdb_command_owner WITH GRANT OPTION;",
             "SET ROLE kdb_schema_owner;",
             "CREATE FUNCTION kdb_ops.extra() RETURNS integer LANGUAGE sql AS 'SELECT 1';",
             "DROP FUNCTION kdb_ops.a04_canonical_digest_v2(jsonb); GRANT CREATE ON SCHEMA kdb_ops TO kdb_command_owner; SET ROLE kdb_command_owner; CREATE FUNCTION kdb_ops.a04_canonical_digest_v2(jsonb) RETURNS text LANGUAGE sql AS 'SELECT ''synthetic''::text'; RESET ROLE; REVOKE CREATE ON SCHEMA kdb_ops FROM kdb_command_owner;",
         ):
-            attempted = psql("kdb_a04_disposable", "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + base_transaction + "\n" + injection + "\n" + patch_sql + "\nCOMMIT;", check=False)
+            attempted = psql("kdb_a04_disposable", "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + base_transaction + "\n" + precreate + "\n" + injection + "\n" + patch_sql + "\nCOMMIT;", check=False)
             if attempted.returncode == 0 or "BLOCKED_CREATOR_AUTHORITY" not in attempted.stderr:
                 raise AssertionError("R1_ADMISSION_INJECTION_NOT_DENIED: " + attempted.stderr.strip())
         pieces = []
         for pin in manifest["sql_steps"][1:]:
-            text = (ROOT / pin["file"]).read_text()
+            source = r1_manifest["p3_precreated_derivative"]["path"] if pin["file"].endswith("202611070002__a04_p3_extensions_disposable.sql") else pin["file"]
+            text = (ROOT / source).read_text()
             if text.count("BEGIN;") != 1 or text.count("COMMIT;") != 1:
                 raise AssertionError("R1_DERIVATIVE_TRANSACTION_AMBIGUOUS")
             pieces.append(text.replace("BEGIN;", "", 1).replace("COMMIT;", "", 1))
-        combined = "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + base_transaction + "\n" + patch_sql + "\n" + "\n".join(pieces) + "\nCOMMIT;"
+        combined = "CREATE TEMP TABLE kdb_a04_disposable_guard(marker int);\n" + base_transaction + "\n" + precreate + "\n" + patch_sql + "\n" + "\n".join(pieces) + "\nCOMMIT;"
         if combined.count("COMMIT;") != 1:
             raise AssertionError("R1_COMBINED_TRANSACTION_AMBIGUOUS")
         psql("kdb_a04_disposable", combined.replace("COMMIT;", "ROLLBACK;"))
@@ -396,7 +452,7 @@ def main():
         changed=copy.deepcopy(evidence); changed["creators"][0]["global_default_raw"]=None; mutations.append(changed)
         changed=copy.deepcopy(evidence); changed["creators"][0]["default_safe"]=False; mutations.append(changed)
         changed=copy.deepcopy(evidence); changed["session"]["current_user"]="kdb_schema_owner"; mutations.append(changed)
-        changed=copy.deepcopy(evidence); changed["memberships"].append({"role":"kdb_schema_owner","member":"unknown","set":True}); mutations.append(changed)
+        changed=copy.deepcopy(evidence); changed["membership_graph"]["edges"].append({"role":"kdb_schema_owner","member":"unknown","grantor":"postgres","admin":False,"inherit":False,"set":True}); mutations.append(changed)
         changed=copy.deepcopy(evidence); changed["functions"][0]["raw_acl"]=None; mutations.append(changed)
         changed=copy.deepcopy(evidence); changed["functions"][0]["definition_sha256"]="0"*64; mutations.append(changed)
         changed=copy.deepcopy(evidence); changed["functions"][0]["signature"]="forged()"; mutations.append(changed)

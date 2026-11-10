@@ -265,7 +265,42 @@
       "signature": "kdb_ops.security_context_ready()"
     }
   ],
-  "memberships": [],
+  "membership_graph": {
+    "edges": [
+      {
+        "admin": true,
+        "grantor": "postgres",
+        "inherit": false,
+        "member": "postgres",
+        "role": "kdb_ingest_writer",
+        "set": false
+      },
+      {
+        "admin": true,
+        "grantor": "postgres",
+        "inherit": false,
+        "member": "postgres",
+        "role": "kdb_reviewer",
+        "set": false
+      },
+      {
+        "admin": true,
+        "grantor": "postgres",
+        "inherit": false,
+        "member": "postgres",
+        "role": "kdb_runtime",
+        "set": false
+      }
+    ],
+    "seeds": [
+      "kdb_command_owner",
+      "kdb_ingest_runtime",
+      "kdb_migrator",
+      "kdb_schema_owner",
+      "postgres"
+    ],
+    "version": "connected-component.v1"
+  },
   "restore": {
     "backup": "UNVERIFIED",
     "operator": "UNVERIFIED"
@@ -433,7 +468,7 @@
   "source": {
     "base_manifest_sha256": "235c6b9875a068a82db5c9d3c0bae4305d94fa952ad001bd0d5a2fc5eca6d65e",
     "base_sha": "67e417a3ee65ffec2b01da2c3a53e92e7b31c07e",
-    "patch_sha256": "a6af6706ace9fb1d3b9226bf499db2911d2c80141b87faaacbe1fbb3e12e06e7"
+    "patch_sha256": "7b995b9ffca85a80b05300518a8d93692fb22776ec7d165b1ba51630e7c4c678"
   },
-  "version": "kdb.a04-r1.creator-evidence.v1"
+  "version": "kdb.a04-r1.creator-evidence.v2"
 }

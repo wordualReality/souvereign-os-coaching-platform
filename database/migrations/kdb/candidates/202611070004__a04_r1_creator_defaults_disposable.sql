@@ -10,14 +10,36 @@ BEGIN
     OR session_user <> 'postgres' OR current_user <> 'postgres' THEN
    RAISE EXCEPTION 'BLOCKED_CREATOR_AUTHORITY';
  END IF;
- FOREACH role_name IN ARRAY ARRAY['kdb_schema_owner','kdb_command_owner','kdb_ingest_runtime'] LOOP
+ FOREACH role_name IN ARRAY ARRAY['kdb_schema_owner','kdb_command_owner','kdb_ingest_runtime','kdb_migrator'] LOOP
    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname=role_name AND NOT rolcanlogin
       AND NOT rolinherit AND NOT rolbypassrls AND NOT rolsuper AND NOT rolcreaterole AND NOT rolcreatedb) THEN
       RAISE EXCEPTION 'BLOCKED_CREATOR_AUTHORITY';
    END IF;
  END LOOP;
- IF EXISTS (SELECT 1 FROM pg_auth_members m JOIN pg_roles r ON r.oid=m.roleid
-    WHERE r.rolname IN ('kdb_schema_owner','kdb_command_owner','kdb_ingest_runtime')) THEN
+ -- Complete undirected connected component, not merely grants of protected
+ -- roles. The only permitted edges are the three existing synthetic preimage
+ -- grants to postgres; their grantor and every PG17 option are pinned.
+ IF (SELECT count(*) FROM pg_roles WHERE rolname IN
+   ('postgres','kdb_schema_owner','kdb_command_owner','kdb_ingest_runtime','kdb_migrator')) <> 5 THEN
+   RAISE EXCEPTION 'BLOCKED_CREATOR_AUTHORITY';
+ END IF;
+ IF EXISTS (
+   WITH RECURSIVE component(oid) AS (
+     SELECT oid FROM pg_roles WHERE rolname IN
+       ('postgres','kdb_schema_owner','kdb_command_owner','kdb_ingest_runtime','kdb_migrator')
+     UNION
+     SELECT adjacent.oid FROM component c
+       JOIN pg_auth_members m ON m.roleid=c.oid OR m.member=c.oid
+       CROSS JOIN LATERAL (VALUES (m.roleid),(m.member)) adjacent(oid)
+   )
+   SELECT 1 FROM pg_auth_members m JOIN component c ON c.oid=m.roleid
+   WHERE NOT (pg_get_userbyid(m.roleid) IN ('kdb_runtime','kdb_ingest_writer','kdb_reviewer')
+     AND pg_get_userbyid(m.member)='postgres' AND pg_get_userbyid(m.grantor)='postgres'
+     AND m.admin_option AND NOT m.inherit_option AND NOT m.set_option)
+ ) OR (SELECT count(*) FROM pg_auth_members m WHERE
+     pg_get_userbyid(m.roleid) IN ('kdb_runtime','kdb_ingest_writer','kdb_reviewer')
+     AND pg_get_userbyid(m.member)='postgres' AND pg_get_userbyid(m.grantor)='postgres'
+     AND m.admin_option AND NOT m.inherit_option AND NOT m.set_option) <> 3 THEN
    RAISE EXCEPTION 'BLOCKED_CREATOR_AUTHORITY';
  END IF;
  IF EXISTS (SELECT 1 FROM pg_namespace n WHERE n.nspname IN

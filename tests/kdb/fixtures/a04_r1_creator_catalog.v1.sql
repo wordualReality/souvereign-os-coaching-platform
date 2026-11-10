@@ -1,10 +1,10 @@
 -- Read-only disposable catalog evidence, never provider attestation.
 SELECT jsonb_build_object(
- 'version','kdb.a04-r1.creator-evidence.v1',
+ 'version','kdb.a04-r1.creator-evidence.v2',
  'binding',jsonb_build_object('project_ref','ujdzahwlximlmndexgmx','attestation','SYNTHETIC_ONLY'),
  'source',jsonb_build_object('base_sha','67e417a3ee65ffec2b01da2c3a53e92e7b31c07e',
    'base_manifest_sha256','235c6b9875a068a82db5c9d3c0bae4305d94fa952ad001bd0d5a2fc5eca6d65e',
-   'patch_sha256','a6af6706ace9fb1d3b9226bf499db2911d2c80141b87faaacbe1fbb3e12e06e7'),
+   'patch_sha256','7b995b9ffca85a80b05300518a8d93692fb22776ec7d165b1ba51630e7c4c678'),
  'session',jsonb_build_object('session_user',session_user,'current_user',current_user,'identity','SYNTHETIC_SESSION_ONLY_NOT_ATTESTED'),
  'restore',jsonb_build_object('backup','UNVERIFIED','operator','UNVERIFIED'),
  'schemas',(SELECT coalesce(jsonb_agg(jsonb_build_object(
@@ -41,11 +41,20 @@ SELECT jsonb_build_object(
    ) ORDER BY r.rolname),'[]'::jsonb) FROM pg_roles r
    LEFT JOIN pg_default_acl d ON d.defaclrole=r.oid AND d.defaclnamespace=0 AND d.defaclobjtype='f'
    WHERE r.rolname IN ('postgres','kdb_schema_owner','kdb_command_owner','kdb_migrator')),
- 'memberships',(SELECT coalesce(jsonb_agg(jsonb_build_object(
+ 'membership_graph',jsonb_build_object(
+   'version','connected-component.v1',
+   'seeds',(SELECT coalesce(jsonb_agg(r.rolname ORDER BY r.rolname),'[]'::jsonb) FROM pg_roles r
+     WHERE r.rolname IN ('postgres','kdb_schema_owner','kdb_command_owner','kdb_ingest_runtime','kdb_migrator')),
+   'edges',(WITH RECURSIVE component(oid) AS (
+      SELECT oid FROM pg_roles WHERE rolname IN ('postgres','kdb_schema_owner','kdb_command_owner','kdb_ingest_runtime','kdb_migrator')
+      UNION SELECT adjacent.oid FROM component c JOIN pg_auth_members m ON m.roleid=c.oid OR m.member=c.oid
+        CROSS JOIN LATERAL (VALUES (m.roleid),(m.member)) adjacent(oid)
+    )
+    SELECT coalesce(jsonb_agg(jsonb_build_object(
    'role',pg_get_userbyid(m.roleid),'member',pg_get_userbyid(m.member),'grantor',pg_get_userbyid(m.grantor),
-   'admin',m.admin_option,'inherit',m.inherit_option,'set',m.set_option) ORDER BY m.roleid,m.member,m.grantor),'[]'::jsonb)
-   FROM pg_auth_members m JOIN pg_roles r ON r.oid=m.roleid
-   WHERE r.rolname IN ('kdb_schema_owner','kdb_command_owner','kdb_ingest_runtime','kdb_migrator')),
+   'admin',m.admin_option,'inherit',m.inherit_option,'set',m.set_option)
+   ORDER BY pg_get_userbyid(m.roleid),pg_get_userbyid(m.member),pg_get_userbyid(m.grantor)),'[]'::jsonb)
+   FROM pg_auth_members m JOIN component c ON c.oid=m.roleid)),
  'functions',(SELECT coalesce(jsonb_agg(jsonb_build_object(
    'schema',n.nspname,'name',p.proname,'signature',p.oid::regprocedure::text,'owner',pg_get_userbyid(p.proowner),
    'definition_sha256',encode(extensions.digest(convert_to(pg_get_functiondef(p.oid),'UTF8'),'sha256'),'hex'),

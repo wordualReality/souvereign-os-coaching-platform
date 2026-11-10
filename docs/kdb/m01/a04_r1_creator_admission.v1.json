@@ -1,16 +1,48 @@
 {
-  "version":"kdb.a04-r1.creator-admission.v1",
-  "scope":"DISPOSABLE_ONLY",
-  "hosted":"NOT_AUTHORIZED",
-  "base_sha":"67e417a3ee65ffec2b01da2c3a53e92e7b31c07e",
-  "base_manifest":{"path":"docs/kdb/m01/a04_disposable_candidate.v1.json","sha256":"235c6b9875a068a82db5c9d3c0bae4305d94fa952ad001bd0d5a2fc5eca6d65e"},
-  "patch":{"path":"database/migrations/kdb/candidates/202611070004__a04_r1_creator_defaults_disposable.sql","sha256":"a6af6706ace9fb1d3b9226bf499db2911d2c80141b87faaacbe1fbb3e12e06e7"},
-  "catalog_query":{"path":"tests/kdb/fixtures/a04_r1_creator_catalog.v1.sql","sha256":"18c498b760896f49d09c8a3e115fc16724ee3941291537517531d96cb831d892"},
-  "synthetic_evidence":{"path":"tests/kdb/fixtures/a04_r1_creator_evidence.v1.json","sha256":"a641f6de6ada8651d0491a02de5a901fcd95777350a87d3de7b7c2983dc6df3b"},
-  "preflight":{"path":"tests/kdb/a04_r1_creator_admission.py","sha256":"71c2871ba051290f5d0e46c62754bfdd3f0bf520a8b111f42e94b2aea7432a6a"},
-  "unit_tests":{"path":"tests/kdb/test_a04_r1_creator_admission.py","sha256":"fe799348074c248a218cf68be702bd72d9d4ba1265b4dd7c0eb270f2d465e1f2"},
-  "allowed_creators":["postgres","kdb_schema_owner","kdb_command_owner","kdb_migrator"],
-  "target_schemas":["kdb_canonical","kdb_staging","kdb_governance","kdb_ops"],
-  "identity":"SYNTHETIC_SESSION_ONLY_NOT_ATTESTED",
-  "postcommit_restore":"POSTCOMMIT_RESTORE_UNVERIFIED"
+  "version": "kdb.a04-r1.creator-admission.v1",
+  "scope": "DISPOSABLE_ONLY",
+  "hosted": "NOT_AUTHORIZED",
+  "base_sha": "67e417a3ee65ffec2b01da2c3a53e92e7b31c07e",
+  "base_manifest": {
+    "path": "docs/kdb/m01/a04_disposable_candidate.v1.json",
+    "sha256": "235c6b9875a068a82db5c9d3c0bae4305d94fa952ad001bd0d5a2fc5eca6d65e"
+  },
+  "patch": {
+    "path": "database/migrations/kdb/candidates/202611070004__a04_r1_creator_defaults_disposable.sql",
+    "sha256": "7b995b9ffca85a80b05300518a8d93692fb22776ec7d165b1ba51630e7c4c678"
+  },
+  "catalog_query": {
+    "path": "tests/kdb/fixtures/a04_r1_creator_catalog.v1.sql",
+    "sha256": "bb5bda07cb1461e7a71129524303cd75d8d1258790cfacc69d877e379dfd004f"
+  },
+  "synthetic_evidence": {
+    "path": "tests/kdb/fixtures/a04_r1_creator_evidence.v1.json",
+    "sha256": "ba7fcecd1c2b17e6a5488ea1de62fbdf96c3daeebf4aef804a2848158d56da40"
+  },
+  "preflight": {
+    "path": "tests/kdb/a04_r1_creator_admission.py",
+    "sha256": "4b70dd5a755ae0d6f6d6f01d92518bc3147648c28bfef0f883ffa98a4575db37"
+  },
+  "unit_tests": {
+    "path": "tests/kdb/test_a04_r1_creator_admission.py",
+    "sha256": "54897330f2d8201206dfe5d0ddddc41a72efab3e0f5926c8b50d8e00f35536c2"
+  },
+  "allowed_creators": [
+    "postgres",
+    "kdb_schema_owner",
+    "kdb_command_owner",
+    "kdb_migrator"
+  ],
+  "target_schemas": [
+    "kdb_canonical",
+    "kdb_staging",
+    "kdb_governance",
+    "kdb_ops"
+  ],
+  "identity": "SYNTHETIC_SESSION_ONLY_NOT_ATTESTED",
+  "postcommit_restore": "POSTCOMMIT_RESTORE_UNVERIFIED",
+  "p3_precreated_derivative": {
+    "path": "database/migrations/kdb/candidates/202611100001__a04_r1_p3_precreated_disposable.sql",
+    "sha256": "db7026b0aa5a948e47c05c0d124666f515d9960d8c1d2b2b702dd4e0dad79455"
+  }
 }

@@ -52,7 +52,7 @@ def analyze(text: str) -> dict:
         return result
     if not isinstance(doc, dict):
         return result
-    if doc.get("version") == "kdb.a04-r1.creator-evidence.v1":
+    if doc.get("version") in ("kdb.a04-r1.creator-evidence.v1", "kdb.a04-r1.creator-evidence.v2"):
         from a04_r1_creator_admission import evaluate
         return evaluate(doc)
     if doc.get("version") == "kdb.a04.catalog-export.disposable.v1":
