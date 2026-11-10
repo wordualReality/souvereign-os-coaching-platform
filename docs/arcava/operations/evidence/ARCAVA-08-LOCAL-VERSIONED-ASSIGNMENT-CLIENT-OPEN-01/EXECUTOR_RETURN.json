@@ -1,0 +1,265 @@
+{
+  "RETURN_ID": "ARCAVA-08-LOCAL-VERSIONED-ASSIGNMENT-CLIENT-OPEN-01",
+  "LANE": "ARCAVA",
+  "STATUS": "IMPLEMENTED_LOCAL_NOT_YET_OWNER_ACCEPTED",
+  "GATE": "ARCAVA08_LOCAL_RUNTIME_PASS_OWNER_QS_PENDING",
+  "PLAN_POSITION": "CL-PA-20261108-01 Controller 08/10",
+  "BASE_SHA": "99428472f1c024982a67ef0f67c0cb19ca1d22dc",
+  "EXECUTION_SOURCE_SHA": "5aeb9b0a740ea2614c5bdd49dd66febd3c9cfa8f",
+  "EVIDENCE_COMMIT_PARENT_SHA": "5aeb9b0a740ea2614c5bdd49dd66febd3c9cfa8f",
+  "PR": {
+    "number": 12,
+    "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/pull/12",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false,
+    "HEAD_OBSERVED_BEFORE_EVIDENCE_COMMIT": "5aeb9b0a740ea2614c5bdd49dd66febd3c9cfa8f",
+    "FINAL_HEAD_RESOLUTION": "The commit containing this receipt is the evidence HEAD. Its hash is resolved externally after publication."
+  },
+  "BRANCH": "feat/arc36p25-journey-service-integration",
+  "WORKTREE": "/Users/aydin/Documents/GitHub/arcava-journey-worktree",
+  "REMOTE": "https://github.com/wordualReality/souvereign-os-coaching-platform.git",
+  "PREFLIGHT": {
+    "local_and_remote_start_sha": "99428472f1c024982a67ef0f67c0cb19ca1d22dc",
+    "worktree_porcelain": "",
+    "common_git_dir": "/Users/aydin/Documents/GitHub/souvereign-os-coaching-platform/.git",
+    "lease": "PASS: atomic cooperative lease arcava08-writer.lease in the worktree gitdir, held by this Arcava Codex session for repository writes",
+    "writer_check": "No competing local writer observed in process/file-descriptor and Codex session inspection. Cursor agent was in the main checkout. LIVE_LOCKED is a path-protection label. The cooperative lease does not prevent writes by unrelated processes.",
+    "worktree_before_receipt": "CLEAN"
+  },
+  "CHANGE_FILES": [
+    "services/api/src/main/java/com/projectb/api/http/JourneyHttpServer.java",
+    "services/api/src/test/java/com/projectb/api/http/JourneyPathTest.java"
+  ],
+  "SHA256": {
+    "services/api/src/main/java/com/projectb/api/http/JourneyHttpServer.java": "bb3ceacd95d44189357b3c08529fc5d996ef62e90d790a4e54a16751280f37f2",
+    "services/api/src/test/java/com/projectb/api/http/JourneyPathTest.java": "51247dfc1c607b68390f564e4b56f127278c5ee13f00ba7cd54e374230bfe579"
+  },
+  "LOCAL_TESTS": {
+    "source_sha": "5aeb9b0a740ea2614c5bdd49dd66febd3c9cfa8f",
+    "platform": "macOS arm64",
+    "jdk": "Eclipse Temurin 25.0.3+9-LTS",
+    "maven": "3.9.16",
+    "commands": [
+      {
+        "command": "javac -Xlint:all -Werror -d \"$classes_dir\" services/api/src/main/java/com/projectb/api/domain/JourneyKernel.java services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java services/api/src/main/java/com/projectb/api/json/JsonMini.java services/api/src/main/java/com/projectb/api/http/JourneyHttpServer.java services/api/src/main/java/com/projectb/api/http/JourneyProducer.java services/api/src/main/java/com/projectb/api/http/TrustedKdbVerifier.java services/api/src/main/java/com/projectb/api/http/TrustedPiacVerifier.java services/api/src/test/java/com/projectb/api/domain/JourneyKernelTest.java services/api/src/test/java/com/projectb/api/http/JourneyPathTest.java services/api/src/test/java/com/projectb/api/http/JourneyProducerTest.java services/api/src/test/java/com/projectb/api/http/JournalAtomicityTest.java services/api/src/test/java/com/projectb/api/http/AuthorityBoundaryTest.java",
+        "exit": 0
+      },
+      {
+        "command": "java -cp \"$classes_dir\" com.projectb.api.domain.JourneyKernelTest",
+        "exit": 0,
+        "result": "PASS"
+      },
+      {
+        "command": "java -cp \"$classes_dir\" com.projectb.api.http.JourneyPathTest",
+        "exit": 0,
+        "result": "PASS"
+      },
+      {
+        "command": "java -cp \"$classes_dir\" com.projectb.api.http.JourneyProducerTest",
+        "exit": 0,
+        "result": "PASS"
+      },
+      {
+        "command": "java -cp \"$classes_dir\" com.projectb.api.http.JournalAtomicityTest",
+        "exit": 0,
+        "result": "PASS"
+      },
+      {
+        "command": "java -cp \"$classes_dir\" com.projectb.api.http.AuthorityBoundaryTest",
+        "exit": 0,
+        "result": "PASS"
+      },
+      {
+        "command": "mvn -B -f services/api/pom.xml package",
+        "exit": 0,
+        "result": "BUILD SUCCESS; 75 tests, 0 failures, 0 errors, 0 skipped"
+      },
+      {
+        "command": "git diff --check BASE_SHA EXECUTION_SOURCE_SHA",
+        "exit": 0
+      }
+    ],
+    "emitted": "PASS ARCAVA08 assigned_step=true exact_pa05_pin=true restart=true foreign_and_unassigned_denied=true wrong_step_denied=true missing_and_swapped_pin_denied=true withdrawal_replayed=true idempotency_conflict=true journal_bytes_preserved=true",
+    "schema_check": {
+      "exit": 0,
+      "result": "CT-ARC-002 accepts exact pin and each structurally valid swapped UUID. The latter are unequal to the exact pin and denied by the HTTP test. Adding content_hash to source_ref fails schema validation."
+    }
+  },
+  "CI": [
+    {
+      "run_id": 42781227622,
+      "workflow": "arcava-journey-kernel",
+      "event": "pull_request",
+      "head_sha": "5aeb9b0a740ea2614c5bdd49dd66febd3c9cfa8f",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "job_id": 129711489980,
+          "name": "Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 129711490223,
+          "name": "JourneyKernel fixture / JDK 25",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 129711490271,
+          "name": "JourneyKernel fixture / JDK 21",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 129711490274,
+          "name": "Persisted loopback journey path / JDK 21",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 129711490348,
+          "name": "Persisted loopback journey path / JDK 25",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "run_id": 42781227541,
+      "workflow": "project-b-contract-validation",
+      "event": "pull_request",
+      "head_sha": "5aeb9b0a740ea2614c5bdd49dd66febd3c9cfa8f",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "job_id": 129711489310,
+          "name": "validate-contracts",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 129711489504,
+          "name": "web-renderer-smoke",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "run_id": 42781227346,
+      "workflow": "arcava-a09-offline-assurance",
+      "event": "pull_request",
+      "head_sha": "5aeb9b0a740ea2614c5bdd49dd66febd3c9cfa8f",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "job_id": 129711484710,
+          "name": "Arcava A09 offline suboracles / Python 3.12.3",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "run_id": 42781215886,
+      "workflow": "arcava-a09-offline-assurance",
+      "event": "push",
+      "head_sha": "5aeb9b0a740ea2614c5bdd49dd66febd3c9cfa8f",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "job_id": 129711452731,
+          "name": "Arcava A09 offline suboracles / Python 3.12.3",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "run_id": 42781215855,
+      "workflow": "arcava-journey-kernel",
+      "event": "push",
+      "head_sha": "5aeb9b0a740ea2614c5bdd49dd66febd3c9cfa8f",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "job_id": 129711450285,
+          "name": "Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 129711450108,
+          "name": "JourneyKernel fixture / JDK 25",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 129711449898,
+          "name": "JourneyKernel fixture / JDK 21",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 129711450187,
+          "name": "Persisted loopback journey path / JDK 21",
+          "conclusion": "success"
+        },
+        {
+          "job_id": 129711450040,
+          "name": "Persisted loopback journey path / JDK 25",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "PA05": {
+    "authority": "TEST_ONLY_SYNTHETIC",
+    "source_ref": {
+      "schema_version": 1,
+      "variant": "KDB_PROTOCOL_VERSION",
+      "protocol_id": "05000000-0000-4000-8000-000000000009",
+      "protocol_version_id": "05000000-0000-4000-8000-000000000010",
+      "owning_module_id": "05000000-0000-4000-8000-000000000013",
+      "taxonomy_version_id": "05000000-0000-4000-8000-000000000014",
+      "relation_ids": []
+    },
+    "kdb_content_sha256_evidence_only": "f1a8594e8976c89f1e5c028870c3d3764a7a5423473cd8635448d7f6d8cc6574"
+  },
+  "RESULTS": {
+    "positive": [
+      "Coach published an immutable version and assigned it with local directory consent. Missing consent is denied.",
+      "Assigned client opened the exact version and step twice with complete PA05 source_ref.",
+      "After stopping the loopback HTTP listener, a new server and journal instance in the test JVM replayed the same durable journal and returned the exact same version, step and pin.",
+      "Replayed publication and assignment retained the same IDs and identical journal bytes."
+    ],
+    "negative": {
+      "403": [
+        "foreign tenant",
+        "foreign client",
+        "coach on client path"
+      ],
+      "404": [
+        "missing assignment",
+        "step outside the assigned version"
+      ],
+      "409": [
+        "same idempotency key with different assignment intent"
+      ],
+      "422": [
+        "client query attempting to override the source",
+        "missing source_ref",
+        "swapped protocol version ID",
+        "swapped owning module ID",
+        "swapped taxonomy version ID",
+        "withdrawn journey before and after journal replay"
+      ]
+    },
+    "journal_bytes": "PASS: repeated reads, retries, rejected reads and conflicting assignment attempts add no bytes or mutate stored bytes.",
+    "live_revocation": "NOT_TESTED: withdrawal is local JourneyVersion withdrawal."
+  },
+  "OPEN_GATES": {
+    "ARCAVA08": "OWNER_QS_PENDING",
+    "Q2": "OPEN",
+    "R02": "EXTERNAL_PENDING",
+    "BL_ARC_01": "OPEN_FORMAL_INTEGRATION_AND_ADMISSION",
+    "PIAC_KDB_LIVE": "NOT_ADMITTED",
+    "T020_T050_T150_T160": "NO_NEW_ADMISSION",
+    "security_acceptance": "NOT_GRANTED",
+    "controller": "08/10 decision after scoped Owner-QS"
+  },
+  "BLOCKER": "NONE_FOR_SCOPED_LOCAL_DELIVERY",
+  "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+  "NEXT_ACTION": "Fetch this receipt at the immutable PR HEAD and perform one scoped Owner-QS for Controller 08/10.",
+  "USER_ACTION": "None for executor publication."
+}
