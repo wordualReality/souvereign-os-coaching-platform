@@ -16,14 +16,14 @@ import com.projectb.api.json.JsonMini;
 
 /** Local persisted coach and client path. Fixture tokens are not PIAC. */
 public final class JourneyPathTest {
-  private static final String TENANT_A = "11111111-1111-4111-8111-111111111111";
+  static final String TENANT_A = "11111111-1111-4111-8111-111111111111";
   private static final String TENANT_B = "22222222-2222-4222-8222-222222222222";
-  private static final String COACH_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+  static final String COACH_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
   private static final String COACH_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
-  private static final String CLIENT_A = "33333333-3333-4333-8333-333333333333";
+  static final String CLIENT_A = "33333333-3333-4333-8333-333333333333";
   private static final String CLIENT_OTHER = "44444444-4444-4444-8444-444444444444";
   private static final String CLIENT_NO_CONSENT = "55555555-5555-4555-8555-555555555555";
-  private static final String STEP = "66666666-6666-4666-8666-666666666666";
+  static final String STEP = "66666666-6666-4666-8666-666666666666";
   private static final String SHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   private static final String PA05_SOURCE = """
       {"schema_version":1,"variant":"KDB_PROTOCOL_VERSION",
@@ -127,7 +127,7 @@ public final class JourneyPathTest {
         + " wrong_step_denied=true missing_and_swapped_pin_denied=true withdrawal_replayed=true idempotency_conflict=true journal_bytes_preserved=true");
   }
 
-  private static String drafts(String tenant) {
+  static String drafts(String tenant) {
     return "/project-b/v1/tenants/" + tenant + "/journeys/drafts";
   }
 
@@ -139,7 +139,7 @@ public final class JourneyPathTest {
     return assignments(tenant, client) + "/" + assignment + "/version";
   }
 
-  private static String updateBody(long revision) {
+  static String updateBody(long revision) {
     return updateBody(revision, PA05_SOURCE);
   }
 
@@ -198,7 +198,7 @@ public final class JourneyPathTest {
     }
   }
 
-  private static HttpResponse<String> request(int port, String method, String path, String token,
+  static HttpResponse<String> request(int port, String method, String path, String token,
                                              String idempotency, String body) throws Exception {
     HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + path))
         .timeout(Duration.ofSeconds(3))
@@ -210,14 +210,14 @@ public final class JourneyPathTest {
     return HTTP.send(builder.build(), HttpResponse.BodyHandlers.ofString());
   }
 
-  private static String field(String json, String name) {
+  static String field(String json, String name) {
     Map<String, Object> data = JsonMini.object(JsonMini.object(JsonMini.parse(json)).get("data"));
     Object value = data.get(name);
     if (value instanceof Long number) return Long.toString(number);
     return JsonMini.text(value);
   }
 
-  private static void check(boolean condition, String label) {
+  static void check(boolean condition, String label) {
     if (!condition) throw new AssertionError(label);
   }
 }
