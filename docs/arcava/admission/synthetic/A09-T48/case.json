@@ -1,0 +1,8 @@
+{
+  "case_id": "A09-T48",
+  "units": ["ARC09-U14"],
+  "fixture_class": "SYNTHETIC_OFFLINE",
+  "entrypoint": "A09-T48",
+  "baseline": "86 = 47 P0 + 39 P1",
+  "acceptance_simulator": false
+}

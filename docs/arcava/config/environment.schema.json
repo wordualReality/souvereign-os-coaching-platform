@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcava-active-dev-environment",
+  "title": "Arcava active development environment keys",
+  "description": "The operator validator checks these local keys on one effective config object. HTTP readback returns a hash of the journal path and reports e1_authority NOT_ADMITTED from the live gate. This file stores no secret values and does not admit E1 transport.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["SERVER_ADDRESS", "ARCAVA_JOURNAL_PATH", "ARCAVA_RUNTIME_ROLE"],
+  "properties": {
+    "SERVER_ADDRESS": {
+      "type": "string",
+      "enum": ["127.0.0.1", "localhost", "::1"],
+      "x-sensitivity": "none",
+      "description": "Active listener bind. Any other address fails startup."
+    },
+    "SERVER_PORT": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "x-sensitivity": "none",
+      "description": "Local port. 0 selects a free port."
+    },
+    "ARCAVA_JOURNAL_PATH": {
+      "type": "string",
+      "minLength": 1,
+      "x-sensitivity": "local_path",
+      "description": "Append-only journal file. Tests use a synthetic temporary path."
+    },
+    "ARCAVA_RUNTIME_ROLE": {
+      "type": "string",
+      "const": "ACTIVE_DEV_HTTP",
+      "x-sensitivity": "none"
+    },
+    "SPRING_PROFILES_ACTIVE": {
+      "type": "string",
+      "const": "dev",
+      "x-sensitivity": "none",
+      "description": "Local development profile. It does not connect PIAC or KDB."
+    }
+  },
+  "x-not-read-by-active-listener": [
+    {"name": "DATABASE_URL", "sensitivity": "secret", "browser": "forbidden"},
+    {"name": "SUPABASE_URL", "sensitivity": "endpoint", "browser": "forbidden"},
+    {"name": "SUPABASE_ANON_KEY", "sensitivity": "credential", "browser": "forbidden"},
+    {"name": "SUPABASE_SERVICE_ROLE_KEY", "sensitivity": "secret", "browser": "forbidden"},
+    {"name": "CORE_ACCESS_API_BASE", "sensitivity": "endpoint", "browser": "forbidden"},
+    {"name": "CANONICAL_API_BASE", "sensitivity": "endpoint", "browser": "forbidden"}
+  ],
+  "x-runtime": {
+    "network": "loopback_only",
+    "database": "not_connected",
+    "workers": "disabled",
+    "relay": "disabled",
+    "provider": "disabled",
+    "service_role_in_browser": "forbidden"
+  }
+}

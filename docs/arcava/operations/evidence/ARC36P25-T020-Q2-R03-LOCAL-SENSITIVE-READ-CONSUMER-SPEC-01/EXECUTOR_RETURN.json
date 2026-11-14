@@ -1,0 +1,348 @@
+{
+  "RETURN_ID": "ARC36P25-T020-Q2-R03-LOCAL-SENSITIVE-READ-CONSUMER-SPEC-01",
+  "LANE": "ARCAVA",
+  "STATUS": "R03_SPEC_ONLY_DRAFT_DELIVERED_PENDING_OWNER_QS / DRAFT_NON_ADMITTED",
+  "GATE": "Q2 OPEN / BL-ARC-01 OPEN_SCOPED / NO_FORMAL_GATE_CLOSED",
+  "PLAN_POSITION": "ARC-36/P25 / ARC10-T020; ARC36P25-T020-Q2-CLOSURE-CHILD-01 C3/R03 SPEC_ONLY; T150 PARTIAL",
+  "BASE_SHA": "741437272bb864bf29bbb4dc72372c70b42e8de7",
+  "SOURCE_SHA": "847363a39205478d44536a000fd09b93a8c32642",
+  "EXECUTION_SOURCE_SHA": "847363a39205478d44536a000fd09b93a8c32642",
+  "SOURCE_VALIDATION_SHA": "847363a39205478d44536a000fd09b93a8c32642",
+  "CURRENT_SHA": "847363a39205478d44536a000fd09b93a8c32642",
+  "CURRENT_SHA_SCOPE": "validated draft source parent; final receipt-only child HEAD resolved from GitHub after publication",
+  "SOURCE_COMMIT_PARENT_SHA": "741437272bb864bf29bbb4dc72372c70b42e8de7",
+  "EVIDENCE_COMMIT_PARENT_SHA": "847363a39205478d44536a000fd09b93a8c32642",
+  "EVIDENCE_ONLY_CHILD": {
+    "path": "docs/arcava/operations/evidence/ARC36P25-T020-Q2-R03-LOCAL-SENSITIVE-READ-CONSUMER-SPEC-01/EXECUTOR_RETURN.json",
+    "sha": "RESOLVED_FROM_GITHUB_HEAD_BY_BUILDER"
+  },
+  "CHANGED_FILES": [
+    {
+      "path": "docs/arcava/security/q2-sensitive-client-read-consumer-contract-draft.md",
+      "sha256": "8c347d4287a6e378dd92386f6ddb48391cf4670bf5f93684be04d4b5c21759f2"
+    }
+  ],
+  "EVIDENCE_PATHS": [
+    "docs/arcava/security/q2-sensitive-client-read-consumer-contract-draft.md",
+    "docs/arcava/operations/evidence/ARC36P25-T020-Q2-R03-LOCAL-SENSITIVE-READ-CONSUMER-SPEC-01/EXECUTOR_RETURN.json"
+  ],
+  "EVIDENCE_URL": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/847363a39205478d44536a000fd09b93a8c32642/docs/arcava/security/q2-sensitive-client-read-consumer-contract-draft.md",
+  "ADOPTION": {
+    "CL-GATE-CLOSURE-20261105-01": "ACKNOWLEDGED_AND_APPLIED; existing Q2 child retained",
+    "BL-ARC-01": "OPEN_SCOPED; local R03 documentation allowed, live/formal admission blocked"
+  },
+  "DELIVERABLE": {
+    "path": "docs/arcava/security/q2-sensitive-client-read-consumer-contract-draft.md",
+    "status": "DRAFT_NON_ADMITTED",
+    "field_classifications": [
+      "VERIFIED_SOURCE_ONLY",
+      "UNVERIFIED",
+      "CONTRACT_MISSING"
+    ],
+    "seven_independent_gates": [
+      "SESSION",
+      "TENANT_MEMBERSHIP",
+      "ACCESS",
+      "ASSIGNMENT",
+      "CONSENT",
+      "SHARE",
+      "ENTITLEMENT"
+    ],
+    "request_binding": "existing seven Request fields and separate backend authSession; actor/subject/ClientProfile/enrollment identities never conflated",
+    "revision_domains": "identity/session/tenant grant/consent grant/entitlement grant/policy-decision-resource and Arcava assignment/share independent; synthetic single revision not a mapping",
+    "producer_operation": "REQUIRES_NEW_CONTRACT; KDB_SOURCE_INTAKE proof cannot authorize Arcava reads",
+    "future_test_matrix": "PLANNED_NOT_EXECUTED; positive, wrong scope/role/resource/purpose/operation/revision, missing/stale/expired/revoked proof, issuer/audience/replay/provider-error and privacy/lookup-counter cases",
+    "production_state": "unchanged OwnerGuard PIAC_NOT_CONNECTED; no live adapter or generated proof"
+  },
+  "R01": {
+    "status": "ANSWERED_SOURCE_SCOPED / CT-SHC-001..005 v1.0 ACCEPT_SOURCE_SCOPED / SENSITIVE_CLIENT_READ_REQUIRES_NEW_CONTRACT",
+    "producer_sha": "9ae5950ed2e556b6d6301f3d19d81a14992d6be7",
+    "repeat_approval_request": "NONE; R01 clarification consumed",
+    "sources": [
+      {
+        "id": 6662999628,
+        "url": "https://github.com/wordualReality/souvereign-os/issues/14#issuecomment-6662999628",
+        "created_at": "2026-11-05T16:15:21Z",
+        "updated_at": "2026-11-05T16:15:21Z",
+        "body_utf8_sha256": "9a5100338150e43f881f2e09815d5b10819c20973b700d5c80088244ee0c1909"
+      },
+      {
+        "id": 6663022174,
+        "url": "https://github.com/wordualReality/souvereign-os/issues/14#issuecomment-6663022174",
+        "created_at": "2026-11-05T16:16:17Z",
+        "updated_at": "2026-11-05T16:16:17Z",
+        "body_utf8_sha256": "85b3dcf211e24decca6c37c31424bbd7c03d17b32e3eb956463e5dd32fa37e32"
+      }
+    ]
+  },
+  "R02": {
+    "status": "EXTERNAL_PENDING / UNASSIGNED_UNVERIFIED operational issuer/workload/custody",
+    "source": {
+      "id": 6667433808,
+      "url": "https://github.com/wordualReality/souvereign-os/issues/14#issuecomment-6667433808",
+      "created_at": "2026-11-05T19:37:46Z",
+      "updated_at": "2026-11-05T19:37:46Z",
+      "body_utf8_sha256": "68500c0a6fd9de5b9140536d7edaac4ee0716574eb53d40d09a144e5d03a1fbb"
+    },
+    "response_observation": "request only in queried issue comments since request timestamp; no reply observed",
+    "observed_at_utc": "2026-11-06T19:04:29.715369+00:00",
+    "no_assignment_inferred": true
+  },
+  "GATE_RECORD": {
+    "GATE_ID": "Q2",
+    "PARENT_PLAN_ID": "ARC-36/P25 (ARC10)",
+    "PARENT_STEP": "ARC10-T020",
+    "OWNER": "GPT_BUILDER_ARCAVA",
+    "GATE_TYPE": "EXTERNAL_PIAC_PRODUCER_AUTHORITY_AND_TRUSTED_CONSUMER_BINDING",
+    "STATUS": "OPEN",
+    "BLOCKER_ID": "BL-ARC-01",
+    "BLOCKED_SCOPE": "dependent live authorization and formal T020/T110/security/integration admission only",
+    "MISSING_CRITERION": [
+      "new SOV-owned SENSITIVE_CLIENT_READ operation-specific signed decision/export/verifier contract REQUIRES_NEW_CONTRACT",
+      "R02 authenticated issuer/Arcava audience/workload/key custody/session-currentness/expiry/revocation/replay evidence",
+      "namespace-safe actor/subject/client/resource and independent revision mapping, with separate Arcava Assignment/Share",
+      "future separately authorized producer/consumer implementation and required independent R04 security/runtime admission"
+    ],
+    "CLOSURE_CRITERIA": "reviewed new producer contract and verified R02, actual admitted backend binding with all independent gates and current revisions/validity, positive/negative runtime evidence and independent security/operational admission",
+    "EVIDENCE_REQUIRED": [
+      "producer source/version/hash and operation decision",
+      "non-secret authenticated instance-bound R02 evidence",
+      "actual producer/consumer runtime tests",
+      "required independent security/operational return"
+    ],
+    "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+    "NEXT_ACTION": "review this R03 draft once; continue existing Q2 child with R02/new-producer-contract dependencies, without another R01 approval or SOV parallel writer",
+    "REVIEW_TRIGGER": "this source-bound R03 return or verified R02/new operation evidence"
+  },
+  "GATE_PROGRESS": {
+    "TARGET_GATE_ID": "Q2",
+    "PARENT_PLAN_ID": "ARC-36/P25 (ARC10)",
+    "PARENT_STEP": "ARC10-T020",
+    "CHILD_PLAN_ID": "ARC36P25-T020-Q2-CLOSURE-CHILD-01",
+    "CHILD_STEP": "C3/R03 SPEC_ONLY draft delivered, pending Owner-QS",
+    "MISSING_CRITERIA": [
+      "new SOV-owned SENSITIVE_CLIENT_READ operation-specific signed decision/export/verifier contract REQUIRES_NEW_CONTRACT",
+      "R02 authenticated issuer/Arcava audience/workload/key custody/session-currentness/expiry/revocation/replay evidence",
+      "namespace-safe actor/subject/client/resource and independent revision mapping, with separate Arcava Assignment/Share",
+      "future separately authorized producer/consumer implementation and required independent R04 security/runtime admission"
+    ],
+    "CLOSURE_EVIDENCE": [
+      {
+        "scope": "draft source/reference consistency only, not Q2 closure",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/847363a39205478d44536a000fd09b93a8c32642/docs/arcava/security/q2-sensitive-client-read-consumer-contract-draft.md",
+        "sha256": "8c347d4287a6e378dd92386f6ddb48391cf4670bf5f93684be04d4b5c21759f2"
+      }
+    ],
+    "RETURN_TO": "ARC10-T020",
+    "RESUME_CONDITION": "scoped Q2 closure evidence after required producer/R02/consumer/security proof, or documented externally blocked live path with independent authorized local work allowed"
+  },
+  "TESTS_CI": {
+    "DOCUMENT_VALIDATION": {
+      "result": "PASS_DOC_SOURCE_REFERENCES_ONLY",
+      "source_sha": "847363a39205478d44536a000fd09b93a8c32642",
+      "document_sha256": "8c347d4287a6e378dd92386f6ddb48391cf4670bf5f93684be04d4b5c21759f2",
+      "schema_field_references": 32,
+      "contracts": 5,
+      "gate_rows": 7,
+      "markdown_tables": "PASS",
+      "single_document_delta": "PASS",
+      "runtime_tests": "NOT_EXECUTED",
+      "E0": "NOT_RERUN",
+      "input_pins": [
+        {
+          "path": "services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java",
+          "sha256": "44d528f7f3e2d28b484ae41d4ebe8adf3e9f006fd51bce0834b06607d90c4223"
+        },
+        {
+          "path": "services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java",
+          "sha256": "0930589e3ebd1f6ae069d73f24e99a82687d2b2d73eadda5a991aab4be708a96"
+        },
+        {
+          "path": "services/api/src/main/java/com/projectb/api/arcava/security/RoleScopePolicy.java",
+          "sha256": "85d60f7c99d305e0e1fa5a955ad8920fb4d8cfc184f74cf6c07379b41c246057"
+        },
+        {
+          "path": "services/api/src/main/java/com/projectb/api/arcava/services/ArcavaAccessService.java",
+          "sha256": "621e5514befb145ef0df9641d0cee182b6d6cee468c6d9bd9df8e77b70e7f68b"
+        },
+        {
+          "path": "docs/arcava/security/trusted-context-source-readiness-e0.md",
+          "sha256": "11d6b09e45a33ba82b9797dbe1d96bb80eb06e878f18b395f2979baaf127447b"
+        },
+        {
+          "path": "docs/arcava/security/trusted-context-source-readiness-e0.json",
+          "sha256": "313598699be7c50da97a42b3a018614b5c00785d3786a7e9b6a610215f408c9f"
+        },
+        {
+          "path": "docs/arcava/security/control-manifest.json",
+          "sha256": "f1baf231c0a5f3bf3ccf795a3fdcd2abd4df8654f1bf56dc7f0bb741b7cc54cb"
+        },
+        {
+          "path": "docs/arcava/operations/evidence/ARC36P25-T020-TYPED-JOURNAL-IDENTITY-BINDING-01/EXECUTOR_RETURN.json",
+          "sha256": "1c3f635ba1686d6b42c5bb9fa0d7fb6f020decb9e9960da2ae90ed5f98ce7b55"
+        }
+      ]
+    },
+    "COMMANDS": [
+      {
+        "command": "python3 <temporary R03 source-field/Markdown/scope validation script>",
+        "exit": 0,
+        "source_sha": "847363a39205478d44536a000fd09b93a8c32642",
+        "scope": "32 actual schema property references; five accepted source hashes; seven gates; Markdown tables/links; exact single-file delta; input-byte pins"
+      },
+      {
+        "command": "git diff --check",
+        "exit": 0
+      }
+    ],
+    "MAVEN_RUNTIME_TESTS": "NOT_EXECUTED_BY_EXECUTOR_FOR_R03",
+    "E0_REEXECUTION": "NOT_EXECUTED",
+    "PREVIOUS_75_TESTS": "preserved unchanged; prior accepted source b2f28610d879d8dac4adc7a171053ee981df0f04; no fresh R03 acceptance claim",
+    "NEW_JUNIT_TESTS": 0,
+    "FUTURE_MATRIX": "PLANNED_NOT_EXECUTED",
+    "CI_SCOPE": "informational automatically triggered docs-push runs only; not a Q2 or new runtime admission",
+    "CI_OBSERVED_AT_UTC": "2026-11-06T19:04:29.715683+00:00",
+    "AUTO_TRIGGERED_CI_RUNS": [
+      {
+        "conclusion": "success",
+        "databaseId": 42276175095,
+        "event": "pull_request",
+        "headSha": "847363a39205478d44536a000fd09b93a8c32642",
+        "name": "arcava-journey-kernel",
+        "status": "completed",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42276175095"
+      },
+      {
+        "conclusion": "success",
+        "databaseId": 42276175316,
+        "event": "pull_request",
+        "headSha": "847363a39205478d44536a000fd09b93a8c32642",
+        "name": "arcava-a09-offline-assurance",
+        "status": "completed",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42276175316"
+      },
+      {
+        "conclusion": "success",
+        "databaseId": 42276175558,
+        "event": "pull_request",
+        "headSha": "847363a39205478d44536a000fd09b93a8c32642",
+        "name": "project-b-contract-validation",
+        "status": "completed",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42276175558"
+      },
+      {
+        "conclusion": "success",
+        "databaseId": 42276163263,
+        "event": "push",
+        "headSha": "847363a39205478d44536a000fd09b93a8c32642",
+        "name": "arcava-a09-offline-assurance",
+        "status": "completed",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42276163263"
+      },
+      {
+        "conclusion": "success",
+        "databaseId": 42276163297,
+        "event": "push",
+        "headSha": "847363a39205478d44536a000fd09b93a8c32642",
+        "name": "arcava-journey-kernel",
+        "status": "completed",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42276163297"
+      }
+    ]
+  },
+  "SOURCE_SCHEMA_PINS": [
+    {
+      "id": "CT-SHC-001",
+      "schema_version": "1.0",
+      "path": "contracts/shared-core/ct-shc-001.actor-identity-context.v1.schema.json",
+      "sha256": "4b77feee91d7cb86013fd3a6f59e7178be3e744ab6d76d6b58844b9a7b03783f"
+    },
+    {
+      "id": "CT-SHC-002",
+      "schema_version": "1.0",
+      "path": "contracts/shared-core/ct-shc-002.auth-session-context.v1.schema.json",
+      "sha256": "7ec82462615fb1b071018d755279c62f9f4c4d6c4c7f974a7f9157a6da665d35"
+    },
+    {
+      "id": "CT-SHC-003",
+      "schema_version": "1.0",
+      "path": "contracts/shared-core/ct-shc-003.tenant-access-context.v1.schema.json",
+      "sha256": "0e55b200c975bbf49432c08d627215c6696351ae52292bfab21ef3c28f0db0af"
+    },
+    {
+      "id": "CT-SHC-004",
+      "schema_version": "1.0",
+      "path": "contracts/shared-core/ct-shc-004.consent-decision.v1.schema.json",
+      "sha256": "e3c21f00a8f0dc62f7aa09ad8474163df6ab512ace4064f2d9ab8375531a40b8"
+    },
+    {
+      "id": "CT-SHC-005",
+      "schema_version": "1.0",
+      "path": "contracts/shared-core/ct-shc-005.entitlement-access-decision.v1.schema.json",
+      "sha256": "8ffd258108bf1f92ef457130c6144b98850becccbaa5e28de86d0fe1ac0f47a4"
+    }
+  ],
+  "SOURCE_COMMENT_PINS": [
+    {
+      "id": 6662999628,
+      "url": "https://github.com/wordualReality/souvereign-os/issues/14#issuecomment-6662999628",
+      "created_at": "2026-11-05T16:15:21Z",
+      "updated_at": "2026-11-05T16:15:21Z",
+      "body_utf8_sha256": "9a5100338150e43f881f2e09815d5b10819c20973b700d5c80088244ee0c1909"
+    },
+    {
+      "id": 6663022174,
+      "url": "https://github.com/wordualReality/souvereign-os/issues/14#issuecomment-6663022174",
+      "created_at": "2026-11-05T16:16:17Z",
+      "updated_at": "2026-11-05T16:16:17Z",
+      "body_utf8_sha256": "85b3dcf211e24decca6c37c31424bbd7c03d17b32e3eb956463e5dd32fa37e32"
+    },
+    {
+      "id": 6667433808,
+      "url": "https://github.com/wordualReality/souvereign-os/issues/14#issuecomment-6667433808",
+      "created_at": "2026-11-05T19:37:46Z",
+      "updated_at": "2026-11-05T19:37:46Z",
+      "body_utf8_sha256": "68500c0a6fd9de5b9140536d7edaac4ee0716574eb53d40d09a144e5d03a1fbb"
+    }
+  ],
+  "SECURITY_LIMITS": {
+    "Java_SQL_RLS_HTTP_PROVIDER_SIGNATURE_NEW_SCHEMA": "NONE",
+    "SOV_P06": "UNCHANGED; no foreign source or issue write, no parallel executor",
+    "credentials_hosted_production": "NONE",
+    "E0_and_control_manifest": "UNCHANGED",
+    "producer_or_consumer_authority": "NOT_GRANTED",
+    "merge_deployment": "NOT_EXECUTED"
+  },
+  "WORKTREE_AND_BRANCH": {
+    "repository": "wordualReality/souvereign-os-coaching-platform",
+    "path": "/Users/aydin/Documents/GitHub/arcava-journey-worktree",
+    "branch": "feat/arc36p25-journey-service-integration",
+    "preflight_local_remote_sha": "741437272bb864bf29bbb4dc72372c70b42e8de7",
+    "preflight_porcelain_v1_untracked_all": "",
+    "single_writer": "no other writer observed in cwd/status checks; no distributed lock claimed",
+    "source_committed_clean": true,
+    "PR": "12 OPEN / DRAFT / NOT_MERGED",
+    "local_Mac_status": "executor attestation only",
+    "source_delta": "one new allowed Markdown file; receipt-only child"
+  },
+  "FORMAL_GATES_CLOSED": [],
+  "OPEN_GATES": [
+    "Q2 OPEN; R02 pending, new SOV operation/export/verifier CONTRACT_MISSING",
+    "Q1-Q4 OPEN / PROPOSED_NOT_ADMITTED",
+    "full T020/T110 NOT_ADMITTED; T150 PARTIAL",
+    "G04/PIAC/KDB/SOV real integration unadmitted",
+    "original A09/T48 statuses unchanged; admitted real T48 0/86",
+    "SQL/RLS, independent security, hosted/release/merge OPEN"
+  ],
+  "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+  "NEXT_ACTION": "bounded Owner-QS of the source-bound R03 draft, then continue the existing Q2 child while R02/new-contract dependencies remain open; RETURN_TO ARC10-T020",
+  "BLOCKER": {
+    "id": "BL-ARC-01",
+    "status": "OPEN_SCOPED",
+    "R03_DOC_DELIVERY_BLOCKED": false,
+    "live_and_formal_admission": "blocked by missing contract and authenticated operational/security evidence"
+  },
+  "USER_ACTION": "no additional routine permission required; existing Builder self-fetches canonical return",
+  "CONTROLLER": "NOT_ROUTED",
+  "NUTRITION": "T050/T090 NON_ROUTING unchanged"
+}
