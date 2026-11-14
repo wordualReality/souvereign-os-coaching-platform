@@ -12,7 +12,7 @@ import java.util.Set;
 /** Disposable, synthetic loopback launcher used by the UI smoke. */
 public final class JourneyUiFixture {
   public static void main(String[] args) throws Exception {
-    if (args.length != 2 || !Set.of("seed", "replay").contains(args[1]))
+    if (args.length != 2 || !Set.of("seed", "replay", "no-consent").contains(args[1]))
       throw new IllegalArgumentException("expected journal path and seed or replay");
     Path journal = Path.of(args[0]);
     boolean seed = "seed".equals(args[1]);
@@ -22,9 +22,15 @@ public final class JourneyUiFixture {
     String client = System.getenv("ARCAVA_UI01_CLIENT_BEARER");
     if (coach == null || coach.isBlank() || client == null || client.isBlank() || coach.equals(client))
       throw new IllegalArgumentException("distinct synthetic bearer tokens required");
-    var server = JourneyHttpServer.start(journal, Map.of(
+    var tokens = new java.util.HashMap<>(Map.of(
         coach, new Actor(TENANT_A, COACH_A, Role.COACH),
-        client, new Actor(TENANT_A, CLIENT_A, Role.CLIENT)), Set.of(TENANT_A + "|" + CLIENT_A));
+        client, new Actor(TENANT_A, CLIENT_A, Role.CLIENT)));
+    String otherCoach = System.getenv("ARCAVA_UI02_OTHER_COACH");
+    String otherClient = System.getenv("ARCAVA_UI02_OTHER_CLIENT");
+    if (otherCoach != null) tokens.put(otherCoach, new Actor(TENANT_A, "other-coach", Role.COACH));
+    if (otherClient != null) tokens.put(otherClient, new Actor(TENANT_A, "other-client", Role.CLIENT));
+    var server = JourneyHttpServer.start(journal, tokens,
+        "no-consent".equals(args[1]) ? Set.of() : Set.of(TENANT_A + "|" + CLIENT_A));
     try {
       int port = server.port();
       if (seed) {

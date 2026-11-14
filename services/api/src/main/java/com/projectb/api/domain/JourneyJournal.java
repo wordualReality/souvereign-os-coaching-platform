@@ -19,6 +19,8 @@ import com.projectb.api.domain.JourneyKernel.Actor;
 import com.projectb.api.domain.JourneyKernel.AssignmentView;
 import com.projectb.api.domain.JourneyKernel.CanonicalPin;
 import com.projectb.api.domain.JourneyKernel.DraftView;
+import com.projectb.api.domain.JourneyKernel.DomainException;
+import com.projectb.api.domain.JourneyKernel.ErrorCode;
 import com.projectb.api.domain.JourneyKernel.PublishedView;
 import com.projectb.api.domain.JourneyKernel.Role;
 import com.projectb.api.domain.JourneyKernel.Step;
@@ -39,6 +41,22 @@ public final class JourneyJournal {
                           String contentHash, String publishedAt, String publicationState) {}
   public record EnrollmentLink(String tenantId, String clientId, String versionId,
                                String assignmentId, String enrollmentId) {}
+
+  private static final Map<String, Object> PA05_STEP_SOURCE = Map.of(
+      "schema_version", 1L, "variant", "KDB_PROTOCOL_VERSION",
+      "protocol_id", "05000000-0000-4000-8000-000000000009",
+      "protocol_version_id", "05000000-0000-4000-8000-000000000010",
+      "owning_module_id", "05000000-0000-4000-8000-000000000013",
+      "taxonomy_version_id", "05000000-0000-4000-8000-000000000014",
+      "relation_ids", List.of());
+
+  public record MessageScope(String tenantId, UUID assignmentId, UUID versionId, String stepId,
+                             String coachId, String clientId) {}
+  public record StepMessage(UUID id, MessageScope scope, Actor sender, String body) {}
+  private record MessageRetry(Actor actor, String key) {}
+
+  private final Map<UUID, Actor> assigningCoaches = new LinkedHashMap<>();
+  private final Map<MessageRetry, StepMessage> messages = new LinkedHashMap<>();
 
   private final Path path;
   private final JournalCommit sink;
@@ -171,6 +189,91 @@ public final class JourneyJournal {
     return false;
   }
 
+  public Map<String, Object> pa05Source() { return PA05_STEP_SOURCE; }
+
+  public synchronized Step pa05Step(PublishedView version, String stepId) {
+    if (!"published".equals(version.status()))
+      throw new DomainException(ErrorCode.WITHDRAWN, "journey version withdrawn");
+    Step step = version.immutableSteps().stream().filter(candidate -> stepId.equals(candidate.stepId()))
+        .findFirst().orElseThrow(() -> new DomainException(ErrorCode.NOT_FOUND, "assigned step not found"));
+    Projection projection = projections.get(version.journeyVersionId());
+    if (projection == null || !version.tenantId().equals(projection.tenantId())
+        || !version.journeyVersionId().toString().equals(projection.versionId())
+        || !"PUBLISHED".equals(projection.publicationState())
+        || !PA05_STEP_SOURCE.equals(stepSource(projection, stepId)))
+      throw new DomainException(ErrorCode.UNPUBLISHED_CANONICAL, "step source does not match the PA05 fixture");
+    return step;
+  }
+
+  public synchronized MessageScope messageScope(Actor actor, String clientId, UUID assignmentId,
+                                                UUID versionId, String stepId) {
+    AssignmentView assignment = kernel.assignmentSnapshot(assignmentId);
+    if (assignment == null || !actor.tenantId().equals(assignment.tenantId())
+        || !clientId.equals(assignment.clientId()) || !versionId.equals(assignment.journeyVersionId()))
+      throw new DomainException(ErrorCode.NOT_FOUND, "assigned version not found");
+    Actor coach = assigningCoaches.get(assignmentId);
+    if (coach == null || !actor.tenantId().equals(coach.tenantId())
+        || !(actor.equals(coach) || (actor.role() == Role.CLIENT && actor.subjectId().equals(clientId))))
+      throw new DomainException(ErrorCode.FORBIDDEN, "assignment participant required");
+    PublishedView version = actor.role() == Role.COACH
+        ? kernel.readPublishedForCoach(actor, versionId)
+        : kernel.readAssignedVersion(actor, actor.tenantId(), assignmentId);
+    pa05Step(version, stepId);
+    return new MessageScope(actor.tenantId(), assignmentId, versionId, stepId, coach.subjectId(), clientId);
+  }
+
+  public synchronized List<StepMessage> stepMessages(Actor actor, MessageScope scope) {
+    if (!scope.equals(messageScope(actor, scope.clientId(), scope.assignmentId(), scope.versionId(), scope.stepId())))
+      throw new IllegalArgumentException("invalid message scope");
+    return messages.values().stream().filter(message -> message.scope().equals(scope)).toList();
+  }
+
+  public synchronized StepMessage sendStepMessage(Actor actor, MessageScope scope, String body, String key)
+      throws IOException {
+    validateMessage(body, key);
+    MessageScope current = messageScope(actor, scope.clientId(), scope.assignmentId(), scope.versionId(), scope.stepId());
+    if (!scope.equals(current)) throw new IllegalArgumentException("invalid message scope");
+    MessageRetry retry = new MessageRetry(actor, key);
+    StepMessage prior = messages.get(retry);
+    if (prior != null) {
+      if (!prior.scope().equals(scope) || !prior.body().equals(body))
+        throw new DomainException(ErrorCode.IDEMPOTENCY_CONFLICT, "message intent differs");
+      return prior;
+    }
+    commit(command("step_message", actor, key)
+        + ",\"sender_role\":" + JsonMini.quote(actor.role().name())
+        + ",\"client_id\":" + JsonMini.quote(scope.clientId())
+        + ",\"coach_id\":" + JsonMini.quote(scope.coachId())
+        + ",\"assignment_id\":" + JsonMini.quote(scope.assignmentId().toString())
+        + ",\"version_id\":" + JsonMini.quote(scope.versionId().toString())
+        + ",\"step_id\":" + JsonMini.quote(scope.stepId())
+        + ",\"message_id\":" + JsonMini.quote(UUID.randomUUID().toString())
+        + ",\"body\":" + JsonMini.quote(body) + "}");
+    return messages.get(retry);
+  }
+
+  private static void validateMessage(String body, String key) {
+    if (body.isBlank() || body.length() > 500 || key.isBlank() || key.length() > 128)
+      throw new IllegalArgumentException("invalid step message or retry key");
+  }
+
+  private static Object stepSource(JourneyJournal.Projection projection, String stepId) {
+    Object parsed = JsonMini.parse(projection.phasesJson());
+    if (!(parsed instanceof List<?> phases)) return null;
+    Map<?, ?> matchedStep = null;
+    for (Object phase : phases) {
+      if (!(phase instanceof Map<?, ?> fields) || !(fields.get("steps") instanceof List<?> steps)) return null;
+      for (Object step : steps) {
+        if (!(step instanceof Map<?, ?> fieldsOfStep)) return null;
+        if (stepId.equals(fieldsOfStep.get("step_id"))) {
+          if (matchedStep != null) return null;
+          matchedStep = fieldsOfStep;
+        }
+      }
+    }
+    return matchedStep == null ? null : matchedStep.get("source_ref");
+  }
+
   private void apply(String line) {
     Map<String, Object> command = JsonMini.object(JsonMini.parse(line));
     Actor actor = new Actor(JsonMini.text(command.get("tenant_id")),
@@ -206,9 +309,25 @@ public final class JourneyJournal {
             Boolean.TRUE.equals(command.get("consent_verified")),
             JsonMini.text(command.get("key")),
             UUID.fromString(JsonMini.text(command.get("assignment_id"))));
+        assigningCoaches.putIfAbsent(view.assignmentId(), actor);
         String enrollmentId = JsonMini.text(command.get("enrollment_id"));
         enrollments.put(UUID.fromString(enrollmentId), new EnrollmentLink(actor.tenantId(),
             view.clientId(), view.journeyVersionId().toString(), view.assignmentId().toString(), enrollmentId));
+      }
+      case "step_message" -> {
+        Actor sender = new Actor(actor.tenantId(), actor.subjectId(),
+            Role.valueOf(JsonMini.text(command.get("sender_role"))));
+        MessageScope scope = messageScope(sender, JsonMini.text(command.get("client_id")),
+            UUID.fromString(JsonMini.text(command.get("assignment_id"))),
+            UUID.fromString(JsonMini.text(command.get("version_id"))), JsonMini.text(command.get("step_id")));
+        String body = JsonMini.text(command.get("body"));
+        String key = JsonMini.text(command.get("key"));
+        validateMessage(body, key);
+        UUID id = UUID.fromString(JsonMini.text(command.get("message_id")));
+        if (!scope.coachId().equals(command.get("coach_id"))
+            || messages.values().stream().anyMatch(message -> message.id().equals(id))
+            || messages.putIfAbsent(new MessageRetry(sender, key), new StepMessage(id, scope, sender, body)) != null)
+          throw new IllegalArgumentException("invalid or duplicate step message");
       }
       case "withdraw" -> {
         UUID versionId = UUID.fromString(JsonMini.text(command.get("version_id")));

@@ -51,14 +51,6 @@ public final class JourneyHttpServer {
 
   public static final String LOOPBACK_PROFILE = "TEST_LOOPBACK_ONLY";
 
-  private static final Map<String, Object> PA05_STEP_SOURCE = Map.of(
-      "schema_version", 1L, "variant", "KDB_PROTOCOL_VERSION",
-      "protocol_id", "05000000-0000-4000-8000-000000000009",
-      "protocol_version_id", "05000000-0000-4000-8000-000000000010",
-      "owning_module_id", "05000000-0000-4000-8000-000000000013",
-      "taxonomy_version_id", "05000000-0000-4000-8000-000000000014",
-      "relation_ids", List.of());
-
   public static JourneyHttpServer start(Path journalPath, Map<String, Actor> tokens,
                                         Set<String> consentedClients) throws IOException {
     return start(JourneyJournal.open(journalPath), tokens, consentedClients);
@@ -193,6 +185,33 @@ public final class JourneyHttpServer {
       send(exchange, 200, assignedStep(actor, tenant, UUID.fromString(path[8]), path[11]));
       return;
     }
+    if (path.length == 14 && "clients".equals(path[5]) && "assignments".equals(path[7])
+        && "versions".equals(path[9]) && "steps".equals(path[11]) && "messages".equals(path[13])
+        && ("GET".equals(method) || "POST".equals(method))) {
+      if (exchange.getRequestURI().getRawQuery() != null)
+        throw new IllegalArgumentException("query override denied");
+      String client = path[6];
+      synchronized (journal) {
+        var scope = journal.messageScope(actor, client, UUID.fromString(path[8]),
+            UUID.fromString(path[10]), path[12]);
+        if (!consentedClients.contains(tenant + "|" + client))
+          throw new DomainException(ErrorCode.CONSENT_REQUIRED, "current fixture consent required");
+        Map<String, Object> data = new java.util.LinkedHashMap<>(Map.of(
+            "assignment_id", scope.assignmentId().toString(), "journey_version_id", scope.versionId().toString(),
+            "step_id", scope.stepId(), "source_ref", journal.pa05Source(), "profile", LOOPBACK_PROFILE));
+        boolean posting = "POST".equals(method);
+        if (posting) {
+          Map<String, Object> payload = body(exchange);
+          if (!payload.keySet().equals(Set.of("body"))) throw new IllegalArgumentException("body field required");
+          data.put("message", messageJson(journal.sendStepMessage(actor, scope,
+              JsonMini.text(payload.get("body")), idempotency(exchange))));
+        } else {
+          data.put("messages", journal.stepMessages(actor, scope).stream().map(JourneyHttpServer::messageJson).toList());
+        }
+        send(exchange, posting ? 201 : 200, JsonMini.write(Map.of("data", data)));
+      }
+      return;
+    }
     if (path.length == 7 && "producers".equals(path[5]) && "POST".equals(method)) {
       JourneyProducer.Reply reply = JourneyProducer.handle(path[6], actor, consentedClients, journal, body(exchange));
       send(exchange, reply.status(), reply.body());
@@ -204,38 +223,16 @@ public final class JourneyHttpServer {
   private String assignedStep(Actor actor, String tenant, UUID assignment, String stepId) {
     synchronized (journal) {
       PublishedView version = journal.kernel().readAssignedVersion(actor, tenant, assignment);
-      Step step = version.immutableSteps().stream().filter(candidate -> stepId.equals(candidate.stepId()))
-          .findFirst().orElseThrow(() -> new DomainException(ErrorCode.NOT_FOUND, "assigned step not found"));
-      JourneyJournal.Projection projection = journal.projection(version.journeyVersionId());
-      if (projection == null || !tenant.equals(projection.tenantId())
-          || !version.journeyVersionId().toString().equals(projection.versionId())
-          || !"PUBLISHED".equals(projection.publicationState()))
-        throw new DomainException(ErrorCode.UNPUBLISHED_CANONICAL, "published step source unavailable");
-
-      Object source = stepSource(projection, stepId);
-      if (!PA05_STEP_SOURCE.equals(source))
-        throw new DomainException(ErrorCode.UNPUBLISHED_CANONICAL, "step source does not match the PA05 fixture");
+      Step step = journal.pa05Step(version, stepId);
       return JsonMini.write(Map.of("data", Map.of(
           "journey_version_id", version.journeyVersionId().toString(), "step_id", step.stepId(),
-          "title", step.title(), "source_ref", source, "profile", LOOPBACK_PROFILE)));
+          "title", step.title(), "source_ref", journal.pa05Source(), "profile", LOOPBACK_PROFILE)));
     }
   }
 
-  private static Object stepSource(JourneyJournal.Projection projection, String stepId) {
-    Object parsed = JsonMini.parse(projection.phasesJson());
-    if (!(parsed instanceof List<?> phases)) return null;
-    Map<?, ?> matchedStep = null;
-    for (Object phase : phases) {
-      if (!(phase instanceof Map<?, ?> fields) || !(fields.get("steps") instanceof List<?> steps)) return null;
-      for (Object step : steps) {
-        if (!(step instanceof Map<?, ?> fieldsOfStep)) return null;
-        if (stepId.equals(fieldsOfStep.get("step_id"))) {
-          if (matchedStep != null) return null;
-          matchedStep = fieldsOfStep;
-        }
-      }
-    }
-    return matchedStep == null ? null : matchedStep.get("source_ref");
+  private static Map<String, Object> messageJson(JourneyJournal.StepMessage message) {
+    return Map.of("message_id", message.id().toString(), "sender_role", message.sender().role().name(),
+        "sender_id", message.sender().subjectId(), "body", message.body());
   }
 
   private static void requireCoach(Actor actor) {
