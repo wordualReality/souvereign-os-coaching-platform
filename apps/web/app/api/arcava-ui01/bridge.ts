@@ -55,15 +55,31 @@ function sessionAssignment(cookie: string | undefined, version: string, secret: 
   return expected.length === provided.length && timingSafeEqual(expected, provided) ? assignment : null;
 }
 
-export async function fixturePost(request: NextRequest, messageRole?: "coach" | "client") {
+export async function fixturePost(request: NextRequest, messageRole?: "coach" | "client", progress = false) {
   const context = config(request);
   if (!context) return deny(404, "FIXTURE_DISABLED");
   if (request.headers.get("origin") !== context.origin) return deny(403, "ORIGIN_DENIED");
   if (request.nextUrl.search || request.headers.has("authorization")) return deny(422, "INVALID");
   const raw = await request.text();
   if (raw.length > 4096) return deny(422, "INVALID");
+  let progressKey: string | undefined;
+  let operation = raw;
+  if (progress) {
+    if (messageRole === "client" && raw !== "own") {
+      try {
+        const input = JSON.parse(raw);
+        if (!input || Object.keys(input).sort().join(",") !== "key,operation"
+            || !["complete", "share", "revoke"].includes(input.operation)
+            || typeof input.key !== "string" || !uuid.test(input.key)) return deny(422, "INVALID");
+        operation = input.operation;
+        progressKey = input.key;
+      } catch {
+        return deny(422, "INVALID");
+      }
+    } else if (messageRole === "coach" && raw !== "released") return deny(422, "INVALID");
+  }
   let message: { body: string; key: string } | undefined;
-  if (messageRole && raw !== "list") {
+  if (!progress && messageRole && raw !== "list") {
     try {
       const input = JSON.parse(raw);
       if (!input || Object.keys(input).sort().join(",") !== "body,key"
@@ -87,9 +103,15 @@ export async function fixturePost(request: NextRequest, messageRole?: "coach" | 
         || profile.runtime !== "loopback_fixture" || profile.status !== "ready") return deny(503, "FIXTURE_UNAVAILABLE");
 
     const assigned = !messageRole && raw === "assign";
-    const messagePath = assignments + "/" + assignment + "/versions/" + context.version + "/steps/" + step + "/messages";
-    const upstream = messageRole
-      ? await fetch(context.service + messagePath, { ...options, method: message ? "POST" : "GET",
+    const stepPath = assignments + "/" + assignment + "/versions/" + context.version + "/steps/" + step;
+    const upstream = progress && messageRole
+      ? await fetch(context.service + stepPath + "/progress/" + operation, {
+        ...options, method: progressKey ? "POST" : "GET",
+        headers: { Authorization: "Bearer " + context[messageRole],
+          ...(progressKey ? { "Content-Type": "application/json", "Idempotency-Key": progressKey } : {}) },
+        body: progressKey ? "{}" : undefined })
+      : messageRole
+      ? await fetch(context.service + stepPath + "/messages", { ...options, method: message ? "POST" : "GET",
         headers: { Authorization: "Bearer " + context[messageRole],
           ...(message ? { "Content-Type": "application/json", "Idempotency-Key": message.key } : {}) },
         body: message ? JSON.stringify({ body: message.body }) : undefined })
@@ -105,10 +127,13 @@ export async function fixturePost(request: NextRequest, messageRole?: "coach" | 
     const data = body.data;
     if (data?.journey_version_id !== context.version
         || (assigned && (upstream.status !== 201 || data.client_id !== client || !uuid.test(data.assignment_id ?? "")))
-        || (!assigned && (upstream.status !== (message ? 201 : 200) || data.profile !== "TEST_LOOPBACK_ONLY"
+        || (!assigned && (upstream.status !== ((message || progressKey) ? 201 : 200) || (!progress && data.profile !== "TEST_LOOPBACK_ONLY")
           || data.step_id !== step || (messageRole && data.assignment_id !== assignment)))) {
       return deny(502, "FIXTURE_RESPONSE_MISMATCH");
     }
+    if (progress && messageRole === "coach"
+        && (data.step_completed !== true || Object.keys(data).sort().join(",")
+          !== "assignment_id,journey_version_id,step_completed,step_id")) return deny(502, "FIXTURE_RESPONSE_MISMATCH");
     const response = NextResponse.json({ data }, { status: upstream.status, headers: { "Cache-Control": "no-store" } });
     if (assigned) response.cookies.set(assignmentCookie, signedAssignment(data.assignment_id, context.version, context.coach), { httpOnly: true, sameSite: "strict", path: "/" });
     return response;

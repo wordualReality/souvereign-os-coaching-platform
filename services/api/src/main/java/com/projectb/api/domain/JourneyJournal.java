@@ -58,6 +58,14 @@ public final class JourneyJournal {
   private final Map<UUID, Actor> assigningCoaches = new LinkedHashMap<>();
   private final Map<MessageRetry, StepMessage> messages = new LinkedHashMap<>();
 
+  public enum ProgressAction { COMPLETE, SHARE, REVOKE }
+  public record ProgressEvent(UUID id, MessageScope scope, ProgressAction action) {}
+  public record ProgressState(UUID completionId, UUID releaseId) {}
+  private record ProgressRetry(Actor client, String key) {}
+
+  private final Map<MessageScope, ProgressState> progress = new LinkedHashMap<>();
+  private final Map<ProgressRetry, ProgressEvent> progressRetries = new LinkedHashMap<>();
+
   private final Path path;
   private final JournalCommit sink;
   private final JourneyKernel kernel = new JourneyKernel();
@@ -257,6 +265,83 @@ public final class JourneyJournal {
       throw new IllegalArgumentException("invalid step message or retry key");
   }
 
+  public synchronized ProgressState clientProgress(Actor actor, MessageScope scope) {
+    requireProgressRole(actor, scope, Role.CLIENT);
+    return progress.get(scope);
+  }
+
+  public synchronized boolean releasedProgress(Actor actor, MessageScope scope) {
+    requireProgressRole(actor, scope, Role.COACH);
+    ProgressState state = progress.get(scope);
+    return state != null && state.releaseId() != null;
+  }
+
+  public synchronized ProgressEvent changeProgress(Actor actor, MessageScope scope, ProgressAction action,
+                                                   String key, boolean canonicalPayload) throws IOException {
+    requireProgressRole(actor, scope, Role.CLIENT);
+    if (key.isBlank() || key.length() > 128) throw new IllegalArgumentException("invalid retry key");
+    ProgressRetry retry = new ProgressRetry(actor, key);
+    ProgressEvent previous = progressRetries.get(retry);
+    if (previous != null && (!previous.scope().equals(scope) || previous.action() != action || !canonicalPayload))
+      throw new DomainException(ErrorCode.IDEMPOTENCY_CONFLICT, "progress intent differs");
+    if (!canonicalPayload) throw new IllegalArgumentException("progress operation takes an empty object");
+    if (previous != null) return previous;
+
+    ProgressState state = progress.get(scope);
+    if ((action == ProgressAction.COMPLETE && state != null)
+        || (action == ProgressAction.SHARE && state != null && state.releaseId() != null))
+      throw new DomainException(ErrorCode.IDEMPOTENCY_CONFLICT, "progress already committed");
+    requireTransition(state, action);
+
+    UUID id = UUID.randomUUID();
+    commit(JsonMini.write(Map.ofEntries(
+        Map.entry("op", "step_progress"), Map.entry("action", action.name()),
+        Map.entry("tenant_id", scope.tenantId()), Map.entry("subject_id", actor.subjectId()),
+        Map.entry("client_id", scope.clientId()), Map.entry("coach_id", scope.coachId()),
+        Map.entry("assignment_id", scope.assignmentId().toString()),
+        Map.entry("version_id", scope.versionId().toString()), Map.entry("step_id", scope.stepId()),
+        Map.entry("source_ref", PA05_STEP_SOURCE), Map.entry("event_id", id.toString()), Map.entry("key", key))));
+    return progressRetries.get(retry);
+  }
+
+  private void requireProgressRole(Actor actor, MessageScope scope, Role role) {
+    if (actor.role() != role || !scope.equals(messageScope(actor, scope.clientId(), scope.assignmentId(),
+        scope.versionId(), scope.stepId())))
+      throw new DomainException(ErrorCode.FORBIDDEN, "progress participant required");
+  }
+
+  private static void requireTransition(ProgressState state, ProgressAction action) {
+    boolean valid = switch (action) {
+      case COMPLETE -> state == null;
+      case SHARE -> state != null && state.releaseId() == null;
+      case REVOKE -> state != null && state.releaseId() != null;
+    };
+    if (!valid) throw new DomainException(ErrorCode.INVALID, "progress transition unavailable");
+  }
+
+  private void replayProgress(Map<String, Object> record, Actor recordedActor) {
+    Actor client = new Actor(recordedActor.tenantId(), recordedActor.subjectId(), Role.CLIENT);
+    MessageScope scope = messageScope(client, JsonMini.text(record.get("client_id")),
+        UUID.fromString(JsonMini.text(record.get("assignment_id"))),
+        UUID.fromString(JsonMini.text(record.get("version_id"))), JsonMini.text(record.get("step_id")));
+    if (!scope.coachId().equals(record.get("coach_id")) || !PA05_STEP_SOURCE.equals(record.get("source_ref")))
+      throw new IllegalArgumentException("invalid committed progress binding");
+    ProgressAction action = ProgressAction.valueOf(JsonMini.text(record.get("action")));
+    ProgressState state = progress.get(scope);
+    requireTransition(state, action);
+    UUID id = UUID.fromString(JsonMini.text(record.get("event_id")));
+    String key = JsonMini.text(record.get("key"));
+    if (key.isBlank() || key.length() > 128 || progressRetries.containsKey(new ProgressRetry(client, key))
+        || progressRetries.values().stream().anyMatch(event -> event.id().equals(id)))
+      throw new IllegalArgumentException("duplicate or invalid progress event");
+    progressRetries.put(new ProgressRetry(client, key), new ProgressEvent(id, scope, action));
+    progress.put(scope, switch (action) {
+      case COMPLETE -> new ProgressState(id, null);
+      case SHARE -> new ProgressState(state.completionId(), id);
+      case REVOKE -> new ProgressState(state.completionId(), null);
+    });
+  }
+
   private static Object stepSource(JourneyJournal.Projection projection, String stepId) {
     Object parsed = JsonMini.parse(projection.phasesJson());
     if (!(parsed instanceof List<?> phases)) return null;
@@ -329,6 +414,7 @@ public final class JourneyJournal {
             || messages.putIfAbsent(new MessageRetry(sender, key), new StepMessage(id, scope, sender, body)) != null)
           throw new IllegalArgumentException("invalid or duplicate step message");
       }
+      case "step_progress" -> replayProgress(command, actor);
       case "withdraw" -> {
         UUID versionId = UUID.fromString(JsonMini.text(command.get("version_id")));
         kernel.withdraw(actor, actor.tenantId(), versionId);

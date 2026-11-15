@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import { mkdtemp, mkdir, readFile, rm } from "node:fs/promises";
+import { appendFile, mkdtemp, mkdir, readFile, rm } from "node:fs/promises";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -208,9 +208,10 @@ try {
   await until(() => evaluate("document.querySelector('button') !== null && document.querySelector('pre') === null"), "browser refresh");
   await checkOpen();
 
-  async function restart(mode = "replay") {
+  async function restart(mode = "replay", partialTail = false) {
     await stop(next);
     await stop(backend.child);
+    if (partialTail) await appendFile(journal, '{"op":"step_progress"');
     backend = await service(mode);
     next = await web(backend.port, version);
     await navigate("/client/member-home");
@@ -331,9 +332,11 @@ try {
   const beforeConflict = await readFile(journal);
   await denied(409, otherTarget, coach, { body: coachSent.message.body }, coachKey);
   assert.deepEqual(await readFile(journal), beforeConflict);
-  for (const pin of [undefined, ...["protocol_id", "protocol_version_id", "owning_module_id", "taxonomy_version_id"]
+  const invalidPinTargets = [];
+  for (const pin of [undefined, { ...source, relation_ids: [randomUUID()] }, ...["protocol_id", "protocol_version_id", "owning_module_id", "taxonomy_version_id"]
     .map(field => ({ ...source, [field]: randomUUID() }))]) {
     const path = await createAssignment(pin);
+    invalidPinTargets.push(path);
     const beforeDeny = await readFile(journal);
     await denied(422, path, coach, { body: "denied" });
     await denied(422, path, client);
@@ -346,10 +349,115 @@ try {
   await denied(422, messagePath, coach, { body: "denied" });
   assert.deepEqual(await readFile(journal), beforeConsent);
   await restart();
+  const clientProgress = endpoint + "/client/progress";
+  const coachProgress = endpoint + "/coach/progress";
+  const progress = messagePath.replace(/messages$/, "progress/");
+  const own = () => click("View my step progress", 200, clientProgress);
+  const coachView = status => click("View released step progress", status, coachProgress);
+  const complete = () => click("Complete step", 201, clientProgress);
+  const share = () => click("Share completed status with assigned coach", 201, clientProgress);
+  const revoke = () => click("Withdraw progress sharing", 201, clientProgress);
+  await navigate("/coach/journeys");
+  await coachView(404);
+  await navigate("/client/member-home");
+  const completed = (await complete()).data;
+  checkBinding(completed);
+  assert.equal(completed.step_completed, true);
+  assert.equal(completed.visibility, "PRIVATE");
+  assert.equal(completed.event_id, completed.completion_id);
+  assert.equal(completed.release_id, undefined);
+  const privateBytes = await readFile(journal);
+  assert.deepEqual((await complete()).data, completed);
+  await navigate("/coach/journeys");
+  await coachView(404);
+  assert.deepEqual(await readFile(journal), privateBytes);
+
+  await navigate("/client/member-home");
+  const released = (await share()).data;
+  checkBinding(released);
+  assert.equal(released.completion_id, completed.completion_id);
+  assert.equal(released.event_id, released.release_id);
+  assert.notEqual(released.release_id, completed.completion_id);
+  assert.equal(released.visibility, "RELEASED");
+  const releasedBytes = await readFile(journal);
+  assert.deepEqual((await share()).data, released);
+  await navigate("/coach/journeys");
+  const coachProjection = { assignment_id: assigned.assignment_id, journey_version_id: version,
+    step_id: stepId, step_completed: true };
+  assert.deepEqual((await coachView(200)).data, coachProjection);
+  await cdp("Page.reload");
+  await until(() => evaluate("document.querySelector('section button') !== null && document.querySelector('pre') === null"), "progress refresh");
+  assert.deepEqual((await coachView(200)).data, coachProjection);
+  await restart("replay", true);
+  const restored = (await own()).data;
+  assert.deepEqual(restored, Object.fromEntries(Object.entries(released).filter(([key]) => key !== "event_id")));
+  await navigate("/coach/journeys");
+  assert.deepEqual((await coachView(200)).data, coachProjection);
+
+  const progressRecords = releasedBytes.toString().trim().split("\n").map(JSON.parse)
+    .filter(entry => entry.op === "step_progress");
+  assert.deepEqual(progressRecords.map(entry => entry.action), ["COMPLETE", "SHARE"]);
+  for (const entry of progressRecords) assert.deepEqual(entry.source_ref, source);
+  const [completeRecord, shareRecord] = progressRecords;
+  await denied(401, progress + "released");
+  await denied(401, progress + "released", randomUUID());
+  await denied(403, progress.replace(tenant, randomUUID()) + "released", coach);
+  await denied(403, progress + "released", otherCoach);
+  await denied(403, progress + "complete", otherClient, {});
+  await denied(403, progress + "complete", coach, {});
+  for (const id of [assigned.assignment_id, version, stepId])
+    await denied(404, progress.replace(id, randomUUID()) + "released", coach);
+  await denied(422, progress + "released?actor=coach", coach);
+  await denied(422, progress + "share", client, { scope: "profile" });
+  await denied(422, progress + "complete", client, "malformed");
+  await denied(409, progress + "share", client, { coach_id: "other" }, shareRecord.key);
+  await denied(409, otherTarget.replace(/messages$/, "progress/complete"), client, {}, completeRecord.key);
+  for (const path of invalidPinTargets)
+    await denied(422, path.replace(/messages$/, "progress/complete"), client, {});
+  assert.equal((await post("released", { origin: "http://example.invalid" }, coachProgress)).status, 403);
+  assert.equal((await post("released", { authorization: "Bearer external" }, coachProgress)).status, 422);
+  assert.equal((await post("released", { cookie: "arcava_ui01_assignment=" + assigned.assignment_id }, coachProgress)).status, 404);
+  assert.equal((await post(JSON.stringify({ operation: "share", key: randomUUID(), role: "coach" }), {}, clientProgress)).status, 422);
+  assert.deepEqual(await readFile(journal), releasedBytes);
+
+  await restart("no-consent");
+  await denied(422, progress + "complete", client, {}, completeRecord.key);
+  await navigate("/coach/journeys");
+  assert.equal((await coachView(422)).error.code, "CONSENT_REQUIRED");
+  assert.deepEqual(await readFile(journal), releasedBytes);
+  await restart();
+  const revoked = (await revoke()).data;
+  assert.equal(revoked.completion_id, completed.completion_id);
+  assert.equal(revoked.visibility, "PRIVATE");
+  assert.equal(revoked.release_id, undefined);
+  const revokedBytes = await readFile(journal);
+  assert.deepEqual((await revoke()).data, revoked);
+  assert.ok(revokedBytes.subarray(0, releasedBytes.length).equals(releasedBytes));
+  const revokedRecords = revokedBytes.toString().trim().split("\n").map(JSON.parse)
+    .filter(entry => entry.op === "step_progress");
+  assert.deepEqual(revokedRecords.map(entry => entry.event_id), [completed.completion_id, released.release_id, revoked.event_id]);
+  assert.equal(revokedRecords[2].action, "REVOKE");
+  await navigate("/coach/journeys");
+  await coachView(404);
+  await restart();
+  assert.equal((await own()).data.completion_id, completed.completion_id);
+  await navigate("/coach/journeys");
+  await coachView(404);
+  const shareReplay = await backendRequest(progress + "share", client, {}, shareRecord.key);
+  assert.equal(shareReplay.status, 201);
+  const replayed = (await shareReplay.json()).data;
+  assert.equal(replayed.event_id, released.release_id);
+  assert.equal(replayed.visibility, "PRIVATE");
+  await coachView(404);
+  assert.deepEqual(await readFile(journal), revokedBytes);
+
   const withdrawal = await fetch("http://127.0.0.1:" + backend.port + "/project-b/v1/tenants/" + tenant
     + "/journeys/versions/" + version + "/withdraw",
     { method: "POST", body: "{}", headers: { authorization: "Bearer " + coach, "content-type": "application/json" } });
   assert.equal(withdrawal.status, 200);
+  await denied(422, progress + "released", coach);
+  await denied(422, progress + "share", client, {});
+  await navigate("/client/member-home");
   const withdrawn = await readFile(journal);
   assert.equal((await click("Open assigned step", 422)).error.code, "WITHDRAWN");
   assert.deepEqual(await readFile(journal), withdrawn);
@@ -361,7 +469,15 @@ try {
   assert.equal((await list("client", 422)).error.code, "WITHDRAWN");
   await denied(422, messagePath, client, { body: "denied" });
   assert.deepEqual(await readFile(journal), withdrawn);
-  console.log(JSON.stringify({ messaging: { coachSent: coachSent.message, clientSent: clientSent.message,
+  await denied(422, progress + "released", coach);
+  await denied(422, progress + "share", client, {});
+  assert.deepEqual(await readFile(journal), withdrawn);
+  console.log(JSON.stringify({ progress: {
+    completion_id: completed.completion_id, release_id: released.release_id, revoke_id: revoked.event_id,
+    private_before_share: true, coach_projection: coachProjection, historical_events: ["COMPLETE", "SHARE", "REVOKE"],
+    consent_denied: true, withdrawal_denied_before_after_replay: true, partial_tail_discarded: true,
+    old_share_retry_stayed_revoked: true, same_key_changed_target_or_audience: 409,
+  }, messaging: { coachSent: coachSent.message, clientSent: clientSent.message,
     ordered_replay: true, current_consent_denied: true, message_retry_conflict: true, changed_target_conflict: true, missing_or_swapped_pin_denied: true, negative_binding_cases: true },
     result: "PASS", browser: await evaluate("navigator.userAgent"),
     assignment_id: assigned.assignment_id, journey_version_id: version, step_id: stepId, source_ref: source,

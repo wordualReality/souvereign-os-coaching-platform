@@ -212,12 +212,63 @@ public final class JourneyHttpServer {
       }
       return;
     }
+    if (path.length == 15 && "clients".equals(path[5]) && "assignments".equals(path[7])
+        && "versions".equals(path[9]) && "steps".equals(path[11]) && "progress".equals(path[13])) {
+      progress(exchange, actor, path);
+      return;
+    }
     if (path.length == 7 && "producers".equals(path[5]) && "POST".equals(method)) {
       JourneyProducer.Reply reply = JourneyProducer.handle(path[6], actor, consentedClients, journal, body(exchange));
       send(exchange, reply.status(), reply.body());
       return;
     }
     send(exchange, 404, error("NOT_FOUND", "route not found", correlation));
+  }
+
+  private void progress(HttpExchange exchange, Actor actor, String[] path) throws IOException {
+    String operation = path[14];
+    String method = exchange.getRequestMethod();
+    boolean reading = "GET".equals(method) && ("own".equals(operation) || "released".equals(operation));
+    boolean writing = "POST".equals(method) && Set.of("complete", "share", "revoke").contains(operation);
+    if (!reading && !writing) {
+      send(exchange, 404, error("NOT_FOUND", "progress route not found", correlation(exchange)));
+      return;
+    }
+    if (exchange.getRequestURI().getRawQuery() != null)
+      throw new IllegalArgumentException("query override denied");
+    boolean coachRead = "released".equals(operation);
+    if (actor.role() != (coachRead ? Role.COACH : Role.CLIENT))
+      throw new DomainException(ErrorCode.FORBIDDEN, "progress role required");
+    Map<String, Object> payload = writing ? body(exchange) : Map.of();
+    synchronized (journal) {
+      var scope = journal.messageScope(actor, path[6], UUID.fromString(path[8]),
+          UUID.fromString(path[10]), path[12]);
+      if (!consentedClients.contains(scope.tenantId() + "|" + scope.clientId()))
+        throw new DomainException(ErrorCode.CONSENT_REQUIRED, "current fixture consent required");
+      Map<String, Object> result = new java.util.LinkedHashMap<>(Map.of(
+          "assignment_id", scope.assignmentId().toString(), "journey_version_id", scope.versionId().toString(),
+          "step_id", scope.stepId()));
+      if (coachRead) {
+        if (!journal.releasedProgress(actor, scope))
+          throw new DomainException(ErrorCode.NOT_FOUND, "released progress unavailable");
+        result.put("step_completed", true);
+      } else {
+        if (writing) {
+          var action = JourneyJournal.ProgressAction.valueOf(operation.toUpperCase(java.util.Locale.ROOT));
+          var event = journal.changeProgress(actor, scope, action, idempotency(exchange), payload.isEmpty());
+          result.put("event_id", event.id().toString());
+        }
+        var state = journal.clientProgress(actor, scope);
+        result.put("tenant_id", scope.tenantId());
+        result.put("client_id", scope.clientId());
+        result.put("source_ref", journal.pa05Source());
+        result.put("step_completed", state != null);
+        result.put("visibility", state != null && state.releaseId() != null ? "RELEASED" : "PRIVATE");
+        if (state != null) result.put("completion_id", state.completionId().toString());
+        if (state != null && state.releaseId() != null) result.put("release_id", state.releaseId().toString());
+      }
+      send(exchange, writing ? 201 : 200, JsonMini.write(Map.of("data", result)));
+    }
   }
 
   private String assignedStep(Actor actor, String tenant, UUID assignment, String stepId) {

@@ -19,6 +19,8 @@ export function Ui01Fixture({ action }: { action: "assign" | "open" }) {
   const [message, setMessage] = useState("");
   const retry = useRef<{ body: string; key: string } | null>(null);
 
+  const progressKeys = useRef<Partial<Record<"complete" | "share" | "revoke", string>>>({});
+
   useEffect(() => {
     const controller = new AbortController();
     fetch(endpoint, { signal: controller.signal })
@@ -27,7 +29,7 @@ export function Ui01Fixture({ action }: { action: "assign" | "open" }) {
     return () => controller.abort();
   }, []);
 
-  async function run(operation: "assign" | "open" | "send" | "list") {
+  async function run(operation: "assign" | "open" | "send" | "list" | "complete" | "share" | "revoke" | "own" | "released") {
     setPending(true);
     setResult(null);
     try {
@@ -35,10 +37,19 @@ export function Ui01Fixture({ action }: { action: "assign" | "open" }) {
       if (operation === "send" && retry.current?.body !== message) {
         retry.current = { body: message, key: crypto.randomUUID() };
       }
-      const route = messaging ? endpoint + (action === "assign" ? "/coach" : "/client") : endpoint;
-      const body = operation === "send" ? JSON.stringify(retry.current) : operation;
+      const progress = ["complete", "share", "revoke", "own", "released"].includes(operation);
+      const roleRoute = endpoint + (action === "assign" ? "/coach" : "/client");
+      const route = progress ? roleRoute + "/progress" : messaging ? roleRoute : endpoint;
+      let body: string = operation;
+      if (operation === "send") body = JSON.stringify(retry.current);
+      if (operation === "complete" || operation === "share" || operation === "revoke") {
+        const key = progressKeys.current[operation] ??= crypto.randomUUID();
+        body = JSON.stringify({ operation, key });
+      }
       const response = await fetch(route, { method: "POST", body });
       setResult({ ...await response.json(), status: response.status });
+      if (response.ok && operation === "revoke") delete progressKeys.current.share;
+      if (response.ok && operation === "share") delete progressKeys.current.revoke;
     } catch {
       setResult({ status: 503, error: { code: "FIXTURE_UNAVAILABLE" } });
     } finally {
@@ -66,6 +77,17 @@ export function Ui01Fixture({ action }: { action: "assign" | "open" }) {
         Send step message
       </button>
       <button type="button" onClick={() => run("list")} disabled={pending}>View step messages</button>
+      {action === "open" ? (
+        <fieldset>
+          <legend>Step completion and sharing</legend>
+          <button type="button" onClick={() => run("complete")} disabled={pending}>Complete step</button>
+          <button type="button" onClick={() => run("own")} disabled={pending}>View my step progress</button>
+          <button type="button" onClick={() => run("share")} disabled={pending}>Share completed status with assigned coach</button>
+          <button type="button" onClick={() => run("revoke")} disabled={pending}>Withdraw progress sharing</button>
+        </fieldset>
+      ) : (
+        <button type="button" onClick={() => run("released")} disabled={pending}>View released step progress</button>
+      )}
       <div aria-live="polite">
         {result && <p role="status">HTTP {result.status}{result.error && " " + result.error.code}</p>}
         {result?.data && <pre>{JSON.stringify(result.data, null, 2)}</pre>}
