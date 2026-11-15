@@ -451,6 +451,94 @@ try {
   await coachView(404);
   assert.deepEqual(await readFile(journal), revokedBytes);
 
+  const mediaUrl = "https://www.youtube.com/watch?v=arcavaLocal";
+  const mediaTitle = "Synthetic test media";
+  const coachMedia = endpoint + "/coach/media";
+  const clientMedia = endpoint + "/client/media";
+  const mediaPath = messagePath.replace(/messages$/, "media-links");
+  async function typeMedia(url) {
+    await evaluate("document.querySelector('[data-media-url]').focus()");
+    await cdp("Input.insertText", { text: url });
+    assert.equal(await evaluate("document.querySelector('[data-media-url]').value"), url);
+  }
+  await navigate("/coach/journeys");
+  await typeMedia(mediaUrl);
+  const attachedMedia = (await click("Attach step media link", 201, coachMedia)).data;
+  checkBinding(attachedMedia);
+  assert.equal(attachedMedia.media_link.url, mediaUrl);
+  assert.equal(attachedMedia.media_link.title, mediaTitle);
+  assert.equal(attachedMedia.media_link.owner_id, "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+  assert.equal(attachedMedia.media_link.link_version, 1);
+  assert.equal(attachedMedia.media_link.visibility, "ACTIVE");
+  assert.equal(attachedMedia.media_link.rights_state, "SYNTHETIC_TEST_ONLY");
+  assert.equal(attachedMedia.media_link.use, "EXTERNAL_NAVIGATION_ONLY");
+  assert.equal(await evaluate("document.querySelector('iframe,embed,video')"), null);
+  const attachedMediaBytes = await readFile(journal);
+  assert.deepEqual((await click("Attach step media link", 201, coachMedia)).data, attachedMedia);
+  assert.deepEqual(await readFile(journal), attachedMediaBytes);
+  await navigate("/client/member-home");
+  const clientMediaView = (await click("View step media link", 200, clientMedia)).data;
+  assert.equal(clientMediaView.media_link.media_link_id, attachedMedia.media_link.media_link_id);
+  assert.equal(clientMediaView.media_link.url, mediaUrl);
+  assert.deepEqual(clientMediaView.source_ref, source);
+  assert.equal(await evaluate("document.querySelector('iframe,embed,video')"), null);
+  await restart();
+  const restoredMedia = (await click("View step media link", 200, clientMedia)).data;
+  assert.equal(restoredMedia.media_link.media_link_id, attachedMedia.media_link.media_link_id);
+  assert.equal(restoredMedia.media_link.url, mediaUrl);
+  assert.equal(restoredMedia.journey_version_id, version);
+  await navigate("/coach/journeys");
+  assert.equal((await click("View step media link", 200, coachMedia)).data.media_link.media_link_id,
+    attachedMedia.media_link.media_link_id);
+  assert.deepEqual(await readFile(journal), attachedMediaBytes);
+  const youtubeFetches = events.filter(event => /youtube\.com|youtu\.be|skool\.com|googlevideo/i.test(event.response.url));
+  assert.equal(youtubeFetches.length, 0);
+  await denied(401, mediaPath);
+  await denied(403, mediaPath.replace(tenant, randomUUID()), coach);
+  await denied(403, mediaPath, otherCoach, { url: mediaUrl, title: mediaTitle });
+  await denied(403, mediaPath, otherClient);
+  await denied(403, mediaPath, client, { url: mediaUrl, title: mediaTitle });
+  for (const id of [assigned.assignment_id, version, stepId])
+    await denied(404, mediaPath.replace(id, randomUUID()), coach);
+  await denied(422, mediaPath + "?provider=youtube", client);
+  for (const payload of [
+    { url: "http://www.youtube.com/watch?v=arcavaLocal", title: mediaTitle },
+    { url: "javascript:alert(1)", title: mediaTitle },
+    { url: "https://user:pass@www.youtube.com/watch?v=arcavaLocal", title: mediaTitle },
+    { url: "https://www.youtube.com.evil.com/watch?v=arcavaLocal", title: mediaTitle },
+    { url: "https://vimeo.com/123", title: mediaTitle },
+    { url: "https://127.0.0.1/watch", title: mediaTitle },
+    { url: mediaUrl, title: "x".repeat(121) },
+  ]) await denied(422, mediaPath, coach, payload);
+  const mediaRecords = attachedMediaBytes.toString().trim().split("\n").map(JSON.parse)
+    .filter(entry => entry.op === "coach_media_link_attach");
+  assert.equal(mediaRecords.length, 1);
+  await denied(409, mediaPath, coach, { url: "https://www.skool.com/arcava-synthetic", title: mediaTitle },
+    mediaRecords[0].key);
+  assert.equal((await post("list", { origin: "http://example.invalid" }, coachMedia)).status, 403);
+  assert.equal((await post("list", { authorization: "Bearer external" }, coachMedia)).status, 422);
+  assert.equal((await post(JSON.stringify({ url: mediaUrl, title: mediaTitle, key: randomUUID() }), {}, clientMedia)).status, 422);
+  assert.deepEqual(await readFile(journal), attachedMediaBytes);
+
+  const withdrawnMedia = (await click("Withdraw step media link", 201, coachMedia)).data;
+  assert.equal(withdrawnMedia.media_link.media_link_id, attachedMedia.media_link.media_link_id);
+  assert.equal(withdrawnMedia.media_link.visibility, "WITHDRAWN");
+  const withdrawnMediaBytes = await readFile(journal);
+  assert.deepEqual((await click("Withdraw step media link", 201, coachMedia)).data, withdrawnMedia);
+  assert.deepEqual(await readFile(journal), withdrawnMediaBytes);
+  await navigate("/client/member-home");
+  assert.equal((await click("View step media link", 404, clientMedia)).error.code, "NOT_FOUND");
+  await restart();
+  assert.equal((await click("View step media link", 404, clientMedia)).error.code, "NOT_FOUND");
+  await navigate("/coach/journeys");
+  assert.equal((await click("View step media link", 404, coachMedia)).error.code, "NOT_FOUND");
+  const mediaHistory = withdrawnMediaBytes.toString().trim().split("\n").map(JSON.parse)
+    .filter(entry => entry.op === "coach_media_link_attach" || entry.op === "coach_media_link_withdraw");
+  assert.deepEqual(mediaHistory.map(entry => entry.op),
+    ["coach_media_link_attach", "coach_media_link_withdraw"]);
+  assert.equal(mediaHistory[0].media_link_id, attachedMedia.media_link.media_link_id);
+  assert.deepEqual(mediaHistory[0].source_ref, source);
+
   const withdrawal = await fetch("http://127.0.0.1:" + backend.port + "/project-b/v1/tenants/" + tenant
     + "/journeys/versions/" + version + "/withdraw",
     { method: "POST", body: "{}", headers: { authorization: "Bearer " + coach, "content-type": "application/json" } });
@@ -463,6 +551,8 @@ try {
   assert.deepEqual(await readFile(journal), withdrawn);
   assert.equal((await list("client", 422)).error.code, "WITHDRAWN");
   await denied(422, messagePath, coach, { body: "denied" });
+  await denied(422, mediaPath, client);
+  await denied(422, mediaPath, coach, { url: mediaUrl, title: mediaTitle });
   await restart();
   assert.equal((await click("Open assigned step", 422)).error.code, "WITHDRAWN");
   assert.deepEqual(await readFile(journal), withdrawn);
@@ -479,6 +569,11 @@ try {
     old_share_retry_stayed_revoked: true, same_key_changed_target_or_audience: 409,
   }, messaging: { coachSent: coachSent.message, clientSent: clientSent.message,
     ordered_replay: true, current_consent_denied: true, message_retry_conflict: true, changed_target_conflict: true, missing_or_swapped_pin_denied: true, negative_binding_cases: true },
+    media: {
+      media_link_id: attachedMedia.media_link.media_link_id, link_version: 1, url: mediaUrl,
+      client_saw_active: true, restart_preserved: true, withdrawn_hidden: true,
+      history_retained: true, no_external_fetch: true, invalid_url_denied: true,
+    },
     result: "PASS", browser: await evaluate("navigator.userAgent"),
     assignment_id: assigned.assignment_id, journey_version_id: version, step_id: stepId, source_ref: source,
     assign_http: 201, open_http: 200, withdrawn_http: 422, refresh: true, service_process_restart: true,

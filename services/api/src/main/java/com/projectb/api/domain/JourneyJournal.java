@@ -1,6 +1,8 @@
 package com.projectb.api.domain;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
@@ -13,7 +15,9 @@ import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import com.projectb.api.domain.JourneyKernel.Actor;
 import com.projectb.api.domain.JourneyKernel.AssignmentView;
@@ -65,6 +69,19 @@ public final class JourneyJournal {
 
   private final Map<MessageScope, ProgressState> progress = new LinkedHashMap<>();
   private final Map<ProgressRetry, ProgressEvent> progressRetries = new LinkedHashMap<>();
+
+  public static final String MEDIA_RIGHTS = "SYNTHETIC_TEST_ONLY";
+  public static final String MEDIA_USE = "EXTERNAL_NAVIGATION_ONLY";
+  private static final Set<String> MEDIA_HOSTS = Set.of(
+      "youtube.com", "www.youtube.com", "youtu.be", "skool.com", "www.skool.com");
+  public record MediaLink(UUID mediaLinkId, long linkVersion, MessageScope scope, String ownerId,
+                          String url, String title, boolean withdrawn) {}
+  public record MediaLinkEvent(UUID eventId, String action, MediaLink link) {}
+  private record MediaRetry(Actor actor, String key) {}
+
+  private final Map<UUID, MediaLink> mediaLinks = new LinkedHashMap<>();
+  private final Map<MessageScope, UUID> activeMedia = new LinkedHashMap<>();
+  private final Map<MediaRetry, MediaLinkEvent> mediaRetries = new LinkedHashMap<>();
 
   private final Path path;
   private final JournalCommit sink;
@@ -319,6 +336,170 @@ public final class JourneyJournal {
     if (!valid) throw new DomainException(ErrorCode.INVALID, "progress transition unavailable");
   }
 
+  public synchronized MediaLink activeMediaLink(Actor actor, MessageScope scope) {
+    requireMediaRole(actor, scope, null);
+    UUID id = activeMedia.get(scope);
+    if (id == null) throw new DomainException(ErrorCode.NOT_FOUND, "active media link unavailable");
+    return mediaLinks.get(id);
+  }
+
+  public synchronized MediaLink attachMediaLink(Actor actor, MessageScope scope, String url, String title,
+                                                String key) throws IOException {
+    requireMediaRole(actor, scope, Role.COACH);
+    String canonicalUrl = requireMediaUrl(url);
+    requireMediaTitle(title);
+    if (key.isBlank() || key.length() > 128) throw new IllegalArgumentException("invalid retry key");
+    MediaRetry retry = new MediaRetry(actor, key);
+    MediaLinkEvent previous = mediaRetries.get(retry);
+    if (previous != null) {
+      MediaLink link = previous.link();
+      if (!"ATTACH".equals(previous.action()) || !link.scope().equals(scope)
+          || !link.url().equals(canonicalUrl) || !link.title().equals(title)
+          || !link.ownerId().equals(actor.subjectId()) || link.withdrawn())
+        throw new DomainException(ErrorCode.IDEMPOTENCY_CONFLICT, "media intent differs");
+      return link;
+    }
+    if (activeMedia.containsKey(scope))
+      throw new DomainException(ErrorCode.IDEMPOTENCY_CONFLICT, "active media link already attached");
+    UUID id = UUID.randomUUID();
+    commit(JsonMini.write(mediaRecord("coach_media_link_attach", actor, scope, key, id, 1L, id,
+        canonicalUrl, title)));
+    return mediaLinks.get(id);
+  }
+
+  public synchronized MediaLink withdrawMediaLink(Actor actor, MessageScope scope, String key)
+      throws IOException {
+    requireMediaRole(actor, scope, Role.COACH);
+    if (key.isBlank() || key.length() > 128) throw new IllegalArgumentException("invalid retry key");
+    MediaRetry retry = new MediaRetry(actor, key);
+    MediaLinkEvent previous = mediaRetries.get(retry);
+    if (previous != null) {
+      if (!"WITHDRAW".equals(previous.action()) || !previous.link().scope().equals(scope)
+          || !previous.link().ownerId().equals(actor.subjectId()))
+        throw new DomainException(ErrorCode.IDEMPOTENCY_CONFLICT, "media intent differs");
+      return previous.link();
+    }
+    UUID active = activeMedia.get(scope);
+    if (active == null) throw new DomainException(ErrorCode.NOT_FOUND, "active media link unavailable");
+    MediaLink current = mediaLinks.get(active);
+    UUID eventId = UUID.randomUUID();
+    commit(JsonMini.write(mediaRecord("coach_media_link_withdraw", actor, scope, key, current.mediaLinkId(),
+        current.linkVersion(), eventId, current.url(), current.title())));
+    return mediaRetries.get(retry).link();
+  }
+
+  private void requireMediaRole(Actor actor, MessageScope scope, Role required) {
+    if (required != null && actor.role() != required)
+      throw new DomainException(ErrorCode.FORBIDDEN, "coach media access required");
+    if (!scope.equals(messageScope(actor, scope.clientId(), scope.assignmentId(), scope.versionId(),
+        scope.stepId())) || (actor.role() == Role.COACH && !actor.subjectId().equals(scope.coachId())))
+      throw new DomainException(ErrorCode.FORBIDDEN, "assignment participant required");
+  }
+
+  private static Map<String, Object> mediaRecord(String op, Actor actor, MessageScope scope, String key,
+                                                 UUID mediaLinkId, long version, UUID eventId,
+                                                 String url, String title) {
+    Map<String, Object> record = new LinkedHashMap<>();
+    record.put("op", op);
+    record.put("tenant_id", scope.tenantId());
+    record.put("subject_id", actor.subjectId());
+    record.put("client_id", scope.clientId());
+    record.put("coach_id", scope.coachId());
+    record.put("assignment_id", scope.assignmentId().toString());
+    record.put("version_id", scope.versionId().toString());
+    record.put("step_id", scope.stepId());
+    record.put("source_ref", PA05_STEP_SOURCE);
+    record.put("media_link_id", mediaLinkId.toString());
+    record.put("link_version", version);
+    record.put("event_id", eventId.toString());
+    record.put("url", url);
+    record.put("title", title);
+    record.put("rights_state", MEDIA_RIGHTS);
+    record.put("use", MEDIA_USE);
+    record.put("key", key);
+    return record;
+  }
+
+  static String requireMediaUrl(String raw) {
+    if (raw == null || raw.length() < 12 || raw.length() > 2048)
+      throw new IllegalArgumentException("invalid media url");
+    for (int i = 0; i < raw.length(); i++) {
+      char c = raw.charAt(i);
+      if (c <= 0x20 || c == '\\' || c == '<' || c == '>' || c == '"' || c == '\'')
+        throw new IllegalArgumentException("invalid media url");
+    }
+    if (raw.indexOf('@') >= 0) throw new IllegalArgumentException("invalid media url");
+    URI uri;
+    try {
+      uri = new URI(raw);
+    } catch (URISyntaxException ex) {
+      throw new IllegalArgumentException("invalid media url");
+    }
+    if (!uri.isAbsolute() || uri.isOpaque() || !"https".equals(uri.getScheme())
+        || uri.getRawUserInfo() != null || uri.getUserInfo() != null || uri.getHost() == null
+        || uri.getPort() != -1)
+      throw new IllegalArgumentException("invalid media url");
+    String host = uri.getHost();
+    if (!host.equals(host.toLowerCase(Locale.ROOT)) || !MEDIA_HOSTS.contains(host)
+        || host.chars().allMatch(ch -> ch == '.' || Character.isDigit(ch)))
+      throw new IllegalArgumentException("invalid media url");
+    String prefix = "https://" + host;
+    if (!raw.startsWith(prefix)) throw new IllegalArgumentException("invalid media url");
+    if (raw.length() > prefix.length()) {
+      char next = raw.charAt(prefix.length());
+      if (next != '/' && next != '?' && next != '#') throw new IllegalArgumentException("invalid media url");
+    }
+    return raw;
+  }
+
+  private static void requireMediaTitle(String title) {
+    if (title == null || title.isBlank() || title.length() > 120)
+      throw new IllegalArgumentException("invalid media title");
+    for (int i = 0; i < title.length(); i++) {
+      if (title.charAt(i) < 0x20) throw new IllegalArgumentException("invalid media title");
+    }
+  }
+
+  private void replayMedia(Map<String, Object> record, Actor recordedActor, boolean withdraw) {
+    Actor coach = new Actor(recordedActor.tenantId(), recordedActor.subjectId(), Role.COACH);
+    MessageScope scope = messageScope(coach, JsonMini.text(record.get("client_id")),
+        UUID.fromString(JsonMini.text(record.get("assignment_id"))),
+        UUID.fromString(JsonMini.text(record.get("version_id"))), JsonMini.text(record.get("step_id")));
+    if (!scope.coachId().equals(record.get("coach_id")) || !PA05_STEP_SOURCE.equals(record.get("source_ref"))
+        || !MEDIA_RIGHTS.equals(record.get("rights_state")) || !MEDIA_USE.equals(record.get("use"))
+        || !coach.subjectId().equals(scope.coachId()))
+      throw new IllegalArgumentException("invalid committed media binding");
+    String url = requireMediaUrl(JsonMini.text(record.get("url")));
+    String title = JsonMini.text(record.get("title"));
+    requireMediaTitle(title);
+    UUID mediaLinkId = UUID.fromString(JsonMini.text(record.get("media_link_id")));
+    long version = JsonMini.integer(record.get("link_version"));
+    UUID eventId = UUID.fromString(JsonMini.text(record.get("event_id")));
+    String key = JsonMini.text(record.get("key"));
+    if (key.isBlank() || key.length() > 128 || version != 1L
+        || mediaRetries.containsKey(new MediaRetry(coach, key))
+        || mediaRetries.values().stream().anyMatch(event -> event.eventId().equals(eventId)))
+      throw new IllegalArgumentException("duplicate or invalid media event");
+    if (withdraw) {
+      MediaLink current = mediaLinks.get(mediaLinkId);
+      if (current == null || current.withdrawn() || !current.scope().equals(scope)
+          || !current.url().equals(url) || !current.title().equals(title)
+          || current.linkVersion() != version || !mediaLinkId.equals(activeMedia.get(scope)))
+        throw new IllegalArgumentException("invalid committed media withdraw");
+      MediaLink withdrawn = new MediaLink(mediaLinkId, version, scope, coach.subjectId(), url, title, true);
+      mediaRetries.put(new MediaRetry(coach, key), new MediaLinkEvent(eventId, "WITHDRAW", withdrawn));
+      mediaLinks.put(mediaLinkId, withdrawn);
+      activeMedia.remove(scope);
+      return;
+    }
+    if (activeMedia.containsKey(scope) || mediaLinks.containsKey(mediaLinkId) || !eventId.equals(mediaLinkId))
+      throw new IllegalArgumentException("invalid committed media attach");
+    MediaLink link = new MediaLink(mediaLinkId, version, scope, coach.subjectId(), url, title, false);
+    mediaRetries.put(new MediaRetry(coach, key), new MediaLinkEvent(eventId, "ATTACH", link));
+    mediaLinks.put(mediaLinkId, link);
+    activeMedia.put(scope, mediaLinkId);
+  }
+
   private void replayProgress(Map<String, Object> record, Actor recordedActor) {
     Actor client = new Actor(recordedActor.tenantId(), recordedActor.subjectId(), Role.CLIENT);
     MessageScope scope = messageScope(client, JsonMini.text(record.get("client_id")),
@@ -415,6 +596,8 @@ public final class JourneyJournal {
           throw new IllegalArgumentException("invalid or duplicate step message");
       }
       case "step_progress" -> replayProgress(command, actor);
+      case "coach_media_link_attach" -> replayMedia(command, actor, false);
+      case "coach_media_link_withdraw" -> replayMedia(command, actor, true);
       case "withdraw" -> {
         UUID versionId = UUID.fromString(JsonMini.text(command.get("version_id")));
         kernel.withdraw(actor, actor.tenantId(), versionId);

@@ -17,7 +17,10 @@ export function Ui01Fixture({ action }: { action: "assign" | "open" }) {
   const [result, setResult] = useState<Result | null>(null);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
+  const [mediaUrl, setMediaUrl] = useState("");
   const retry = useRef<{ body: string; key: string } | null>(null);
+  const mediaRetry = useRef<{ url: string; title: string; key: string } | null>(null);
+  const mediaWithdrawKey = useRef<string | null>(null);
 
   const progressKeys = useRef<Partial<Record<"complete" | "share" | "revoke", string>>>({});
 
@@ -29,7 +32,8 @@ export function Ui01Fixture({ action }: { action: "assign" | "open" }) {
     return () => controller.abort();
   }, []);
 
-  async function run(operation: "assign" | "open" | "send" | "list" | "complete" | "share" | "revoke" | "own" | "released") {
+  async function run(operation: "assign" | "open" | "send" | "list" | "complete" | "share" | "revoke" | "own" | "released"
+    | "attach-media" | "view-media" | "withdraw-media") {
     setPending(true);
     setResult(null);
     try {
@@ -38,10 +42,18 @@ export function Ui01Fixture({ action }: { action: "assign" | "open" }) {
         retry.current = { body: message, key: crypto.randomUUID() };
       }
       const progress = ["complete", "share", "revoke", "own", "released"].includes(operation);
+      const media = operation === "attach-media" || operation === "view-media" || operation === "withdraw-media";
+      if (operation === "attach-media" && mediaRetry.current?.url !== mediaUrl) {
+        mediaRetry.current = { url: mediaUrl, title: "Synthetic test media", key: crypto.randomUUID() };
+      }
+      if (operation === "withdraw-media") mediaWithdrawKey.current ??= crypto.randomUUID();
       const roleRoute = endpoint + (action === "assign" ? "/coach" : "/client");
-      const route = progress ? roleRoute + "/progress" : messaging ? roleRoute : endpoint;
+      const route = media ? roleRoute + "/media" : progress ? roleRoute + "/progress" : messaging ? roleRoute : endpoint;
       let body: string = operation;
       if (operation === "send") body = JSON.stringify(retry.current);
+      if (operation === "view-media") body = "list";
+      if (operation === "attach-media") body = JSON.stringify(mediaRetry.current);
+      if (operation === "withdraw-media") body = JSON.stringify({ operation: "withdraw", key: mediaWithdrawKey.current });
       if (operation === "complete" || operation === "share" || operation === "revoke") {
         const key = progressKeys.current[operation] ??= crypto.randomUUID();
         body = JSON.stringify({ operation, key });
@@ -77,6 +89,21 @@ export function Ui01Fixture({ action }: { action: "assign" | "open" }) {
         Send step message
       </button>
       <button type="button" onClick={() => run("list")} disabled={pending}>View step messages</button>
+      {action === "assign" ? (
+        <p><label>Step media URL <input data-media-url value={mediaUrl} maxLength={2048} onChange={event => {
+          mediaRetry.current = null;
+          setMediaUrl(event.target.value);
+        }} /></label></p>
+      ) : null}
+      {action === "assign" ? (
+        <button type="button" onClick={() => run("attach-media")} disabled={pending || !mediaUrl.trim()}>
+          Attach step media link
+        </button>
+      ) : null}
+      <button type="button" onClick={() => run("view-media")} disabled={pending}>View step media link</button>
+      {action === "assign" ? (
+        <button type="button" onClick={() => run("withdraw-media")} disabled={pending}>Withdraw step media link</button>
+      ) : null}
       {action === "open" ? (
         <fieldset>
           <legend>Step completion and sharing</legend>

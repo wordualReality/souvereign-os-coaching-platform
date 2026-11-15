@@ -55,7 +55,8 @@ function sessionAssignment(cookie: string | undefined, version: string, secret: 
   return expected.length === provided.length && timingSafeEqual(expected, provided) ? assignment : null;
 }
 
-export async function fixturePost(request: NextRequest, messageRole?: "coach" | "client", progress = false) {
+export async function fixturePost(request: NextRequest, messageRole?: "coach" | "client",
+                                  progress = false, media = false) {
   const context = config(request);
   if (!context) return deny(404, "FIXTURE_DISABLED");
   if (request.headers.get("origin") !== context.origin) return deny(403, "ORIGIN_DENIED");
@@ -78,8 +79,31 @@ export async function fixturePost(request: NextRequest, messageRole?: "coach" | 
       }
     } else if (messageRole === "coach" && raw !== "released") return deny(422, "INVALID");
   }
+  let mediaAttach: { url: string; title: string; key: string } | undefined;
+  let mediaWithdraw: string | undefined;
+  if (media) {
+    if (!messageRole) return deny(422, "INVALID");
+    if (raw !== "list") {
+      if (messageRole !== "coach") return deny(422, "INVALID");
+      try {
+        const input = JSON.parse(raw);
+        if (input?.operation === "withdraw") {
+          if (!input || Object.keys(input).sort().join(",") !== "key,operation"
+              || typeof input.key !== "string" || !uuid.test(input.key)) return deny(422, "INVALID");
+          mediaWithdraw = input.key;
+        } else if (input && Object.keys(input).sort().join(",") === "key,title,url"
+            && typeof input.url === "string" && typeof input.title === "string"
+            && typeof input.key === "string" && uuid.test(input.key)
+            && input.url.length <= 2048 && input.title.length <= 120) {
+          mediaAttach = input;
+        } else return deny(422, "INVALID");
+      } catch {
+        return deny(422, "INVALID");
+      }
+    }
+  }
   let message: { body: string; key: string } | undefined;
-  if (!progress && messageRole && raw !== "list") {
+  if (!progress && !media && messageRole && raw !== "list") {
     try {
       const input = JSON.parse(raw);
       if (!input || Object.keys(input).sort().join(",") !== "body,key"
@@ -104,7 +128,16 @@ export async function fixturePost(request: NextRequest, messageRole?: "coach" | 
 
     const assigned = !messageRole && raw === "assign";
     const stepPath = assignments + "/" + assignment + "/versions/" + context.version + "/steps/" + step;
-    const upstream = progress && messageRole
+    const mediaPath = context.service + stepPath + "/media-links";
+    const upstream = media && messageRole
+      ? await fetch(mediaWithdraw ? mediaPath + "/withdraw" : mediaPath, {
+        ...options, method: (mediaAttach || mediaWithdraw) ? "POST" : "GET",
+        headers: { Authorization: "Bearer " + context[messageRole],
+          ...((mediaAttach || mediaWithdraw) ? { "Content-Type": "application/json",
+            "Idempotency-Key": mediaAttach?.key ?? mediaWithdraw ?? "" } : {}) },
+        body: mediaAttach ? JSON.stringify({ url: mediaAttach.url, title: mediaAttach.title })
+          : mediaWithdraw ? "{}" : undefined })
+      : progress && messageRole
       ? await fetch(context.service + stepPath + "/progress/" + operation, {
         ...options, method: progressKey ? "POST" : "GET",
         headers: { Authorization: "Bearer " + context[messageRole],
@@ -127,8 +160,14 @@ export async function fixturePost(request: NextRequest, messageRole?: "coach" | 
     const data = body.data;
     if (data?.journey_version_id !== context.version
         || (assigned && (upstream.status !== 201 || data.client_id !== client || !uuid.test(data.assignment_id ?? "")))
-        || (!assigned && (upstream.status !== ((message || progressKey) ? 201 : 200) || (!progress && data.profile !== "TEST_LOOPBACK_ONLY")
+        || (!assigned && (upstream.status !== ((message || progressKey || mediaAttach || mediaWithdraw) ? 201 : 200) || (!progress && data.profile !== "TEST_LOOPBACK_ONLY")
           || data.step_id !== step || (messageRole && data.assignment_id !== assignment)))) {
+      return deny(502, "FIXTURE_RESPONSE_MISMATCH");
+    }
+    if (media && messageRole && (!data.media_link?.media_link_id || data.media_link.rights_state !== "SYNTHETIC_TEST_ONLY"
+        || data.media_link.use !== "EXTERNAL_NAVIGATION_ONLY"
+        || data.media_link.visibility !== (mediaWithdraw ? "WITHDRAWN" : "ACTIVE")
+        || (mediaAttach && (data.media_link.url !== mediaAttach.url || data.media_link.title !== mediaAttach.title)))) {
       return deny(502, "FIXTURE_RESPONSE_MISMATCH");
     }
     if (progress && messageRole === "coach"

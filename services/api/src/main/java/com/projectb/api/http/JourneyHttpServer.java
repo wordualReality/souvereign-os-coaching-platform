@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -217,6 +218,18 @@ public final class JourneyHttpServer {
       progress(exchange, actor, path);
       return;
     }
+    if (path.length == 14 && "clients".equals(path[5]) && "assignments".equals(path[7])
+        && "versions".equals(path[9]) && "steps".equals(path[11]) && "media-links".equals(path[13])
+        && ("GET".equals(method) || "POST".equals(method))) {
+      media(exchange, actor, path, false);
+      return;
+    }
+    if (path.length == 15 && "clients".equals(path[5]) && "assignments".equals(path[7])
+        && "versions".equals(path[9]) && "steps".equals(path[11]) && "media-links".equals(path[13])
+        && "withdraw".equals(path[14]) && "POST".equals(method)) {
+      media(exchange, actor, path, true);
+      return;
+    }
     if (path.length == 7 && "producers".equals(path[5]) && "POST".equals(method)) {
       JourneyProducer.Reply reply = JourneyProducer.handle(path[6], actor, consentedClients, journal, body(exchange));
       send(exchange, reply.status(), reply.body());
@@ -269,6 +282,54 @@ public final class JourneyHttpServer {
       }
       send(exchange, writing ? 201 : 200, JsonMini.write(Map.of("data", result)));
     }
+  }
+
+  private void media(HttpExchange exchange, Actor actor, String[] path, boolean withdraw) throws IOException {
+    if (exchange.getRequestURI().getRawQuery() != null)
+      throw new IllegalArgumentException("query override denied");
+    boolean posting = "POST".equals(exchange.getRequestMethod());
+    if (posting && actor.role() != Role.COACH)
+      throw new DomainException(ErrorCode.FORBIDDEN, "coach media access required");
+    Map<String, Object> payload = posting ? body(exchange) : Map.of();
+    synchronized (journal) {
+      var scope = journal.messageScope(actor, path[6], UUID.fromString(path[8]),
+          UUID.fromString(path[10]), path[12]);
+      if (!consentedClients.contains(scope.tenantId() + "|" + scope.clientId()))
+        throw new DomainException(ErrorCode.CONSENT_REQUIRED, "current fixture consent required");
+      Map<String, Object> data = new LinkedHashMap<>();
+      data.put("assignment_id", scope.assignmentId().toString());
+      data.put("journey_version_id", scope.versionId().toString());
+      data.put("step_id", scope.stepId());
+      data.put("source_ref", journal.pa05Source());
+      data.put("profile", LOOPBACK_PROFILE);
+      JourneyJournal.MediaLink link;
+      if (withdraw) {
+        if (!payload.isEmpty()) throw new IllegalArgumentException("media withdraw takes an empty object");
+        link = journal.withdrawMediaLink(actor, scope, idempotency(exchange));
+      } else if (posting) {
+        if (!payload.keySet().equals(Set.of("url", "title")))
+          throw new IllegalArgumentException("url and title required");
+        link = journal.attachMediaLink(actor, scope, JsonMini.text(payload.get("url")),
+            JsonMini.text(payload.get("title")), idempotency(exchange));
+      } else {
+        link = journal.activeMediaLink(actor, scope);
+      }
+      data.put("media_link", mediaJson(link));
+      send(exchange, posting ? 201 : 200, JsonMini.write(Map.of("data", data)));
+    }
+  }
+
+  private static Map<String, Object> mediaJson(JourneyJournal.MediaLink link) {
+    Map<String, Object> media = new LinkedHashMap<>();
+    media.put("media_link_id", link.mediaLinkId().toString());
+    media.put("link_version", link.linkVersion());
+    media.put("owner_id", link.ownerId());
+    media.put("url", link.url());
+    media.put("title", link.title());
+    media.put("rights_state", JourneyJournal.MEDIA_RIGHTS);
+    media.put("use", JourneyJournal.MEDIA_USE);
+    media.put("visibility", link.withdrawn() ? "WITHDRAWN" : "ACTIVE");
+    return media;
   }
 
   private String assignedStep(Actor actor, String tenant, UUID assignment, String stepId) {
