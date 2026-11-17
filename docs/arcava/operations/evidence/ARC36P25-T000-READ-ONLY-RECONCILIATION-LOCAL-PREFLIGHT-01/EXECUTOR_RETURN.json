@@ -1,0 +1,194 @@
+{
+  "RETURN_ID": "ARC36P25-T000-READ-ONLY-RECONCILIATION-LOCAL-PREFLIGHT-01",
+  "PACKET_ID": "ARC10-T000-READ-ONLY-RECONCILIATION",
+  "LANE": "ARCAVA",
+  "EXECUTOR": "EXISTING_LOCAL_ARCAVA_CURSOR_WORK_CHAT",
+  "CONTROLLER_RETURN": "CL-ARCAVA-A09-FX-V1-RESTORE-SOURCE-REVIEW-20261116-01",
+  "POLICY_ID": "CL-UNIFIED-EXECUTOR-RETURN-CURSOR-CODEX-20261115-01",
+  "CHAT_RETURN_POLICY": "Kurzreturn ab 2026-11-17; Volltext nur in dieser Ablage",
+  "MANDATE": "READ_ONLY_ONLY",
+  "STATUS": "PARTIAL_READ_ONLY_RECONCILIATION",
+  "PLAN_POSITION": "ARC-36/P25 7/10",
+  "GATE": "ARC10-T000 OPEN; ARC10-T010 historisch akzeptiert; ARC10-T150 PARTIAL; G01/PIAC OPEN; KDB B03/RC1B OPEN; SOV unverändert; kein T000-PASS; kein G00-PASS",
+  "ERGEBNIS": "Lokale physische Arcava-Checkout-Inventur und Quell-Readback abgeschlossen. HEAD aligned mit PR #12. Drei T000-Admission-JSONs weiterhin ABSENT. Statisches Migrations-/RLS-Quellmodell SOURCE_CONFLICT (84 Tabellen vs 73 RLS-Enable). Hosted DB, Live Provider und Asset-Bestand UNKNOWN (keine DB/SQL/Secrets).",
+  "BLOCKER": "T000-Zielartefakte physisch ABSENT; Hosted-/Live-DB-Nachweis UNKNOWN; statischer RLS-Gap ohne Live-Beweis",
+  "FIRST_MISSING_PHYSICAL_PROOF": "docs/arcava/admission/live-reconciliation.json (ABSENT auf Checkout a7b443f…)",
+  "RETURN_QUALITY": "8/10 — vollständige lokale Git-/Hash-Inventur ohne DB/Secrets/Writes; Hosted-DB bewusst UNKNOWN.",
+  "PROGRESS": "ANGEMESSEN — Builder-Lücke Founder-Mac/Checkout geschlossen; T000-Gate und Live-Evidenz offen.",
+  "EXECUTION_SOURCE_SHA": "a7b443fae54e44426a979cf081450f5a0a744682",
+  "EVIDENCE_ONLY_COMMIT_PARENT": "a7b443fae54e44426a979cf081450f5a0a744682",
+  "REPO": "https://github.com/wordualReality/souvereign-os-coaching-platform.git",
+  "BRANCH": "feat/arc36p25-journey-service-integration",
+  "WORKTREE": "/Users/aydin/Documents/GitHub/CoachingStudios/Arcava",
+  "GIT_DIR": "/Users/aydin/Documents/GitHub/souvereign-os-coaching-platform/.git/worktrees/arcava-journey-worktree",
+  "HEAD": "a7b443fae54e44426a979cf081450f5a0a744682",
+  "UPSTREAM": "origin/feat/arc36p25-journey-service-integration@a7b443fae54e44426a979cf081450f5a0a744682",
+  "AHEAD_BEHIND_UPSTREAM": "0/0",
+  "PORCELAIN": ["?? AGENTS.md"],
+  "PR": {
+    "number": 12,
+    "state": "OPEN",
+    "isDraft": true,
+    "headRefOid": "a7b443fae54e44426a979cf081450f5a0a744682",
+    "baseRefName": "feat/arc36p25-journey-kernel-candidate-20261023",
+    "baseRefOid": "515dc46bab5deb03e61e0a34d3ad0c64d4a3fed5",
+    "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/pull/12"
+  },
+  "DRIFT_VS_HISTORICAL_LOCK": {
+    "historical_branch": "fix/python3-dev-deps",
+    "historical_head": "cec0a7c9f7333aa2015c8fac3d163f0374dffde1",
+    "historical_porcelain_lines_claimed": 26,
+    "current_branch": "feat/arc36p25-journey-service-integration",
+    "current_head": "a7b443fae54e44426a979cf081450f5a0a744682",
+    "current_porcelain_lines": 1,
+    "classification": "DRIFT (branch, HEAD, porcelain); not usable as current repo identity"
+  },
+  "T000_CLASSIFICATIONS": [
+    {"domain": "repo_identity_vs_pr12", "classification": "ALIGNED"},
+    {"domain": "repo_vs_historical_lock", "classification": "DRIFT"},
+    {"domain": "t000_admission_artifacts", "classification": "ABSENT"},
+    {"domain": "static_migration_rls_source", "classification": "SOURCE_CONFLICT"},
+    {"domain": "live_db_provider_assets", "classification": "UNKNOWN_NOT_CONNECTED"}
+  ],
+  "T000_TARGET_OBJECTS": [
+    {
+      "path": "docs/arcava/admission/live-reconciliation.json",
+      "disposition": "ABSENT",
+      "case_insensitive_variant": false
+    },
+    {
+      "path": "docs/arcava/admission/file-preimages.json",
+      "disposition": "ABSENT",
+      "historical_preimage": {
+        "bytes": 7470,
+        "sha256": "984ad02cf9f996a6757bdb8511c5b9c880091226ad6a5bc417e57e9d0d6b0896",
+        "note": "Historical executor claim 2026-10-16; not comparable — file absent"
+      }
+    },
+    {
+      "path": "docs/arcava/admission/migration-allocation.json",
+      "disposition": "ABSENT"
+    }
+  ],
+  "STATIC_DB_SOURCE": {
+    "scope": "repository SQL only; not deployed database",
+    "migrations": {
+      "001_project_b_baseline_schema.sql": {
+        "bytes": 66642,
+        "sha256": "04338b0f8c78c4a97f947996ac72d6cf81a182c75d1f3184ab0a7a0a221e5e36",
+        "tables": 73
+      },
+      "002_project_b_journey_provisioning_hardening.sql": {
+        "bytes": 4659,
+        "sha256": "7bd4c9685baf12ccfc02573cdae1c1df0191a6101e41b3d8558dd1621243275a",
+        "tables": 11
+      },
+      "001_project_b_rls_seed.sql": {
+        "bytes": 39428,
+        "sha256": "1d77f1e932fee3f9b15d9d64e6bb482983b234054b239e6c0d528e975337fe48",
+        "rls_enable_tables": 73,
+        "policies": 145,
+        "force_rls": 0
+      }
+    },
+    "totals": {
+      "tables_union": 84,
+      "indexes_001_002": 146,
+      "extensions_001": 1,
+      "create_role_grant_revoke": 0
+    },
+    "tables_only_in_002_without_rls_seed_enable": [
+      "client_ownerships",
+      "cohort_memberships",
+      "cohort_schedules",
+      "cohorts",
+      "journey_condition_rules",
+      "journey_rule_evaluation_traces",
+      "journey_template_clones",
+      "journey_template_versions",
+      "journey_templates",
+      "provisioning_sessions",
+      "support_coach_assignments"
+    ],
+    "database_migrations_arcava_dir": "ABSENT"
+  },
+  "CONFIG_MANIFESTS_NON_SECRET": {
+    ".env.example": {"bytes": 273, "sha256": "774d354e13e73974b75e569d9bb59e58604270c5b823598e0a017468279baecd"},
+    "docs/arcava/config/environment.schema.json": {"bytes": 2286, "sha256": "19887227e634178a265f4ce2db8b23285b2b603288bad333a34f8509f843a206"},
+    "docs/arcava/security/control-manifest.json": {"bytes": 12848, "sha256": "f1baf231c0a5f3bf3ccf795a3fdcd2abd4df8654f1bf56dc7f0bb741b7cc54cb"},
+    "docs/arcava/admission/toolchain-manifest.json": {"bytes": 5277, "sha256": "e648c5cc57e7fe4126f552941c2c8ec07dfbb132b66ac69d37401953fdcc45d4"},
+    "contracts/arcava/contract-manifest.json": {"bytes": 12032, "sha256": "e0dfef2598eef6885221521a768a46d85f46beac8c47b17fd9447a90bcba88d8"},
+    ".env_present_unread": false
+  },
+  "PROVIDER_BOUNDARY": {
+    "environment_schema_runtime": {
+      "network": "loopback_only",
+      "database": "not_connected",
+      "provider": "disabled"
+    },
+    "control_manifest_production_trust": "NO_LIVE_ADAPTER / PIAC_NOT_CONNECTED",
+    "live_PIAC_KDB": "NONE",
+    "hosted_db_target_in_non_secret_config": false
+  },
+  "EVIDENCE_LINKS": [
+    {
+      "id": "PR12",
+      "kind": "github_pull_request",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/pull/12"
+    },
+    {
+      "id": "A09-T01-local-pg17",
+      "kind": "git_path",
+      "path": "docs/arcava/operations/evidence/A09-T01-local-pg17/tests/A09-T01.json",
+      "fields": {"original_T01": "PARTIAL", "admission": "NOT_ADMITTED", "cleanup": "OWNED_CLUSTER_STOPPED"}
+    },
+    {
+      "id": "A09-FX-v1",
+      "kind": "git_path",
+      "path": "docs/arcava/operations/evidence/ARC36P25-T150-A09-FX-v1/EXECUTOR_RETURN.json",
+      "fields": {"runtime_claims": "NONE", "SQL": "NOT_EXECUTED"}
+    },
+    {
+      "id": "A09-T44-preflight",
+      "kind": "git_path",
+      "path": "docs/arcava/operations/evidence/ARC36P25-T150-A09-T44-RLS-SEED-AUTHORITY-FAILCLOSED-PREFLIGHT-01/EXECUTOR_RETURN.json"
+    }
+  ],
+  "EVIDENCE_MATRIX": [
+    {"object": "Git HEAD", "path": "Arcava worktree", "bytes": null, "sha256": "a7b443fae54e44426a979cf081450f5a0a744682", "disposition": "ALIGNED_PR12", "proof_level": "PHYSICAL_READ", "owner": "ARCAVA", "missing_link": null},
+    {"object": "live-reconciliation.json", "path": "docs/arcava/admission/live-reconciliation.json", "bytes": null, "sha256": null, "disposition": "ABSENT", "proof_level": "PHYSICAL_READ", "owner": "ARCAVA", "missing_link": "T000 write release"},
+    {"object": "file-preimages.json", "path": "docs/arcava/admission/file-preimages.json", "bytes": null, "sha256": null, "disposition": "ABSENT", "proof_level": "PHYSICAL_READ", "owner": "ARCAVA", "missing_link": "T000 write release"},
+    {"object": "migration-allocation.json", "path": "docs/arcava/admission/migration-allocation.json", "bytes": null, "sha256": null, "disposition": "ABSENT", "proof_level": "PHYSICAL_READ", "owner": "ARCAVA", "missing_link": "T000 write release"},
+    {"object": "Migration 001", "path": "database/migrations/001_project_b_baseline_schema.sql", "bytes": 66642, "sha256": "04338b0f8c78c4a97f947996ac72d6cf81a182c75d1f3184ab0a7a0a221e5e36", "disposition": "PRESENT", "proof_level": "PHYSICAL_HASH", "owner": "ARCAVA", "missing_link": null},
+    {"object": "Migration 002", "path": "database/migrations/002_project_b_journey_provisioning_hardening.sql", "bytes": 4659, "sha256": "7bd4c9685baf12ccfc02573cdae1c1df0191a6101e41b3d8558dd1621243275a", "disposition": "PRESENT", "proof_level": "PHYSICAL_HASH", "owner": "ARCAVA", "missing_link": null},
+    {"object": "RLS seed", "path": "database/policies/001_project_b_rls_seed.sql", "bytes": 39428, "sha256": "1d77f1e932fee3f9b15d9d64e6bb482983b234054b239e6c0d528e975337fe48", "disposition": "SOURCE_CONFLICT", "proof_level": "PHYSICAL_HASH", "owner": "ARCAVA", "missing_link": "live RLS not queried"},
+    {"object": "Hosted DB", "path": null, "bytes": null, "sha256": null, "disposition": "UNKNOWN", "proof_level": "NONE", "owner": null, "missing_link": "DB target + read scope"}
+  ],
+  "HARD_LIMITS_OBSERVED": [
+    "no_sql_or_database_connection",
+    "no_supabase_or_provider_api",
+    "no_secrets_read",
+    "no_git_fetch_pull_checkout_commit_during_preflight",
+    "t000_admission_json_not_created_or_modified_during_preflight"
+  ],
+  "COMMANDS": [
+    {"kind": "git_identity_read_only", "exit": 0},
+    {"kind": "file_stat_sha256", "exit": 0},
+    {"kind": "gh_pr_view_12", "exit": 0}
+  ],
+  "CHANGED_FILES": [],
+  "THIS_RECEIPT_CHANGED_FILES": [
+    "docs/arcava/operations/evidence/ARC36P25-T000-READ-ONLY-RECONCILIATION-LOCAL-PREFLIGHT-01/EXECUTOR_RETURN.json"
+  ],
+  "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+  "NEXT_ACTION": "Merge remote and local readbacks; request Controller write release for T000 admission JSON materialization or explicit hosted DB read target.",
+  "USER_ACTION": "NONE",
+  "RECURSIVE_MASTERPROMPT_REFS": {
+    "controller_decision": "CL-ARCAVA-A09-FX-V1-RESTORE-SOURCE-REVIEW-20261116-01",
+    "unified_return_policy": "CL-UNIFIED-EXECUTOR-RETURN-CURSOR-CODEX-20261115-01",
+    "arcava_lane_identity": "AGENTS.md (untracked local)",
+    "t000_artifacts_write_gate": "Separate Schreibfreigabe required before live-reconciliation.json, file-preimages.json, migration-allocation.json",
+    "db_query_ban": "Canonical Arcava masterprompt DB/SQL/connection probe ban remains unless Controller lifts with named target",
+    "prior_builder_return": "PARTIAL_READ_ONLY_RECONCILIATION remote-only; superseded for local physical facts by this return"
+  }
+}
