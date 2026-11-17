@@ -292,6 +292,8 @@ jobs:
         run: python3 tests/kdb/pg17_step7_synthetic_promotion.py
       - name: PA05 network-isolated synthetic catalog SQL read
         run: python3 tests/kdb/pg17_pa05_catalog.py
+      - name: PD01 network-isolated synthetic morning check-in detail SQL read
+        run: python3 tests/kdb/pg17_pd01_morning_checkin.py
       - name: Step 8 C04 C05 adversarial SQL oracle
         env:
           KDB_PG17_MODE: libpq
