@@ -166,6 +166,7 @@ try {
     const index = await evaluate(`Array.from(document.querySelectorAll(${JSON.stringify(selector)}))
       .findIndex(button => button.textContent.trim() === ${JSON.stringify(label)} && !button.disabled)`);
     assert.ok(index >= 0, "enabled control: " + label);
+    await evaluate(`document.querySelectorAll(${JSON.stringify(selector)})[${index}].scrollIntoView({block:"center"})`);
     const button = await cdp("DOM.getDocument");
     const { nodeIds } = await cdp("DOM.querySelectorAll", { nodeId: button.root.nodeId, selector });
     const nodeId = nodeIds[index];
@@ -186,6 +187,10 @@ try {
     else assert.deepEqual(JSON.parse(visible), body.data);
     return body;
   }
+  const stepTitle = () => evaluate("document.querySelector('[data-step-title]')?.getAttribute('data-step-title') ?? null");
+  const mediaNav = () => evaluate("document.querySelector('a[data-external-media]')?.getAttribute('href') ?? null");
+  const mediaRel = () => evaluate("document.querySelector('a[data-external-media]')?.getAttribute('rel') ?? null");
+  const mediaTarget = () => evaluate("document.querySelector('a[data-external-media]')?.getAttribute('target') ?? null");
   await navigate("/coach/journeys");
   const assigned = (await click("Assign published test Journey", 201)).data;
   assert.equal(assigned.journey_version_id, version);
@@ -200,6 +205,8 @@ try {
     assert.equal(opened.step_id, stepId);
     assert.equal(opened.title, "Breathing");
     assert.deepEqual(opened.source_ref, source);
+    assert.equal(await stepTitle(), "Breathing");
+    assert.equal(await mediaNav(), null);
     assert.deepEqual(await readFile(journal), durable);
   };
   await checkOpen();
@@ -223,8 +230,13 @@ try {
   const list = (role, status = 200) => click("View step messages", status, role === "coach" ? coachRoute : clientRoute);
   const send = role => click("Send step message", 201, role === "coach" ? coachRoute : clientRoute);
   async function type(body) {
-    await evaluate("document.querySelector('section input').focus()");
-    await cdp("Input.insertText", { text: body });
+    await evaluate(`(() => {
+      const input = document.querySelector("section input");
+      input.focus();
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+      setter.call(input, ${JSON.stringify(body)});
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    })()`);
     assert.equal(await evaluate("document.querySelector('section input').value"), body);
   }
   function checkBinding(data) {
@@ -254,6 +266,7 @@ try {
   assert.equal(clientSent.message.sender_role, "CLIENT");
   assert.equal(clientSent.message.sender_id, clientId);
   assert.equal(clientSent.message.body, "Synthetic client reply");
+  assert.equal(await stepTitle(), "Breathing");
   await navigate("/coach/journeys");
   const thread = (await list("coach")).data;
   checkBinding(thread);
@@ -366,6 +379,7 @@ try {
   assert.equal(completed.visibility, "PRIVATE");
   assert.equal(completed.event_id, completed.completion_id);
   assert.equal(completed.release_id, undefined);
+  assert.equal(await stepTitle(), "Breathing");
   const privateBytes = await readFile(journal);
   assert.deepEqual((await complete()).data, completed);
   await navigate("/coach/journeys");
@@ -482,11 +496,17 @@ try {
   assert.equal(clientMediaView.media_link.url, mediaUrl);
   assert.deepEqual(clientMediaView.source_ref, source);
   assert.equal(await evaluate("document.querySelector('iframe,embed,video')"), null);
+  assert.equal(await stepTitle(), "Breathing");
+  assert.equal(await mediaNav(), mediaUrl);
+  assert.equal(await mediaTarget(), "_blank");
+  assert.equal(await mediaRel(), "noopener noreferrer");
   await restart();
   const restoredMedia = (await click("View step media link", 200, clientMedia)).data;
   assert.equal(restoredMedia.media_link.media_link_id, attachedMedia.media_link.media_link_id);
   assert.equal(restoredMedia.media_link.url, mediaUrl);
   assert.equal(restoredMedia.journey_version_id, version);
+  assert.equal(await mediaNav(), mediaUrl);
+  assert.equal(await evaluate("document.querySelector('iframe,embed,video')"), null);
   await navigate("/coach/journeys");
   assert.equal((await click("View step media link", 200, coachMedia)).data.media_link.media_link_id,
     attachedMedia.media_link.media_link_id);
@@ -528,8 +548,10 @@ try {
   assert.deepEqual(await readFile(journal), withdrawnMediaBytes);
   await navigate("/client/member-home");
   assert.equal((await click("View step media link", 404, clientMedia)).error.code, "NOT_FOUND");
+  assert.equal(await mediaNav(), null);
   await restart();
   assert.equal((await click("View step media link", 404, clientMedia)).error.code, "NOT_FOUND");
+  assert.equal(await mediaNav(), null);
   await navigate("/coach/journeys");
   assert.equal((await click("View step media link", 404, coachMedia)).error.code, "NOT_FOUND");
   const mediaHistory = withdrawnMediaBytes.toString().trim().split("\n").map(JSON.parse)
@@ -548,6 +570,8 @@ try {
   await navigate("/client/member-home");
   const withdrawn = await readFile(journal);
   assert.equal((await click("Open assigned step", 422)).error.code, "WITHDRAWN");
+  assert.equal(await stepTitle(), null);
+  assert.equal(await mediaNav(), null);
   assert.deepEqual(await readFile(journal), withdrawn);
   assert.equal((await list("client", 422)).error.code, "WITHDRAWN");
   await denied(422, messagePath, coach, { body: "denied" });
@@ -555,6 +579,8 @@ try {
   await denied(422, mediaPath, coach, { url: mediaUrl, title: mediaTitle });
   await restart();
   assert.equal((await click("Open assigned step", 422)).error.code, "WITHDRAWN");
+  assert.equal(await stepTitle(), null);
+  assert.equal(await mediaNav(), null);
   assert.deepEqual(await readFile(journal), withdrawn);
   assert.equal((await list("client", 422)).error.code, "WITHDRAWN");
   await denied(422, messagePath, client, { body: "denied" });
@@ -573,6 +599,11 @@ try {
       media_link_id: attachedMedia.media_link.media_link_id, link_version: 1, url: mediaUrl,
       client_saw_active: true, restart_preserved: true, withdrawn_hidden: true,
       history_retained: true, no_external_fetch: true, invalid_url_denied: true,
+      clickable_https_only_when_active: true, no_link_after_withdraw_or_restart_404: true,
+    },
+    assigned_step: {
+      visible_title: "Breathing", stable_through_messages_progress_media: true,
+      test_only: true, no_live_kdb: true, source_pin: "PA-05",
     },
     result: "PASS", browser: await evaluate("navigator.userAgent"),
     assignment_id: assigned.assignment_id, journey_version_id: version, step_id: stepId, source_ref: source,
