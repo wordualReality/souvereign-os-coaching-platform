@@ -14,6 +14,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import com.projectb.api.domain.GoalProposalAdapter;
+import com.projectb.api.domain.GoalProposalAdapter.AdapterFailure;
+import com.projectb.api.domain.GoalProposalAdapter.ProposedStep;
 import com.projectb.api.domain.JourneyJournal;
 import com.projectb.api.domain.JourneyKernel.Actor;
 import com.projectb.api.domain.JourneyKernel.AssignmentView;
@@ -87,13 +90,15 @@ public final class JourneyHttpServer {
     try {
       route(exchange, correlation);
     } catch (DomainException ex) {
-      send(exchange, status(ex.code), error(ex.code.name(), ex.getMessage(), correlation));
+      send(exchange, status(ex.code), error(ex.code.name(), ex.getMessage(), correlation, false));
+    } catch (AdapterFailure ex) {
+      send(exchange, 503, error("ADAPTER_UNAVAILABLE", ex.getMessage(), correlation, true));
     } catch (IllegalArgumentException ex) {
-      send(exchange, 422, error("INVALID", "request does not match the journey contract", correlation));
+      send(exchange, 422, error("INVALID", "request does not match the journey contract", correlation, false));
     } catch (IOException ex) {
-      send(exchange, 503, error("PERSISTENCE_FAILED", "journal commit failed closed", correlation));
+      send(exchange, 503, error("PERSISTENCE_FAILED", "journal commit failed closed", correlation, false));
     } catch (RuntimeException ex) {
-      send(exchange, 500, error("INTERNAL", "journey service failed closed", correlation));
+      send(exchange, 500, error("INTERNAL", "journey service failed closed", correlation, false));
     }
   }
 
@@ -109,11 +114,11 @@ public final class JourneyHttpServer {
     }
     Actor actor = actor(exchange);
     if (actor == null) {
-      send(exchange, 401, error("UNAUTHORIZED", "bearer token is required", correlation));
+      send(exchange, 401, error("UNAUTHORIZED", "bearer token is required", correlation, false));
       return;
     }
     if (path.length < 5 || !"project-b".equals(path[1]) || !"v1".equals(path[2]) || !"tenants".equals(path[3])) {
-      send(exchange, 404, error("NOT_FOUND", "route not found", correlation));
+      send(exchange, 404, error("NOT_FOUND", "route not found", correlation, false));
       return;
     }
     String tenant = path[4];
@@ -134,6 +139,23 @@ public final class JourneyHttpServer {
           JsonMini.integer(body.get("expected_revision")), JsonMini.text(body.get("title")),
           steps(body.get("phases")), body.get("producer_phases") == null ? null : JsonMini.write(body.get("producer_phases")));
       send(exchange, 200, draftJson(view));
+      return;
+    }
+    if (path.length == 8 && "journeys".equals(path[5]) && "drafts".equals(path[6]) && "GET".equals(method)) {
+      requireCoach(actor);
+      DraftView view = journal.kernel().readDraft(actor, UUID.fromString(path[7]));
+      send(exchange, 200, draftDetailJson(view));
+      return;
+    }
+    if (path.length == 7 && "journeys".equals(path[5]) && "draft-proposals".equals(path[6]) && "POST".equals(method)) {
+      requireCoach(actor);
+      send(exchange, 200, JsonMini.write(Map.of("data", propose(body(exchange)))));
+      return;
+    }
+    if (path.length == 8 && "journeys".equals(path[5]) && "draft-proposals".equals(path[6])
+        && "commit".equals(path[7]) && "POST".equals(method)) {
+      requireCoach(actor);
+      send(exchange, 201, commitProposal(actor, body(exchange), idempotency(exchange)));
       return;
     }
     if (path.length == 9 && "journeys".equals(path[5]) && "drafts".equals(path[6])
@@ -235,7 +257,7 @@ public final class JourneyHttpServer {
       send(exchange, reply.status(), reply.body());
       return;
     }
-    send(exchange, 404, error("NOT_FOUND", "route not found", correlation));
+    send(exchange, 404, error("NOT_FOUND", "route not found", correlation, false));
   }
 
   private void progress(HttpExchange exchange, Actor actor, String[] path) throws IOException {
@@ -244,7 +266,7 @@ public final class JourneyHttpServer {
     boolean reading = "GET".equals(method) && ("own".equals(operation) || "released".equals(operation));
     boolean writing = "POST".equals(method) && Set.of("complete", "share", "revoke").contains(operation);
     if (!reading && !writing) {
-      send(exchange, 404, error("NOT_FOUND", "progress route not found", correlation(exchange)));
+      send(exchange, 404, error("NOT_FOUND", "progress route not found", correlation(exchange), false));
       return;
     }
     if (exchange.getRequestURI().getRawQuery() != null)
@@ -420,11 +442,80 @@ public final class JourneyHttpServer {
     };
   }
 
-  private static String error(String code, String message, String correlation) {
+  private static Map<String, Object> propose(Map<String, Object> body) {
+    boolean forceError = Boolean.TRUE.equals(body.get("force_adapter_error"));
+    List<String> candidateIds = strings(body.get("candidate_ids"));
+    return new GoalProposalAdapter().json(new GoalProposalAdapter()
+        .propose(JsonMini.text(body.get("learning_goal")), candidateIds, forceError));
+  }
+
+  private String commitProposal(Actor actor, Map<String, Object> body, String key) throws IOException {
+    GoalProposalAdapter adapter = new GoalProposalAdapter();
+    if (Boolean.TRUE.equals(body.get("force_adapter_error")))
+      throw new AdapterFailure("synthetic proposal adapter unavailable");
+    List<ProposedStep> edited = adapter.parseEdited(body.get("steps"));
+    List<Step> kernelSteps = adapter.kernelSteps(edited);
+    String title = JsonMini.text(body.get("title"));
+    String phases = adapter.phasesJson(edited);
+    DraftView view;
+    Object draftIdValue = body.get("draft_id");
+    if (draftIdValue == null) {
+      view = journal.createDraft(actor, title, key);
+      DraftView current = journal.kernel().readDraft(actor, view.draftId());
+      if (current.steps().isEmpty())
+        view = journal.updateDraft(actor, current.draftId(), current.revision(), title, kernelSteps, phases);
+      else view = current;
+    } else {
+      view = journal.updateDraft(actor, UUID.fromString(JsonMini.text(draftIdValue)),
+          JsonMini.integer(body.get("expected_revision")), title, kernelSteps, phases);
+    }
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("draft_id", view.draftId().toString());
+    data.put("title", view.title());
+    data.put("status", view.status());
+    data.put("revision", view.revision());
+    data.put("profile", GoalProposalAdapter.PROFILE);
+    data.put("proposal_kind", GoalProposalAdapter.PROPOSAL_KIND);
+    data.put("publication_state", "DRAFT");
+    data.put("test_only", true);
+    data.put("no_live_kdb", true);
+    data.put("kdb_adapter", "not_connected");
+    data.put("steps", edited.stream().map(adapter::stepJsonMap).toList());
+    return JsonMini.write(Map.of("data", data));
+  }
+
+  @SuppressWarnings("unchecked")
+  private static List<String> strings(Object value) {
+    if (!(value instanceof List<?> list)) throw new IllegalArgumentException("candidate ids required");
+    List<String> ids = new ArrayList<>();
+    for (Object item : list) ids.add(JsonMini.text(item));
+    return ids;
+  }
+
+  private static String draftDetailJson(DraftView view) {
+    GoalProposalAdapter adapter = new GoalProposalAdapter();
+    List<Map<String, Object>> steps = new ArrayList<>();
+    for (Step step : view.steps()) steps.add(adapter.sourcedKernelStep(step));
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("draft_id", view.draftId().toString());
+    data.put("title", view.title());
+    data.put("status", view.status());
+    data.put("revision", view.revision());
+    data.put("kdb_adapter", "not_connected");
+    data.put("profile", LOOPBACK_PROFILE);
+    data.put("proposal_kind", GoalProposalAdapter.PROPOSAL_KIND);
+    data.put("publication_state", "DRAFT");
+    data.put("test_only", true);
+    data.put("no_live_kdb", true);
+    data.put("steps", steps);
+    return JsonMini.write(Map.of("data", data));
+  }
+
+  private static String error(String code, String message, String correlation, boolean retryable) {
     return "{\"error\":{\"code\":" + JsonMini.quote(code)
         + ",\"message\":" + JsonMini.quote(message)
         + ",\"correlation_id\":" + JsonMini.quote(correlation)
-        + ",\"retryable\":false}}";
+        + ",\"retryable\":" + retryable + "}}";
   }
 
   private static String draftJson(DraftView view) {

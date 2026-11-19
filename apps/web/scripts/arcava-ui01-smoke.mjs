@@ -95,7 +95,7 @@ try {
   const src = "services/api/src/";
   const pkg = "/java/com/projectb/api/";
   execFileSync("javac", ["-Xlint:all", "-Werror", "-d", classes,
-    ...["domain/JourneyKernel", "domain/JourneyJournal", "json/JsonMini", "http/JourneyHttpServer",
+    ...["domain/JourneyKernel", "domain/JourneyJournal", "domain/GoalProposalAdapter", "json/JsonMini", "http/JourneyHttpServer",
       "http/JourneyProducer", "http/TrustedKdbVerifier", "http/TrustedPiacVerifier"]
       .map(name => src + "main" + pkg + name + ".java"),
     ...["JourneyPathTest", "JourneyUiFixture"].map(name => src + "test" + pkg + "http/" + name + ".java"),
@@ -158,11 +158,12 @@ try {
   await cdp("Page.enable");
   async function navigate(path) {
     await cdp("Page.navigate", { url: origin + path });
-    await until(() => evaluate("location.pathname === " + JSON.stringify(path) + " && document.querySelector('button') !== null"), path);
+    await until(() => evaluate("location.pathname === " + JSON.stringify(path)
+      + " && document.querySelector(\"section[aria-label='Synthetic local journey fixture'] button\") !== null"), path);
   }
   async function click(label, status, route = endpoint) {
     const start = events.length;
-    const selector = "section button";
+    const selector = "section[aria-label='Synthetic local journey fixture'] button";
     const index = await evaluate(`Array.from(document.querySelectorAll(${JSON.stringify(selector)}))
       .findIndex(button => button.textContent.trim() === ${JSON.stringify(label)} && !button.disabled)`);
     assert.ok(index >= 0, "enabled control: " + label);
@@ -212,7 +213,7 @@ try {
   await checkOpen();
   await checkOpen();
   await cdp("Page.reload");
-  await until(() => evaluate("document.querySelector('button') !== null && document.querySelector('pre') === null"), "browser refresh");
+  await until(() => evaluate("document.querySelector(\"section[aria-label='Synthetic local journey fixture'] button\") !== null && document.querySelector('pre') === null"), "browser refresh");
   await checkOpen();
 
   async function restart(mode = "replay", partialTail = false) {
@@ -231,13 +232,13 @@ try {
   const send = role => click("Send step message", 201, role === "coach" ? coachRoute : clientRoute);
   async function type(body) {
     await evaluate(`(() => {
-      const input = document.querySelector("section input");
+      const input = document.querySelector("section[aria-label='Synthetic local journey fixture'] input");
       input.focus();
       const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
       setter.call(input, ${JSON.stringify(body)});
       input.dispatchEvent(new Event("input", { bubbles: true }));
     })()`);
-    assert.equal(await evaluate("document.querySelector('section input').value"), body);
+    assert.equal(await evaluate("document.querySelector(\"section[aria-label='Synthetic local journey fixture'] input\").value"), body);
   }
   function checkBinding(data) {
     assert.equal(data.assignment_id, assigned.assignment_id);
@@ -273,7 +274,7 @@ try {
   assert.deepEqual(thread.messages, [coachSent.message, clientSent.message]);
   const messageBytes = await readFile(journal);
   await cdp("Page.reload");
-  await until(() => evaluate("document.querySelector('section button') !== null && document.querySelector('pre') === null"), "message refresh");
+  await until(() => evaluate("document.querySelector(\"section[aria-label='Synthetic local journey fixture'] button\") !== null && document.querySelector('pre') === null"), "message refresh");
   assert.deepEqual((await list("coach")).data, thread);
   await restart();
   assert.deepEqual((await list("client")).data, thread);
@@ -400,7 +401,7 @@ try {
     step_id: stepId, step_completed: true };
   assert.deepEqual((await coachView(200)).data, coachProjection);
   await cdp("Page.reload");
-  await until(() => evaluate("document.querySelector('section button') !== null && document.querySelector('pre') === null"), "progress refresh");
+  await until(() => evaluate("document.querySelector(\"section[aria-label='Synthetic local journey fixture'] button\") !== null && document.querySelector('pre') === null"), "progress refresh");
   assert.deepEqual((await coachView(200)).data, coachProjection);
   await restart("replay", true);
   const restored = (await own()).data;
