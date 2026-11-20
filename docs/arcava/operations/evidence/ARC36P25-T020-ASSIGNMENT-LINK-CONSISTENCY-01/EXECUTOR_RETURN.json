@@ -1,0 +1,632 @@
+{
+  "RETURN_ID": "ARC36P25-T020-ASSIGNMENT-LINK-CONSISTENCY-01",
+  "LANE": "ARCAVA",
+  "STATUS": "SCOPED_LOCAL_ASSIGNMENT_LINK_CONSISTENCY_IMPLEMENTED_AND_TESTED_NOT_ADMITTED",
+  "BASE_SHA": "d46ac47182c33862fe3d3eaad236efadb1b12a23",
+  "EXECUTION_SOURCE_SHA": "a80155bf06905bd9eada801a6d28e8fbb9242e89",
+  "SOURCE_COMMIT_PARENT_SHA": "d46ac47182c33862fe3d3eaad236efadb1b12a23",
+  "EVIDENCE_COMMIT_PARENT_SHA": "a80155bf06905bd9eada801a6d28e8fbb9242e89",
+  "EVIDENCE_ONLY_CHILD": {
+    "path": "docs/arcava/operations/evidence/ARC36P25-T020-ASSIGNMENT-LINK-CONSISTENCY-01/EXECUTOR_RETURN.json",
+    "sha": "RESOLVED_FROM_GITHUB_HEAD_BY_BUILDER"
+  },
+  "CHANGED_FILES": [
+    {
+      "path": "docs/arcava/security/control-manifest.json",
+      "sha256": "51bd2832b07ad89876ae89daaa9d060da9c76dfa859c34f7581e5a3c542bfd1a"
+    },
+    {
+      "path": "docs/arcava/security/owner-guard-rls-binding-contract-draft.md",
+      "sha256": "798987b189a0d0a18bae52054e90bc6f044f9acdcdf11e5c8378f22c8d095587"
+    },
+    {
+      "path": "services/api/src/main/java/com/projectb/api/arcava/repositories/ClientRelationshipRepository.java",
+      "sha256": "4904abbf96dee18ddd036739d68e87f2ff3cf0878777756036567e1ab55f5fb1"
+    },
+    {
+      "path": "services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java",
+      "sha256": "7d6d4fd69485fcbcac7ed7a1ea50caeac7f9e8629a8cc95b1fdde3742f2740eb"
+    },
+    {
+      "path": "services/api/src/main/java/com/projectb/api/domain/JourneyKernel.java",
+      "sha256": "97a11f218510eefd1bc1793d87bd3cc7041fa4218623e02edd93b8d2e258a431"
+    },
+    {
+      "path": "services/api/src/test/java/com/projectb/api/arcava/security/ClientEnrollmentGuardedReadIntegrationTest.java",
+      "sha256": "3bfb78c4c6a805902cc271dd3aeeeeac8c16eee46c47ba42bd763a51216cc4bb"
+    }
+  ],
+  "EVIDENCE_PATHS": [
+    "docs/arcava/security/control-manifest.json",
+    "docs/arcava/security/owner-guard-rls-binding-contract-draft.md",
+    "services/api/src/main/java/com/projectb/api/arcava/repositories/ClientRelationshipRepository.java",
+    "services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java",
+    "services/api/src/main/java/com/projectb/api/domain/JourneyKernel.java",
+    "services/api/src/test/java/com/projectb/api/arcava/security/ClientEnrollmentGuardedReadIntegrationTest.java",
+    "docs/arcava/operations/evidence/ARC36P25-T020-ASSIGNMENT-LINK-CONSISTENCY-01/EXECUTOR_RETURN.json"
+  ],
+  "LOCAL_LINKAGE": {
+    "before": "Enrollment assignmentId was UUID-format checked without resolving the actual local assignment record",
+    "accessors": [
+      "JourneyKernel.assignmentSnapshot(UUID): synchronized immutable map entry or null",
+      "JourneyJournal.assignmentSnapshot(UUID): synchronized delegation to kernel"
+    ],
+    "snapshot": "EnrollmentLink + associated Projection + actual AssignmentView captured in one synchronized(journal) block; no mutable cache or trust boolean",
+    "bindings": [
+      "assignmentId exact canonical non-nil enrollment UUID",
+      "tenantId exact enrollment tenant",
+      "clientId exact enrollment client",
+      "journeyVersionId exact enrollment version"
+    ],
+    "allowed_status": "active exactly, the existing source-supported local status",
+    "failure": "missing/mismatched/malformed/null/unknown assignment record or fields/status -> NOT_FOUND, null view; storage fault -> READ_UNAVAILABLE with no raw error",
+    "withdrawal": "independent exact PUBLISHED projection fence still required; withdrawal does not revoke local assignment, active assignment cannot bypass withdrawal",
+    "linearization": "one existing Journal monitor across all 3 reads, journal assign and withdraw; immutable records; no cross-process/SQL consistency claim; concurrent read may linearize before withdrawal",
+    "unchanged": [
+      "OwnerGuard and trusted context",
+      "ArcavaAccessService guard-before-storage and minimized view",
+      "ClientRelationshipModel",
+      "HTTP routes and production trust registration",
+      "CI workflows",
+      "SQL"
+    ],
+    "source_lifecycle": "No assignment revoke operation added; inactive/revoked/corrupt records only SYNTHETIC_TEST_ONLY fault fixtures",
+    "authority_limit": "Local stored record consistency, not PIAC assignment attestation, coach identity, consent, entitlement or role grant"
+  },
+  "TEST_COMMANDS_EXITS": [
+    {
+      "command": "mvn -B -f services/api/pom.xml test",
+      "exit": 0,
+      "tests": 51,
+      "failures": 0,
+      "errors": 0,
+      "binding": "final Java source tree before source commit"
+    },
+    {
+      "command": "mvn -B -f services/api/pom.xml package",
+      "exit": 0,
+      "tests": 51,
+      "failures": 0,
+      "errors": 0,
+      "binding": "final source tree before source commit"
+    },
+    {
+      "command": "mvn -B -f services/api/pom.xml package",
+      "exit": 0,
+      "tests": 51,
+      "failures": 0,
+      "errors": 0,
+      "execution_sha": "a80155bf06905bd9eada801a6d28e8fbb9242e89"
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    },
+    {
+      "command": "verify all control-manifest component SHA256 file bytes",
+      "exit": 0
+    }
+  ],
+  "LOCAL_TOOLCHAIN": {
+    "java": "Temurin 25.0.3+9-LTS",
+    "maven": "3.9.16",
+    "host_installation": "NONE; reused existing temporary Maven"
+  },
+  "JUNIT_SUITES": [
+    {
+      "name": "com.projectb.api.ApplicationBootstrapTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "liveProfileStaysClosedWithoutVerifiedAuthorities",
+          "result": "PASS"
+        },
+        {
+          "name": "inactiveBootstrapStaysNonWeb",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.projectb.api.active.ActiveDevHttpLifecycleTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "withdrawnJournalProjectionStaysWithdrawn",
+          "result": "PASS"
+        },
+        {
+          "name": "listenerStartsReportsClosedReadinessAndStopsCleanly",
+          "result": "PASS"
+        },
+        {
+          "name": "nonLoopbackBindFailsBeforeListening",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.projectb.api.active.EffectiveConfigReadbackTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "effectiveReadbackMatchesTheRunningBindAndRedactsTheJournalPath",
+          "result": "PASS"
+        },
+        {
+          "name": "blankJournalPathFailsClosed",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.projectb.api.active.TrustedPortDenyTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "positiveDummyVerdictStillCannotAdmitProtectedTraffic",
+          "result": "PASS"
+        },
+        {
+          "name": "callerSuppliedPublicationDoesNotVerify",
+          "result": "PASS"
+        },
+        {
+          "name": "missingAndFailedPiacQueriesStayDenied",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.projectb.api.arcava.security.ClientEnrollmentGuardedReadIntegrationTest",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "assignedCoachReadsPersistedEnrollmentAndExactReplay",
+          "result": "PASS"
+        },
+        {
+          "name": "substitutedStoredEnrollmentIdCannotReturnPayload",
+          "result": "PASS"
+        },
+        {
+          "name": "missingForeignChangedAndInactiveAssignmentSnapshotsDenyAfterReplay",
+          "result": "PASS"
+        },
+        {
+          "name": "actualAssignmentSnapshotMatchesEnrollmentForBothRolesAfterReplay",
+          "result": "PASS"
+        },
+        {
+          "name": "tenantAdminAndServiceCannotBypassRepositoryGuard",
+          "result": "PASS"
+        },
+        {
+          "name": "noLivePiacNeverLooksUpEvenAnExistingEnrollment",
+          "result": "PASS"
+        },
+        {
+          "name": "assignmentLinkageCannotBypassGuardOrPublicationWithdrawal",
+          "result": "PASS"
+        },
+        {
+          "name": "nullAndUnknownRequestsDoNotLookup",
+          "result": "PASS"
+        },
+        {
+          "name": "wrongCallerTenantClientAndResourceDenyBeforeLookup",
+          "result": "PASS"
+        },
+        {
+          "name": "withdrawalDeniesCoachAndSelfClientOnSameServiceAndAfterReplay",
+          "result": "PASS"
+        },
+        {
+          "name": "expiredRevokedUnknownAndStaleGatesDenyBeforeLookupAndAfterReplay",
+          "result": "PASS"
+        },
+        {
+          "name": "revokedStaleAndNoLiveIdentityStillDenyBeforeLookupAfterWithdrawal",
+          "result": "PASS"
+        },
+        {
+          "name": "storedTenantAndClientMismatchAreIndistinguishableFromAbsent",
+          "result": "PASS"
+        },
+        {
+          "name": "everyMissingIndependentGateDeniesBeforeLookupAndAfterReplay",
+          "result": "PASS"
+        },
+        {
+          "name": "unsupportedStoredClientFormatFromRealJournalDeniesAfterReplay",
+          "result": "PASS"
+        },
+        {
+          "name": "readWaitsForJournalMonitorAndSeesCommittedWithdrawalWithoutSleeps",
+          "result": "PASS"
+        },
+        {
+          "name": "ownClientReadsWithoutCoachAssignmentAfterReplay",
+          "result": "PASS"
+        },
+        {
+          "name": "malformedStoredFieldsFailClosedWithoutEchoingRawValues",
+          "result": "PASS"
+        },
+        {
+          "name": "allUnknownMissingAndMalformedPublicationSnapshotsFailClosed",
+          "result": "PASS"
+        },
+        {
+          "name": "storageFaultIsSafeAndCannotLeakException",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.projectb.api.arcava.security.OwnerGuardContractTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "noLivePiacDefaultDeniesEvenPlausibleCallerFields",
+          "result": "PASS"
+        },
+        {
+          "name": "injectedCallerIdentityCannotBecomeTrusted",
+          "result": "PASS"
+        },
+        {
+          "name": "entitlementAbsentDenies",
+          "result": "PASS"
+        },
+        {
+          "name": "crossTenantIsDenied",
+          "result": "PASS"
+        },
+        {
+          "name": "consentWithoutShareDenies",
+          "result": "PASS"
+        },
+        {
+          "name": "noHttpOrJarLiveReadinessChange",
+          "result": "PASS"
+        },
+        {
+          "name": "futureDatedAndUnboundEvidenceDeny",
+          "result": "PASS"
+        },
+        {
+          "name": "assignedCoachWithAllIndependentGatesAllowsSyntheticScope",
+          "result": "PASS"
+        },
+        {
+          "name": "shareWithoutConsentDenies",
+          "result": "PASS"
+        },
+        {
+          "name": "wrongSubjectIsDenied",
+          "result": "PASS"
+        },
+        {
+          "name": "eachMissingGateDeniesIndependently",
+          "result": "PASS"
+        },
+        {
+          "name": "nullRequestAndMissingSessionDeny",
+          "result": "PASS"
+        },
+        {
+          "name": "unknownPurposeAndOperationDeny",
+          "result": "PASS"
+        },
+        {
+          "name": "tenantAdminAndServiceRolesCannotBypassSensitiveScope",
+          "result": "PASS"
+        },
+        {
+          "name": "allExpiredRevokedStaleUnknownAndDeniedGatesDenyIndependently",
+          "result": "PASS"
+        },
+        {
+          "name": "wrongResourceIsDenied",
+          "result": "PASS"
+        },
+        {
+          "name": "expiryAndRevocationAtExactClockDenyEveryGate",
+          "result": "PASS"
+        },
+        {
+          "name": "staleEvidenceRevisionDenies",
+          "result": "PASS"
+        },
+        {
+          "name": "clientOwnResourceAllowsSyntheticScopeWithoutCoachAssignment",
+          "result": "PASS"
+        },
+        {
+          "name": "assignmentCannotBeInferredFromOtherGates",
+          "result": "PASS"
+        },
+        {
+          "name": "trustSourceErrorsDenyWithoutLeakingErrorPayload",
+          "result": "PASS"
+        }
+      ]
+    }
+  ],
+  "TEST_COUNTS": {
+    "all": 51,
+    "prior_maven_cases_passing": 48,
+    "enrollment_suite": 20,
+    "prior_enrollment_cases_retained": 17,
+    "new_cases": 3
+  },
+  "NEW_TESTS": [
+    {
+      "test": "actualAssignmentSnapshotMatchesEnrollmentForBothRolesAfterReplay",
+      "result": "PASS",
+      "proof": "actual Journal create/update/publish/assign; exact AssignmentView matches both kernel and journal accessors before/after reopen; missing/null lookup returns null; coach/client ALLOWED; unchanged bytes"
+    },
+    {
+      "test": "missingForeignChangedAndInactiveAssignmentSnapshotsDenyAfterReplay",
+      "result": "PASS",
+      "proof": "26 missing/corrupt/foreign/mismatched/unknown status assignment variants plus changed enrollment assignmentId, both roles before/after actual Journal.open; null views, no private data echo; unchanged bytes; unsupported corruptions only fault seams"
+    },
+    {
+      "test": "assignmentLinkageCannotBypassGuardOrPublicationWithdrawal",
+      "result": "PASS",
+      "proof": "actual withdraw, underlying local assignment remains active, both roles denied before/after replay; admin/service denied before lookup; storage exception safe; missing guard assignment denies before faulting source"
+    }
+  ],
+  "RETAINED_REGRESSIONS": [
+    "all prior 48 Maven cases",
+    "4 withdrawal tests, real withdraw/reopen and no stale publication cache",
+    "bounded deterministic journal monitor/latch ordering without sleeps",
+    "independent stale/revoked/UNKNOWN gates and no-live-PIAC deny before all storage",
+    "malformed stored IDs, null payload and no journal mutation"
+  ],
+  "AUTHORITY": {
+    "scope": "LOCAL_SYNTHETIC_ONLY",
+    "identity_consent_canonical_pins": "SYNTHETIC_TEST_ONLY; never producer attestation",
+    "PIAC_KDB_LIVE": "NONE",
+    "production_guard": "PIAC_NOT_CONNECTED, DENY before storage",
+    "SQL_EXECUTION": "NONE",
+    "HOSTED_PRODUCTION": "NONE",
+    "new_http_route_or_bean": "NONE",
+    "foreign_permissions": "UNCHANGED",
+    "SECURITY_ACCEPTANCE": "NOT_GRANTED"
+  },
+  "CI_RUN_IDS_AND_CONCLUSIONS": [
+    {
+      "conclusion": "success",
+      "databaseId": 41851116090,
+      "event": "pull_request",
+      "headSha": "a80155bf06905bd9eada801a6d28e8fbb9242e89",
+      "name": "arcava-a09-offline-assurance",
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851116090",
+      "jobs": [
+        {
+          "databaseId": 126647368008,
+          "name": "Arcava A09 offline suboracles / Python 3.12.3",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851116090/job/126647368008"
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41851115764,
+      "event": "pull_request",
+      "headSha": "a80155bf06905bd9eada801a6d28e8fbb9242e89",
+      "name": "project-b-contract-validation",
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851115764",
+      "jobs": [
+        {
+          "databaseId": 126647366178,
+          "name": "web-renderer-smoke",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851115764/job/126647366178"
+        },
+        {
+          "databaseId": 126647366989,
+          "name": "validate-contracts",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851115764/job/126647366989"
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41851115734,
+      "event": "pull_request",
+      "headSha": "a80155bf06905bd9eada801a6d28e8fbb9242e89",
+      "name": "arcava-journey-kernel",
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851115734",
+      "jobs": [
+        {
+          "databaseId": 126647366460,
+          "name": "JourneyKernel fixture / JDK 21",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851115734/job/126647366460"
+        },
+        {
+          "databaseId": 126647366835,
+          "name": "JourneyKernel fixture / JDK 25",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851115734/job/126647366835"
+        },
+        {
+          "databaseId": 126647366898,
+          "name": "Persisted loopback journey path / JDK 21",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851115734/job/126647366898"
+        },
+        {
+          "databaseId": 126647367016,
+          "name": "Persisted loopback journey path / JDK 25",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851115734/job/126647367016"
+        },
+        {
+          "databaseId": 126647367039,
+          "name": "Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851115734/job/126647367039"
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41851102740,
+      "event": "push",
+      "headSha": "a80155bf06905bd9eada801a6d28e8fbb9242e89",
+      "name": "arcava-a09-offline-assurance",
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851102740",
+      "jobs": [
+        {
+          "databaseId": 126647322113,
+          "name": "Arcava A09 offline suboracles / Python 3.12.3",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851102740/job/126647322113"
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41851103056,
+      "event": "push",
+      "headSha": "a80155bf06905bd9eada801a6d28e8fbb9242e89",
+      "name": "arcava-journey-kernel",
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851103056",
+      "jobs": [
+        {
+          "databaseId": 126647322126,
+          "name": "Persisted loopback journey path / JDK 21",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851103056/job/126647322126"
+        },
+        {
+          "databaseId": 126647322645,
+          "name": "JourneyKernel fixture / JDK 21",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851103056/job/126647322645"
+        },
+        {
+          "databaseId": 126647322651,
+          "name": "JourneyKernel fixture / JDK 25",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851103056/job/126647322651"
+        },
+        {
+          "databaseId": 126647322717,
+          "name": "Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851103056/job/126647322717"
+        },
+        {
+          "databaseId": 126647322925,
+          "name": "Persisted loopback journey path / JDK 25",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/41851103056/job/126647322925"
+        }
+      ]
+    }
+  ],
+  "CI_MAVEN_PROOF": {
+    "run_id": 41851115734,
+    "job_id": 126647367039,
+    "head_sha": "a80155bf06905bd9eada801a6d28e8fbb9242e89",
+    "tests": 51,
+    "enrollment_suite_tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "status": "BUILD_SUCCESS",
+    "note": "PR run headSha equals execution source; pull_request checkout may use ephemeral merge commit"
+  },
+  "WORKTREE_AND_BRANCH": {
+    "repository": "wordualReality/souvereign-os-coaching-platform",
+    "path": "/Users/aydin/Documents/GitHub/arcava-journey-worktree",
+    "branch": "feat/arc36p25-journey-service-integration",
+    "preflight_local_remote_head": "d46ac47182c33862fe3d3eaad236efadb1b12a23",
+    "preflight_porcelain_v1_untracked_all": "",
+    "single_writer": "no other writer observed in worktree cwd/status checks; no distributed lock claimed",
+    "source_committed_clean": true,
+    "PR": "12 OPEN / DRAFT / NOT_MERGED",
+    "final_evidence_commit": "receipt-only child of source; Builder resolves actual HEAD"
+  },
+  "Q1_Q4": [
+    {
+      "id": "Q1",
+      "status": "OPEN",
+      "question": "exact Arcava table/schema/migration ownership"
+    },
+    {
+      "id": "Q2",
+      "status": "OPEN",
+      "question": "trusted PIAC envelope/authentication/expiry/revocation and backend binding"
+    },
+    {
+      "id": "Q3",
+      "status": "OPEN",
+      "question": "PostgreSQL login/scoped-role/ACL and non-spoofable session binding"
+    },
+    {
+      "id": "Q4",
+      "status": "OPEN",
+      "question": "separate owner-approved policy source and actual SQL test authority"
+    }
+  ],
+  "OPEN_GATES": [
+    "ARC10-T020/T110 FULL NOT_ADMITTED",
+    "Q1-Q4 OPEN / PROPOSED_NOT_ADMITTED",
+    "T150_PARTIAL",
+    "A09-T01 PARTIAL_NOT_ADMITTED",
+    "A09-T04/T44/T48 and original T07/T08/T09 NOT_EXECUTED",
+    "T48_ADMITTED_REAL_EVIDENCE_0_OF_86; source baseline 47 P0 + 39 P1",
+    "A09-FX-v1_NOT_APPROVED",
+    "full 48-contract/16-family and crash/restore evidence remain open",
+    "production PIAC/KDB/SOV, SQL/RLS, independent Security QS and full runtime/release admission remain open"
+  ],
+  "BACKLOG": "Nutrition T050/T090 NON_ROUTING, unchanged; no formal T030/T050 advancement",
+  "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+  "BLOCKER": "NONE_FOR_SCOPED_LOCAL_ASSIGNMENT_LINK_CONSISTENCY",
+  "CONTROLLER": "NOT_ROUTED",
+  "MERGE_DEPLOYMENT": "NOT_EXECUTED"
+}

@@ -1,0 +1,16 @@
+{
+  "case_id": "A09-T44",
+  "units": ["ARC09-U11", "ARC09-U14"],
+  "fixture_class": "SYNTHETIC_OFFLINE",
+  "entrypoint": "A09-T44",
+  "historical_seed": "database/policies/001_project_b_rls_seed.sql",
+  "historical_seed_authority": "NOT_ACCEPTED",
+  "sql_apply": "NOT_EXECUTED",
+  "checks_prepared": [
+    "role_positive_negative",
+    "rls_positive_negative",
+    "public_grant_denial",
+    "foreign_access_denial",
+    "audit_chain"
+  ]
+}

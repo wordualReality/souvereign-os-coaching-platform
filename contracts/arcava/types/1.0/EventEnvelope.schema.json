@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:arcava:types:1.0:EventEnvelope",
+  "title": "Arcava EventEnvelope v1.0 — abstract component",
+  "description": "Abstract reusable component. Concrete event profiles close payload and event identity.",
+  "not": {},
+  "$defs": {
+    "eventEnvelopeBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "event_type",
+        "schema_version",
+        "producer",
+        "producer_namespace",
+        "occurred_at",
+        "emitted_at",
+        "correlation_id",
+        "sensitivity_class",
+        "payload"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "latest"
+          }
+        },
+        "event_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "producer": {
+          "enum": [
+            "PIAC",
+            "KDB",
+            "ARCAVA",
+            "SOV",
+            "ADAPTER"
+          ]
+        },
+        "producer_namespace": {
+          "type": "string"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "emitted_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "correlation_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "latest"
+          }
+        },
+        "sensitivity_class": {
+          "enum": [
+            "PUBLIC",
+            "INTERNAL",
+            "PERSONAL",
+            "RESTRICTED"
+          ]
+        },
+        "payload": {},
+        "causation_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "latest"
+          }
+        },
+        "idempotency_key": {
+          "type": "string"
+        },
+        "tenant_scope": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "subject_principal_id"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "PERSONAL"
+                },
+                "subject_principal_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "tenant_id"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "TENANT"
+                },
+                "tenant_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                },
+                "client_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "PUBLIC"
+                }
+              }
+            }
+          ]
+        },
+        "actor_ref": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "producer_namespace",
+            "object_type",
+            "stable_id"
+          ],
+          "properties": {
+            "producer_namespace": {
+              "const": "PIAC"
+            },
+            "object_type": {
+              "const": "PrincipalIdentity"
+            },
+            "stable_id": {
+              "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+            }
+          }
+        },
+        "resource_ref": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "producer_namespace",
+                "object_type",
+                "stable_id"
+              ],
+              "properties": {
+                "producer_namespace": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "object_type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "stable_id": {
+                  "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "producer_namespace",
+                "object_type",
+                "stable_id",
+                "immutable_version_id"
+              ],
+              "properties": {
+                "producer_namespace": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "object_type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "stable_id": {
+                  "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                },
+                "immutable_version_id": {
+                  "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                }
+              }
+            }
+          ]
+        },
+        "aggregate_revision": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        }
+      }
+    }
+  }
+}

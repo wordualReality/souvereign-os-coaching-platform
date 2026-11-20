@@ -1,0 +1,289 @@
+{
+  "RETURN_ID": "ARCAVA-08-UI01-LOCAL-COACH-ASSIGN-CLIENT-OPEN-BRIDGE",
+  "LANE": "ARCAVA",
+  "STATUS": "LOCAL_UI_ONLY_SOURCE_AND_RUNTIME_PASS_OWNER_QS_PENDING",
+  "PLAN_POSITION": "ARC-36/P25 7/10, Arcava-08 UI01",
+  "GATE": "UI01_LOCAL_TEST_ONLY",
+  "BASE_SHA": "1cb4ae1516a9c938060fa0c87a3aa29ce89c3942",
+  "SOURCE_SHA": "d56a8e4e6513f146731eb09a0900bfce3da1a0ab",
+  "EVIDENCE_COMMIT_PARENT_SHA": "d56a8e4e6513f146731eb09a0900bfce3da1a0ab",
+  "EVIDENCE_HEAD_RESOLUTION": "Immutable GitHub commit containing this receipt, verified after push.",
+  "PR": 12,
+  "BRANCH": "feat/arc36p25-journey-service-integration",
+  "WORKTREE": "/Users/aydin/Documents/GitHub/CoachingStudios/Arcava",
+  "ORIGIN": "https://github.com/wordualReality/souvereign-os-coaching-platform.git",
+  "PREFLIGHT": {
+    "result": "PASS",
+    "writer": "User delegated this write phase. No concrete competing write, Git lock or changed source observed before applying the verified delta.",
+    "porcelain": "?? AGENTS.md",
+    "remote_base_sha": "1cb4ae1516a9c938060fa0c87a3aa29ce89c3942"
+  },
+  "CHANGE_FILES": [
+    "apps/web/README.md",
+    "apps/web/app/api/arcava-ui01/route.ts",
+    "apps/web/app/client/member-home/page.tsx",
+    "apps/web/app/coach/journeys/page.tsx",
+    "apps/web/app/ui01-fixture.tsx",
+    "apps/web/scripts/arcava-ui01-smoke.mjs",
+    "apps/web/tsconfig.json",
+    "services/api/src/test/java/com/projectb/api/http/JourneyPathTest.java",
+    "services/api/src/test/java/com/projectb/api/http/JourneyUiFixture.java"
+  ],
+  "SHA256": {
+    "apps/web/README.md": "38c5a3051f29a1a339242c666d12b68acbe37fd72ebf4d509fa40486d3211c3d",
+    "apps/web/app/api/arcava-ui01/route.ts": "9970b9b938ada698486e4954fe6f15d7592d7383ecce6924dabd0e18b5b87bbc",
+    "apps/web/app/client/member-home/page.tsx": "b812fa323875b75870eee66eeb7ad2695769cf171c58111297b003f42c3d9a86",
+    "apps/web/app/coach/journeys/page.tsx": "4d76b86641ac075f2857af5eaeb650a51af5f1af1d24424e7de4808d88dc6589",
+    "apps/web/app/ui01-fixture.tsx": "c138d612062cf309813eec0251110d4d492de3d53401e5268eeb9949681cc928",
+    "apps/web/scripts/arcava-ui01-smoke.mjs": "1268fcdd4bd6b3a3e67584e51bca3b47913d4e91a38ff8c2f46ae6baad514b3e",
+    "apps/web/tsconfig.json": "86e018364979a2d6d95a883dd19671a6e9b7426c4f37f75f3523f11cfe5b5260",
+    "services/api/src/test/java/com/projectb/api/http/JourneyPathTest.java": "12b0d6d4707a827a6543f0816508aeeda9440e12c554a6a0fd40b7eb117868bf",
+    "services/api/src/test/java/com/projectb/api/http/JourneyUiFixture.java": "c66a5f29408f0332d9fcd41c3769508e3c98c5dca6403b9541ba489cd60ab40f"
+  },
+  "LOCAL_TESTS": {
+    "source_binding": "Tested in a disposable source copy. All nine committed blobs were compared byte-for-byte to the tested files.",
+    "node": "26.8.2",
+    "next": "16.4.3",
+    "jdk": "Temurin 25.0.3+9-LTS",
+    "commands": [
+      {
+        "command": "apps/web/scripts/renderer-smoke.sh",
+        "exit": 0,
+        "result": "Strict TypeScript Next build passed. Four routes HTTP 200. Loopback shutdown and service-role absence verified."
+      },
+      {
+        "command": "node apps/web/scripts/arcava-ui01-smoke.mjs",
+        "exit": 0,
+        "result": "Headless Chrome clicks, actual bridge response codes and bodies, DOM equality, Java process restart and withdrawals."
+      },
+      {
+        "command": "mvn -o -B -f services/api/pom.xml package",
+        "exit": 0,
+        "result": "Maven 3.9.16, 75 tests, 0 failures, 0 errors."
+      },
+      {
+        "command": "javac -Xlint:all -Werror -d <scratch-classes> <journey source and test files>; java -cp <scratch-classes> com.projectb.api.<suite>",
+        "exit": 0,
+        "suites": [
+          "domain.JourneyKernelTest",
+          "http.JourneyPathTest",
+          "http.JourneyProducerTest",
+          "http.JournalAtomicityTest",
+          "http.AuthorityBoundaryTest"
+        ]
+      }
+    ],
+    "recoveries": [
+      "Used physical copies of installed dependencies for the scratch Turbopack build after it rejected a symlink outside its root.",
+      "Re-ran local socket tests with loopback permissions after sandbox bind denial.",
+      "Fixed Chrome test launch directory conversion and verified foreign Host using curl."
+    ]
+  },
+  "BROWSER_EVIDENCE": {
+    "runner": "apps/web/scripts/arcava-ui01-smoke.mjs",
+    "method": "Chrome DevTools input, Network.responseReceived and response body compared to visible DOM. This receipt embeds the smoke output.",
+    "result": "PASS",
+    "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "assignment_id": "a6ebe054-d81e-4458-b412-507f91e9d5ca",
+    "journey_version_id": "832cae2a-3182-34ad-8157-63bbdecb0bdb",
+    "step_id": "66666666-6666-4666-8666-666666666666",
+    "source_ref": {
+      "schema_version": 1,
+      "variant": "KDB_PROTOCOL_VERSION",
+      "protocol_id": "05000000-0000-4000-8000-000000000009",
+      "protocol_version_id": "05000000-0000-4000-8000-000000000010",
+      "owning_module_id": "05000000-0000-4000-8000-000000000013",
+      "taxonomy_version_id": "05000000-0000-4000-8000-000000000014",
+      "relation_ids": []
+    },
+    "assign_http": 201,
+    "open_http": 200,
+    "withdrawn_http": 422,
+    "refresh": true,
+    "service_process_restart": true,
+    "stable_idempotency": true,
+    "journal_bytes_preserved": true,
+    "cross_origin_denied": true,
+    "foreign_host_denied": true,
+    "client_id": "33333333-3333-4333-8333-333333333333",
+    "tenant_id": "11111111-1111-4111-8111-111111111111",
+    "kdb_content_sha256_evidence_only": "f1a8594e8976c89f1e5c028870c3d3764a7a5423473cd8635448d7f6d8cc6574"
+  },
+  "NEGATIVES": {
+    "browser_or_bridge": {
+      "403": [
+        "foreign origin"
+      ],
+      "404": [
+        "disabled test context",
+        "foreign Host",
+        "open without assignment cookie"
+      ],
+      "422": [
+        "query override",
+        "caller-supplied authorization",
+        "withdrawn step denied in browser before and after process restart"
+      ]
+    },
+    "java_service": {
+      "403": [
+        "foreign tenant",
+        "foreign client",
+        "wrong role"
+      ],
+      "404": [
+        "missing assignment",
+        "wrong step"
+      ],
+      "409": [
+        "idempotency key reused for a different assignment intent"
+      ],
+      "422": [
+        "missing consent",
+        "missing PA-05 pin",
+        "swapped protocol version, module or taxonomy",
+        "query override",
+        "withdrawal before and after replay"
+      ]
+    },
+    "journal": "Denied reads, repeated opens and assignment retries were byte-checked in their respective fixture suites."
+  },
+  "CI": [
+    {
+      "conclusion": "success",
+      "databaseId": 43580565659,
+      "event": "pull_request",
+      "headSha": "d56a8e4e6513f146731eb09a0900bfce3da1a0ab",
+      "name": "arcava-a09-offline-assurance",
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/43580565659",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 132404204758,
+          "name": "Arcava A09 offline suboracles / Python 3.12.3"
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 43580565632,
+      "event": "pull_request",
+      "headSha": "d56a8e4e6513f146731eb09a0900bfce3da1a0ab",
+      "name": "project-b-contract-validation",
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/43580565632",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 132404204664,
+          "name": "web-renderer-smoke"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 132404204782,
+          "name": "validate-contracts"
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 43580565670,
+      "event": "pull_request",
+      "headSha": "d56a8e4e6513f146731eb09a0900bfce3da1a0ab",
+      "name": "arcava-journey-kernel",
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/43580565670",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 132404204988,
+          "name": "Persisted loopback journey path / JDK 25"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 132404205071,
+          "name": "JourneyKernel fixture / JDK 25"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 132404205135,
+          "name": "JourneyKernel fixture / JDK 21"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 132404205205,
+          "name": "Persisted loopback journey path / JDK 21"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 132404205244,
+          "name": "Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16"
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 43580560347,
+      "event": "push",
+      "headSha": "d56a8e4e6513f146731eb09a0900bfce3da1a0ab",
+      "name": "arcava-a09-offline-assurance",
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/43580560347",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 132404187789,
+          "name": "Arcava A09 offline suboracles / Python 3.12.3"
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 43580560368,
+      "event": "push",
+      "headSha": "d56a8e4e6513f146731eb09a0900bfce3da1a0ab",
+      "name": "arcava-journey-kernel",
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/43580560368",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 132404187662,
+          "name": "Persisted loopback journey path / JDK 25"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 132404187790,
+          "name": "JourneyKernel fixture / JDK 21"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 132404187836,
+          "name": "JourneyKernel fixture / JDK 25"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 132404187839,
+          "name": "Persisted loopback journey path / JDK 21"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 132404187921,
+          "name": "Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16"
+        }
+      ]
+    }
+  ],
+  "OPEN_GATES": {
+    "Q2": "OPEN",
+    "R02": "OWNER_RESPONSE_CONSUMED_OPERATIONAL_TRUST_EVIDENCE_MISSING",
+    "BL_ARC_01": "OPEN_SCOPED",
+    "SENSITIVE_CLIENT_READ": "NOT_IMPLEMENTED_NOT_ADMITTED",
+    "T020_T110": "NOT_ADMITTED",
+    "SECURITY_LIVE": "NOT_ADMITTED"
+  },
+  "BLOCKER": "NONE_FOR_SCOPED_LOCAL_UI",
+  "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+  "NEXT_ACTION": "Perform one scoped independent Owner-QS on immutable UI01 source and browser evidence."
+}

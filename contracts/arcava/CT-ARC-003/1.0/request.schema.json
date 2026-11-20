@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:arcava:CT-ARC-003:1.0:request",
+  "title": "CT-ARC-003 request v1.0",
+  "allOf": [
+    {
+      "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/queryEnvelopeBase"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_id": {
+          "const": "CT-ARC-003"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "projection_or_resource": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tenant_id",
+            "client_id",
+            "enrollment_id"
+          ],
+          "properties": {
+            "tenant_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "client_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "enrollment_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "programme_binding_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "unevaluatedProperties": false
+}

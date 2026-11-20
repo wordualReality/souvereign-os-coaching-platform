@@ -1,0 +1,70 @@
+name: arcava-a09-offline-assurance
+
+on:
+  push:
+    branches: [feat/arc36p25-journey-service-integration]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-suboracles:
+    name: Arcava A09 offline suboracles / Python 3.12.3
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.12.3
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12.3'
+      - name: Record offline source and input identity
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          echo "EVENT_SOURCE_SHA ${GITHUB_SHA}"
+          python3 -c 'import sys; print(sys.version); assert sys.version_info[:3] == (3,12,3)'
+          sha256sum docs/arcava/admission/synthetic/A09-FX-v1/{manifest.candidate,applicability}.json
+          sha256sum docs/arcava/admission/synthetic/A09-T04/byte-pins.json
+          sha256sum docs/arcava/admission/synthetic/A09-T44/{case,engine}.json
+          sha256sum database/policies/001_project_b_rls_seed.sql
+          echo 'SCOPE OFFLINE_ONLY SQL_NOT_EXECUTED ORIGINAL_A09_NOT_ADMITTED'
+      - name: Validate FX-v1 candidate
+        run: |
+          set -euo pipefail
+          trap 'echo COMMAND_EXIT=$?' EXIT
+          python3 scripts/arcava/validate_a09_fx_v1_candidate.py --manifest docs/arcava/admission/synthetic/A09-FX-v1/manifest.candidate.json --matrix docs/arcava/admission/synthetic/A09-FX-v1/applicability.json
+      - name: Test FX-v1 repeatability and denial variants
+        run: |
+          set -euo pipefail
+          trap 'echo COMMAND_EXIT=$?' EXIT
+          python3 -m unittest discover -s tests/migration/arcava -p test_a09_fx_v1_candidate.py -v
+      - name: Validate T04 physical subset
+        run: |
+          set -euo pipefail
+          trap 'echo COMMAND_EXIT=$?' EXIT
+          python3 scripts/arcava/validate_a09_t04_physical.py
+      - name: Test T04 physical denial variants
+        run: |
+          set -euo pipefail
+          trap 'echo COMMAND_EXIT=$?' EXIT
+          python3 -m unittest discover -s tests/arcava/contracts -p test_a09_t04_physical.py -v
+      - name: Validate T44 authority denial
+        run: |
+          set -euo pipefail
+          trap 'echo COMMAND_EXIT=$?' EXIT
+          python3 scripts/arcava/validate_a09_t44_policy_authority.py
+      - name: Test T44 authority denial variants
+        run: |
+          set -euo pipefail
+          trap 'echo COMMAND_EXIT=$?' EXIT
+          python3 -m unittest discover -s tests/arcava/security -p test_a09_t44_policy_authority.py -v

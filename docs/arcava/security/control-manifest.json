@@ -1,0 +1,258 @@
+{
+  "manifest_version": "1.6",
+  "decision_id": "ARC36P25-ARCAVA-RLS-BINDING-CONTRACT-DRAFT-01",
+  "status": "PROPOSED_NOT_ADMITTED",
+  "scope": "ARC-07 owner guard / ARC10-T110 foundation and local ARC10-T020 guarded enrollment read only",
+  "source_base_sha": "0a263fa744de84951c5e5a5961e28d2539e46f79",
+  "sources": [
+    {
+      "id": "ARC-07",
+      "url": "https://docs.google.com/document/d/1i9NEnvB3Kk9WK4zBNdDzo5eV7xYroW1qJ95ZEQmpZsM/edit",
+      "sections": [
+        "ROLE_AND_SERVICE_IDENTITY_MATRIX",
+        "RLS_ACL_FUNCTION_CONTROLS",
+        "PRIVACY_LIFECYCLE"
+      ]
+    },
+    {
+      "id": "ATC-07",
+      "url": "https://docs.google.com/document/d/1oNv0gaHdh0skkzana9KmuagggbOXdjwwdsoDW8c_3Ns/edit",
+      "sections": [
+        "AUTHORIZATION_DECISION_MATRIX",
+        "SEPARATE_CONTROL_GATES"
+      ]
+    },
+    {
+      "id": "ARC09-U11",
+      "url": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit"
+    },
+    {
+      "id": "ARC10-T110",
+      "url": "https://docs.google.com/document/d/1bwZrdGHeQXZcU2V5kSQeGypNnMVUAp6I3aAgVY8fHKQ/edit"
+    },
+    {
+      "id": "ARC10-T020",
+      "url": "https://docs.google.com/document/d/1bwZrdGHeQXZcU2V5kSQeGypNnMVUAp6I3aAgVY8fHKQ/edit"
+    },
+    {
+      "id": "ARC09-U02",
+      "url": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit"
+    },
+    {
+      "id": "ATC-04",
+      "url": "https://docs.google.com/document/d/1DEwzYlvC5etngjUnmAl5MCXQDWFQNgeaogxM1j8egQY/edit",
+      "sections": [
+        "N1",
+        "AG-ARC-001",
+        "EN-ARC-002",
+        "AG-ARC-003",
+        "SM-ARC-01",
+        "AG-ARC-004",
+        "AG-ARC-005",
+        "SM-ARC-02",
+        "SM-ARC-03"
+      ]
+    }
+  ],
+  "components": {
+    "services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java": "0930589e3ebd1f6ae069d73f24e99a82687d2b2d73eadda5a991aab4be708a96",
+    "services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java": "44d528f7f3e2d28b484ae41d4ebe8adf3e9f006fd51bce0834b06607d90c4223",
+    "services/api/src/main/java/com/projectb/api/arcava/security/RoleScopePolicy.java": "85d60f7c99d305e0e1fa5a955ad8920fb4d8cfc184f74cf6c07379b41c246057",
+    "services/api/src/main/java/com/projectb/api/arcava/services/CoachClientAccessService.java": "8697aa6b342bf806824c98bc6c9f7f5a57a1c5c950380661f0bc698cea01096e",
+    "services/api/src/test/java/com/projectb/api/arcava/security/OwnerGuardContractTest.java": "205db8501abc80f03a53d7942e56f0bb029e18106f46405fbfc10ee10a1e75a7",
+    "docs/arcava/security/owner-guard-rls-binding-contract-draft.md": "c4f2a5e1fa5c1905ea34668f91278200f0d3c74c47a90e440d554beca72ebb14",
+    "services/api/src/main/java/com/projectb/api/arcava/domain/ClientRelationshipModel.java": "131e2a74e8f2658fedd81b74f890d94db4b6cd903d3c5353a952c7c050ac7c88",
+    "services/api/src/main/java/com/projectb/api/arcava/repositories/ClientRelationshipRepository.java": "4904abbf96dee18ddd036739d68e87f2ff3cf0878777756036567e1ab55f5fb1",
+    "services/api/src/main/java/com/projectb/api/arcava/services/ArcavaAccessService.java": "621e5514befb145ef0df9641d0cee182b6d6cee468c6d9bd9df8e77b70e7f68b",
+    "services/api/src/test/java/com/projectb/api/arcava/security/ClientEnrollmentGuardedReadIntegrationTest.java": "f93cb93913fbcf4d6a1503610bdf10fdfb19ec2421512ff948101a60cfa487ff",
+    "services/api/src/main/java/com/projectb/api/domain/JourneyKernel.java": "97a11f218510eefd1bc1793d87bd3cc7041fa4218623e02edd93b8d2e258a431",
+    "services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java": "7d6d4fd69485fcbcac7ed7a1ea50caeac7f9e8629a8cc95b1fdde3742f2740eb",
+    "services/api/src/main/java/com/projectb/api/arcava/domain/TenantModel.java": "69e658bf018a883d1b22cb42834bf10b6814f482924d88a2a64188e33a7053cf",
+    "services/api/src/test/java/com/projectb/api/arcava/domain/TenantModelContractTest.java": "37e529ced16aaa74c9560be28781ec1ca051c38db4a9088e24104443c2c41906",
+    "services/api/src/main/java/com/projectb/api/arcava/domain/CoachEnrollmentModel.java": "1d811bfe61860cc4610599c960cf69616f93415e8db7308cf5520903d085d1ec",
+    "services/api/src/test/java/com/projectb/api/arcava/domain/CoachEnrollmentModelContractTest.java": "4de859edd8a249d40778dbeceb15d845b17cfe58fcf32fe832b1457f55db3dde",
+    "services/api/src/test/java/com/projectb/api/arcava/domain/JournalIdentityBindingContractTest.java": "20d7c71defc2ba5470706a87a8ead813291f1cdda159533041cd9c77a1914844"
+  },
+  "gates": [
+    "SESSION",
+    "TENANT_MEMBERSHIP",
+    "ACCESS",
+    "ASSIGNMENT_COACH_ONLY",
+    "CONSENT",
+    "SHARE",
+    "ENTITLEMENT"
+  ],
+  "production_trust": "NO_LIVE_ADAPTER / PIAC_NOT_CONNECTED",
+  "synthetic_factory": "test sources only / SYNTHETIC_TEST_ONLY",
+  "operations": {
+    "SENSITIVE_CLIENT_READ": {
+      "COACH": "exact assignment and independent gates",
+      "CLIENT": "own subject and independent gates",
+      "OTHER_ROLES": "DENY"
+    }
+  },
+  "unresolved_decisions": [
+    {
+      "id": "Q1",
+      "status": "OPEN",
+      "question": "exact Arcava table/schema/migration ownership"
+    },
+    {
+      "id": "Q2",
+      "status": "OPEN",
+      "question": "trusted PIAC envelope/authentication/expiry/revocation and backend binding"
+    },
+    {
+      "id": "Q3",
+      "status": "OPEN",
+      "question": "PostgreSQL login/scoped-role/ACL and non-spoofable session binding"
+    },
+    {
+      "id": "Q4",
+      "status": "OPEN",
+      "question": "separate owner-approved policy source and actual SQL test authority"
+    }
+  ],
+  "SQL_EXECUTION": "NONE",
+  "live_PIAC_KDB": "NONE",
+  "security_acceptance": "NOT_GRANTED",
+  "T150": "PARTIAL",
+  "enrollment_read": {
+    "service": "ArcavaAccessService.readEnrollment",
+    "storage": "atomic EnrollmentLink + Projection + actual local AssignmentView snapshot under synchronized(JourneyJournal)",
+    "order": [
+      "OwnerGuard.authorize",
+      "atomic enrollment/publication/assignment snapshot",
+      "canonical stored IDs and exact projection tenant/version binding",
+      "PUBLISHED-only publication fence",
+      "exact active local assignment ID/tenant/client/version binding",
+      "stored tenant/client/enrollment exact request binding",
+      "minimized immutable view"
+    ],
+    "view_fields": [
+      "enrollmentId",
+      "journeyVersionId"
+    ],
+    "missing_or_mismatched": "NOT_FOUND with no payload",
+    "invalid_stored_identity": "STORED_DATA_INVALID with no raw values",
+    "storage_fault": "READ_UNAVAILABLE with no exception payload",
+    "stored_ids": "canonical non-nil UUIDs only; unsupported strings rejected",
+    "assignment_scope": "Independent local record consistency plus prior guard evidence; no trusted PIAC assignmentId attestation",
+    "replay": "real create/update/publish/assign; exact persisted identities after reopen",
+    "live_adapter": "NONE",
+    "T020_FULL": "NOT_ADMITTED",
+    "T110_FULL": "NOT_ADMITTED",
+    "A09_T07_T08_T09_T44_ORIGINAL": "NOT_EXECUTED",
+    "withdrawal_fence": {
+      "scope": "single existing JourneyJournal monitor, immutable snapshot, no cache",
+      "allowed_state": "PUBLISHED exactly",
+      "denied": "missing/WITHDRAWN/null/unknown state or malformed/mismatched projection -> NOT_FOUND without payload",
+      "projection_ids": "exact enrollment tenant/version; canonical non-nil journeyId",
+      "concurrency": "snapshot linearizes under same monitor as withdraw; a prior concurrent read may linearize before withdrawal, subsequent reads see current state",
+      "test": "bounded monitor/latch ordering without sleeps",
+      "replay": "coach and client denied after actual withdraw and Journal.open; enrollment remains; repeat withdraw idempotent",
+      "authority": "SYNTHETIC_TEST_ONLY; no live PIAC/KDB or SQL approval"
+    },
+    "assignment_link": {
+      "accessors": [
+        "JourneyKernel.assignmentSnapshot(UUID)",
+        "JourneyJournal.assignmentSnapshot(UUID)"
+      ],
+      "scope": "internal immutable read-only map entry, no HTTP or authority grant",
+      "bindings": [
+        "assignmentId",
+        "tenantId",
+        "clientId",
+        "journeyVersionId"
+      ],
+      "allowed_status": "active exactly; existing source status",
+      "denial": "NOT_FOUND and null payload for missing/corrupt/mismatched/unknown local assignment",
+      "atomicity": "all three storage observations under same Journal monitor; no cache",
+      "withdrawal": "active assignment never overrides PUBLISHED-only fence",
+      "source_revoke_operation": "NONE; unsupported state variants are SYNTHETIC_TEST_ONLY faults",
+      "external_attestation": "NONE"
+    }
+  },
+  "tenant_client_domain": {
+    "scope": "immutable owner-local ATC-04 identity snapshots only",
+    "objects": [
+      "BusinessTenant AG-ARC-001",
+      "ClientProfile AG-ARC-003",
+      "TenantMembership EN-ARC-002"
+    ],
+    "ids": "distinct TenantId/ClientId/MembershipId ARCAVA types and external PiacPrincipalRef PIAC type; canonical non-nil local UUIDs",
+    "issuer_verification": "NONE; UUID bytes do not establish namespace provenance or identity equivalence",
+    "tenant_states": [
+      "PROVISIONING",
+      "ACTIVE",
+      "SUSPENDED",
+      "CLOSED"
+    ],
+    "missing_tenant_status": "UNKNOWN; never default ACTIVE",
+    "client_and_membership_lifecycle": "UNKNOWN or NOT_VERIFIED knowledge metadata only; exact state enums unresolved",
+    "verification": "NOT_VERIFIED for every snapshot, including ACTIVE tenant label",
+    "membership_fields": "id, parent tenant, external principal ref, explicit created_at, optional uint64 revision; no invented role/validity/revocation",
+    "authorization": "NONE; independent existing OwnerGuard still required and production default closed",
+    "connection_to_enrollment_path": "Identity-only ClientRelationshipModel projection reuses ID types; no full model/PIAC authority binding",
+    "privacy": "opaque private ref only; diagnostic redaction; validation does not echo raw malformed IDs",
+    "unresolved_seams": [
+      "ClientProfile profile_status enum",
+      "TenantMembership actual lifecycle/role/validity/revocation registry",
+      "current trusted external decision and activation provenance",
+      "ClientProfile to PIAC principal/adapter binding"
+    ]
+  },
+  "coach_enrollment_domain": {
+    "scope": "immutable ATC-04 AG-ARC-004/005 local snapshots only",
+    "ids": "distinct ARCAVA AssignmentId/EnrollmentId/JourneyVersionRef; reuse TenantId/ClientId/PiacPrincipalRef; canonical non-nil UUIDs",
+    "assignment_states": [
+      "PENDING",
+      "ACTIVE",
+      "ENDED",
+      "REVOKED"
+    ],
+    "enrollment_states": [
+      "PENDING",
+      "ACTIVE",
+      "COMPLETED",
+      "CANCELLED",
+      "REVOKED"
+    ],
+    "role": "UNKNOWN/NOT_VERIFIED knowledge metadata; concrete source role unresolved",
+    "time": "required validFrom/effectiveAt; optional validUntil strictly after validFrom; explicit start-inclusive/end-exclusive current-window check; no implicit host clock or fabricated times",
+    "scope_checks": "exact tenant/client links; no ClientProfile/PIAC principal equivalence inferred",
+    "verification": "NOT_VERIFIED even ACTIVE or within declared interval",
+    "authority": "NONE; independent existing OwnerGuard and real producer proof still required",
+    "persisted_source": "AssignmentView/EnrollmentLink unchanged; no conversion or second mutable store",
+    "residual_seams": [
+      "exact assignment role",
+      "authenticated current identity/access/consent/share/entitlement decisions",
+      "activation and transition provenance",
+      "reviewed full-aggregate mapping to existing persisted records beyond identity-only projection"
+    ]
+  },
+  "typed_journal_identity_bridge": {
+    "entrypoint": "ClientRelationshipModel.typedIdentity()",
+    "source_fields_in_order": [
+      "tenantId",
+      "clientId",
+      "versionId",
+      "assignmentId",
+      "enrollmentId"
+    ],
+    "target_types_in_order": [
+      "TenantModel.TenantId",
+      "TenantModel.ClientId",
+      "CoachEnrollmentModel.JourneyVersionRef",
+      "CoachEnrollmentModel.AssignmentId",
+      "CoachEnrollmentModel.EnrollmentId"
+    ],
+    "operations": "pure immutable identity mapping, exact local scope/identity comparisons only",
+    "not_proven": "current storage linkage, authorization, provenance or lifecycle",
+    "aggregate_construction": "NONE; Journal lacks required role/PIAC/time/activation fields",
+    "state_conversion": "NONE; local active is not admitted AssignmentState.ACTIVE",
+    "storage_and_wire_changes": "NONE; existing lookup order, atomic monitor, guard, PUBLISHED fence, active linkage and UUID view unchanged",
+    "privacy": "new typed projection diagnostic redaction; safe mismatch messages",
+    "tests": "5 pure contracts + 2 real journal/replay/guard-denial cases; prior 68 retained"
+  }
+}

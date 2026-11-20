@@ -1,0 +1,354 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:arcava:CT-ARC-003:1.0:result",
+  "title": "CT-ARC-003 result v1.0",
+  "allOf": [
+    {
+      "$ref": "urn:arcava:types:1.0:ResponseEnvelope#/$defs/responseEnvelopeBase"
+    },
+    {
+      "type": "object",
+      "required": [
+        "payload"
+      ],
+      "properties": {
+        "contract_id": {
+          "const": "CT-ARC-003"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "outcome": {
+          "const": "OK"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "enrollment_ref",
+            "enrollment_revision",
+            "enrollment_state",
+            "assignment_refs",
+            "effective_access"
+          ],
+          "properties": {
+            "enrollment_ref": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "producer_namespace",
+                "object_type",
+                "stable_id"
+              ],
+              "properties": {
+                "producer_namespace": {
+                  "const": "ARCAVA"
+                },
+                "object_type": {
+                  "const": "Enrollment"
+                },
+                "stable_id": {
+                  "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                }
+              }
+            },
+            "enrollment_revision": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            },
+            "enrollment_state": {
+              "enum": [
+                "PENDING",
+                "ACTIVE",
+                "COMPLETED",
+                "CANCELLED",
+                "REVOKED"
+              ]
+            },
+            "assignment_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "producer_namespace",
+                  "object_type",
+                  "stable_id"
+                ],
+                "properties": {
+                  "producer_namespace": {
+                    "const": "ARCAVA"
+                  },
+                  "object_type": {
+                    "const": "CoachAssignment"
+                  },
+                  "stable_id": {
+                    "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                  }
+                }
+              }
+            },
+            "programme_binding": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "binding_id",
+                "programme_id",
+                "binding_revision",
+                "binding_hash",
+                "taxonomy_version_id",
+                "os_module_id",
+                "validity"
+              ],
+              "properties": {
+                "binding_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                },
+                "programme_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                },
+                "binding_revision": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                },
+                "binding_hash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "taxonomy_version_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                },
+                "os_module_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                },
+                "validity": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "valid_from",
+                    "valid_until",
+                    "revocation_state"
+                  ],
+                  "properties": {
+                    "valid_from": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "Z$"
+                    },
+                    "valid_until": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "Z$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "revocation_state": {
+                      "enum": [
+                        "ACTIVE",
+                        "REVOKED",
+                        "EXPIRED"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "effective_access": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "decision_id",
+                "principal_id",
+                "scope",
+                "purpose",
+                "policy_version",
+                "decision",
+                "reason_codes",
+                "validity",
+                "evidence_ref"
+              ],
+              "properties": {
+                "decision_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                },
+                "principal_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "latest"
+                  }
+                },
+                "scope": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind",
+                        "subject_principal_id"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "const": "PERSONAL"
+                        },
+                        "subject_principal_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "not": {
+                            "const": "latest"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind",
+                        "tenant_id"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "const": "TENANT"
+                        },
+                        "tenant_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "not": {
+                            "const": "latest"
+                          }
+                        },
+                        "client_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "not": {
+                            "const": "latest"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "const": "PUBLIC"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "purpose": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "policy_version": {
+                  "type": "string"
+                },
+                "decision": {
+                  "enum": [
+                    "ALLOW",
+                    "DENY"
+                  ]
+                },
+                "reason_codes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "validity": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "valid_from",
+                    "valid_until",
+                    "revocation_state"
+                  ],
+                  "properties": {
+                    "valid_from": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "Z$"
+                    },
+                    "valid_until": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "Z$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "revocation_state": {
+                      "enum": [
+                        "ACTIVE",
+                        "REVOKED",
+                        "EXPIRED"
+                      ]
+                    }
+                  }
+                },
+                "evidence_ref": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "producer_namespace",
+                    "object_type",
+                    "stable_id"
+                  ],
+                  "properties": {
+                    "producer_namespace": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "object_type": {
+                      "const": "ProducerAuditRecord"
+                    },
+                    "stable_id": {
+                      "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "error": false
+      }
+    }
+  ],
+  "unevaluatedProperties": false
+}

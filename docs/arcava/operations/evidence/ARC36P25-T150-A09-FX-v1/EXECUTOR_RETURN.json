@@ -1,0 +1,72 @@
+{
+  "RETURN_ID": "ARC36P25-T150-A09-FX-v1-OWNER-SCOPED-FIXTURE-CANDIDATE-01",
+  "LANE": "ARCAVA",
+  "STATUS": "CANDIDATE_IMPLEMENTED_LOCAL_VALIDATED_CI_SUCCESS_PENDING_OWNER_QS",
+  "BASE_SHA": "96c80d97878185d2f1aa62bfa545aebe37d1c67d",
+  "EXECUTION_SOURCE_SHA": "3ad628bba20e2410f6eb5e1ba66cf5b735e9f8f1",
+  "EVIDENCE_ONLY_COMMIT_PARENT": "3ad628bba20e2410f6eb5e1ba66cf5b735e9f8f1",
+  "CODE_SHA256": "e35841798aec59ec3f6ac1b64dde4276b8f0136120c6c187a76fd6d5deef84c7",
+  "TEST_SHA256": "91b108440765832812540d663b45f2e3be00b0d2ed04c5e5953ecd5c125365d7",
+  "FIXTURE_FILE_SHA256": "428ec30e9d92135ef83deac504d3c2c1396cb0b63340dfe163456cdc6ef05c7e",
+  "MATRIX_FILE_SHA256": "e7ddf0572b3adbfc360b035c8507a21068bb97d95850f3fac9756f601bc63cf4",
+  "CANONICAL_DIGESTS": [
+    "c9fce88492d96aa318da94251bbdf7b2bbb75be7fe5375c240149e343047ce14",
+    "be1f8209c39324dbf7c66aa09906f4c463edb5340ebbc619a503e6999c53cfd5"
+  ],
+  "CHANGED_FILES": [
+    "docs/arcava/admission/synthetic/A09-FX-v1/manifest.candidate.json",
+    "docs/arcava/admission/synthetic/A09-FX-v1/applicability.json",
+    "scripts/arcava/validate_a09_fx_v1_candidate.py",
+    "tests/migration/arcava/test_a09_fx_v1_candidate.py",
+    "docs/arcava/operations/evidence/ARC36P25-T150-A09-FX-v1/EXECUTOR_RETURN.json"
+  ],
+  "TESTS": [
+    {
+      "command": "python3 scripts/arcava/validate_a09_fx_v1_candidate.py --manifest docs/arcava/admission/synthetic/A09-FX-v1/manifest.candidate.json --matrix docs/arcava/admission/synthetic/A09-FX-v1/applicability.json",
+      "exit": 0
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/migration/arcava -p test_a09_fx_v1_candidate.py -v",
+      "exit": 0,
+      "tests": 2,
+      "negative_subcases": 9
+    }
+  ],
+  "CI": [
+    {
+      "id": 41456597714,
+      "status": "SUCCESS"
+    },
+    {
+      "id": 41456607634,
+      "status": "SUCCESS"
+    },
+    {
+      "id": 41456607925,
+      "status": "SUCCESS"
+    }
+  ],
+  "CI_SCOPE": "existing regressions only; new candidate validator/tests executed locally; PG17 not rerun",
+  "SOURCE": "ARC09 original exact 48 oracle rows and unit mappings; candidate hashes are offline integrity pins, not owner approval",
+  "DELIVERY": {
+    "source_oracles": 48,
+    "fixture_slot_groups": 14,
+    "implemented_synthetic": "tenant/client/coach identifier scaffolding only",
+    "runtime_claims": "NONE"
+  },
+  "OPEN_GATES": [
+    "Whole-suite A09-FX-v1 approved manifest/checksum absent",
+    "crash/restore fixture runtime evidence NOT_MATERIALIZED",
+    "foreign-owner trusted bindings DEPENDS_ON_NONOWNER",
+    "T01 PARTIAL_NOT_ADMITTED",
+    "T04/T44/T48 NOT_EXECUTED",
+    "T48 0/86",
+    "T150 PARTIAL",
+    "SECURITY_NOT_GRANTED"
+  ],
+  "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+  "BLOCKER": "NONE_FOR_CANDIDATE_BUILD; owner approval, missing payloads/runtime evidence and foreign bindings remain open",
+  "SQL": "NOT_EXECUTED",
+  "HOSTED_MERGE_DEPLOY": "NONE",
+  "WORKFLOW": "CL-WORKFLOW-COMPACT-20261102-01"
+}

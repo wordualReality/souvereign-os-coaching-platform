@@ -1,0 +1,15 @@
+{
+  "fixture_class": "SYNTHETIC_OFFLINE",
+  "replace_index": 3,
+  "pin": {
+    "set": "contract",
+    "contract_id": "CT-ARC-002",
+    "version": "1.0",
+    "kind": "request",
+    "path": "contracts/arcava/CT-ARC-002/1.0/missing.schema.json",
+    "sha256": "23b388323182cac055da79f9a2ef5941c2760e82ee5bc742d5e9ad2f945c7cc8"
+  },
+  "expected": {
+    "reason": "missing_file"
+  }
+}

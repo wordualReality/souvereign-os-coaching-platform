@@ -1,0 +1,693 @@
+{
+  "RETURN_ID": "ARC36P25-T020-TRUSTED-CONTEXT-SOURCE-READINESS-E0-01",
+  "LANE": "ARCAVA",
+  "STATUS": "E0_SOURCE_READINESS_LEDGER_COMPLETE_Q2_OPEN_UNVERIFIED",
+  "GATE": "Q2 OPEN_UNVERIFIED / BL-ARC-01 OPEN_SCOPED / NO_FORMAL_GATE_CLOSED",
+  "PLAN_POSITION": "ARC-36/P25 7/10 ACTIVE; ARC10-T020 ACTIVE_LOCAL_WITH_Q2_OPEN; T150 PARTIAL",
+  "BASE_SHA": "154a5914730eb9d53ced813f000e844c87072652",
+  "SOURCE_SHA": "55af6fd7c10ee25e6df9a471058b6d75f23d5d59",
+  "EXECUTION_SOURCE_SHA": "55af6fd7c10ee25e6df9a471058b6d75f23d5d59",
+  "SOURCE_VALIDATION_SHA": "55af6fd7c10ee25e6df9a471058b6d75f23d5d59",
+  "CURRENT_SHA": "55af6fd7c10ee25e6df9a471058b6d75f23d5d59",
+  "CURRENT_SHA_SCOPE": "exact source-consistency-tested documentation parent; final receipt child resolved from GitHub HEAD",
+  "SOURCE_COMMIT_PARENT_SHA": "154a5914730eb9d53ced813f000e844c87072652",
+  "EVIDENCE_COMMIT_PARENT_SHA": "55af6fd7c10ee25e6df9a471058b6d75f23d5d59",
+  "EVIDENCE_ONLY_CHILD": {
+    "path": "docs/arcava/operations/evidence/ARC36P25-T020-TRUSTED-CONTEXT-SOURCE-READINESS-E0-01/EXECUTOR_RETURN.json",
+    "sha": "RESOLVED_FROM_GITHUB_HEAD_BY_BUILDER"
+  },
+  "ADOPTION": {
+    "CL-GATE-CLOSURE-20261105-01": "ACKNOWLEDGED_AND_APPLIED_IN_THIS_REGULAR_EXECUTOR_RETURN",
+    "BL-ARC-01": "ACKNOWLEDGED_OPEN_SCOPED; formal integration/admission blocked, local E0 allowed"
+  },
+  "CHANGED_FILES": [
+    {
+      "path": "docs/arcava/security/trusted-context-source-readiness-e0-selfcheck.py",
+      "sha256": "8ef1d487a352a45b478e5a8e690a33d49f4db17a8aa59707ac4ffa14d0505a79"
+    },
+    {
+      "path": "docs/arcava/security/trusted-context-source-readiness-e0.json",
+      "sha256": "313598699be7c50da97a42b3a018614b5c00785d3786a7e9b6a610215f408c9f"
+    },
+    {
+      "path": "docs/arcava/security/trusted-context-source-readiness-e0.md",
+      "sha256": "11d6b09e45a33ba82b9797dbe1d96bb80eb06e878f18b395f2979baaf127447b"
+    }
+  ],
+  "EVIDENCE_PATHS": [
+    "docs/arcava/security/trusted-context-source-readiness-e0-selfcheck.py",
+    "docs/arcava/security/trusted-context-source-readiness-e0.json",
+    "docs/arcava/security/trusted-context-source-readiness-e0.md",
+    "docs/arcava/operations/evidence/ARC36P25-T020-TRUSTED-CONTEXT-SOURCE-READINESS-E0-01/EXECUTOR_RETURN.json"
+  ],
+  "EVIDENCE_URL": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/55af6fd7c10ee25e6df9a471058b6d75f23d5d59/docs/arcava/security/trusted-context-source-readiness-e0.json",
+  "SOURCE_RESULT": {
+    "CT_SHC_SCHEMA_FILES": "VERIFIED_AVAILABLE in discovered Repo A proof branch; not globally absent",
+    "schema_versions": "actual declared 1.0 for CT-SHC-001..005",
+    "manifest_matches": "5/5 SHA256 match",
+    "producer_repo": "wordualReality/souvereign-os",
+    "producer_source_sha": "9ae5950ed2e556b6d6301f3d19d81a14992d6be7",
+    "additional_snapshot_comparison": [
+      {
+        "branch": "main",
+        "sha": "e7080491b31f64f338e3e4cb39d6b74cb1b0d30f",
+        "tree_complete": true,
+        "CT_SHC_paths": "ABSENT in this tree"
+      },
+      {
+        "branch": "impl/sov-apb-p04-local-dst-window-20261105",
+        "sha": "edb40836baf8cec631d1873d60b5b57f7706a820",
+        "tree_complete": true,
+        "comparison": "five CT-SHC schema blobs and PiacDecisionProofVerifier blob identical to pinned proof snapshot"
+      }
+    ],
+    "availability_not_authority": "source bytes and manifest verified; no producer deployment/issuer/consumer admission inferred"
+  },
+  "CONTRACTS": [
+    {
+      "id": "CT-SHC-001",
+      "path": "contracts/shared-core/ct-shc-001.actor-identity-context.v1.schema.json",
+      "schema_version": "1.0",
+      "sha256": "4b77feee91d7cb86013fd3a6f59e7178be3e744ab6d76d6b58844b9a7b03783f",
+      "git_blob_sha": "812495f244bca0a4cd5f05b4f6613018c0fa3d12",
+      "authority": "UNVERIFIED_FOR_ARCAVA"
+    },
+    {
+      "id": "CT-SHC-002",
+      "path": "contracts/shared-core/ct-shc-002.auth-session-context.v1.schema.json",
+      "schema_version": "1.0",
+      "sha256": "7ec82462615fb1b071018d755279c62f9f4c4d6c4c7f974a7f9157a6da665d35",
+      "git_blob_sha": "c7ee41677d674284d485bdf0a3c59e54a7d22656",
+      "authority": "UNVERIFIED_FOR_ARCAVA"
+    },
+    {
+      "id": "CT-SHC-003",
+      "path": "contracts/shared-core/ct-shc-003.tenant-access-context.v1.schema.json",
+      "schema_version": "1.0",
+      "sha256": "0e55b200c975bbf49432c08d627215c6696351ae52292bfab21ef3c28f0db0af",
+      "git_blob_sha": "c4a3b2450d2b00f0e46a189724e9debe3d194d41",
+      "authority": "UNVERIFIED_FOR_ARCAVA"
+    },
+    {
+      "id": "CT-SHC-004",
+      "path": "contracts/shared-core/ct-shc-004.consent-decision.v1.schema.json",
+      "schema_version": "1.0",
+      "sha256": "e3c21f00a8f0dc62f7aa09ad8474163df6ab512ace4064f2d9ab8375531a40b8",
+      "git_blob_sha": "b5da15df141bb8dc3848ab420d3add325e0429e1",
+      "authority": "UNVERIFIED_FOR_ARCAVA"
+    },
+    {
+      "id": "CT-SHC-005",
+      "path": "contracts/shared-core/ct-shc-005.entitlement-access-decision.v1.schema.json",
+      "schema_version": "1.0",
+      "sha256": "8ffd258108bf1f92ef457130c6144b98850becccbaa5e28de86d0fe1ac0f47a4",
+      "git_blob_sha": "f8ba0a3f71682f9ab52a2cea0d3c1ed1ad5dead9",
+      "authority": "UNVERIFIED_FOR_ARCAVA"
+    }
+  ],
+  "CONSUMER_READINESS": {
+    "gate_rows": [
+      "SESSION",
+      "TENANT_MEMBERSHIP",
+      "ACCESS",
+      "ASSIGNMENT",
+      "CONSENT",
+      "SHARE",
+      "ENTITLEMENT"
+    ],
+    "dimensions": "issuer/audience/principal/tenant/client/resource/purpose/operation/revision/effectiveAt/expiresAt/revokedAt/policy-decision/version-hash/backend binding explicitly recorded per gate",
+    "live_context_source": "ABSENT; public OwnerGuard resolves null / PIAC_NOT_CONNECTED",
+    "proof_candidate": "existing signed verifier accepts KDB_SOURCE_INTAKE only; pinned producer receipt reports unconfigured live authority and no Arcava adoption; no live deployment queried",
+    "missing_binding": "Arcava SENSITIVE_CLIENT_READ profile, authenticated current issuer/audience/workload and principal-client/role/independent revision/validity/revocation mapping",
+    "independent_domain_gates": "ASSIGNMENT and SHARE remain separate ARCAVA authority obligations, not extra CT-SHC contracts"
+  },
+  "GATE_RECORD": {
+    "GATE_ID": "Q2",
+    "PARENT_PLAN_ID": "ARC-36/P25 (ARC10)",
+    "PARENT_STEP": "ARC10-T020",
+    "OWNER": "GPT_BUILDER_ARCAVA",
+    "GATE_TYPE": "EXTERNAL_PIAC_PRODUCER_AUTHORITY_AND_TRUSTED_CONSUMER_BINDING",
+    "BLOCKED_SCOPE": "live identity/session/tenant/access/consent/share/entitlement authorization and dependent full T020/T110 security/integration admission only",
+    "MISSING_CRITERION": "Arcava owner-admitted producer source selection, authenticated issuer/audience/custody and current binding of each independent gate to principal/client/tenant/resource/purpose/operation/revisions/validity; actual reviewed ContextSource and independent admission evidence",
+    "CLOSURE_CRITERIA": [
+      "owner-reviewed producer source/version/checksum and exact Arcava operation/role/identity contract",
+      "real authenticated backend binding with current revocation/freshness and independent domain gates",
+      "positive/negative current/expired/revoked/stale/unbound tests on actual binding",
+      "required independent security and operational evidence"
+    ],
+    "EVIDENCE_REQUIRED": [
+      "producer manifests and source hashes",
+      "issuer/audience/workload/custody and revocation evidence",
+      "consumer contract/CI/runtime tests",
+      "required independent security QS"
+    ],
+    "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+    "NEXT_ACTION": "request existing SOV/PIAC producer owner review of the pinned CT-SHC bundle and the precise Arcava operation/binding gaps (R01); keep live path closed",
+    "REVIEW_TRIGGER": "this E0 return or newly verified producer authority artifact",
+    "STATUS": "OPEN_UNVERIFIED",
+    "BLOCKER_ID": "BL-ARC-01"
+  },
+  "BLOCKER_RECORD": {
+    "id": "BL-ARC-01",
+    "status": "OPEN",
+    "blocked_operations": [
+      "full T150/T020/T110 admission",
+      "Q2 live authorization/integration",
+      "original A09/T48 and independent security/hosted/release acceptance"
+    ],
+    "independent_allowed_work": [
+      "source-pinned local E0 ledger",
+      "previously authorized local Arcava implementation without live authority"
+    ],
+    "board_write": "NONE; Builder handles existing row 8"
+  },
+  "OWNER_REQUESTS": [
+    {
+      "id": "R01",
+      "requested_resolver": "existing SOV/PIAC producer owner",
+      "assignment_status": "UNASSIGNED_UNVERIFIED; architecture owner identified, no dispatch claimed",
+      "missing_capability": "owner-approved Arcava-consumable CT-SHC source bundle and exact operation/role/identity binding contract",
+      "request": "Confirm or supersede the pinned five v1.0 hashes; identify supported authenticated Arcava sensitive-read producer/profile and ClientProfile/principal mapping, independent revision/validity/revocation correlation. Existing KDB-only proof is not an Arcava grant.",
+      "acceptance": "source/version/hash and reviewed operation/field mapping with explicit issuer/audience/currentness obligations; no secrets",
+      "return_to": "GPT_BUILDER_ARCAVA / Q2 / ARC10-T020"
+    },
+    {
+      "id": "R02",
+      "requested_resolver": "existing PIAC workload/key-custody operator",
+      "assignment_status": "UNASSIGNED_UNVERIFIED",
+      "missing_capability": "admitted issuer/audience/workload authentication, custody/rotation and current revocation evidence",
+      "request": "Provide non-secret operational authority and freshness binding evidence for the reviewed source/profile; do not send credentials or start hosted operations under this E0 packet.",
+      "acceptance": "verifiable non-secret issuer/audience/custody/revocation evidence and actual accountable operator",
+      "return_to": "GPT_BUILDER_ARCAVA / Q2 / ARC10-T020"
+    },
+    {
+      "id": "R03",
+      "requested_resolver": "GPT_BUILDER_ARCAVA",
+      "assignment_status": "EXISTING_LANE_OWNER",
+      "missing_capability": "reviewed consumer mapping including independent Assignment/Share and role/client identity semantics",
+      "request": "Consume E0 once, obtain R01 source decision, then select one already authorized closure delta; only admit a backend ContextSource implementation after exact required contracts and mandate exist.",
+      "acceptance": "bounded consumer binding specification; default-closed path preserved until actual tests/admission",
+      "return_to": "ARC10-T020"
+    },
+    {
+      "id": "R04",
+      "requested_resolver": "existing independent security/admission authority",
+      "assignment_status": "UNASSIGNED_UNVERIFIED; no new reviewer appointed",
+      "missing_capability": "required independent security and operational admission of actual binding",
+      "request": "After material implementation, review actual positive/negative current/expired/revoked/stale/unbound and cross-tenant/subject/resource tests; static schemas and synthetic tests are insufficient.",
+      "acceptance": "qualified source-bound independent return for the appropriate scope",
+      "return_to": "GPT_BUILDER_ARCAVA / Q2 / ARC10-T020"
+    }
+  ],
+  "EXECUTION_STACK": {
+    "parent": "ARC10-T020 ACTIVE_LOCAL_WITH_Q2_OPEN",
+    "active_leaf": "this bounded E0 inventory",
+    "child_plan": "NOT_CREATED; no child plan required for one completed inventory leaf",
+    "live_path": "WAITING_EXTERNAL only for Q2-dependent operations",
+    "return_to": "ARC10-T020",
+    "next_action": "R01: existing PIAC producer owner source/adoption and Arcava operation/binding decision; no message dispatched"
+  },
+  "NO_CHILD_PLAN": "One bounded E0 inventory leaf; no GATE_PROGRESS needed or new overall/child plan created",
+  "TESTS_CI": {
+    "mechanical_validation": "PASS_SOURCE_CONSISTENCY_ONLY; 5 schema/manifest matches, 7 gate rows, 19 producer files and 10 local source files hashed",
+    "commands": [
+      {
+        "command": "python3 docs/arcava/security/trusted-context-source-readiness-e0-selfcheck.py",
+        "exit": 0,
+        "scope": "fresh immutable producer-byte and tree fetch before commit",
+        "result": {
+          "result": "PASS_SOURCE_CONSISTENCY_ONLY",
+          "contracts": 5,
+          "manifest_matches": 5,
+          "gate_rows": 7,
+          "producer_files_hashed": 19,
+          "local_sources_hashed": 10,
+          "runtime_tests": "NOT_EXECUTED",
+          "Q2": "OPEN_UNVERIFIED",
+          "BL-ARC-01": "OPEN"
+        }
+      },
+      {
+        "command": "python3 docs/arcava/security/trusted-context-source-readiness-e0-selfcheck.py --producer-cache <temporary pinned non-secret source cache>",
+        "exit": 0,
+        "source_sha": "55af6fd7c10ee25e6df9a471058b6d75f23d5d59",
+        "scope": "same pinned bytes plus immutable tree reads at exact documentation commit",
+        "result": {
+          "result": "PASS_SOURCE_CONSISTENCY_ONLY",
+          "contracts": 5,
+          "manifest_matches": 5,
+          "gate_rows": 7,
+          "producer_files_hashed": 19,
+          "local_sources_hashed": 10,
+          "runtime_tests": "NOT_EXECUTED",
+          "Q2": "OPEN_UNVERIFIED",
+          "BL-ARC-01": "OPEN"
+        }
+      },
+      {
+        "command": "git diff --check",
+        "exit": 0
+      }
+    ],
+    "JAVA_CHANGED": false,
+    "NEW_JUNIT_CASES": 0,
+    "MAVEN_COMMANDS_BY_EXECUTOR": "NOT_EXECUTED_FOR_E0",
+    "RUNTIME_PIAC_SECURITY_TESTS": "NOT_EXECUTED",
+    "PRIOR_75": "unchanged and previously accepted at b2f28610d879d8dac4adc7a171053ee981df0f04; not re-QS or a fresh E0 runtime acceptance claim",
+    "CI_POLICY": "Docs push auto-triggers existing workflows; following runs/jobs are informational observations only. They may rerun prior regressions automatically but do not test live Q2 or close admission.",
+    "CI_OBSERVED_AT_UTC": "2026-11-05T14:39:41.619495+00:00",
+    "AUTO_TRIGGERED_CI_RUNS": [
+      {
+        "conclusion": "success",
+        "databaseId": 42046775410,
+        "event": "pull_request",
+        "headSha": "55af6fd7c10ee25e6df9a471058b6d75f23d5d59",
+        "name": "arcava-a09-offline-assurance",
+        "status": "completed",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046775410",
+        "jobs": [
+          {
+            "databaseId": 127311751757,
+            "name": "Arcava A09 offline suboracles / Python 3.12.3",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046775410/job/127311751757"
+          }
+        ]
+      },
+      {
+        "conclusion": "success",
+        "databaseId": 42046775499,
+        "event": "pull_request",
+        "headSha": "55af6fd7c10ee25e6df9a471058b6d75f23d5d59",
+        "name": "project-b-contract-validation",
+        "status": "completed",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046775499",
+        "jobs": [
+          {
+            "databaseId": 127311751350,
+            "name": "validate-contracts",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046775499/job/127311751350"
+          },
+          {
+            "databaseId": 127311752101,
+            "name": "web-renderer-smoke",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046775499/job/127311752101"
+          }
+        ]
+      },
+      {
+        "conclusion": "success",
+        "databaseId": 42046775895,
+        "event": "pull_request",
+        "headSha": "55af6fd7c10ee25e6df9a471058b6d75f23d5d59",
+        "name": "arcava-journey-kernel",
+        "status": "completed",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046775895",
+        "jobs": [
+          {
+            "databaseId": 127311753666,
+            "name": "Persisted loopback journey path / JDK 21",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046775895/job/127311753666"
+          },
+          {
+            "databaseId": 127311754133,
+            "name": "Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046775895/job/127311754133"
+          },
+          {
+            "databaseId": 127311754176,
+            "name": "JourneyKernel fixture / JDK 25",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046775895/job/127311754176"
+          },
+          {
+            "databaseId": 127311754347,
+            "name": "JourneyKernel fixture / JDK 21",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046775895/job/127311754347"
+          },
+          {
+            "databaseId": 127311754352,
+            "name": "Persisted loopback journey path / JDK 25",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046775895/job/127311754352"
+          }
+        ]
+      },
+      {
+        "conclusion": "success",
+        "databaseId": 42046762892,
+        "event": "push",
+        "headSha": "55af6fd7c10ee25e6df9a471058b6d75f23d5d59",
+        "name": "arcava-a09-offline-assurance",
+        "status": "completed",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046762892",
+        "jobs": [
+          {
+            "databaseId": 127311707095,
+            "name": "Arcava A09 offline suboracles / Python 3.12.3",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046762892/job/127311707095"
+          }
+        ]
+      },
+      {
+        "conclusion": "success",
+        "databaseId": 42046763056,
+        "event": "push",
+        "headSha": "55af6fd7c10ee25e6df9a471058b6d75f23d5d59",
+        "name": "arcava-journey-kernel",
+        "status": "completed",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046763056",
+        "jobs": [
+          {
+            "databaseId": 127311708133,
+            "name": "Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046763056/job/127311708133"
+          },
+          {
+            "databaseId": 127311708284,
+            "name": "JourneyKernel fixture / JDK 25",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046763056/job/127311708284"
+          },
+          {
+            "databaseId": 127311708742,
+            "name": "Persisted loopback journey path / JDK 25",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046763056/job/127311708742"
+          },
+          {
+            "databaseId": 127311708841,
+            "name": "JourneyKernel fixture / JDK 21",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046763056/job/127311708841"
+          },
+          {
+            "databaseId": 127311708939,
+            "name": "Persisted loopback journey path / JDK 21",
+            "status": "completed",
+            "conclusion": "success",
+            "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/42046763056/job/127311708939"
+          }
+        ]
+      }
+    ]
+  },
+  "JAVA_TEST_DECISION": "No concrete untested local fail-closed case evidenced after source review; existing tests cover missing/bad/expired/revoked/stale/unbound/provider-error/default closure, so no duplicate JUnit suite added",
+  "SOURCE_PINS": {
+    "local_sources": [
+      {
+        "path": "services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java",
+        "sha256": "44d528f7f3e2d28b484ae41d4ebe8adf3e9f006fd51bce0834b06607d90c4223",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java"
+      },
+      {
+        "path": "services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java",
+        "sha256": "0930589e3ebd1f6ae069d73f24e99a82687d2b2d73eadda5a991aab4be708a96",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java"
+      },
+      {
+        "path": "services/api/src/main/java/com/projectb/api/arcava/security/RoleScopePolicy.java",
+        "sha256": "85d60f7c99d305e0e1fa5a955ad8920fb4d8cfc184f74cf6c07379b41c246057",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/RoleScopePolicy.java"
+      },
+      {
+        "path": "services/api/src/main/java/com/projectb/api/arcava/services/ArcavaAccessService.java",
+        "sha256": "621e5514befb145ef0df9641d0cee182b6d6cee468c6d9bd9df8e77b70e7f68b",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/services/ArcavaAccessService.java"
+      },
+      {
+        "path": "services/api/src/main/java/com/projectb/api/http/TrustedPiacVerifier.java",
+        "sha256": "bc1c6e9781e5a260e0b6e9d00483194064cf7f740def1548af02e9c138a112af",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/http/TrustedPiacVerifier.java"
+      },
+      {
+        "path": "services/api/src/main/java/com/projectb/api/active/PiacDecisionConsumer.java",
+        "sha256": "5b028806fed11c584ef4912d9bc5e93cc657d2dacd9b9593fbff3eac1b30eff6",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/active/PiacDecisionConsumer.java"
+      },
+      {
+        "path": "services/api/src/main/java/com/projectb/api/active/DenyByDefaultPiacConsumer.java",
+        "sha256": "c284b6475af15ab372a00a8a5e8359688670ce230f4d79bdbc2d2cd6a611d464",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/active/DenyByDefaultPiacConsumer.java"
+      },
+      {
+        "path": "services/api/src/test/java/com/projectb/api/arcava/security/OwnerGuardContractTest.java",
+        "sha256": "205db8501abc80f03a53d7942e56f0bb029e18106f46405fbfc10ee10a1e75a7",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/test/java/com/projectb/api/arcava/security/OwnerGuardContractTest.java"
+      },
+      {
+        "path": "contracts/arcava/contract-manifest.json",
+        "sha256": "e0dfef2598eef6885221521a768a46d85f46beac8c47b17fd9447a90bcba88d8",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/contracts/arcava/contract-manifest.json"
+      },
+      {
+        "path": "docs/arcava/security/control-manifest.json",
+        "sha256": "f1baf231c0a5f3bf3ccf795a3fdcd2abd4df8654f1bf56dc7f0bb741b7cc54cb",
+        "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/docs/arcava/security/control-manifest.json"
+      }
+    ],
+    "producer_sources": [
+      {
+        "path": "contracts/shared-core/ct-shc-001.actor-identity-context.v1.schema.json",
+        "git_blob_sha": "812495f244bca0a4cd5f05b4f6613018c0fa3d12",
+        "sha256": "4b77feee91d7cb86013fd3a6f59e7178be3e744ab6d76d6b58844b9a7b03783f",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-001.actor-identity-context.v1.schema.json"
+      },
+      {
+        "path": "contracts/shared-core/ct-shc-002.auth-session-context.v1.schema.json",
+        "git_blob_sha": "c7ee41677d674284d485bdf0a3c59e54a7d22656",
+        "sha256": "7ec82462615fb1b071018d755279c62f9f4c4d6c4c7f974a7f9157a6da665d35",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-002.auth-session-context.v1.schema.json"
+      },
+      {
+        "path": "contracts/shared-core/ct-shc-003.tenant-access-context.v1.schema.json",
+        "git_blob_sha": "c4a3b2450d2b00f0e46a189724e9debe3d194d41",
+        "sha256": "0e55b200c975bbf49432c08d627215c6696351ae52292bfab21ef3c28f0db0af",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-003.tenant-access-context.v1.schema.json"
+      },
+      {
+        "path": "contracts/shared-core/ct-shc-004.consent-decision.v1.schema.json",
+        "git_blob_sha": "b5da15df141bb8dc3848ab420d3add325e0429e1",
+        "sha256": "e3c21f00a8f0dc62f7aa09ad8474163df6ab512ace4064f2d9ab8375531a40b8",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-004.consent-decision.v1.schema.json"
+      },
+      {
+        "path": "contracts/shared-core/ct-shc-005.entitlement-access-decision.v1.schema.json",
+        "git_blob_sha": "f8ba0a3f71682f9ab52a2cea0d3c1ed1ad5dead9",
+        "sha256": "8ffd258108bf1f92ef457130c6144b98850becccbaa5e28de86d0fe1ac0f47a4",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-005.entitlement-access-decision.v1.schema.json"
+      },
+      {
+        "path": "contracts/manifest.json",
+        "git_blob_sha": "5edc6fceb51d1266c491bf2a6aaa0334fa2aaac3",
+        "sha256": "eccfd46721f3bf2a89261c5f6aa58f8ee00dbeb45d63ccf0b7727343686ee64c",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/manifest.json"
+      },
+      {
+        "path": "contracts/piac-decision-proof/v1/proof-envelope.schema.json",
+        "git_blob_sha": "c3b89a8a208d521cd0663a648b903866c242afce",
+        "sha256": "4111bc551d68af9ebc3e8f36377ea7e051f323053d4053451306371b3a2a04ca",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/piac-decision-proof/v1/proof-envelope.schema.json"
+      },
+      {
+        "path": "contracts/piac-decision-proof/v1/proof-envelope.schema.sha256",
+        "git_blob_sha": "7b3d248b4b805bfad8630410c272d184a527e102",
+        "sha256": "6a2030bb56c0a7840ff19d8d20cad5f40a2e9ab8c610ee7ea98c87f05302389e",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/piac-decision-proof/v1/proof-envelope.schema.sha256"
+      },
+      {
+        "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacContracts.java",
+        "git_blob_sha": "e9041ca30b7f4e9251e3d585756101d07a73a607",
+        "sha256": "4c94e7f16c57be40a77063730f6e5919d52e70c00a21ee42c1ae07968ca82b31",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacContracts.java"
+      },
+      {
+        "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacApplicationService.java",
+        "git_blob_sha": "d15cffbdb73145f77e0dd8ae821fcd79a7ce8530",
+        "sha256": "53fe51987938eace7ca7571378940de21834b82e23824ec1e7d21d0a06fc52aa",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacApplicationService.java"
+      },
+      {
+        "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/ProofVerificationRequest.java",
+        "git_blob_sha": "3cc2288f1a255779be83ce65cab516af634fe640",
+        "sha256": "56af42fb92415587abc5d01243403703d4afd551c5e252ee2a4f1b9be488e57c",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/ProofVerificationRequest.java"
+      },
+      {
+        "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/ProofPublicMetadata.java",
+        "git_blob_sha": "b6800617ff8d0695cc2f1931791c133312d6cb1d",
+        "sha256": "57c8eb303b5eddd124406eb1801ba96ec75c992a551112755ceb8549dfb426bf",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/ProofPublicMetadata.java"
+      },
+      {
+        "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/UnconfiguredProofAuthority.java",
+        "git_blob_sha": "5576073a321ac4a11c84d9f106fd93034b5669fa",
+        "sha256": "370eeb12ae3e1fb4af7c1e028c055389690fa7a1fa02b8ca5e01ffd1cf480d1b",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/UnconfiguredProofAuthority.java"
+      },
+      {
+        "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/SyntheticEphemeralProofAuthority.java",
+        "git_blob_sha": "b6cd1b92d12431011b868998b6aea3e85783df0f",
+        "sha256": "cd776147481a795a3a77a0e1b8e32cbca738d9389ab6f715c8738cab9d087272",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/SyntheticEphemeralProofAuthority.java"
+      },
+      {
+        "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/PiacDecisionProofVerifier.java",
+        "git_blob_sha": "f7423aa5e38ced42cfd565f93c6e006e37ed1064",
+        "sha256": "2030cebfc8816d55885d5611bf1a3ab1791c2525c4856ac93054c6bd0f1384c1",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/PiacDecisionProofVerifier.java"
+      },
+      {
+        "path": "evidence/returns/SOV-IMP-17/reentry-04/piac-decision-proof-v1/EXECUTOR_RETURN.md",
+        "git_blob_sha": "1f466b71823ea95819164bf9d96c79f7cf8c3b77",
+        "sha256": "6ed23933feead43367574bf8dcda185b6b307d98c2cf3f5868f24727e6e9dd47",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/evidence/returns/SOV-IMP-17/reentry-04/piac-decision-proof-v1/EXECUTOR_RETURN.md"
+      },
+      {
+        "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacDomain.java",
+        "git_blob_sha": "538c1a1c1bee18c1646f890c3a315c970e9a86ff",
+        "sha256": "9b4fd69865d81e309076b133c89dfc9fbc0ae968a707e01ea6bdd93337fd72ee",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacDomain.java"
+      },
+      {
+        "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/OperationProfileRegistry.java",
+        "git_blob_sha": "2687442eb8cf2bf09b2561865abaeebad0cf1d55",
+        "sha256": "1a17e9fba9a09a5104738df1498a556c369d57929d24109cbcf625a370a5061d",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/OperationProfileRegistry.java"
+      },
+      {
+        "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacAccessDecisionComposer.java",
+        "git_blob_sha": "f11d7cc5c28271d115fe4c99f38fa8633939dca4",
+        "sha256": "8417682a3a647bf2bfae71ea0f68a6f660231fcd125bdcac693d78fd07517e53",
+        "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacAccessDecisionComposer.java"
+      }
+    ],
+    "drive_excerpt_sources": [
+      {
+        "id": "ATC-04",
+        "url": "https://docs.google.com/document/d/1DEwzYlvC5etngjUnmAl5MCXQDWFQNgeaogxM1j8egQY/edit",
+        "modified_time_observed": "2026-10-02T13:49:15.831Z",
+        "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+        "excerpt_utf8_sha256": "324f0cf1e3f882305e74aee9147fbe1db346cd2957c90c3ccba7807d1a331b33"
+      },
+      {
+        "id": "ATC-07",
+        "url": "https://docs.google.com/document/d/1oNv0gaHdh0skkzana9KmuagggbOXdjwwdsoDW8c_3Ns/edit",
+        "modified_time_observed": "2026-10-02T13:50:09.856Z",
+        "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+        "excerpt_utf8_sha256": "f505fb5575516b397c23d01bc69d80cc449b88b9e035c461ace8906e81e7eea6"
+      },
+      {
+        "id": "ARC10",
+        "url": "https://docs.google.com/document/d/1bwZrdGHeQXZcU2V5kSQeGypNnMVUAp6I3aAgVY8fHKQ/edit",
+        "modified_time_observed": "2026-10-21T20:29:33.074Z",
+        "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+        "excerpt_utf8_sha256": "512e3a96fa4f439e2d7c09918ae0f26e25e01664ae4a1f76be21a54c89e06d05"
+      },
+      {
+        "id": "ARC09",
+        "url": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+        "modified_time_observed": "2026-09-30T14:18:48.090Z",
+        "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+        "excerpt_utf8_sha256": "f396b92bfa5be60643e1d56c0ffeb4820d31e125859b02d2fa9c89ad5193f48e"
+      },
+      {
+        "id": "ARC-07",
+        "url": "https://docs.google.com/document/d/1i9NEnvB3Kk9WK4zBNdDzo5eV7xYroW1qJ95ZEQmpZsM/edit",
+        "modified_time_observed": "2026-09-30T08:22:42.909Z",
+        "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+        "excerpt_utf8_sha256": "060ae4147db6dd3c0ad8dc9e9941b513ca987a17a08bff607070d5a7d3c72831"
+      },
+      {
+        "id": "SOV-19",
+        "url": "https://docs.google.com/document/d/1o4D2aymkbPugkjos6d8U_qz7G1_HTZHDLoz_fSoLve8/edit",
+        "modified_time_observed": "2026-10-01T16:14:55.593Z",
+        "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+        "excerpt_utf8_sha256": "cd556dd15cc77e85ade28164d97231e9f3e6878a1ca4d836b029ab58e87abe5a"
+      },
+      {
+        "id": "SOV-20",
+        "url": "https://docs.google.com/document/d/1VGwiXf_GBUG3Ofz5GjQy8VIE8dSg_JN6eckVNOa4jTo/edit",
+        "modified_time_observed": "2026-10-01T16:27:20.252Z",
+        "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+        "excerpt_utf8_sha256": "9237766c4361188765da65186c4231d637c9526a44e62d830fb9d6ec00ae9b56"
+      },
+      {
+        "id": "CL-GATE-CLOSURE-20261105-01",
+        "url": "https://docs.google.com/document/d/1SSbRb94ij-3CS_miSXrTIX-kGvhY1DtPxzYwDInV5Zg/edit",
+        "status": "READ_AND_ADOPTED",
+        "excerpt_utf8_sha256": "6387f58e35379d32a2e9b54104dacde4cd4666a75326887aadde87a70a53e930"
+      }
+    ]
+  },
+  "TRUST_BOUNDARIES": {
+    "producer_source_selection": "discovered immutable snapshots, not a new producer admission or current deployment certification",
+    "external_roles": "architecture identifies SOV/PIAC producer; operational/independent assignees UNASSIGNED_UNVERIFIED unless actual evidence arrives; requests are not dispatched",
+    "code": "no live adapter, HTTP/controller/bean, JWT/header/GUC definition, SQL, migration, host/runtime start, credentials or cross-owner mutation",
+    "SQL_HOSTED_EXTERNAL_WRITES": "NONE (authorized Arcava repository/GitHub publication only)",
+    "SECURITY_ACCEPTANCE": "NOT_GRANTED"
+  },
+  "WORKTREE_AND_BRANCH": {
+    "repository": "wordualReality/souvereign-os-coaching-platform",
+    "path": "/Users/aydin/Documents/GitHub/arcava-journey-worktree",
+    "branch": "feat/arc36p25-journey-service-integration",
+    "preflight_local_remote_head": "154a5914730eb9d53ced813f000e844c87072652",
+    "preflight_porcelain_v1_untracked_all": "",
+    "single_writer": "no other writer observed in worktree cwd/status checks; no distributed lock claimed",
+    "source_committed_clean": true,
+    "PR": "12 OPEN / DRAFT / NOT_MERGED",
+    "Mac_status": "executor attestation, not independently reproduced by Builder"
+  },
+  "Q1_Q4": {
+    "Q1": "OPEN_PROPOSED_NOT_ADMITTED",
+    "Q2": "OPEN_UNVERIFIED",
+    "Q3": "OPEN_PROPOSED_NOT_ADMITTED",
+    "Q4": "OPEN_PROPOSED_NOT_ADMITTED"
+  },
+  "FORMAL_GATES_CLOSED": [],
+  "OPEN_GATES": [
+    "full T020/T110 NOT_ADMITTED",
+    "T150 PARTIAL",
+    "Q1-Q4 OPEN",
+    "G04/PIAC/KDB/SOV integration UNKNOWN/NOT_ADMITTED",
+    "original A09-T01 PARTIAL_NOT_ADMITTED",
+    "original T04/T44/T48/T07/T08/T09 NOT_EXECUTED",
+    "T48 admitted real evidence 0/86 (source baseline 47 P0 + 39 P1)",
+    "A09-FX-v1 NOT_APPROVED",
+    "SQL/RLS, independent Security QS, hosted/release/main merge OPEN"
+  ],
+  "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+  "NEXT_ACTION": "Consume E0 once; obtain R01 existing PIAC producer-owner source/adoption and exact Arcava binding decision using the already discovered hashes, then select one lawful closure delta returning to ARC10-T020.",
+  "BLOCKER": {
+    "id": "BL-ARC-01",
+    "status": "OPEN",
+    "target_gate": "Q2 OPEN_UNVERIFIED",
+    "missing": "admitted producer operation/issuer/audience/client-role/currentness binding and actual reviewed ContextSource plus security/operational evidence",
+    "affected_scope": "dependent live integration/full admission only",
+    "E0_DELIVERY_BLOCKED": false
+  },
+  "USER_ACTION": "No new routine permission needed; existing Builder self-fetches this canonical return",
+  "NUTRITION": "T050/T090 NON_ROUTING unchanged",
+  "CONTROLLER": "NOT_ROUTED",
+  "MERGE_DEPLOYMENT": "NOT_EXECUTED"
+}

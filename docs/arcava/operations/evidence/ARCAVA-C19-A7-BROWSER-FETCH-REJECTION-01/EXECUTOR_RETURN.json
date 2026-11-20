@@ -1,0 +1,231 @@
+{
+  "RETURN_ID": "ARCAVA-C19-A7-BROWSER-FETCH-REJECTION-01",
+  "PACKET_ID": "ARCAVA-C19-A3-A7-DRAFT-REOPEN-UI-REPAIR-20261120-01",
+  "LANE": "ARCAVA",
+  "EXECUTOR": "EXISTING_LOCAL_ARCAVA_CURSOR_WORK_CHAT",
+  "CONTROLLER_RETURN": "ARCAVA-C19-A3-A7-UI-DELTA-OWNER-QS-20261120-01",
+  "POLICY_ID": "CL-UNIFIED-EXECUTOR-RETURN-CURSOR-CODEX-20261115-01",
+  "CHAT_RETURN_POLICY": "Kurzreturn ab 2026-11-17; Volltext nur in dieser Ablage",
+  "STATUS": "LOCAL_A7_BROWSER_FETCH_REJECTION_PASS_OWNER_QS_PENDING",
+  "PLAN_POSITION": "ARC-36/P25 7/10, C19 same-milestone A7 repair after Owner-QS PARTIAL",
+  "GATE": "TEST_LOOPBACK_ONLY / OWNER_QS_PENDING",
+  "MANDATE": "TEST_LOOPBACK_ONLY",
+  "SKILLS_USED": [
+    {
+      "skill": "diagnosing-bugs",
+      "purpose": "prove real browser fetch() rejection via CDP Network.setBlockedURLs, not a server 503 simulation",
+      "path": "/Users/aydin/.claude/skills/diagnosing-bugs/SKILL.md",
+      "sha256": "849198df88cdb65fd0d97236604c1fca7ff2f22d2f705f9724a800d0266b118d"
+    }
+  ],
+  "ERGEBNIS": "Client catch on fetch()/json()/AbortError shows HTTP 0 FETCH_REJECTED plus the retryable adapter notice, clears pending, and leaves title/revision/steps/pins unchanged. CDP Network.setBlockedURLs on /api/arcava-c19 produces Network.loadingFailed blockedReason inspector, not HTTP 503. Journal bytes unchanged during the blocked Propose. After unblock, Reload returns the same draft_id/revision/title. Prior A3 title restore and A7 HTTP-503 paths remain PASS. No A1–A6 rebuild, no REA, no new admission.",
+  "BASE_SHA": "651a5c2ba175f6b8ee952b45922efa9256e3ecf8",
+  "TESTED_SOURCE_SHA": "926cdb6a9ad8f413b297e3409df490e2a1ffee33",
+  "SOURCE_SHA": "926cdb6a9ad8f413b297e3409df490e2a1ffee33",
+  "EVIDENCE_COMMIT_PARENT_SHA": "926cdb6a9ad8f413b297e3409df490e2a1ffee33",
+  "EVIDENCE_HEAD": "Verified GitHub commit containing this receipt, resolved externally after push.",
+  "FULL_HEAD_AT_SOURCE": "926cdb6a9ad8f413b297e3409df490e2a1ffee33",
+  "REPO": "https://github.com/wordualReality/souvereign-os-coaching-platform.git",
+  "BRANCH": "feat/arc36p25-journey-service-integration",
+  "WORKTREE": "/Users/aydin/Documents/GitHub/CoachingStudios/Arcava",
+  "GIT_DIR": "/Users/aydin/Documents/GitHub/souvereign-os-coaching-platform/.git/worktrees/arcava-journey-worktree",
+  "ORIGIN": "https://github.com/wordualReality/souvereign-os-coaching-platform.git",
+  "PR": 12,
+  "CHANGED_FILES": [
+    "apps/web/app/c19-fixture.tsx",
+    "apps/web/scripts/arcava-c19-smoke.mjs"
+  ],
+  "SHA256": {
+    "apps/web/app/c19-fixture.tsx": "ae4def107da84836ef9428d404572e46179ca7542b76f9b7a107ffbd24dee566",
+    "apps/web/scripts/arcava-c19-smoke.mjs": "e251a51a932c01819a5a8c4e6d869244822595e9321301ae025c5082192ce922"
+  },
+  "BLOB_SHA": {
+    "apps/web/app/c19-fixture.tsx": "696d1859f9265401ceb583b16d456a66131fa1b4",
+    "apps/web/scripts/arcava-c19-smoke.mjs": "e33004ebd2c17e6f0aec81474b909da593ac0577"
+  },
+  "PRESERVED_PRIOR_RECEIPTS": [
+    "docs/arcava/operations/evidence/ARCAVA-C19-GOAL-TO-EDITABLE-SOURCED-DRAFT-LOCAL-01/EXECUTOR_RETURN.json",
+    "docs/arcava/operations/evidence/ARCAVA-C19-GOAL-TO-EDITABLE-SOURCED-DRAFT-A3-A7-UI-01/EXECUTOR_RETURN.json"
+  ],
+  "ACCEPTANCE": {
+    "A3_title_restored": "PASS_SCOPED — unchanged: after Java+Next restart, Reload shows title Edited calm draft, same draft_id and original source versions/hashes; explicit Save after restart succeeds",
+    "A7_adapter_error": "PASS_SCOPED — unchanged: Simulate adapter failure 503 ADAPTER_UNAVAILABLE retryable; draft unchanged",
+    "A7_fetch_timeout_server": "PASS_SCOPED — retained server 503 FIXTURE_UNAVAILABLE path; Owner-QS correctly did not treat this as a browser fetch rejection",
+    "A7_browser_fetch_rejected": "PASS — CDP Network.setBlockedURLs on /api/arcava-c19; fetch rejects; UI shows HTTP 0 FETCH_REJECTED and retryable notice; pending cleared; title/steps/hashes preserved; Reload enabled; no 503 on the blocked URL; Network.loadingFailed blockedReason inspector; journal bytes unchanged; unblock then Reload same draft_id/revision/title"
+  },
+  "TESTS_CI": {
+    "source_binding": "Changed blobs at SOURCE_SHA 926cdb6 matched the tested working-tree bytes.",
+    "maven_local": "NOT_RUN — Maven absent locally; Java sources unchanged in this delta",
+    "commands": [
+      {
+        "command": "apps/web/scripts/renderer-smoke.sh",
+        "exit": 0,
+        "result": "Next renderer smoke PASS before Chrome C19 smoke."
+      },
+      {
+        "command": "node apps/web/scripts/arcava-c19-smoke.mjs",
+        "exit": 0,
+        "result": "a3_title_restored=true a7_adapter_error=true a7_fetch_timeout=true a7_browser_fetch_rejected=true loading_failed=inspector; draft_id a12f37dd-6143-4aa7-9d1d-97bc84dc1ed1 revision 3 title Edited calm draft"
+      },
+      {
+        "command": "node apps/web/scripts/arcava-ui01-smoke.mjs",
+        "exit": 0,
+        "result": "Regression PASS with the C19 fetch-rejection catch present."
+      }
+    ]
+  },
+  "GATE_RECORD": "ARCAVA_C19_A7_BROWSER_FETCH_REJECTION IMPLEMENTED_LOCAL_BY_EXECUTOR / OWNER_QS_PENDING",
+  "OPEN_GATES": [
+    "T000 OPEN",
+    "G00 NOT_COMPLETE",
+    "T150 PARTIAL",
+    "Q2 OPEN_UNVERIFIED",
+    "PIAC, Hosted, Security, Merge, Deployment and Release NOT_ADMITTED"
+  ],
+  "BLOCKER": "NONE for this isolated TEST_LOOPBACK_ONLY A7 browser-fetch-rejection repair. Terminal scoped Owner-Delta-QS is the next gate.",
+  "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+  "NEXT_ACTION": "Perform one scoped Owner-Delta-QS of this A7 browser fetch-rejection GitHub return. Same C19 milestone; no new packet.",
+  "RETURN_TO": "CROSS_LANE_CONTROLLER after Owner-QS. No merge or release.",
+  "USER_ACTION": "NONE",
+  "CI": [
+    {
+      "conclusion": "success",
+      "databaseId": 44728844219,
+      "event": "pull_request",
+      "headSha": "926cdb6a9ad8f413b297e3409df490e2a1ffee33",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 136263076588,
+          "name": "Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 136263076883,
+          "name": "JourneyKernel fixture / JDK 25",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 136263076925,
+          "name": "JourneyKernel fixture / JDK 21",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 136263076933,
+          "name": "Persisted loopback journey path / JDK 21",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 136263077224,
+          "name": "Persisted loopback journey path / JDK 25",
+          "status": "completed"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/44728844219",
+      "workflowName": "arcava-journey-kernel"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44728844145,
+      "event": "pull_request",
+      "headSha": "926cdb6a9ad8f413b297e3409df490e2a1ffee33",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 136263076561,
+          "name": "web-renderer-smoke",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 136263076927,
+          "name": "validate-contracts",
+          "status": "completed"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/44728844145",
+      "workflowName": "project-b-contract-validation"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44728844151,
+      "event": "pull_request",
+      "headSha": "926cdb6a9ad8f413b297e3409df490e2a1ffee33",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 136263076108,
+          "name": "Arcava A09 offline suboracles / Python 3.12.3",
+          "status": "completed"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/44728844151",
+      "workflowName": "arcava-a09-offline-assurance"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44728833712,
+      "event": "push",
+      "headSha": "926cdb6a9ad8f413b297e3409df490e2a1ffee33",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 136263045217,
+          "name": "Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 136263045528,
+          "name": "Persisted loopback journey path / JDK 25",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 136263045703,
+          "name": "JourneyKernel fixture / JDK 21",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 136263045706,
+          "name": "JourneyKernel fixture / JDK 25",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 136263045895,
+          "name": "Persisted loopback journey path / JDK 21",
+          "status": "completed"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/44728833712",
+      "workflowName": "arcava-journey-kernel"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44728833582,
+      "event": "push",
+      "headSha": "926cdb6a9ad8f413b297e3409df490e2a1ffee33",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 136263043789,
+          "name": "Arcava A09 offline suboracles / Python 3.12.3",
+          "status": "completed"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/44728833582",
+      "workflowName": "arcava-a09-offline-assurance"
+    }
+  ]
+}
