@@ -103,6 +103,7 @@ try {
   await once(socket, "open");
   const commands = new Map();
   const events = [];
+  const failures = [];
   let sequence = 0;
   socket.addEventListener("message", event => {
     const message = JSON.parse(event.data);
@@ -112,6 +113,7 @@ try {
       if (message.error) command.reject(new Error(message.error.message));
       else command.resolve(message.result);
     } else if (message.method === "Network.responseReceived") events.push(message.params);
+    else if (message.method === "Network.loadingFailed") failures.push(message.params);
   });
   function cdp(method, params = {}) {
     return new Promise((resolve, reject) => {
@@ -209,6 +211,12 @@ try {
   assert.equal(await evaluate("document.querySelectorAll('[data-c19-hash]').length"), 2);
   assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
   assert.equal(restored.data.title, "Edited calm draft");
+  const resaved = await click("Save draft", 201);
+  assert.equal(resaved.data.draft_id, draftId);
+  assert.equal(resaved.data.title, "Edited calm draft");
+  assert.ok(resaved.data.revision >= revision);
+  const liveRevision = resaved.data.revision;
+  const journalAfterSave = await readFile(journal);
   const failed = await click("Simulate adapter failure", 503);
   assert.equal(failed.error.code, "ADAPTER_UNAVAILABLE");
   assert.equal(failed.error.retryable, true);
@@ -220,18 +228,44 @@ try {
   assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
   const still = await click("Reload saved draft", 200);
   assert.equal(still.data.draft_id, draftId);
-  assert.equal(still.data.revision, revision);
+  assert.equal(still.data.revision, liveRevision);
   assert.equal(still.data.steps.length, 2);
   assert.equal(still.data.title, "Edited calm draft");
+  assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
+  const failStart = failures.length;
+  const responseStart = events.length;
+  await cdp("Network.setBlockedURLs", { urls: [endpoint, "*/api/arcava-c19*"] });
+  await press("Propose sourced outline");
+  await until(() => evaluate("document.querySelector('[data-c19-status]')?.textContent === 'HTTP 0 FETCH_REJECTED'"),
+    "rejected fetch status");
+  assert.equal(await evaluate("document.querySelector('[data-c19-notice]')?.textContent?.includes('temporarily unavailable')"), true);
+  assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
+  assert.equal(await evaluate("document.querySelector('[data-c19-steps]').getAttribute('data-c19-steps')"), "2");
+  assert.equal(await evaluate("document.querySelectorAll('[data-c19-hash]').length"), 2);
+  assert.equal(await evaluate(`Array.from(document.querySelectorAll(${JSON.stringify(c19 + " button")}))
+    .some(button => button.textContent.trim() === "Reload saved draft" && !button.disabled)`), true);
+  assert.equal(events.slice(responseStart).some(event => event.response.url === endpoint && event.response.status === 503), false);
+  const rejected = failures.slice(failStart).find(event =>
+    (event.errorText || event.blockedReason || "").length > 0);
+  assert.ok(rejected, "CDP Network.loadingFailed for blocked C19 fetch");
+  assert.deepEqual(await readFile(journal), journalAfterSave);
+  await cdp("Network.setBlockedURLs", { urls: [] });
+  const recovered = await click("Reload saved draft", 200);
+  assert.equal(recovered.data.draft_id, draftId);
+  assert.equal(recovered.data.revision, liveRevision);
+  assert.equal(recovered.data.title, "Edited calm draft");
   assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
   console.log(JSON.stringify({
     result: "PASS",
     draft_id: draftId,
-    revision,
-    title: still.data.title,
-    steps: still.data.steps.length,
+    revision: liveRevision,
+    title: recovered.data.title,
+    steps: recovered.data.steps.length,
     a1_preview: true, a2_edit_save: true, a3_restart: true, a3_title_restored: true,
+    a3_save_after_restart: true,
     a7_adapter_error: true, a7_fetch_timeout: true,
+    a7_browser_fetch_rejected: true,
+    loading_failed: rejected.errorText || rejected.blockedReason,
     test_only: true, no_live_kdb: true,
   }));
 } finally {

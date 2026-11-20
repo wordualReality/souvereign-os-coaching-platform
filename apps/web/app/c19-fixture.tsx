@@ -43,6 +43,7 @@ export function C19GoalDraftFixture() {
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "content-type": "application/json" },
+        signal: AbortSignal.timeout(4000),
         body: JSON.stringify({
           action,
           learning_goal: goal,
@@ -67,6 +68,9 @@ export function C19GoalDraftFixture() {
           ? "Proposal adapter is temporarily unavailable. The saved draft was not changed."
           : "This outline is not available.");
       }
+    } catch {
+      setStatus("HTTP 0 FETCH_REJECTED");
+      setNotice("Proposal adapter is temporarily unavailable. The saved draft was not changed.");
     } finally {
       setPending(false);
     }
