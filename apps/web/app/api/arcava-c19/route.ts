@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
     draft_id?: string;
     expected_revision?: number;
     force_adapter_error?: boolean;
+    force_fetch_timeout?: boolean;
     key?: string;
   };
   try { input = JSON.parse(raw); }
@@ -97,6 +98,11 @@ export async function POST(request: NextRequest) {
   const headers = { Authorization: "Bearer " + context.coach, "Content-Type": "application/json",
     ...(input.key && uuid.test(input.key) ? { "Idempotency-Key": input.key } : {}) };
   try {
+    if (input.force_fetch_timeout === true) {
+      const error = new Error("timeout");
+      error.name = "TimeoutError";
+      throw error;
+    }
     if (action === "propose") {
       const upstream = await fetch(context.service + "/journeys/draft-proposals", {
         ...options, method: "POST", headers,

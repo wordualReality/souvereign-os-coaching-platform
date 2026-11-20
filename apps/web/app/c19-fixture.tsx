@@ -59,6 +59,8 @@ export function C19GoalDraftFixture() {
       if (response.ok && payload.data) {
         if (payload.data.steps) setSteps(payload.data.steps);
         if (payload.data.draft_id) setDraft(payload.data);
+        if (typeof payload.data.title === "string") setTitle(payload.data.title);
+        if (typeof payload.data.learning_goal === "string") setGoal(payload.data.learning_goal);
         setNotice(null);
       } else {
         setNotice(payload.error?.retryable
@@ -90,6 +92,9 @@ export function C19GoalDraftFixture() {
         <button type="button" disabled={pending} onClick={load}>Reload saved draft</button>
         <button type="button" disabled={pending} onClick={() => run("propose", { force_adapter_error: true })}>
           Simulate adapter failure
+        </button>
+        <button type="button" disabled={pending} onClick={() => run("propose", { force_fetch_timeout: true })}>
+          Simulate fetch timeout
         </button>
       </p>
       {draft?.draft_id ? (

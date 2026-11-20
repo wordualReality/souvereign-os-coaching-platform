@@ -135,18 +135,15 @@ try {
   const c19 = "[aria-label='C19 local goal draft fixture']";
   async function click(label, status) {
     const start = events.length;
-    await evaluate(`document.querySelector(${JSON.stringify(c19)} + ' button')?.scrollIntoView({block:"center"})`);
-    const index = await evaluate(`Array.from(document.querySelectorAll(${JSON.stringify(c19 + " button")}))
-      .findIndex(button => button.textContent.trim() === ${JSON.stringify(label)} && !button.disabled)`);
-    assert.ok(index >= 0, "enabled control: " + label);
-    const button = await cdp("DOM.getDocument");
-    const { nodeIds } = await cdp("DOM.querySelectorAll", { nodeId: button.root.nodeId, selector: c19 + " button" });
-    const nodeId = nodeIds[index];
-    await evaluate(`document.querySelectorAll(${JSON.stringify(c19 + " button")})[${index}].scrollIntoView({block:"center"})`);
-    const { model } = await cdp("DOM.getBoxModel", { nodeId });
-    const [x1, y1, x2, , , y3] = model.content;
-    for (const type of ["mousePressed", "mouseReleased"])
-      await cdp("Input.dispatchMouseEvent", { type, x: (x1 + x2) / 2, y: (y1 + y3) / 2, button: "left", clickCount: 1 });
+    const done = await evaluate(`(() => {
+      const button = Array.from(document.querySelectorAll(${JSON.stringify(c19 + " button")}))
+        .find(candidate => candidate.textContent.trim() === ${JSON.stringify(label)} && !candidate.disabled);
+      if (!button) return false;
+      button.scrollIntoView({block:"center"});
+      button.click();
+      return true;
+    })()`);
+    assert.equal(done, true, "enabled control: " + label);
     const wire = await until(() => events.slice(start).find(event => event.response.url === endpoint), "C19 response");
     assert.equal(wire.response.status, status);
     await until(() => evaluate("document.querySelector('[data-c19-status]')?.textContent?.startsWith('HTTP " + status + "')"),
@@ -178,11 +175,19 @@ try {
     input.dispatchEvent(new Event("input", { bubbles: true }));
   })()`);
   assert.equal(await evaluate("document.querySelector('[data-c19-step] input').value"), "Settle slowly");
+  await evaluate(`(() => {
+    const input = document.querySelector("[data-c19-title]");
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+    setter.call(input, "Edited calm draft");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  })()`);
+  assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
   await press("Move down");
   await press("Remove step");
   await until(() => evaluate("document.querySelector('[data-c19-steps]').getAttribute('data-c19-steps') === '2'"), "removed step");
   const saved = await click("Save draft", 201);
   assert.equal(saved.data.status, "draft");
+  assert.equal(saved.data.title, "Edited calm draft");
   assert.equal(saved.data.steps.length, 2);
   assert.equal(saved.data.publication_state, "DRAFT");
   const draftId = saved.data.draft_id;
@@ -202,20 +207,31 @@ try {
   assert.equal(restored.data.publication_state, "DRAFT");
   assert.equal(await evaluate("document.querySelector('[data-c19-steps]').getAttribute('data-c19-steps')"), "2");
   assert.equal(await evaluate("document.querySelectorAll('[data-c19-hash]').length"), 2);
+  assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
+  assert.equal(restored.data.title, "Edited calm draft");
   const failed = await click("Simulate adapter failure", 503);
   assert.equal(failed.error.code, "ADAPTER_UNAVAILABLE");
   assert.equal(failed.error.retryable, true);
   assert.equal(await evaluate("document.querySelector('[data-c19-notice]')?.textContent?.includes('temporarily unavailable')"), true);
+  const timedOut = await click("Simulate fetch timeout", 503);
+  assert.equal(timedOut.error.code, "FIXTURE_UNAVAILABLE");
+  assert.equal(timedOut.error.retryable, true);
+  assert.equal(await evaluate("document.querySelector('[data-c19-notice]')?.textContent?.includes('temporarily unavailable')"), true);
+  assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
   const still = await click("Reload saved draft", 200);
   assert.equal(still.data.draft_id, draftId);
   assert.equal(still.data.revision, revision);
   assert.equal(still.data.steps.length, 2);
+  assert.equal(still.data.title, "Edited calm draft");
+  assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
   console.log(JSON.stringify({
     result: "PASS",
     draft_id: draftId,
     revision,
+    title: still.data.title,
     steps: still.data.steps.length,
-    a1_preview: true, a2_edit_save: true, a3_restart: true, a7_adapter_error: true,
+    a1_preview: true, a2_edit_save: true, a3_restart: true, a3_title_restored: true,
+    a7_adapter_error: true, a7_fetch_timeout: true,
     test_only: true, no_live_kdb: true,
   }));
 } finally {
