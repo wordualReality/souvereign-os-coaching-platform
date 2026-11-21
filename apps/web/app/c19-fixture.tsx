@@ -19,9 +19,27 @@ type Draft = {
   revision?: number;
   status?: string;
   publication_state?: string;
+  origin?: string;
+  digest?: string;
+  review_state?: string;
+  review_label?: string;
+  review_receipt?: { reviewer_id?: string; digest?: string; revision?: number; test_only?: boolean };
   steps?: Step[];
   learning_goal?: string;
 };
+
+function snapshot(title: string, steps: Step[]) {
+  return JSON.stringify({
+    title,
+    steps: steps.map(step => ({
+      id: step.step_id,
+      title: step.title,
+      candidate: step.source.candidate_id,
+      version: step.source.version,
+      hash: step.source.content_hash,
+    })),
+  });
+}
 
 export function C19GoalDraftFixture() {
   const [goal, setGoal] = useState("Build a calm two-source practice");
@@ -32,19 +50,28 @@ export function C19GoalDraftFixture() {
   const [status, setStatus] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [saveKey, setSaveKey] = useState<string | null>(null);
+  const [reviewKey, setReviewKey] = useState<string | null>(null);
+  const [persisted, setPersisted] = useState<string>(snapshot("Calm practice draft", []));
+  const dirty = snapshot(title, steps) !== persisted;
 
-  async function run(action: "propose" | "save" | "load", extra: Record<string, unknown> = {}) {
+  async function run(action: "propose" | "save" | "load" | "review", extra: Record<string, unknown> = {}) {
+    if (action === "review" && dirty) {
+      setStatus("HTTP 422 UNSAVED_CHANGES");
+      setNotice("Save or reload the persisted draft before review.");
+      return;
+    }
     setPending(true);
     setStatus(null);
     setNotice(null);
     try {
-      const key = action === "save" ? (saveKey ?? crypto.randomUUID()) : undefined;
+      const key = action === "save" ? (saveKey ?? crypto.randomUUID())
+        : action === "review" ? (reviewKey ?? crypto.randomUUID())
+        : undefined;
       if (action === "save" && !saveKey) setSaveKey(key ?? null);
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        signal: AbortSignal.timeout(4000),
-        body: JSON.stringify({
+      if (action === "review" && !reviewKey) setReviewKey(key ?? null);
+      const body = action === "review"
+        ? { action, draft_id: draft?.draft_id, expected_revision: draft?.revision, key, ...extra }
+        : {
           action,
           learning_goal: goal,
           title,
@@ -53,7 +80,12 @@ export function C19GoalDraftFixture() {
           expected_revision: draft?.revision,
           key,
           ...extra,
-        }),
+        };
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        signal: AbortSignal.timeout(4000),
+        body: JSON.stringify(body),
       });
       const payload = await response.json();
       setStatus(`HTTP ${response.status}${payload.error?.code ? " " + payload.error.code : ""}`);
@@ -62,6 +94,12 @@ export function C19GoalDraftFixture() {
         if (payload.data.draft_id) setDraft(payload.data);
         if (typeof payload.data.title === "string") setTitle(payload.data.title);
         if (typeof payload.data.learning_goal === "string") setGoal(payload.data.learning_goal);
+        if (payload.data.draft_id) {
+          const nextTitle = typeof payload.data.title === "string" ? payload.data.title : title;
+          const nextSteps = payload.data.steps ?? steps;
+          setPersisted(snapshot(nextTitle, nextSteps));
+        }
+        if (action === "save") setReviewKey(null);
         setNotice(null);
       } else {
         setNotice(payload.error?.retryable
@@ -94,6 +132,8 @@ export function C19GoalDraftFixture() {
         <button type="button" disabled={pending} onClick={() => run("propose")}>Propose sourced outline</button>
         <button type="button" disabled={pending || steps.length === 0} onClick={() => run("save")}>Save draft</button>
         <button type="button" disabled={pending} onClick={load}>Reload saved draft</button>
+        <button type="button" disabled={pending || !draft?.draft_id}
+          onClick={() => run("review")}>Confirm local review</button>
         <button type="button" disabled={pending} onClick={() => run("propose", { force_adapter_error: true })}>
           Simulate adapter failure
         </button>
@@ -106,6 +146,24 @@ export function C19GoalDraftFixture() {
           Saved revision {draft.revision} · status {draft.status} · {draft.publication_state}
         </p>
       ) : <p data-c19-revision="">No draft saved in this local fixture.</p>}
+      <aside aria-label="C19 local draft review" data-c19-review="true" data-c19-dirty={dirty ? "true" : "false"}>
+        <p data-c19-review-label="true">LOCAL TEST REVIEW, NOT PUBLISHING</p>
+        <p data-c19-review-id={draft?.draft_id ?? ""}>Draft {draft?.draft_id ?? "unsaved"}</p>
+        <p data-c19-review-state={draft?.review_state ?? "NONE"}>Review {draft?.review_state ?? "NONE"}</p>
+        <p data-c19-digest={draft?.digest ?? ""}>Digest {draft?.digest ?? "none"}</p>
+        <p data-c19-review-actor={draft?.review_receipt?.reviewer_id ?? ""}>
+          Reviewer {draft?.review_receipt?.reviewer_id ?? "none"}
+        </p>
+        <ol>
+          {steps.map(step => (
+            <li key={"review-" + step.step_id}>
+              {step.title} · {step.source.candidate_id}@{step.source.version}
+              · {step.source.rights_state ?? "SYNTHETIC_TEST_ONLY"}
+              · {step.source.lifecycle ?? "ACTIVE"}
+            </li>
+          ))}
+        </ol>
+      </aside>
       <ol data-c19-steps={String(steps.length)}>
         {steps.map((step, index) => (
           <li key={step.step_id} data-c19-step={step.step_id}>

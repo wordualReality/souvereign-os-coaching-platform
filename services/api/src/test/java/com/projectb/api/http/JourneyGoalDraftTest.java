@@ -141,11 +141,109 @@ public final class JourneyGoalDraftTest {
       check(request(port, "GET",
           "/project-b/v1/tenants/" + TENANT + "/journeys/versions/" + versionId, "coach-a", null, null)
           .statusCode() == 200, "A6 published version unchanged");
+
+      String beforeReview = Files.readString(journal);
+      HttpResponse<String> c19PublishBefore = request(port, "POST",
+          drafts(TENANT) + "/" + draftId + "/publish", "coach-a", "c19-review-publish-before",
+          "{\"expected_draft_version\":" + revision + "}");
+      check(c19PublishBefore.statusCode() == 403 && c19PublishBefore.body().contains("FORBIDDEN")
+          && !c19PublishBefore.body().contains("\"data\""), "R06 C19 publish denied before review");
+      check(beforeReview.equals(Files.readString(journal)), "R06 before-review publish leaves journal unchanged");
+
+      HttpResponse<String> loadedForReview = request(port, "GET", drafts(TENANT) + "/" + draftId, "coach-a", null, null);
+      Map<String, Object> loadedReview = data(loadedForReview.body());
+      String digest = JsonMini.text(loadedReview.get("digest"));
+      check(digest != null && digest.matches("[0-9a-f]{64}"), "R01 server digest");
+      check("NONE".equals(loadedReview.get("review_state")), "R01 no retroactive approval");
+      check("C19_GOAL_DRAFT".equals(loadedReview.get("origin")), "R01 typed C19 origin");
+      check("DRAFT".equals(loadedReview.get("publication_state")), "R01 stays draft");
+
+      HttpResponse<String> unknownField = request(port, "POST", localReview(TENANT, draftId), "coach-a",
+          "c19-review-unknown", "{\"draft_id\":\"" + draftId + "\",\"expected_revision\":" + revision
+              + ",\"digest\":\"" + digest + "\"}");
+      check(unknownField.statusCode() == 422 && unknownField.body().contains("INVALID"),
+          "R05 unknown digest field " + unknownField.body());
+      check(request(port, "POST", localReview(TENANT, draftId), "client-a", "c19-review-client",
+          reviewBody(draftId, revision)).statusCode() == 403, "R05 client denied");
+      check(request(port, "POST", localReview(TENANT, draftId), "coach-b", "c19-review-tenant",
+          reviewBody(draftId, revision)).statusCode() == 403, "R05 wrong tenant denied");
+      check(request(port, "POST", localReview(TENANT, draftId), null, "c19-review-anon",
+          reviewBody(draftId, revision)).statusCode() == 401, "R05 missing bearer");
+      check(beforeReview.equals(Files.readString(journal)), "R05 denials do not mutate journal");
+
+      HttpResponse<String> staleReview = request(port, "POST", localReview(TENANT, draftId), "coach-a",
+          "c19-review-stale", reviewBody(draftId, 1L));
+      check(staleReview.statusCode() == 409 && staleReview.body().contains("STALE_REVISION"),
+          "R04 stale expected_revision " + staleReview.body());
+
+      HttpResponse<String> reviewed = request(port, "POST", localReview(TENANT, draftId), "coach-a",
+          "c19-review-1", reviewBody(draftId, revision));
+      check(reviewed.statusCode() == 201, "R01 review " + reviewed.body());
+      Map<String, Object> reviewedData = data(reviewed.body());
+      check("ACCEPTED".equals(reviewedData.get("review_state")), "R01 accepted");
+      check(digest.equals(reviewedData.get("digest")), "R01 digest bound");
+      check(JourneyPathTest.COACH_A.equals(JsonMini.object(reviewedData.get("review_receipt")).get("reviewer_id")),
+          "R01 reviewer is server actor");
+      check("DRAFT".equals(reviewedData.get("publication_state")), "R01 review is not publish");
+      String afterReview = Files.readString(journal);
+      check(afterReview.contains("\"op\":\"c19_local_review\""), "R01 review persisted");
+      check(!afterReview.substring(assignedBytes.length()).contains("\"op\":\"publish\""),
+          "R01 review does not publish");
+      check(!afterReview.substring(assignedBytes.length()).contains("\"op\":\"assign\""),
+          "R01 review does not assign");
+
+      HttpResponse<String> sameReview = request(port, "POST", localReview(TENANT, draftId), "coach-a",
+          "c19-review-1", reviewBody(draftId, revision));
+      check(sameReview.statusCode() == 201 && digest.equals(field(sameReview.body(), "digest"))
+          && "ACCEPTED".equals(data(sameReview.body()).get("review_state")), "R04 same key idempotent");
+      check(afterReview.equals(Files.readString(journal)), "R04 idempotent review adds no journal line");
+
+      HttpResponse<String> alteredKey = request(port, "POST", localReview(TENANT, draftId), "coach-a",
+          "c19-review-1", reviewBody(draftId, revision + 1));
+      check(alteredKey.statusCode() == 409 && alteredKey.body().contains("IDEMPOTENCY_CONFLICT"),
+          "R04 same key altered body " + alteredKey.body());
+      check(afterReview.equals(Files.readString(journal)), "R04 conflict leaves journal unchanged");
+
+      HttpResponse<String> c19PublishAfter = request(port, "POST",
+          drafts(TENANT) + "/" + draftId + "/publish", "coach-a", "c19-review-publish-after",
+          "{\"expected_draft_version\":" + revision + "}");
+      check(c19PublishAfter.statusCode() == 403 && c19PublishAfter.body().contains("FORBIDDEN"),
+          "R06 C19 publish denied after review");
+      check(afterReview.equals(Files.readString(journal)), "R06 after-review publish leaves journal unchanged");
+      check(request(port, "GET",
+          "/project-b/v1/tenants/" + TENANT + "/journeys/versions/" + versionId, "coach-a", null, null)
+          .statusCode() == 200, "R06 legacy published version remains");
+
+      server.stop();
+      server = JourneyHttpServer.start(journal, tokens, consent);
+      port = server.port();
+      HttpResponse<String> restoredReview = request(port, "GET", drafts(TENANT) + "/" + draftId, "coach-a", null, null);
+      Map<String, Object> restoredReviewData = data(restoredReview.body());
+      check(restoredReview.statusCode() == 200 && "ACCEPTED".equals(restoredReviewData.get("review_state"))
+          && digest.equals(restoredReviewData.get("digest"))
+          && Long.toString(revision).equals(field(restoredReview.body(), "revision")),
+          "R02 restart keeps accepted receipt");
+      check(restoredReview.body().contains(GoalProposalAdapter.CALM_HASH)
+          && restoredReview.body().contains(GoalProposalAdapter.FOCUS_HASH), "R02 source pins preserved");
+
+      HttpResponse<String> renamed = request(port, "POST", COMMIT, "coach-a", "c19-review-rename",
+          commitBody(GOAL, "Changed after review", savedSteps, draftId, revision));
+      check(renamed.statusCode() == 201, "R03 title change saves " + renamed.body());
+      long newRevision = JsonMini.integer(data(renamed.body()).get("revision"));
+      check(newRevision != revision && "INEFFECTIVE".equals(data(renamed.body()).get("review_state")),
+          "R03 saved change makes review ineffective");
+      check(!digest.equals(data(renamed.body()).get("digest")), "R03 digest changes with title");
+      HttpResponse<String> publishStaleReview = request(port, "POST",
+          drafts(TENANT) + "/" + draftId + "/publish", "coach-a", "c19-review-publish-changed",
+          "{\"expected_draft_version\":" + newRevision + "}");
+      check(publishStaleReview.statusCode() == 403, "R06 still denied after invalidating edit");
     } finally {
       server.stop();
     }
     System.out.println("PASS JourneyGoalDraftTest a1_two_candidates=true a2_edit_save=true a3_restart=true"
-        + " a4_source_denials=true a5_revision=true a6_no_publish_assign=true a7_adapter_error=true test_only=true");
+        + " a4_source_denials=true a5_revision=true a6_no_publish_assign=true a7_adapter_error=true"
+        + " r01_review=true r02_restart=true r03_invalidate=true r04_idempotency=true r05_auth=true"
+        + " r06_c19_publish_denied=true test_only=true");
   }
 
   private static void deniedPreview(int port, List<String> ids, String code) throws Exception {
@@ -160,6 +258,14 @@ public final class JourneyGoalDraftTest {
     body.put("candidate_ids", ids);
     if (forceError) body.put("force_adapter_error", true);
     return JsonMini.write(body);
+  }
+
+  private static String localReview(String tenant, String draftId) {
+    return drafts(tenant) + "/" + draftId + "/local-review";
+  }
+
+  private static String reviewBody(String draftId, long revision) {
+    return "{\"draft_id\":\"" + draftId + "\",\"expected_revision\":" + revision + "}";
   }
 
   private static String commitBody(String goal, String title, List<Map<String, Object>> steps,

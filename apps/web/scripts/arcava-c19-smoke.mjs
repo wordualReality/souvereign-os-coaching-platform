@@ -80,7 +80,7 @@ try {
   const src = "services/api/src/";
   const pkg = "/java/com/projectb/api/";
   execFileSync("javac", ["-Xlint:all", "-Werror", "-d", classes,
-    ...["domain/JourneyKernel", "domain/JourneyJournal", "domain/GoalProposalAdapter", "json/JsonMini",
+    ...["domain/JourneyKernel", "domain/JourneyJournal", "domain/C19LocalReview", "domain/GoalProposalAdapter", "json/JsonMini",
       "http/JourneyHttpServer", "http/JourneyProducer", "http/TrustedKdbVerifier", "http/TrustedPiacVerifier"]
       .map(name => src + "main" + pkg + name + ".java"),
     ...["JourneyPathTest", "JourneyUiFixture"].map(name => src + "test" + pkg + "http/" + name + ".java"),
@@ -211,11 +211,63 @@ try {
   assert.equal(await evaluate("document.querySelectorAll('[data-c19-hash]').length"), 2);
   assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
   assert.equal(restored.data.title, "Edited calm draft");
+  assert.equal(restored.data.origin, "C19_GOAL_DRAFT");
+  assert.match(String(restored.data.digest ?? ""), /^[0-9a-f]{64}$/);
+  assert.equal(restored.data.review_state, "NONE");
+  assert.equal(await evaluate("document.querySelector('[data-c19-review-label]')?.textContent"),
+    "LOCAL TEST REVIEW, NOT PUBLISHING");
+  assert.equal(await evaluate("document.querySelector('[data-c19-dirty]').getAttribute('data-c19-dirty')"), "false");
+  const reviewed = await click("Confirm local review", 201);
+  assert.equal(reviewed.data.review_state, "ACCEPTED");
+  assert.equal(reviewed.data.digest, restored.data.digest);
+  assert.equal(reviewed.data.publication_state, "DRAFT");
+  assert.ok(reviewed.data.review_receipt?.reviewer_id);
+  assert.equal(await evaluate("document.querySelector('[data-c19-review-state]').getAttribute('data-c19-review-state')"),
+    "ACCEPTED");
+  const journalAfterReview = await readFile(journal);
+  assert.equal(journalAfterReview.toString().includes('"op":"c19_local_review"'), true);
+  assert.equal(journalAfterReview.toString().includes('"op":"publish"')
+    && journalAfterReview.toString().split('"op":"publish"').length === 2, true);
+
+  await stop(next);
+  await stop(backend.child);
+  backend = await service("replay");
+  next = await web(backend.port, version);
+  await navigate();
+  const reviewRestored = await click("Reload saved draft", 200);
+  assert.equal(reviewRestored.data.draft_id, draftId);
+  assert.equal(reviewRestored.data.revision, revision);
+  assert.equal(reviewRestored.data.review_state, "ACCEPTED");
+  assert.equal(reviewRestored.data.digest, restored.data.digest);
+  assert.equal(reviewRestored.data.title, "Edited calm draft");
+  assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
+
+  await evaluate(`(() => {
+    const input = document.querySelector("[data-c19-title]");
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+    setter.call(input, "Unsaved review edit");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  })()`);
+  assert.equal(await evaluate("document.querySelector('[data-c19-dirty]').getAttribute('data-c19-dirty')"), "true");
+  await press("Confirm local review");
+  await until(() => evaluate("document.querySelector('[data-c19-status]')?.textContent === 'HTTP 422 UNSAVED_CHANGES'"),
+    "unsaved review refused");
+  assert.equal(await evaluate("document.querySelector('[data-c19-review-state]').getAttribute('data-c19-review-state')"),
+    "ACCEPTED");
+  const reloadedClean = await click("Reload saved draft", 200);
+  assert.equal(reloadedClean.data.review_state, "ACCEPTED");
+  assert.equal(reloadedClean.data.title, "Edited calm draft");
+
   const resaved = await click("Save draft", 201);
   assert.equal(resaved.data.draft_id, draftId);
   assert.equal(resaved.data.title, "Edited calm draft");
   assert.ok(resaved.data.revision >= revision);
+  assert.equal(resaved.data.review_state, "INEFFECTIVE");
   const liveRevision = resaved.data.revision;
+  const acceptedAgain = await click("Confirm local review", 201);
+  assert.equal(acceptedAgain.data.review_state, "ACCEPTED");
+  assert.equal(acceptedAgain.data.revision, liveRevision);
+  assert.notEqual(acceptedAgain.data.digest, restored.data.digest);
   const journalAfterSave = await readFile(journal);
   const failed = await click("Simulate adapter failure", 503);
   assert.equal(failed.error.code, "ADAPTER_UNAVAILABLE");
@@ -231,7 +283,19 @@ try {
   assert.equal(still.data.revision, liveRevision);
   assert.equal(still.data.steps.length, 2);
   assert.equal(still.data.title, "Edited calm draft");
+  assert.equal(still.data.review_state, "ACCEPTED");
   assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
+  const reviewFailStart = failures.length;
+  await cdp("Network.setBlockedURLs", { urls: [endpoint, "*/api/arcava-c19*"] });
+  await press("Confirm local review");
+  await until(() => evaluate("document.querySelector('[data-c19-status]')?.textContent === 'HTTP 0 FETCH_REJECTED'"),
+    "rejected review fetch");
+  assert.equal(await evaluate("document.querySelector('[data-c19-notice]')?.textContent?.includes('temporarily unavailable')"), true);
+  assert.equal(await evaluate("document.querySelector('[data-c19-review-state]').getAttribute('data-c19-review-state')"),
+    "ACCEPTED");
+  assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
+  assert.ok(failures.slice(reviewFailStart).find(event => (event.errorText || event.blockedReason || "").length > 0));
+  await cdp("Network.setBlockedURLs", { urls: [] });
   const failStart = failures.length;
   const responseStart = events.length;
   await cdp("Network.setBlockedURLs", { urls: [endpoint, "*/api/arcava-c19*"] });
@@ -265,6 +329,7 @@ try {
     a3_save_after_restart: true,
     a7_adapter_error: true, a7_fetch_timeout: true,
     a7_browser_fetch_rejected: true,
+    r01_review: true, r02_restart: true, r03_unsaved_and_invalidate: true, r07_review_fetch_rejected: true,
     loading_failed: rejected.errorText || rejected.blockedReason,
     test_only: true, no_live_kdb: true,
   }));

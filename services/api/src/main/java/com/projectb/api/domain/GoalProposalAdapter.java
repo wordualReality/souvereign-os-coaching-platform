@@ -244,4 +244,11 @@ public final class GoalProposalAdapter {
   public Candidate candidate(String id) {
     return Objects.requireNonNull(CATALOG.get(id), "unknown candidate");
   }
+
+  public Candidate requireCurrentPin(CanonicalPin pin) {
+    String ref = pin.publishedVersionRef();
+    int at = ref.lastIndexOf('@');
+    if (at <= 0) throw new DomainException(ErrorCode.INVALID, "C19 source pin required");
+    return requireUsable(ref.substring(0, at), ref.substring(at + 1), pin.receiptSha256());
+  }
 }

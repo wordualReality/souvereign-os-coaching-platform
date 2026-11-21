@@ -89,6 +89,10 @@ public final class JourneyJournal {
   private final Map<UUID, String> draftPhases = new LinkedHashMap<>();
   private final Map<UUID, Projection> projections = new LinkedHashMap<>();
   private final Map<UUID, EnrollmentLink> enrollments = new LinkedHashMap<>();
+  private final Map<UUID, String> draftOrigins = new LinkedHashMap<>();
+  private final Map<UUID, C19LocalReview.Receipt> reviews = new LinkedHashMap<>();
+  private record ReviewRetry(String tenantId, String subjectId, String key) {}
+  private final Map<ReviewRetry, C19LocalReview.Receipt> reviewRetries = new LinkedHashMap<>();
 
   private JourneyJournal(Path path, JournalCommit sink) {
     this.path = path;
@@ -118,12 +122,17 @@ public final class JourneyJournal {
   public JourneyKernel kernel() { return kernel; }
 
   public synchronized DraftView createDraft(Actor actor, String title, String key) throws IOException {
+    return createDraft(actor, title, key, null);
+  }
+
+  public synchronized DraftView createDraft(Actor actor, String title, String key, String origin) throws IOException {
     DraftView existing = kernel.peekCreate(actor, actor.tenantId(), title, key);
     if (existing != null) return existing;
     UUID draftId = UUID.randomUUID();
     commit(command("create", actor, key)
         + ",\"title\":" + JsonMini.quote(title)
-        + ",\"draft_id\":" + JsonMini.quote(draftId.toString()) + "}");
+        + ",\"draft_id\":" + JsonMini.quote(draftId.toString())
+        + originField(origin) + "}");
     DraftView created = kernel.peekCreate(actor, actor.tenantId(), title, key);
     if (created == null) throw new IOException("committed create was not visible");
     return created;
@@ -131,18 +140,65 @@ public final class JourneyJournal {
 
   public synchronized DraftView updateDraft(Actor actor, UUID draftId, long expectedRevision,
                                             String title, List<Step> steps, String phasesJson) throws IOException {
+    return updateDraft(actor, draftId, expectedRevision, title, steps, phasesJson, null);
+  }
+
+  public synchronized DraftView updateDraft(Actor actor, UUID draftId, long expectedRevision,
+                                            String title, List<Step> steps, String phasesJson,
+                                            String origin) throws IOException {
     kernel.validateUpdateDraft(actor, actor.tenantId(), draftId, expectedRevision, title, steps);
     commit(command("update", actor, null)
         + ",\"draft_id\":" + JsonMini.quote(draftId.toString())
         + ",\"expected_revision\":" + expectedRevision
         + ",\"title\":" + JsonMini.quote(title)
         + ",\"steps\":" + stepsJson(steps)
-        + (phasesJson == null ? "" : ",\"phases_json\":" + JsonMini.quote(phasesJson)) + "}");
+        + (phasesJson == null ? "" : ",\"phases_json\":" + JsonMini.quote(phasesJson))
+        + originField(origin) + "}");
     return kernel.readDraft(actor, draftId);
+  }
+
+  public synchronized C19LocalReview.Receipt localReview(Actor actor, UUID draftId, long expectedRevision,
+                                                         String key) throws IOException {
+    ReviewRetry retry = new ReviewRetry(actor.tenantId(), actor.subjectId(), key);
+    C19LocalReview.Receipt prior = reviewRetries.get(retry);
+    if (prior != null) {
+      if (!prior.draftId().equals(draftId) || prior.revision() != expectedRevision)
+        throw new DomainException(ErrorCode.IDEMPOTENCY_CONFLICT, "review key already bound");
+      return prior;
+    }
+    DraftView draft = requireC19Draft(actor, draftId, expectedRevision);
+    String digest = C19LocalReview.digest(draft);
+    commit(command("c19_local_review", actor, key)
+        + ",\"draft_id\":" + JsonMini.quote(draftId.toString())
+        + ",\"expected_revision\":" + expectedRevision
+        + ",\"digest\":" + JsonMini.quote(digest)
+        + ",\"test_only\":true}");
+    C19LocalReview.Receipt stored = reviewRetries.get(retry);
+    if (stored == null) throw new IOException("committed local review was not visible");
+    return stored;
+  }
+
+  public synchronized String originOf(UUID draftId) { return draftOrigins.get(draftId); }
+
+  public synchronized C19LocalReview.Receipt currentReview(Actor actor, UUID draftId) {
+    DraftView draft = kernel.readDraft(actor, draftId);
+    C19LocalReview.Receipt receipt = reviews.get(draftId);
+    if (receipt == null) return null;
+    if (receipt.revision() != draft.revision()) return null;
+    if (!receipt.digest().equals(C19LocalReview.digest(draft))) return null;
+    return receipt;
+  }
+
+  public synchronized String reviewState(Actor actor, UUID draftId) {
+    if (!C19LocalReview.ORIGIN.equals(draftOrigins.get(draftId))) return C19LocalReview.STATE_NONE;
+    if (currentReview(actor, draftId) != null) return C19LocalReview.STATE_ACCEPTED;
+    return reviews.containsKey(draftId) ? C19LocalReview.STATE_INEFFECTIVE : C19LocalReview.STATE_NONE;
   }
 
   public synchronized PublishedView publish(Actor actor, UUID draftId, long expectedRevision,
                                             String key) throws IOException {
+    if (C19LocalReview.ORIGIN.equals(draftOrigins.get(draftId)))
+      throw new DomainException(ErrorCode.FORBIDDEN, "C19 local review is not publication");
     PublishedView existing = kernel.peekPublish(actor, actor.tenantId(), draftId, expectedRevision, key);
     if (existing != null) return existing;
     kernel.validatePublish(actor, actor.tenantId(), draftId, expectedRevision);
@@ -545,16 +601,21 @@ public final class JourneyJournal {
     Actor actor = new Actor(JsonMini.text(command.get("tenant_id")),
                              JsonMini.text(command.get("subject_id")), Role.COACH);
     switch (JsonMini.text(command.get("op"))) {
-      case "create" -> kernel.createDraft(actor, actor.tenantId(),
-          JsonMini.text(command.get("title")), JsonMini.text(command.get("key")),
-          UUID.fromString(JsonMini.text(command.get("draft_id"))));
+      case "create" -> {
+        UUID draftId = UUID.fromString(JsonMini.text(command.get("draft_id")));
+        kernel.createDraft(actor, actor.tenantId(),
+            JsonMini.text(command.get("title")), JsonMini.text(command.get("key")), draftId);
+        rememberOrigin(draftId, command.get("origin"));
+      }
       case "update" -> {
         UUID draftId = UUID.fromString(JsonMini.text(command.get("draft_id")));
         kernel.updateDraft(actor, actor.tenantId(), draftId,
             JsonMini.integer(command.get("expected_revision")),
             JsonMini.text(command.get("title")), readSteps(command.get("steps")));
         if (command.get("phases_json") instanceof String phases) draftPhases.put(draftId, phases);
+        rememberOrigin(draftId, command.get("origin"));
       }
+      case "c19_local_review" -> replayLocalReview(command, actor);
       case "publish" -> {
         UUID draftId = UUID.fromString(JsonMini.text(command.get("draft_id")));
         var view = kernel.publish(actor, actor.tenantId(), draftId,
@@ -638,6 +699,52 @@ public final class JourneyJournal {
          .append('}');
     }
     return out.append(']').toString();
+  }
+
+  private DraftView requireC19Draft(Actor actor, UUID draftId, long expectedRevision) {
+    DraftView draft = kernel.readDraft(actor, draftId);
+    if (!C19LocalReview.ORIGIN.equals(draftOrigins.get(draftId)))
+      throw new DomainException(ErrorCode.INVALID, "C19 draft origin required");
+    if (!"draft".equals(draft.status()))
+      throw new DomainException(ErrorCode.INVALID, "C19 draft is not reviewable");
+    if (draft.revision() != expectedRevision)
+      throw new DomainException(ErrorCode.STALE_REVISION, "expected draft revision differs");
+    GoalProposalAdapter adapter = new GoalProposalAdapter();
+    for (Step step : draft.steps()) adapter.requireCurrentPin(step.canonicalPin());
+    return draft;
+  }
+
+  private void replayLocalReview(Map<String, Object> command, Actor actor) {
+    UUID draftId = UUID.fromString(JsonMini.text(command.get("draft_id")));
+    long expectedRevision = JsonMini.integer(command.get("expected_revision"));
+    String key = JsonMini.text(command.get("key"));
+    String storedDigest = JsonMini.text(command.get("digest"));
+    DraftView draft = requireC19Draft(actor, draftId, expectedRevision);
+    String digest = C19LocalReview.digest(draft);
+    if (!digest.equals(storedDigest))
+      throw new IllegalArgumentException("local review digest does not match persisted draft");
+    C19LocalReview.Receipt receipt = new C19LocalReview.Receipt(
+        draftId, expectedRevision, digest, actor.tenantId(), actor.subjectId(), key, true);
+    ReviewRetry retry = new ReviewRetry(actor.tenantId(), actor.subjectId(), key);
+    C19LocalReview.Receipt existing = reviewRetries.putIfAbsent(retry, receipt);
+    if (existing != null && (!existing.draftId().equals(draftId) || existing.revision() != expectedRevision
+        || !existing.digest().equals(digest)))
+      throw new IllegalArgumentException("invalid or duplicate local review");
+    reviews.put(draftId, receipt);
+  }
+
+  private void rememberOrigin(UUID draftId, Object originValue) {
+    if (!(originValue instanceof String origin) || origin.isBlank()) return;
+    if (!C19LocalReview.ORIGIN.equals(origin))
+      throw new IllegalArgumentException("unknown draft origin");
+    draftOrigins.put(draftId, origin);
+  }
+
+  private static String originField(String origin) {
+    if (origin == null || origin.isBlank()) return "";
+    if (!C19LocalReview.ORIGIN.equals(origin))
+      throw new IllegalArgumentException("unknown draft origin");
+    return ",\"origin\":" + JsonMini.quote(origin);
   }
 
   private static String command(String op, Actor actor, String key) {

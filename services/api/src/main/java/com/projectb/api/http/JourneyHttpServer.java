@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import com.projectb.api.domain.C19LocalReview;
 import com.projectb.api.domain.GoalProposalAdapter;
 import com.projectb.api.domain.GoalProposalAdapter.AdapterFailure;
 import com.projectb.api.domain.GoalProposalAdapter.ProposedStep;
@@ -144,7 +145,7 @@ public final class JourneyHttpServer {
     if (path.length == 8 && "journeys".equals(path[5]) && "drafts".equals(path[6]) && "GET".equals(method)) {
       requireCoach(actor);
       DraftView view = journal.kernel().readDraft(actor, UUID.fromString(path[7]));
-      send(exchange, 200, draftDetailJson(view));
+      send(exchange, 200, draftDetailJson(actor, view));
       return;
     }
     if (path.length == 7 && "journeys".equals(path[5]) && "draft-proposals".equals(path[6]) && "POST".equals(method)) {
@@ -156,6 +157,12 @@ public final class JourneyHttpServer {
         && "commit".equals(path[7]) && "POST".equals(method)) {
       requireCoach(actor);
       send(exchange, 201, commitProposal(actor, body(exchange), idempotency(exchange)));
+      return;
+    }
+    if (path.length == 9 && "journeys".equals(path[5]) && "drafts".equals(path[6])
+        && "local-review".equals(path[8]) && "POST".equals(method)) {
+      requireCoach(actor);
+      send(exchange, 201, localReview(actor, UUID.fromString(path[7]), body(exchange), idempotency(exchange)));
       return;
     }
     if (path.length == 9 && "journeys".equals(path[5]) && "drafts".equals(path[6])
@@ -460,14 +467,15 @@ public final class JourneyHttpServer {
     DraftView view;
     Object draftIdValue = body.get("draft_id");
     if (draftIdValue == null) {
-      view = journal.createDraft(actor, title, key);
+      view = journal.createDraft(actor, title, key, C19LocalReview.ORIGIN);
       DraftView current = journal.kernel().readDraft(actor, view.draftId());
       if (current.steps().isEmpty())
-        view = journal.updateDraft(actor, current.draftId(), current.revision(), title, kernelSteps, phases);
+        view = journal.updateDraft(actor, current.draftId(), current.revision(), title, kernelSteps, phases,
+            C19LocalReview.ORIGIN);
       else view = current;
     } else {
       view = journal.updateDraft(actor, UUID.fromString(JsonMini.text(draftIdValue)),
-          JsonMini.integer(body.get("expected_revision")), title, kernelSteps, phases);
+          JsonMini.integer(body.get("expected_revision")), title, kernelSteps, phases, C19LocalReview.ORIGIN);
     }
     Map<String, Object> data = new LinkedHashMap<>();
     data.put("draft_id", view.draftId().toString());
@@ -481,6 +489,36 @@ public final class JourneyHttpServer {
     data.put("no_live_kdb", true);
     data.put("kdb_adapter", "not_connected");
     data.put("steps", edited.stream().map(adapter::stepJsonMap).toList());
+    attachReview(actor, view, data);
+    return JsonMini.write(Map.of("data", data));
+  }
+
+  private String localReview(Actor actor, UUID pathDraftId, Map<String, Object> body, String key)
+      throws IOException {
+    if (body.containsKey("digest") || body.containsKey("reviewer_id") || body.containsKey("tenant_id"))
+      throw new IllegalArgumentException("client digest and actor fields are not accepted");
+    if (body.containsKey("key") && !key.equals(JsonMini.text(body.get("key"))))
+      throw new IllegalArgumentException("idempotency key mismatch");
+    java.util.HashSet<String> allowed = new java.util.HashSet<>(Set.of("draft_id", "expected_revision"));
+    if (body.containsKey("key")) allowed.add("key");
+    if (!body.keySet().equals(allowed))
+      throw new IllegalArgumentException("unknown local-review field");
+    UUID draftId = UUID.fromString(JsonMini.text(body.get("draft_id")));
+    if (!pathDraftId.equals(draftId))
+      throw new DomainException(ErrorCode.INVALID, "draft id mismatch");
+    C19LocalReview.Receipt receipt = journal.localReview(actor, draftId,
+        JsonMini.integer(body.get("expected_revision")), key);
+    DraftView view = journal.kernel().readDraft(actor, draftId);
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("draft_id", view.draftId().toString());
+    data.put("title", view.title());
+    data.put("status", view.status());
+    data.put("revision", view.revision());
+    data.put("publication_state", "DRAFT");
+    data.put("test_only", true);
+    data.put("no_live_kdb", true);
+    attachReview(actor, view, data);
+    data.put("review_receipt", receiptMap(receipt));
     return JsonMini.write(Map.of("data", data));
   }
 
@@ -492,7 +530,7 @@ public final class JourneyHttpServer {
     return ids;
   }
 
-  private static String draftDetailJson(DraftView view) {
+  private String draftDetailJson(Actor actor, DraftView view) {
     GoalProposalAdapter adapter = new GoalProposalAdapter();
     List<Map<String, Object>> steps = new ArrayList<>();
     for (Step step : view.steps()) steps.add(adapter.sourcedKernelStep(step));
@@ -508,7 +546,36 @@ public final class JourneyHttpServer {
     data.put("test_only", true);
     data.put("no_live_kdb", true);
     data.put("steps", steps);
+    attachReview(actor, view, data);
     return JsonMini.write(Map.of("data", data));
+  }
+
+  private void attachReview(Actor actor, DraftView view, Map<String, Object> data) {
+    String origin = journal.originOf(view.draftId());
+    if (origin != null) data.put("origin", origin);
+    if (!C19LocalReview.ORIGIN.equals(origin) || view.steps().isEmpty()) {
+      data.put("review_state", C19LocalReview.STATE_NONE);
+      return;
+    }
+    data.put("digest", C19LocalReview.digest(view));
+    String state = journal.reviewState(actor, view.draftId());
+    data.put("review_state", state);
+    data.put("review_label", "LOCAL TEST REVIEW, NOT PUBLISHING");
+    C19LocalReview.Receipt current = journal.currentReview(actor, view.draftId());
+    if (current != null) data.put("review_receipt", receiptMap(current));
+  }
+
+  private static Map<String, Object> receiptMap(C19LocalReview.Receipt receipt) {
+    Map<String, Object> json = new LinkedHashMap<>();
+    json.put("draft_id", receipt.draftId().toString());
+    json.put("revision", receipt.revision());
+    json.put("digest", receipt.digest());
+    json.put("reviewer_id", receipt.reviewerId());
+    json.put("tenant_id", receipt.tenantId());
+    json.put("test_only", receipt.testOnly());
+    json.put("review_state", C19LocalReview.STATE_ACCEPTED);
+    json.put("publication_state", "DRAFT");
+    return json;
   }
 
   private static String error(String code, String message, String correlation, boolean retryable) {

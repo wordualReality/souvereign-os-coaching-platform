@@ -80,6 +80,7 @@ jobs:
           javac -Xlint:all -Werror -d "$classes_dir" \
             services/api/src/main/java/com/projectb/api/domain/JourneyKernel.java \
             services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java \
+            services/api/src/main/java/com/projectb/api/domain/C19LocalReview.java \
             services/api/src/main/java/com/projectb/api/domain/GoalProposalAdapter.java \
             services/api/src/main/java/com/projectb/api/json/JsonMini.java \
             services/api/src/main/java/com/projectb/api/http/JourneyHttpServer.java \

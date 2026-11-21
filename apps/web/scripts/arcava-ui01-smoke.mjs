@@ -95,7 +95,7 @@ try {
   const src = "services/api/src/";
   const pkg = "/java/com/projectb/api/";
   execFileSync("javac", ["-Xlint:all", "-Werror", "-d", classes,
-    ...["domain/JourneyKernel", "domain/JourneyJournal", "domain/GoalProposalAdapter", "json/JsonMini", "http/JourneyHttpServer",
+    ...["domain/JourneyKernel", "domain/JourneyJournal", "domain/C19LocalReview", "domain/GoalProposalAdapter", "json/JsonMini", "http/JourneyHttpServer",
       "http/JourneyProducer", "http/TrustedKdbVerifier", "http/TrustedPiacVerifier"]
       .map(name => src + "main" + pkg + name + ".java"),
     ...["JourneyPathTest", "JourneyUiFixture"].map(name => src + "test" + pkg + "http/" + name + ".java"),

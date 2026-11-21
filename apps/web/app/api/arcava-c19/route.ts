@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
     force_adapter_error?: boolean;
     force_fetch_timeout?: boolean;
     key?: string;
+    digest?: unknown;
   };
   try { input = JSON.parse(raw); }
   catch { return deny(422, "INVALID"); }
@@ -102,6 +103,24 @@ export async function POST(request: NextRequest) {
       const error = new Error("timeout");
       error.name = "TimeoutError";
       throw error;
+    }
+    if (action === "review") {
+      const allowed = new Set(["action", "draft_id", "expected_revision", "key", "force_fetch_timeout"]);
+      if (Object.keys(input).some(field => !allowed.has(field)) || input.digest !== undefined)
+        return deny(422, "INVALID");
+      if (!input.draft_id || !uuid.test(input.draft_id) || !input.key || !uuid.test(input.key)
+          || typeof input.expected_revision !== "number")
+        return deny(422, "INVALID");
+      const upstream = await fetch(context.service + "/journeys/drafts/" + input.draft_id + "/local-review", {
+        ...options, method: "POST", headers,
+        body: JSON.stringify({
+          draft_id: input.draft_id,
+          expected_revision: input.expected_revision,
+        }),
+      });
+      const body = await upstream.json();
+      if (!upstream.ok) return NextResponse.json({ error: body.error }, { status: upstream.status, headers: { "Cache-Control": "no-store" } });
+      return NextResponse.json({ data: sourcedDraft(body.data) }, { status: 201, headers: { "Cache-Control": "no-store" } });
     }
     if (action === "propose") {
       const upstream = await fetch(context.service + "/journeys/draft-proposals", {
