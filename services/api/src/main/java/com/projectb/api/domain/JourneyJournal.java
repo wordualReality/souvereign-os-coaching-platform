@@ -164,6 +164,10 @@ public final class JourneyJournal {
     if (prior != null) {
       if (!prior.draftId().equals(draftId) || prior.revision() != expectedRevision)
         throw new DomainException(ErrorCode.IDEMPOTENCY_CONFLICT, "review key already bound");
+      DraftView current = kernel.readDraft(actor, draftId);
+      if (current.revision() != prior.revision()
+          || !prior.digest().equals(C19LocalReview.digest(current)))
+        throw new DomainException(ErrorCode.STALE_REVISION, "review receipt is no longer current");
       return prior;
     }
     DraftView draft = requireC19Draft(actor, draftId, expectedRevision);
@@ -197,7 +201,7 @@ public final class JourneyJournal {
 
   public synchronized PublishedView publish(Actor actor, UUID draftId, long expectedRevision,
                                             String key) throws IOException {
-    if (C19LocalReview.ORIGIN.equals(draftOrigins.get(draftId)))
+    if (c19PublishDenied(actor, draftId))
       throw new DomainException(ErrorCode.FORBIDDEN, "C19 local review is not publication");
     PublishedView existing = kernel.peekPublish(actor, actor.tenantId(), draftId, expectedRevision, key);
     if (existing != null) return existing;
@@ -699,6 +703,17 @@ public final class JourneyJournal {
          .append('}');
     }
     return out.append(']').toString();
+  }
+
+  private boolean c19PublishDenied(Actor actor, UUID draftId) {
+    if (C19LocalReview.ORIGIN.equals(draftOrigins.get(draftId))) return true;
+    DraftView draft = kernel.readDraft(actor, draftId);
+    if (draft.steps().isEmpty()) return false;
+    GoalProposalAdapter adapter = new GoalProposalAdapter();
+    for (Step step : draft.steps()) {
+      if (adapter.isAdmittedC19Pin(step.canonicalPin())) return true;
+    }
+    return false;
   }
 
   private DraftView requireC19Draft(Actor actor, UUID draftId, long expectedRevision) {

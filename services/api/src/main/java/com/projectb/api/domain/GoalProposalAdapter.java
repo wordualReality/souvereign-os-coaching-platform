@@ -251,4 +251,18 @@ public final class GoalProposalAdapter {
     if (at <= 0) throw new DomainException(ErrorCode.INVALID, "C19 source pin required");
     return requireUsable(ref.substring(0, at), ref.substring(at + 1), pin.receiptSha256());
   }
+
+  /** Trusted synthetic C19 pin only; never infers from title or raw user text. */
+  public boolean isAdmittedC19Pin(CanonicalPin pin) {
+    if (pin == null || !pin.approved() || !pin.rightsGranted()) return false;
+    String ref = pin.publishedVersionRef();
+    int at = ref.lastIndexOf('@');
+    if (at <= 0) return false;
+    String candidateId = ref.substring(0, at);
+    if (!admittedIds().contains(candidateId)) return false;
+    Candidate found = CATALOG.get(candidateId);
+    return found != null
+        && found.version().equals(ref.substring(at + 1))
+        && found.contentHash().equals(pin.receiptSha256());
+  }
 }

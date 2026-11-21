@@ -506,9 +506,10 @@ public final class JourneyHttpServer {
     UUID draftId = UUID.fromString(JsonMini.text(body.get("draft_id")));
     if (!pathDraftId.equals(draftId))
       throw new DomainException(ErrorCode.INVALID, "draft id mismatch");
-    C19LocalReview.Receipt receipt = journal.localReview(actor, draftId,
-        JsonMini.integer(body.get("expected_revision")), key);
+    journal.localReview(actor, draftId, JsonMini.integer(body.get("expected_revision")), key);
     DraftView view = journal.kernel().readDraft(actor, draftId);
+    if (journal.currentReview(actor, draftId) == null)
+      throw new DomainException(ErrorCode.STALE_REVISION, "review receipt is no longer current");
     Map<String, Object> data = new LinkedHashMap<>();
     data.put("draft_id", view.draftId().toString());
     data.put("title", view.title());
@@ -518,7 +519,6 @@ public final class JourneyHttpServer {
     data.put("test_only", true);
     data.put("no_live_kdb", true);
     attachReview(actor, view, data);
-    data.put("review_receipt", receiptMap(receipt));
     return JsonMini.write(Map.of("data", data));
   }
 

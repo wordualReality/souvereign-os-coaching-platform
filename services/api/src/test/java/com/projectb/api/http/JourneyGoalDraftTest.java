@@ -13,6 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import com.projectb.api.domain.GoalProposalAdapter;
 import com.projectb.api.domain.JourneyKernel.Actor;
 import com.projectb.api.domain.JourneyKernel.Role;
@@ -237,13 +241,127 @@ public final class JourneyGoalDraftTest {
           drafts(TENANT) + "/" + draftId + "/publish", "coach-a", "c19-review-publish-changed",
           "{\"expected_draft_version\":" + newRevision + "}");
       check(publishStaleReview.statusCode() == 403, "R06 still denied after invalidating edit");
+
+      String afterRename = Files.readString(journal);
+      HttpResponse<String> staleKey = request(port, "POST", localReview(TENANT, draftId), "coach-a",
+          "c19-review-1", reviewBody(draftId, revision));
+      check(staleKey.statusCode() == 409 && staleKey.body().contains("STALE_REVISION")
+          && !staleKey.body().contains("\"review_state\":\"ACCEPTED\""),
+          "B2 old review key after save is stale " + staleKey.body());
+      check(afterRename.equals(Files.readString(journal)), "B2 stale retry adds no journal line");
+
+      int livePort = port;
+      ExecutorService pool = Executors.newFixedThreadPool(2);
+      try {
+        Future<HttpResponse<String>> raceFirst = pool.submit(() -> request(livePort, "POST",
+            localReview(TENANT, draftId), "coach-a", "c19-race-a", reviewBody(draftId, newRevision)));
+        Future<HttpResponse<String>> raceSecond = pool.submit(() -> request(livePort, "POST",
+            localReview(TENANT, draftId), "coach-a", "c19-race-b", reviewBody(draftId, newRevision)));
+        HttpResponse<String> raceA = raceFirst.get();
+        HttpResponse<String> raceB = raceSecond.get();
+        check(raceA.statusCode() == 201 && raceB.statusCode() == 201, "R04 two review keys serialize");
+        HttpResponse<String> afterRace = request(livePort, "GET", drafts(TENANT) + "/" + draftId, "coach-a", null, null);
+        check("ACCEPTED".equals(data(afterRace.body()).get("review_state")), "R04 one current accepted receipt");
+        check("DRAFT".equals(data(afterRace.body()).get("publication_state")), "R04 still draft");
+
+        long live = JsonMini.integer(data(afterRace.body()).get("revision"));
+        String beforeSaveRace = Files.readString(journal);
+        Future<HttpResponse<String>> saveRace = pool.submit(() -> request(livePort, "POST", COMMIT, "coach-a",
+            "c19-race-save", commitBody(GOAL, "Race title after review", savedSteps, draftId, live)));
+        Future<HttpResponse<String>> reviewRace = pool.submit(() -> request(livePort, "POST",
+            localReview(TENANT, draftId), "coach-a", "c19-race-review", reviewBody(draftId, live)));
+        HttpResponse<String> savedRace = saveRace.get();
+        HttpResponse<String> reviewedRace = reviewRace.get();
+        check(savedRace.statusCode() == 201 || savedRace.statusCode() == 409, "R04 concurrent save closes");
+        check(reviewedRace.statusCode() == 201 || reviewedRace.statusCode() == 409, "R04 concurrent review closes");
+        HttpResponse<String> afterSaveRace = request(port, "GET", drafts(TENANT) + "/" + draftId, "coach-a", null, null);
+        Map<String, Object> raced = data(afterSaveRace.body());
+        check("DRAFT".equals(raced.get("publication_state")), "R04 concurrent path stays draft");
+        check(!Files.readString(journal).substring(beforeSaveRace.length()).contains("\"op\":\"publish\""),
+            "R04 concurrent path does not publish");
+        if ("ACCEPTED".equals(raced.get("review_state"))) {
+          check(JsonMini.text(raced.get("digest")).equals(
+              JsonMini.text(JsonMini.object(raced.get("review_receipt")).get("digest"))),
+              "R04 accepted receipt matches current digest");
+        } else {
+          check("INEFFECTIVE".equals(raced.get("review_state")) || "NONE".equals(raced.get("review_state")),
+              "R04 concurrent save leaves review not accepted");
+        }
+        check(request(port, "POST", localReview(TENANT, draftId), "coach-b", "c19-race-tenant",
+            reviewBody(draftId, JsonMini.integer(raced.get("revision")))).statusCode() == 403,
+            "R05 wrong tenant still denied after delta");
+      } finally {
+        pool.shutdownNow();
+      }
     } finally {
       server.stop();
     }
+    checkLegacyC19PublishFence(tokens, consent);
     System.out.println("PASS JourneyGoalDraftTest a1_two_candidates=true a2_edit_save=true a3_restart=true"
         + " a4_source_denials=true a5_revision=true a6_no_publish_assign=true a7_adapter_error=true"
         + " r01_review=true r02_restart=true r03_invalidate=true r04_idempotency=true r05_auth=true"
-        + " r06_c19_publish_denied=true test_only=true");
+        + " r06_c19_publish_denied=true b1_legacy_c19_publish_denied=true b2_stale_retry=true"
+        + " r04_parallel=true test_only=true");
+  }
+
+  private static void checkLegacyC19PublishFence(Map<String, Actor> tokens, Set<String> consent) throws Exception {
+    Path journal = Files.createTempDirectory("arcava-c19-legacy").resolve("journal.ndjson");
+    UUID draftId = UUID.fromString("c19c19c1-0000-4000-8000-000000000001");
+    String calmRef = GoalProposalAdapter.CALM_ID + "@" + GoalProposalAdapter.CALM_VERSION;
+    String focusRef = GoalProposalAdapter.FOCUS_ID + "@" + GoalProposalAdapter.FOCUS_VERSION;
+    String stepsJson = "[{\"step_id\":\"step.c19.settle\",\"title\":\"Settle\","
+        + "\"published_version_ref\":" + JsonMini.quote(calmRef)
+        + ",\"receipt_sha256\":" + JsonMini.quote(GoalProposalAdapter.CALM_HASH)
+        + ",\"approved\":true,\"rights_granted\":true},"
+        + "{\"step_id\":\"step.c19.focus\",\"title\":\"Focus\","
+        + "\"published_version_ref\":" + JsonMini.quote(focusRef)
+        + ",\"receipt_sha256\":" + JsonMini.quote(GoalProposalAdapter.FOCUS_HASH)
+        + ",\"approved\":true,\"rights_granted\":true}]";
+    Files.writeString(journal, "{\"op\":\"create\",\"tenant_id\":" + JsonMini.quote(TENANT)
+        + ",\"subject_id\":" + JsonMini.quote(JourneyPathTest.COACH_A)
+        + ",\"key\":\"legacy-c19-create\",\"title\":\"Legacy unmarked C19\",\"draft_id\":"
+        + JsonMini.quote(draftId.toString()) + "}\n"
+        + "{\"op\":\"update\",\"tenant_id\":" + JsonMini.quote(TENANT)
+        + ",\"subject_id\":" + JsonMini.quote(JourneyPathTest.COACH_A)
+        + ",\"draft_id\":" + JsonMini.quote(draftId.toString())
+        + ",\"expected_revision\":1,\"title\":\"Legacy unmarked C19\",\"steps\":" + stepsJson + "}\n");
+    JourneyHttpServer server = JourneyHttpServer.start(journal, tokens, consent);
+    try {
+      int port = server.port();
+      String loadedJournal = Files.readString(journal);
+      check(!loadedJournal.contains("\"origin\""), "B1 legacy journal has no origin marker");
+      HttpResponse<String> loaded = request(port, "GET", drafts(TENANT) + "/" + draftId, "coach-a", null, null);
+      check(loaded.statusCode() == 200 && "NONE".equals(data(loaded.body()).get("review_state"))
+          && data(loaded.body()).get("origin") == null, "B1 no retroactive acceptance");
+      HttpResponse<String> reviewDenied = request(port, "POST", localReview(TENANT, draftId.toString()),
+          "coach-a", "legacy-c19-review", reviewBody(draftId.toString(), 2L));
+      check(reviewDenied.statusCode() == 422 && reviewDenied.body().contains("INVALID"),
+          "B1 unmarked C19 cannot be reviewed " + reviewDenied.body());
+      String beforePublish = Files.readString(journal);
+      HttpResponse<String> publish = request(port, "POST", drafts(TENANT) + "/" + draftId + "/publish",
+          "coach-a", "legacy-c19-publish", "{\"expected_draft_version\":2}");
+      check(publish.statusCode() == 403 && publish.body().contains("FORBIDDEN")
+          && !publish.body().contains("\"data\""), "B1 legacy C19 publish denied " + publish.body());
+      String afterPublish = Files.readString(journal);
+      check(beforePublish.equals(afterPublish) && !afterPublish.contains("\"op\":\"publish\""),
+          "B1 legacy publish writes no version");
+      List<Map<String, Object>> steps = objects(data(loaded.body()).get("steps"));
+      HttpResponse<String> restamped = request(port, "POST", COMMIT, "coach-a", "legacy-c19-resave",
+          commitBody(GOAL, "Legacy unmarked C19", steps, draftId.toString(), 2L));
+      check(restamped.statusCode() == 201 && "C19_GOAL_DRAFT".equals(data(restamped.body()).get("origin")),
+          "B1 explicit resave stamps typed origin " + restamped.body());
+      long stampedRevision = JsonMini.integer(data(restamped.body()).get("revision"));
+      HttpResponse<String> stillDenied = request(port, "POST", drafts(TENANT) + "/" + draftId + "/publish",
+          "coach-a", "legacy-c19-publish-after-resave",
+          "{\"expected_draft_version\":" + stampedRevision + "}");
+      check(stillDenied.statusCode() == 403, "B1 publish still denied after resave");
+      HttpResponse<String> nowReviewable = request(port, "POST", localReview(TENANT, draftId.toString()),
+          "coach-a", "legacy-c19-review-after-resave", reviewBody(draftId.toString(), stampedRevision));
+      check(nowReviewable.statusCode() == 201 && "ACCEPTED".equals(data(nowReviewable.body()).get("review_state")),
+          "B1 resave makes review possible " + nowReviewable.body());
+    } finally {
+      server.stop();
+    }
   }
 
   private static void deniedPreview(int port, List<String> ids, String code) throws Exception {
