@@ -1,0 +1,13 @@
+{
+  "fixture_class": "SYNTHETIC_OFFLINE",
+  "replace_index": 0,
+  "pin": {
+    "set": "common",
+    "version": "1.0",
+    "path": "contracts/arcava/types/1.0/QueryEnvelope.schema.json",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "expected": {
+    "reason": "digest_mismatch"
+  }
+}

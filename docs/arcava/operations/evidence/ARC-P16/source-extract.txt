@@ -1,0 +1,23 @@
+ARC-P16 SOURCE EXTRACT — FROZEN
+
+ARC-10: 1bwZrdGHeQXZcU2V5kSQeGypNnMVUAp6I3aAgVY8fHKQ
+revision: AHj4eMRvY37JqQDTG18YBPQsEcO5HHusT8gTcN-NNXqEtT1YfMPEP1E5gbc56Z-mCGgbNN0taMtRCFVwA0Lv3rg6p1BRnHM3ohv0wNiK248
+ATC-05: 1HUn9DThuSaWeWhw4eQEfUMAZw8omCPvcy0rIoITL_iU
+revision: AHj4eMQcKEHGwLPGc_kMRaUR7-b5hADe1XpZbYlkjBkn6rIrnlV4e95-f0dkHw11j1FUOMeckfb1k0bdWL-wtXTfIVSWX_wBpBK7A1yzwwo
+FZ-04 Registry: 1SkrqFPuCMDhcfIfrMohCArqupjNwj7peHKgRtO6irqk
+revision: ANLCKQkSLhkaYIQHv61ig6fP1UlslzdOQwKUzGAF2TRNwD9Wa_EGvW5_1lt7H-5bIxKG9UQUktu_aDuoRkhCp_j1k_RX1rntnCTKnv2dgQM
+ATC-04: 1DEwzYlvC5etngjUnmAl5MCXQDWFQNgeaogxM1j8egQY
+revision: ANLCKQlpqAEprRUIE3ADwcbgCjR5WO--bejLa3jCH388GCtcT0i16ZeucuozpJADUndfm8Uv8gIgF8crhp9O5uV-3g1xRDuA9cxrXIn6740
+SOV-34 Owner Return: 1af7vWihYv7fqNGHCk4W3qUtfYh0AwrWZYre8QqxYfzU
+revision: ANLCKQkgvK3UjlHk3DM-pmYf6pS7pBwKcQK91XUFBbX4pxuYvlaCq0OgW-Scf1wgAquqBTCC3KN4DImltVzC91dzCtYxINpILLjl5mtEvL0
+
+P1 grammar: SchemaVersion=MAJOR.MINOR string; Revision=decimal-digit string; Hash=lowercase SHA-256; required vs optional exact; no implicit null; Ref/Exact typed; TrackingSource closed union.
+P2: Query B2, Response common, Event B4 as materialized in the abstract components. Body refs do not grant authority.
+CT-ARC-002 request/result: journey_id + immutable journey_version_id; published journey projection with SM-ARC-05, phases/steps, optional TrackingSource, Canonical bindings, Exact execution profile, review ref. Outcome set FZ-04: OK|NOT_FOUND|STALE|WITHDRAWN|REVALIDATION_REQUIRED.
+CT-ARC-003 request/result: tenant/client/enrollment + optional programme binding ID; enrollment/assignment/programme/effective-access projection. Outcome set FZ-04: OK|DENIED|STALE|PRECONDITION_FAILED.
+CT-ARC-004 request/result: journey session/version/step correlation to SOV runtime refs; no runtime outcome/completion ownership. Outcome set FZ-04: OK|NOT_FOUND|STALE.
+CT-ARC-R03-REM-001 current-intent query/result and EV-R03-REM-DUE closed event payload. Event execution_mode=SOV_DELEGATED const. Current intent state includes ACTIVE|CANCELLED|SUPERSEDED|EXPIRED. Derived query error subset uses only source-supported P2/P6/E10/F09/SOV-07 states: DENIED|STALE|PRECONDITION_FAILED|UNAVAILABLE. EXPIRED remains an intent_state, not an invented error outcome.
+E08: CT-ARC-002/004 -> SOV, runtime producer backing remains ARC10-T050.
+E09: CT-ARC-003 -> SOV execution eligibility.
+E10: CT-ARC-R03-REM-001 -> SOV, runtime current-intent/ReminderDue backing remains ARC10-T060; CT-PROV-NOTIF-001 separate.
+Requirement baseline remains 86 = 47 P0 + 39 P1. Food Scan × Dosha AI remains DEFERRED.

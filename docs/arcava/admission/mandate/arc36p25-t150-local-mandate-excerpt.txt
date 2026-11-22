@@ -1,0 +1,16 @@
+decision_id: ARC36P25-T150-MANDATE-AND-E1-A09-SCOPE-01
+source_document_id: 18tLEM05Dxlo_8_bPmCvWygFHJtQ4v1B5mYp0PL7OdZI
+source_name: MASTERPROMPT ARCAVA RECURSIVE RESUME
+preimage_sha: 1457be9863ab6086a4b1e2dcc566129c9d7d832b
+mandate_giver: Aydin Mokhtary
+confirmation: Ja, bestätigt.
+cryptographic_signature: false
+scope: LIMITED_LOCAL_TEST_SCOPE
+allowed: offline_subcheck
+prohibited: sql_execution hosted_apply live_access main_merge n8n a09_pass t150_pass
+revocation_feed: absent
+oracle_t01: Clean-create and compatible-existing paths preserve ledger/checksums; CONFLICTING/UNKNOWN blocks mutation.
+oracle_t04: All applicable 48-registry producer/consumer schemas and canonical-byte checksums agree; active 16-family registry preserved, E16 inactive.
+oracle_t44: Real SQL apply/roles/RLS/function positive-negative tests, public grants/default ACL and direct foreign access denial; sanitized audit/trace chain intact.
+oracle_t48: Evidence bundle links all 86 IDs to owner disposition/unit/profile/security/fixture/test; UNKNOWN admissions blocked; no test execution or production readiness falsely asserted.
+oracle_status: All A09-T01..T48 are PLANNED / NOT EXECUTED.

@@ -1,0 +1,135 @@
+{
+  "RETURN_ID": "ARC36P25-T150-A09-T44-RLS-SEED-AUTHORITY-FAILCLOSED-PREFLIGHT-01",
+  "LANE": "ARCAVA",
+  "STATUS": "OFFLINE_POLICY_AUTHORITY_DENIAL_VERIFIED_PENDING_OWNER_QS",
+  "BASE_SHA": "9ea4ef827a4aae74929e11bab3320bf0b230ea22",
+  "EXECUTION_SOURCE_SHA": "4382f37143f2bce52d8aca8c6c6a75cc6643be53",
+  "EVIDENCE_ONLY_COMMIT_PARENT": "4382f37143f2bce52d8aca8c6c6a75cc6643be53",
+  "BYTE_HASHES": {
+    "runner": "3b18d74ed73cc2be144c62d6ca0af4e7318da2546d2209d9284e412b6ca00782",
+    "tests": "96731a60f13ea5d40d942250862283356eca8dd775321d9bff3c4e8e775e1695",
+    "inputs": {
+      "database/policies/001_project_b_rls_seed.sql": "1d77f1e932fee3f9b15d9d64e6bb482983b234054b239e6c0d528e975337fe48",
+      "docs/arcava/admission/synthetic/A09-T44/case.json": "2bf0272e23f827911bd1db06b45fcf354b4d5824cf772a5b0381aa001e228882",
+      "docs/arcava/admission/synthetic/A09-T44/engine.json": "f3f01c7d950f5b6f80d0b51e7e1969cc41b63cb40a0f3948531cdedc33b9cf69"
+    }
+  },
+  "CHANGED_FILES": [
+    "scripts/arcava/validate_a09_t44_policy_authority.py",
+    "tests/arcava/security/test_a09_t44_policy_authority.py",
+    "docs/arcava/operations/evidence/ARC36P25-T150-A09-T44-RLS-SEED-AUTHORITY-FAILCLOSED-PREFLIGHT-01/evidence.json",
+    "docs/arcava/operations/evidence/ARC36P25-T150-A09-T44-RLS-SEED-AUTHORITY-FAILCLOSED-PREFLIGHT-01/EXECUTOR_RETURN.json"
+  ],
+  "COMMANDS": [
+    {
+      "command": "python3 scripts/arcava/validate_a09_t44_policy_authority.py",
+      "exit": 0
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/arcava/security -p test_a09_t44_policy_authority.py -v",
+      "exit": 0,
+      "tests": 2,
+      "negative_subcases": 11
+    }
+  ],
+  "NEGATIVE_CASES": [
+    {
+      "name": "owner_pin",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "changed_bytes",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "missing_case",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "missing_sql",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "source_location",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "approval",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "live_success",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "foreign_schema",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "public_grant",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "engine",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    },
+    {
+      "name": "symlink",
+      "exit": 1,
+      "decision": "BLOCK_UNAPPROVED_FOREIGN_SEED",
+      "sql": "NOT_EXECUTED"
+    }
+  ],
+  "CI": [
+    {
+      "id": 41499286795,
+      "head": "4382f37143f2bce52d8aca8c6c6a75cc6643be53",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "id": 41499298188,
+      "head": "4382f37143f2bce52d8aca8c6c6a75cc6643be53",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "id": 41499298217,
+      "head": "4382f37143f2bce52d8aca8c6c6a75cc6643be53",
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "CI_SCOPE": "existing regressions; new offline validator/tests run locally; no SQL",
+  "EVIDENCE_PATH": "docs/arcava/operations/evidence/ARC36P25-T150-A09-T44-RLS-SEED-AUTHORITY-FAILCLOSED-PREFLIGHT-01/evidence.json",
+  "OPEN_GATES": [
+    "T01 PARTIAL_NOT_ADMITTED",
+    "T04/T44/T48 NOT_EXECUTED",
+    "T48 0/86",
+    "T150 PARTIAL",
+    "full 48 registry and approved whole-suite fixture absent",
+    "Security NOT_GRANTED",
+    "foreign source authority UNVERIFIED"
+  ],
+  "BLOCKER": "NONE_FOR_OFFLINE_DENIAL; admitted Arcava-owned policy source and separate SQL authority required for real T44",
+  "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+  "SQL_HOSTED_PRODUCTION_MERGE_DEPLOY": "NONE",
+  "WORKFLOW": "CL-WORKFLOW-COMPACT-20261102-01"
+}

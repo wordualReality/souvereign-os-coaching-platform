@@ -1,0 +1,23 @@
+{
+  "fixture_class": "SYNTHETIC_OFFLINE",
+  "applied_database_state": false,
+  "entries": [
+    {
+      "migration_id": "001_project_b_baseline_schema",
+      "path": "database/migrations/001_project_b_baseline_schema.sql",
+      "sha256": "04338b0f8c78c4a97f947996ac72d6cf81a182c75d1f3184ab0a7a0a221e5e36"
+    },
+    {
+      "migration_id": "001_project_b_baseline_schema",
+      "path": "database/migrations/001_project_b_baseline_schema.sql",
+      "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+    }
+  ],
+  "expected": {
+    "disposition": "MUTATION_PLAN_BLOCKED",
+    "reason": "duplicate_entry",
+    "mutation_plan": "BLOCKED",
+    "mutation_apply": "NOT_EXECUTED",
+    "sql_execution": "NOT_EXECUTED"
+  }
+}

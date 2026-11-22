@@ -1,0 +1,1633 @@
+{
+  "packet": "ARC36P25-T020-TRUSTED-CONTEXT-SOURCE-READINESS-E0-01",
+  "lane": "ARCAVA",
+  "status": "E0_SOURCE_INVENTORY_COMPLETE_Q2_OPEN_UNVERIFIED",
+  "base_sha": "154a5914730eb9d53ced813f000e844c87072652",
+  "adoption": {
+    "CL-GATE-CLOSURE-20261105-01": "ACKNOWLEDGED_AND_APPLIED",
+    "BL-ARC-01": "ACKNOWLEDGED_OPEN_SCOPED"
+  },
+  "verification_vocabulary": {
+    "VERIFIED": "observed immutable source bytes/manifest/readable excerpt only; not live trust or security admission",
+    "UNVERIFIED": "source/declaration exists or a binding is required, but Arcava admissibility/current authority is not proven",
+    "ABSENT": "not present in the explicitly inspected source/scope; not a global claim of nonexistence"
+  },
+  "producer_repository": "wordualReality/souvereign-os",
+  "producer_source_sha": "9ae5950ed2e556b6d6301f3d19d81a14992d6be7",
+  "producer_source_branch_observed": "impl/sov-piac-decision-proof-v1-issue14-20261026",
+  "source_selection_limit": "Pinned discovery snapshot, not an owner-approved current producer deployment. Additional APB snapshot has identical five schema and proof-verifier blobs; no foreign owner work or authority modified.",
+  "additional_repo_snapshots": [
+    {
+      "branch": "main",
+      "sha": "e7080491b31f64f338e3e4cb39d6b74cb1b0d30f",
+      "tree_complete": true,
+      "CT_SHC_paths": "ABSENT in this tree"
+    },
+    {
+      "branch": "impl/sov-apb-p04-local-dst-window-20261105",
+      "sha": "edb40836baf8cec631d1873d60b5b57f7706a820",
+      "tree_complete": true,
+      "comparison": "five CT-SHC schema blobs and PiacDecisionProofVerifier blob identical to pinned proof snapshot"
+    }
+  ],
+  "local_sources": [
+    {
+      "path": "services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java",
+      "sha256": "44d528f7f3e2d28b484ae41d4ebe8adf3e9f006fd51bce0834b06607d90c4223",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java"
+    },
+    {
+      "path": "services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java",
+      "sha256": "0930589e3ebd1f6ae069d73f24e99a82687d2b2d73eadda5a991aab4be708a96",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java"
+    },
+    {
+      "path": "services/api/src/main/java/com/projectb/api/arcava/security/RoleScopePolicy.java",
+      "sha256": "85d60f7c99d305e0e1fa5a955ad8920fb4d8cfc184f74cf6c07379b41c246057",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/RoleScopePolicy.java"
+    },
+    {
+      "path": "services/api/src/main/java/com/projectb/api/arcava/services/ArcavaAccessService.java",
+      "sha256": "621e5514befb145ef0df9641d0cee182b6d6cee468c6d9bd9df8e77b70e7f68b",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/services/ArcavaAccessService.java"
+    },
+    {
+      "path": "services/api/src/main/java/com/projectb/api/http/TrustedPiacVerifier.java",
+      "sha256": "bc1c6e9781e5a260e0b6e9d00483194064cf7f740def1548af02e9c138a112af",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/http/TrustedPiacVerifier.java"
+    },
+    {
+      "path": "services/api/src/main/java/com/projectb/api/active/PiacDecisionConsumer.java",
+      "sha256": "5b028806fed11c584ef4912d9bc5e93cc657d2dacd9b9593fbff3eac1b30eff6",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/active/PiacDecisionConsumer.java"
+    },
+    {
+      "path": "services/api/src/main/java/com/projectb/api/active/DenyByDefaultPiacConsumer.java",
+      "sha256": "c284b6475af15ab372a00a8a5e8359688670ce230f4d79bdbc2d2cd6a611d464",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/active/DenyByDefaultPiacConsumer.java"
+    },
+    {
+      "path": "services/api/src/test/java/com/projectb/api/arcava/security/OwnerGuardContractTest.java",
+      "sha256": "205db8501abc80f03a53d7942e56f0bb029e18106f46405fbfc10ee10a1e75a7",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/test/java/com/projectb/api/arcava/security/OwnerGuardContractTest.java"
+    },
+    {
+      "path": "contracts/arcava/contract-manifest.json",
+      "sha256": "e0dfef2598eef6885221521a768a46d85f46beac8c47b17fd9447a90bcba88d8",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/contracts/arcava/contract-manifest.json"
+    },
+    {
+      "path": "docs/arcava/security/control-manifest.json",
+      "sha256": "f1baf231c0a5f3bf3ccf795a3fdcd2abd4df8654f1bf56dc7f0bb741b7cc54cb",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/docs/arcava/security/control-manifest.json"
+    }
+  ],
+  "producer_sources": [
+    {
+      "path": "contracts/shared-core/ct-shc-001.actor-identity-context.v1.schema.json",
+      "git_blob_sha": "812495f244bca0a4cd5f05b4f6613018c0fa3d12",
+      "sha256": "4b77feee91d7cb86013fd3a6f59e7178be3e744ab6d76d6b58844b9a7b03783f",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-001.actor-identity-context.v1.schema.json"
+    },
+    {
+      "path": "contracts/shared-core/ct-shc-002.auth-session-context.v1.schema.json",
+      "git_blob_sha": "c7ee41677d674284d485bdf0a3c59e54a7d22656",
+      "sha256": "7ec82462615fb1b071018d755279c62f9f4c4d6c4c7f974a7f9157a6da665d35",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-002.auth-session-context.v1.schema.json"
+    },
+    {
+      "path": "contracts/shared-core/ct-shc-003.tenant-access-context.v1.schema.json",
+      "git_blob_sha": "c4a3b2450d2b00f0e46a189724e9debe3d194d41",
+      "sha256": "0e55b200c975bbf49432c08d627215c6696351ae52292bfab21ef3c28f0db0af",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-003.tenant-access-context.v1.schema.json"
+    },
+    {
+      "path": "contracts/shared-core/ct-shc-004.consent-decision.v1.schema.json",
+      "git_blob_sha": "b5da15df141bb8dc3848ab420d3add325e0429e1",
+      "sha256": "e3c21f00a8f0dc62f7aa09ad8474163df6ab512ace4064f2d9ab8375531a40b8",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-004.consent-decision.v1.schema.json"
+    },
+    {
+      "path": "contracts/shared-core/ct-shc-005.entitlement-access-decision.v1.schema.json",
+      "git_blob_sha": "f8ba0a3f71682f9ab52a2cea0d3c1ed1ad5dead9",
+      "sha256": "8ffd258108bf1f92ef457130c6144b98850becccbaa5e28de86d0fe1ac0f47a4",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-005.entitlement-access-decision.v1.schema.json"
+    },
+    {
+      "path": "contracts/manifest.json",
+      "git_blob_sha": "5edc6fceb51d1266c491bf2a6aaa0334fa2aaac3",
+      "sha256": "eccfd46721f3bf2a89261c5f6aa58f8ee00dbeb45d63ccf0b7727343686ee64c",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/manifest.json"
+    },
+    {
+      "path": "contracts/piac-decision-proof/v1/proof-envelope.schema.json",
+      "git_blob_sha": "c3b89a8a208d521cd0663a648b903866c242afce",
+      "sha256": "4111bc551d68af9ebc3e8f36377ea7e051f323053d4053451306371b3a2a04ca",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/piac-decision-proof/v1/proof-envelope.schema.json"
+    },
+    {
+      "path": "contracts/piac-decision-proof/v1/proof-envelope.schema.sha256",
+      "git_blob_sha": "7b3d248b4b805bfad8630410c272d184a527e102",
+      "sha256": "6a2030bb56c0a7840ff19d8d20cad5f40a2e9ab8c610ee7ea98c87f05302389e",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/piac-decision-proof/v1/proof-envelope.schema.sha256"
+    },
+    {
+      "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacContracts.java",
+      "git_blob_sha": "e9041ca30b7f4e9251e3d585756101d07a73a607",
+      "sha256": "4c94e7f16c57be40a77063730f6e5919d52e70c00a21ee42c1ae07968ca82b31",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacContracts.java"
+    },
+    {
+      "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacApplicationService.java",
+      "git_blob_sha": "d15cffbdb73145f77e0dd8ae821fcd79a7ce8530",
+      "sha256": "53fe51987938eace7ca7571378940de21834b82e23824ec1e7d21d0a06fc52aa",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacApplicationService.java"
+    },
+    {
+      "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/ProofVerificationRequest.java",
+      "git_blob_sha": "3cc2288f1a255779be83ce65cab516af634fe640",
+      "sha256": "56af42fb92415587abc5d01243403703d4afd551c5e252ee2a4f1b9be488e57c",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/ProofVerificationRequest.java"
+    },
+    {
+      "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/ProofPublicMetadata.java",
+      "git_blob_sha": "b6800617ff8d0695cc2f1931791c133312d6cb1d",
+      "sha256": "57c8eb303b5eddd124406eb1801ba96ec75c992a551112755ceb8549dfb426bf",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/ProofPublicMetadata.java"
+    },
+    {
+      "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/UnconfiguredProofAuthority.java",
+      "git_blob_sha": "5576073a321ac4a11c84d9f106fd93034b5669fa",
+      "sha256": "370eeb12ae3e1fb4af7c1e028c055389690fa7a1fa02b8ca5e01ffd1cf480d1b",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/UnconfiguredProofAuthority.java"
+    },
+    {
+      "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/SyntheticEphemeralProofAuthority.java",
+      "git_blob_sha": "b6cd1b92d12431011b868998b6aea3e85783df0f",
+      "sha256": "cd776147481a795a3a77a0e1b8e32cbca738d9389ab6f715c8738cab9d087272",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/SyntheticEphemeralProofAuthority.java"
+    },
+    {
+      "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/PiacDecisionProofVerifier.java",
+      "git_blob_sha": "f7423aa5e38ced42cfd565f93c6e006e37ed1064",
+      "sha256": "2030cebfc8816d55885d5611bf1a3ab1791c2525c4856ac93054c6bd0f1384c1",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/proof/PiacDecisionProofVerifier.java"
+    },
+    {
+      "path": "evidence/returns/SOV-IMP-17/reentry-04/piac-decision-proof-v1/EXECUTOR_RETURN.md",
+      "git_blob_sha": "1f466b71823ea95819164bf9d96c79f7cf8c3b77",
+      "sha256": "6ed23933feead43367574bf8dcda185b6b307d98c2cf3f5868f24727e6e9dd47",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/evidence/returns/SOV-IMP-17/reentry-04/piac-decision-proof-v1/EXECUTOR_RETURN.md"
+    },
+    {
+      "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacDomain.java",
+      "git_blob_sha": "538c1a1c1bee18c1646f890c3a315c970e9a86ff",
+      "sha256": "9b4fd69865d81e309076b133c89dfc9fbc0ae968a707e01ea6bdd93337fd72ee",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacDomain.java"
+    },
+    {
+      "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/OperationProfileRegistry.java",
+      "git_blob_sha": "2687442eb8cf2bf09b2561865abaeebad0cf1d55",
+      "sha256": "1a17e9fba9a09a5104738df1498a556c369d57929d24109cbcf625a370a5061d",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/OperationProfileRegistry.java"
+    },
+    {
+      "path": "services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacAccessDecisionComposer.java",
+      "git_blob_sha": "f11d7cc5c28271d115fe4c99f38fa8633939dca4",
+      "sha256": "8417682a3a647bf2bfae71ea0f68a6f660231fcd125bdcac693d78fd07517e53",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/services/runtime/src/main/java/io/sovereignos/sharedcore/identity/PiacAccessDecisionComposer.java"
+    }
+  ],
+  "local_contract_inventory": {
+    "base_sha": "154a5914730eb9d53ced813f000e844c87072652",
+    "tracked_paths": [
+      "contracts/arcava/CT-ARC-002/1.0/error.schema.json",
+      "contracts/arcava/CT-ARC-002/1.0/request.schema.json",
+      "contracts/arcava/CT-ARC-002/1.0/result.schema.json",
+      "contracts/arcava/CT-ARC-003/1.0/error.schema.json",
+      "contracts/arcava/CT-ARC-003/1.0/request.schema.json",
+      "contracts/arcava/CT-ARC-003/1.0/result.schema.json",
+      "contracts/arcava/CT-ARC-004/1.0/error.schema.json",
+      "contracts/arcava/CT-ARC-004/1.0/request.schema.json",
+      "contracts/arcava/CT-ARC-004/1.0/result.schema.json",
+      "contracts/arcava/CT-ARC-R03-REM-001/1.0/error.schema.json",
+      "contracts/arcava/CT-ARC-R03-REM-001/1.0/event.schema.json",
+      "contracts/arcava/CT-ARC-R03-REM-001/1.0/request.schema.json",
+      "contracts/arcava/CT-ARC-R03-REM-001/1.0/result.schema.json",
+      "contracts/arcava/contract-manifest.json",
+      "contracts/arcava/types/1.0/EventEnvelope.schema.json",
+      "contracts/arcava/types/1.0/QueryEnvelope.schema.json",
+      "contracts/arcava/types/1.0/ResponseEnvelope.schema.json",
+      "contracts/asyncapi/project-b-events-v1.json",
+      "contracts/events/envelopes/project-b-cloud-event-envelope.v1.schema.json",
+      "contracts/events/patches/Event_Patch_Register_Journey_Provisioning_v1_1.csv",
+      "contracts/events/schemas/project_b_access_checked_v1.schema.json",
+      "contracts/events/schemas/project_b_agreement_signed_v1.schema.json",
+      "contracts/events/schemas/project_b_audit_policy_violation_detected_v1.schema.json",
+      "contracts/events/schemas/project_b_blueprint_version_published_v1.schema.json",
+      "contracts/events/schemas/project_b_branding_theme_published_v1.schema.json",
+      "contracts/events/schemas/project_b_canonical_binding_validated_v1.schema.json",
+      "contracts/events/schemas/project_b_canonical_ref_validation_failed_v1.schema.json",
+      "contracts/events/schemas/project_b_checkout_started_v1.schema.json",
+      "contracts/events/schemas/project_b_client_assignment_created_v1.schema.json",
+      "contracts/events/schemas/project_b_community_content_moderated_v1.schema.json",
+      "contracts/events/schemas/project_b_community_content_reported_v1.schema.json",
+      "contracts/events/schemas/project_b_community_post_created_v1.schema.json",
+      "contracts/events/schemas/project_b_content_asset_uploaded_v1.schema.json",
+      "contracts/events/schemas/project_b_core_access_allow_denied_v1.schema.json",
+      "contracts/events/schemas/project_b_core_access_allow_granted_v1.schema.json",
+      "contracts/events/schemas/project_b_core_access_allow_requested_v1.schema.json",
+      "contracts/events/schemas/project_b_discovery_call_booked_v1.schema.json",
+      "contracts/events/schemas/project_b_enrollment_activated_v1.schema.json",
+      "contracts/events/schemas/project_b_intervention_created_v1.schema.json",
+      "contracts/events/schemas/project_b_journey_draft_created_v1.schema.json",
+      "contracts/events/schemas/project_b_journey_draft_updated_v1.schema.json",
+      "contracts/events/schemas/project_b_journey_draft_validation_requested_v1.schema.json",
+      "contracts/events/schemas/project_b_journey_version_published_v1.schema.json",
+      "contracts/events/schemas/project_b_lead_created_v1.schema.json",
+      "contracts/events/schemas/project_b_lead_stage_changed_v1.schema.json",
+      "contracts/events/schemas/project_b_message_sent_v1.schema.json",
+      "contracts/events/schemas/project_b_notification_failed_v1.schema.json",
+      "contracts/events/schemas/project_b_notification_scheduled_v1.schema.json",
+      "contracts/events/schemas/project_b_notification_sent_v1.schema.json",
+      "contracts/events/schemas/project_b_offer_created_v1.schema.json",
+      "contracts/events/schemas/project_b_onboarding_started_v1.schema.json",
+      "contracts/events/schemas/project_b_outbox_event_dead_lettered_v1.schema.json",
+      "contracts/events/schemas/project_b_outbox_event_failed_v1.schema.json",
+      "contracts/events/schemas/project_b_outbox_event_published_v1.schema.json",
+      "contracts/events/schemas/project_b_payment_failed_v1.schema.json",
+      "contracts/events/schemas/project_b_payment_succeeded_v1.schema.json",
+      "contracts/events/schemas/project_b_projection_rebuild_requested_v1.schema.json",
+      "contracts/events/schemas/project_b_projection_rebuilt_v1.schema.json",
+      "contracts/events/schemas/project_b_reflection_submitted_v1.schema.json",
+      "contracts/events/schemas/project_b_role_assigned_v1.schema.json",
+      "contracts/events/schemas/project_b_role_revoked_v1.schema.json",
+      "contracts/events/schemas/project_b_step_completed_v1.schema.json",
+      "contracts/events/schemas/project_b_support_case_created_v1.schema.json",
+      "contracts/events/schemas/project_b_tenant_created_v1.schema.json",
+      "contracts/events/schemas/project_b_tenant_status_changed_v1.schema.json",
+      "contracts/json-schema/journey-condition-rule.v1.schema.json",
+      "contracts/openapi/patches/OpenAPI_Patch_Register_Journey_Provisioning_v1_1.csv",
+      "contracts/openapi/project-b-v1.1-overlay.json",
+      "contracts/openapi/project-b-v1.1-overlay.yaml",
+      "contracts/openapi/project-b-v1.json",
+      "contracts/openapi/project-b-v1.yaml"
+    ],
+    "CT_SHC_physical_paths": [],
+    "absence_scope": "entire tracked contracts subtree at base; no assertion about all repositories"
+  },
+  "drive_sources": [
+    {
+      "id": "ATC-04",
+      "url": "https://docs.google.com/document/d/1DEwzYlvC5etngjUnmAl5MCXQDWFQNgeaogxM1j8egQY/edit",
+      "modified_time_observed": "2026-10-02T13:49:15.831Z",
+      "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+      "excerpts": [
+        "N1 SOV, ARCAVA, KDB, PIAC and external provider namespaces are distinct. PIAC PrincipalId may be referenced in Arcava ClientProfile; ClientProfileId is different. One tenant ID may correlate Arcava BusinessTenant and PIAC access scope but only Arcava owns business lifecycle.",
+        "AG-ARC-004 | CoachAssignment | AGGREGATE_ROOT | ARCAVA | tenant/client/coach | assignment_id:ID<ARCAVA>; tenant_id:ID<BusinessTenant>; client_id:ID<ClientProfile>; coach_principal_id:ID<PIAC>; role:enum; status:AssignmentState; valid_from:Instant; valid_until:Instant? | ClientProfile; CoachPrincipalRef; AssignmentReason | ARC-001,ARC-002,ACT-003,SEC-001",
+        "AG-ARC-113 | ActivityShareGrant | AGGREGATE_ROOT | ARCAVA | tenant/client/coach/purpose | share_grant_id:ID<ARCAVA>; client_id:ID<ClientProfile>; coach_assignment_id:ID<CoachAssignment>; data_type_scope:set<enum>; purpose:string; state:enum; consent_decision_id:ID<PIAC>; valid_until:Instant? | CoachAssignment; ConsentDecisionRef; data-type scope | ACT-002,ACT-003,SEC-001",
+        "AG-SHC-001 | PrincipalIdentity | AGGREGATE_ROOT | SOV/PIAC | principal | principal_id:ID<PIAC>; auth_provider_ref:ExternalRef?; identity_status:enum; created_at:Instant | AuthSession; tenant/access refs | SHC-001",
+        "AG-SHC-002 | AuthSession | AGGREGATE_ROOT | SOV/PIAC | principal/session | auth_session_id:ID<PIAC>; principal_id:ID<PrincipalIdentity>; status:enum; issued_at:Instant; expires_at:Instant; revoked_at:Instant? | PrincipalIdentity | SHC-001",
+        "AG-SHC-003 | TenantAccessGrant | AGGREGATE_ROOT | SOV/PIAC | principal/tenant | tenant_access_grant_id:ID<PIAC>; principal_id:ID<PrincipalIdentity>; tenant_id:ID<ARCAVA>; scope:enum; status:enum; valid_until:Instant? | PrincipalIdentity; TenantId external ref | SHC-002,SHC-003",
+        "AG-SHC-004 | ConsentGrant | AGGREGATE_ROOT | SOV/PIAC | principal/purpose | consent_grant_id:ID<PIAC>; principal_id:ID<PrincipalIdentity>; purpose:string; data_scope:object; status:enum; valid_from:Instant; valid_until:Instant? | principal; purpose; scope; validity | SHC-002,ACT-002,ACT-003",
+        "AG-SHC-005 | EntitlementGrant | AGGREGATE_ROOT | SOV/PIAC | principal/capability | entitlement_grant_id:ID<PIAC>; principal_id:ID<PrincipalIdentity>; capability_id:string; tenant_id:ID<ARCAVA>?; status:enum; valid_until:Instant? | PrincipalIdentity; capability scope | SHC-002,ARC-002",
+        "EV-SHC-006 | AccessDecision | EVIDENCE_RECORD | SOV/PIAC | principal/resource/purpose | access_decision_id:ID<PIAC>; principal_id:ID<PrincipalIdentity>; resource_ref:TypedRef; purpose:string; result:ALLOW|DENY; policy_version:string; source_grant_refs:list<TypedRef>; valid_until:Instant; issued_at:Instant | ConsentGrant; EntitlementGrant; TenantAccessGrant; validity/reason | SHC-002,SHC-003,ARC-002"
+      ],
+      "excerpt_utf8_sha256": "324f0cf1e3f882305e74aee9147fbe1db346cd2957c90c3ccba7807d1a331b33"
+    },
+    {
+      "id": "ATC-07",
+      "url": "https://docs.google.com/document/d/1oNv0gaHdh0skkzana9KmuagggbOXdjwwdsoDW8c_3Ns/edit",
+      "modified_time_observed": "2026-10-02T13:50:09.856Z",
+      "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+      "excerpts": [
+        "PrincipalIdentity is the stable authenticated subject/service identity owned by PIAC. AuthSession is authentication/session evidence only and never equals JourneySession, DeliverySession or RuntimeExecutionSession. ActorContext is a minimized projection containing principal, validated session context, tenant memberships/scopes, assurance/authentication context where available and policy/version refs. ResourceRef and SubjectRef are typed owner-lane references. PurposeRef is mandatory for sensitive reads/writes. ConsentDecisionRef, EntitlementDecisionRef and AccessDecisionRef bind current policy/version/effective/expiry/revocation/evidence. Correlation/causation IDs are security/trace metadata, not authority.",
+        "PIAC operations: trusted principal/session/tenant/consent/entitlement only; no business truth. SOV Runtime: PIAC decision + SOV resource/precondition guard; denial/revocation/stale evidence fails closed. SOV personal tracking: personal subject ownership/purpose + exact source binding + SOV guard. Arcava client/coaching operations: PIAC actor/tenant/consent/entitlement + Arcava CoachAssignment/enrollment/resource/commercial/booking guard as applicable. KDB candidate/review/publish: PIAC/service identity + KDB purpose/rights/reviewer/publisher/lifecycle/validation guard. Provider callback: verified provider origin + owner-local adapter guard + replay/idempotency checks. No generic platform role bypasses an owner-domain guard.",
+        "ProviderPermission, ConsentDecision, ActivityShareGrant, CoachAssignment, EntitlementDecision, tenant membership and resource ownership are independent controls. Each has stable identity, policy/version, effective_at, expiry/revocation where applicable and evidence. Missing, expired, revoked or stale gate is DENY/REVOKED/STALE; no gate is inferred from another. Withdrawal/revocation affects future access and owner-local projections; immutable historical evidence is not rewritten.",
+        "Repo A shared_core: PIAC migration owner, PIAC runtime/service identity, audit reader; RLS/default deny for subject/tenant scoped data; no Arcava/KDB table privileges. Repo A sov_runtime: SOV runtime/personal-tracking service identities scoped to SOV operations; direct cross-owner access denied. Repo B arcava: Arcava application/provider-adapter/composition services scoped to tenant/resource/assignment/business guards; no KDB canonical or SOV mutation. Repo B KDB lane: KDB migration owner, pipeline service, reviewer, publisher, read service and audit reader separated; no Arcava/SOV direct table access. PUBLIC/anon privileged mutation denied. SECURITY INVOKER preferred. SECURITY DEFINER only when justified, with dedicated NOLOGIN/NOSUPERUSER/NOBYPASSRLS owner, minimal grants, fixed minimal search_path and schema-qualified references. Cross-owner FK cascades and grants are forbidden."
+      ],
+      "excerpt_utf8_sha256": "f505fb5575516b397c23d01bc69d80cc449b88b9e035c461ace8906e81e7eea6"
+    },
+    {
+      "id": "ARC10",
+      "url": "https://docs.google.com/document/d/1bwZrdGHeQXZcU2V5kSQeGypNnMVUAp6I3aAgVY8fHKQ/edit",
+      "modified_time_observed": "2026-10-21T20:29:33.074Z",
+      "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+      "excerpts": [
+        "S00 authenticated server context: verified PIAC principal/session/tenant/audience/issuer + decision/purpose/resource + freshness; request body/GUC alone grants nothing. S01 tenant + subject/client membership; coach active assignment/resource; admin config authority distinct sensitive access. S02 consent/share/provider permission/entitlement/enrollment/business guards independently current. S03 default-deny RLS/ACL, explicit service scope; no browser bypass role. S04 publication/correction/effect immutability and revision checks. S05 current rights/safety/source/pack admission and human digest approval. S06 minimized events/logs/projections and redaction/erasure/tombstones. S07 authenticated idempotent callbacks, provider-key UNKNOWN fence. S08 owner-only migration/roles/fixed search_path/evidence.",
+        "CT-SHC-001 | Q principal_id:ID<PIAC> | principal_id:ID<PIAC>; identity_revision:Revision; decision:Decision",
+        "CT-SHC-002 | Q auth_session_id:ID<PIAC> | auth_session_id:ID<PIAC>; principal_id:ID<PIAC>; session_state:SM<SM-SHC-01>; session_revision:Revision; validity:Validity; decision:Decision",
+        "CT-SHC-003 | Q principal_id:ID<PIAC>; requested_scope:Scope | grant_ref:Ref<TenantAccessGrant>; grant_revision:Revision; grant_state:SM<SM-SHC-02>; decision:Decision",
+        "CT-SHC-004 | Q principal_id:ID<PIAC>; resource_ref:Ref|Exact; data_scope:Code[]; processing_purpose:Code | consent_grant_ref?:Ref<ConsentGrant>; grant_state:SM<SM-SHC-03>; data_scope:Code[]; decision:Decision. No grant_ref required for NOT_GRANTED/DENY.",
+        "CT-SHC-005 | Q principal_id:ID<PIAC>; capability_code:Code; resource_ref:Ref|Exact | entitlement_ref?:Ref<EntitlementGrant>; grant_state:SM<SM-SHC-04>; capability_code:Code; decision:Decision",
+        "E01 PIAC -> Arcava: CT-SHC-001..005 trusted decisions; T020/110 consume, stale/missing denies. PIAC source never local SQL."
+      ],
+      "excerpt_utf8_sha256": "512e3a96fa4f439e2d7c09918ae0f26e25e01664ae4a1f76be21a54c89e06d05"
+    },
+    {
+      "id": "ARC09",
+      "url": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "modified_time_observed": "2026-09-30T14:18:48.090Z",
+      "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+      "excerpts": [
+        "Environment contract required fields: environment identity; engine/extensions and schema/ledger; producer endpoint and version/hash registry; trusted PIAC issuer/audience/session verification; owner least-privilege DB/adapter identity refs; secret store references without values; allowed network targets; worker modes/fencing; approved retry/retention/alert policies; timezone rules; fixture/run manifests; backup/restore evidence. Exact env-var names derive from implemented modules at ATC-10. Missing proof keeps relevant readiness false."
+      ],
+      "excerpt_utf8_sha256": "f396b92bfa5be60643e1d56c0ffeb4820d31e125859b02d2fa9c89ad5193f48e"
+    },
+    {
+      "id": "ARC-07",
+      "url": "https://docs.google.com/document/d/1i9NEnvB3Kk9WK4zBNdDzo5eV7xYroW1qJ95ZEQmpZsM/edit",
+      "modified_time_observed": "2026-09-30T08:22:42.909Z",
+      "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+      "excerpts": [
+        "Client/coach/admin operations on Programme/Journey, enrollment, client resources, tracking/progress, communications/media, Client360/Timeline/Attention, Appointment/booking/reschedule/cancel/no-show, ReminderPlan, composition and commercial guards require PIAC actor/session/tenant evidence plus Arcava resource/assignment/business guard. Provider operations additionally require ProviderPermission and relevant owner-local grant. Sensitive activity views require ConsentDecision + ActivityShareGrant + CoachAssignment where applicable.",
+        "ProviderPermission, ConsentDecision, ActivityShareGrant, CoachAssignment, EntitlementDecision and tenant membership are independent gates. Missing/revoked/expired/stale gate fails closed. Client360/Timeline are minimized projections, not universal ledgers. Private reflections and communications are excluded from generic cross-lane events. Provider activity missing data is UNKNOWN, never zero. Export/erasure/redaction follow resource ownership and retention policy; exact legal retention durations remain TBD where sources do not define them.",
+        "Consumes CT-SHC-001..005, KDB resolver/taxonomy/provenance/safety/SynthesisContextPackage contracts and SOV Runtime/Reminder outcomes. Produces JourneyVersion/Enrollment/ReminderDue and Arcava read models/events. For SOV_DELEGATED due intents Arcava cannot directly deliver the same intent. KDB nomination via CT-KDB-R03-PIPE-001 is rights-qualified source nomination only; client operational data is forbidden."
+      ],
+      "excerpt_utf8_sha256": "060ae4147db6dd3c0ad8dc9e9941b513ca987a17a08bff607070d5a7d3c72831"
+    },
+    {
+      "id": "SOV-19",
+      "url": "https://docs.google.com/document/d/1o4D2aymkbPugkjos6d8U_qz7G1_HTZHDLoz_fSoLve8/edit",
+      "modified_time_observed": "2026-10-01T16:14:55.593Z",
+      "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+      "excerpts": [
+        "Turn the SOV-18 shared_core persistence foundation into an executable, fail-closed PIAC producer boundary for CT-SHC-001..005. Implement trusted actor/session/tenant/purpose context resolution, PIAC decision application logic, repository/adapters and narrowly admitted positive data-access paths without broadening direct database access or starting sov_runtime persistence.",
+        "verified issuer;",
+        "audience;",
+        "If a trustworthy runtime login mechanism is not currently available, implement code and policy/grant material on the feature branch but keep live positive traffic disabled and route exactly one bounded service-identity binding successor. Do not fall back to service_role or postgres."
+      ],
+      "excerpt_utf8_sha256": "cd556dd15cc77e85ade28164d97231e9f3e6878a1ca4d836b029ab58e87abe5a"
+    },
+    {
+      "id": "SOV-20",
+      "url": "https://docs.google.com/document/d/1VGwiXf_GBUG3Ofz5GjQy8VIE8dSg_JN6eckVNOa4jTo/edit",
+      "modified_time_observed": "2026-10-01T16:27:20.252Z",
+      "status": "VERIFIED_READABLE_SOURCE_EXCERPT_NOT_PRODUCER_ADMISSION",
+      "excerpts": [
+        "EXECUTED / BLOCKED_BY_SECRET_BINDING_FOUNDER_ACTION / SUCCESSOR_CREATED",
+        "Bind exactly one dedicated backend service identity to the existing PIAC application core so CT-SHC-001..005 can execute against shared_core without using postgres, service_role, owner or migration identities. Prove non-bypass RLS behavior, operation-scoped data access, trusted-context propagation and negative isolation before allowing SOV Runtime persistence to depend on PIAC.",
+        "If no safe credential-binding mechanism is available through the current execution context:",
+        "classify BLOCKED_BY_SECRET_BINDING_FOUNDER_ACTION;"
+      ],
+      "excerpt_utf8_sha256": "9237766c4361188765da65186c4231d637c9526a44e62d830fb9d6ec00ae9b56"
+    },
+    {
+      "id": "CL-GATE-CLOSURE-20261105-01",
+      "url": "https://docs.google.com/document/d/1SSbRb94ij-3CS_miSXrTIX-kGvhY1DtPxzYwDInV5Zg/edit",
+      "status": "READ_AND_ADOPTED",
+      "excerpts": [
+        "GATE-RECORD: GATE_ID, PARENT_PLAN_ID, PARENT_STEP, OWNER, GATE_TYPE, BLOCKED_SCOPE, MISSING_CRITERION, CLOSURE_CRITERIA, EVIDENCE_REQUIRED, NEXT_EXECUTOR, NEXT_ACTION, REVIEW_TRIGGER, STATUS und bei Bedarf BLOCKER_ID. Owner ist verantwortlich, ein benannter externer L\u00f6ser dadurch noch nicht beauftragt. Rollen-/Zugriffsl\u00fccken offen als UNASSIGNED/UNVERIFIED markieren. Existierende IDs und Ablage wiederverwenden.",
+        "GESCHACHTELTER PLAN NUR BEI BEDARF: Ein direkt l\u00f6sbares Gate ben\u00f6tigt keinen Unterplan. Braucht die L\u00f6sung mehrere abh\u00e4ngige Schritte, legt der Builder im bestehenden Owner-Dokument einen begrenzten Gate-Unterplan/Zwischensprint an. CHILD_PLAN_ID verweist eindeutig auf PARENT_PLAN_ID/PARENT_STEP und TARGET_GATE_ID. Zweck, Eingangszustand, konkrete Schritte/Ergebnisse, Abh\u00e4ngigkeiten, zul\u00e4ssige Operationen, Abnahmekriterien und R\u00fcckkehrpunkt werden festgehalten. Schrittzahl nach Bedarf, keine erzwungenen zehn Schritte f\u00fcr ein kleines Problem. Weitere Verschachtelung nur f\u00fcr eine tats\u00e4chliche eigenst\u00e4ndige Abh\u00e4ngigkeit und mit Begr\u00fcndung; so flach wie m\u00f6glich.",
+        "SCHLIESSUNG UND RUECKKEHR: Executor liefert exakten Source-/Versions-/Testnachweis und verbleibende L\u00fccken. Builder pr\u00fcft einmal das relevante Delta; unabh\u00e4ngige QS nur wo risikobedingt erforderlich. GELOEST/CLOSED gilt ausschlie\u00dflich f\u00fcr erf\u00fcllte benannte Kriterien und Scope. Technischer Erfolg, Owner-Abnahme und Produktionszulassung getrennt halten. Child-Abschluss aktualisiert Parent-Checkpoint und Gate-/Blockerrecord; danach am dokumentierten RETURN_TO fortsetzen, urspr\u00fcnglichen Meilenstein nicht \u00fcberspringen oder neu beginnen. PENDING_REVIEW ist nicht CLOSED. Keine k\u00fcnstlichen Evidence-only-Commit-Schleifen oder Routine-QS ohne materielles Delta."
+      ],
+      "excerpt_utf8_sha256": "6387f58e35379d32a2e9b54104dacde4cd4666a75326887aadde87a70a53e930"
+    }
+  ],
+  "contracts": [
+    {
+      "contract_id": "CT-SHC-001",
+      "source_status": "VERIFIED_BYTES_AND_MANIFEST_ONLY",
+      "producer_authority_status": "UNVERIFIED_FOR_ARCAVA",
+      "manifest_entry": {
+        "logical_id": "CT-SHC-001",
+        "title": "ActorIdentityContext",
+        "kind": "CONTRACT",
+        "producer": "PIAC",
+        "schema_version": "1.0",
+        "path": "contracts/shared-core/ct-shc-001.actor-identity-context.v1.schema.json",
+        "sha256": "4b77feee91d7cb86013fd3a6f59e7178be3e744ab6d76d6b58844b9a7b03783f"
+      },
+      "git_blob_sha": "812495f244bca0a4cd5f05b4f6613018c0fa3d12",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-001.actor-identity-context.v1.schema.json",
+      "schema_metadata": {
+        "logical_id": "CT-SHC-001",
+        "schema_version": "1.0",
+        "producer": "PIAC",
+        "interaction": "QUERY_READ_MODEL",
+        "source_authority": "ATC-05",
+        "compatibility_model": "MAJOR.MINOR",
+        "no_silent_major_fallback": true
+      },
+      "request_payload": {
+        "type": "object",
+        "description": "",
+        "additionalProperties": false,
+        "properties": {
+          "principal_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "PIAC principal ID"
+          }
+        },
+        "required": [
+          "principal_id"
+        ]
+      },
+      "response_payload": {
+        "type": "object",
+        "description": "",
+        "additionalProperties": false,
+        "properties": {
+          "principal_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "PIAC principal ID"
+          },
+          "identity_revision": {
+            "type": "integer",
+            "description": "Identity revision",
+            "minimum": 0
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "ALLOW",
+              "DENY"
+            ],
+            "description": ""
+          }
+        },
+        "required": [
+          "principal_id",
+          "identity_revision",
+          "decision"
+        ]
+      },
+      "response_envelope_required": [
+        "contract_id",
+        "schema_version",
+        "producer",
+        "source_refs",
+        "as_of",
+        "freshness_state",
+        "projection_version",
+        "payload"
+      ],
+      "response_envelope_optional": [
+        "completeness",
+        "limitations",
+        "next_cursor",
+        "projection_id",
+        "resource_ref",
+        "valid_until"
+      ]
+    },
+    {
+      "contract_id": "CT-SHC-002",
+      "source_status": "VERIFIED_BYTES_AND_MANIFEST_ONLY",
+      "producer_authority_status": "UNVERIFIED_FOR_ARCAVA",
+      "manifest_entry": {
+        "logical_id": "CT-SHC-002",
+        "title": "AuthSessionContext",
+        "kind": "CONTRACT",
+        "producer": "PIAC",
+        "schema_version": "1.0",
+        "path": "contracts/shared-core/ct-shc-002.auth-session-context.v1.schema.json",
+        "sha256": "7ec82462615fb1b071018d755279c62f9f4c4d6c4c7f974a7f9157a6da665d35"
+      },
+      "git_blob_sha": "c7ee41677d674284d485bdf0a3c59e54a7d22656",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-002.auth-session-context.v1.schema.json",
+      "schema_metadata": {
+        "logical_id": "CT-SHC-002",
+        "schema_version": "1.0",
+        "producer": "PIAC",
+        "interaction": "QUERY_READ_MODEL",
+        "source_authority": "ATC-05",
+        "compatibility_model": "MAJOR.MINOR",
+        "no_silent_major_fallback": true
+      },
+      "request_payload": {
+        "type": "object",
+        "description": "",
+        "additionalProperties": false,
+        "properties": {
+          "auth_session_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "AuthSession ID"
+          }
+        },
+        "required": [
+          "auth_session_id"
+        ]
+      },
+      "response_payload": {
+        "type": "object",
+        "description": "",
+        "additionalProperties": false,
+        "properties": {
+          "auth_session_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "AuthSession ID"
+          },
+          "principal_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "PIAC principal ID"
+          },
+          "session_state": {
+            "type": "string",
+            "minLength": 1,
+            "description": "SM-SHC-01 state"
+          },
+          "session_revision": {
+            "type": "integer",
+            "description": "Session revision",
+            "minimum": 0
+          },
+          "validity": {
+            "type": "object",
+            "description": "",
+            "additionalProperties": false,
+            "properties": {
+              "state": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Validity state"
+              },
+              "effective_from": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Effective from"
+              },
+              "effective_until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Effective until"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "ALLOW",
+              "DENY"
+            ],
+            "description": ""
+          }
+        },
+        "required": [
+          "auth_session_id",
+          "principal_id",
+          "session_state",
+          "session_revision",
+          "validity",
+          "decision"
+        ]
+      },
+      "response_envelope_required": [
+        "contract_id",
+        "schema_version",
+        "producer",
+        "source_refs",
+        "as_of",
+        "freshness_state",
+        "projection_version",
+        "payload"
+      ],
+      "response_envelope_optional": [
+        "completeness",
+        "limitations",
+        "next_cursor",
+        "projection_id",
+        "resource_ref",
+        "valid_until"
+      ]
+    },
+    {
+      "contract_id": "CT-SHC-003",
+      "source_status": "VERIFIED_BYTES_AND_MANIFEST_ONLY",
+      "producer_authority_status": "UNVERIFIED_FOR_ARCAVA",
+      "manifest_entry": {
+        "logical_id": "CT-SHC-003",
+        "title": "TenantAccessContext",
+        "kind": "CONTRACT",
+        "producer": "PIAC",
+        "schema_version": "1.0",
+        "path": "contracts/shared-core/ct-shc-003.tenant-access-context.v1.schema.json",
+        "sha256": "0e55b200c975bbf49432c08d627215c6696351ae52292bfab21ef3c28f0db0af"
+      },
+      "git_blob_sha": "c4a3b2450d2b00f0e46a189724e9debe3d194d41",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-003.tenant-access-context.v1.schema.json",
+      "schema_metadata": {
+        "logical_id": "CT-SHC-003",
+        "schema_version": "1.0",
+        "producer": "PIAC",
+        "interaction": "QUERY_READ_MODEL",
+        "source_authority": "ATC-05",
+        "compatibility_model": "MAJOR.MINOR",
+        "no_silent_major_fallback": true
+      },
+      "request_payload": {
+        "type": "object",
+        "description": "",
+        "additionalProperties": false,
+        "properties": {
+          "principal_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "PIAC principal ID"
+          },
+          "requested_scope": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Requested scope"
+          }
+        },
+        "required": [
+          "principal_id",
+          "requested_scope"
+        ]
+      },
+      "response_payload": {
+        "type": "object",
+        "description": "",
+        "additionalProperties": false,
+        "properties": {
+          "grant_ref": {
+            "type": "string",
+            "minLength": 1,
+            "description": "TenantAccessGrant ref"
+          },
+          "grant_revision": {
+            "type": "integer",
+            "description": "Grant revision",
+            "minimum": 0
+          },
+          "grant_state": {
+            "type": "string",
+            "minLength": 1,
+            "description": "SM-SHC-02 state"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "ALLOW",
+              "DENY"
+            ],
+            "description": ""
+          }
+        },
+        "required": [
+          "grant_ref",
+          "grant_revision",
+          "grant_state",
+          "decision"
+        ]
+      },
+      "response_envelope_required": [
+        "contract_id",
+        "schema_version",
+        "producer",
+        "source_refs",
+        "as_of",
+        "freshness_state",
+        "projection_version",
+        "payload"
+      ],
+      "response_envelope_optional": [
+        "completeness",
+        "limitations",
+        "next_cursor",
+        "projection_id",
+        "resource_ref",
+        "valid_until"
+      ]
+    },
+    {
+      "contract_id": "CT-SHC-004",
+      "source_status": "VERIFIED_BYTES_AND_MANIFEST_ONLY",
+      "producer_authority_status": "UNVERIFIED_FOR_ARCAVA",
+      "manifest_entry": {
+        "logical_id": "CT-SHC-004",
+        "title": "ConsentDecision",
+        "kind": "CONTRACT",
+        "producer": "PIAC",
+        "schema_version": "1.0",
+        "path": "contracts/shared-core/ct-shc-004.consent-decision.v1.schema.json",
+        "sha256": "e3c21f00a8f0dc62f7aa09ad8474163df6ab512ace4064f2d9ab8375531a40b8"
+      },
+      "git_blob_sha": "b5da15df141bb8dc3848ab420d3add325e0429e1",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-004.consent-decision.v1.schema.json",
+      "schema_metadata": {
+        "logical_id": "CT-SHC-004",
+        "schema_version": "1.0",
+        "producer": "PIAC",
+        "interaction": "QUERY_READ_MODEL",
+        "source_authority": "ATC-05",
+        "compatibility_model": "MAJOR.MINOR",
+        "no_silent_major_fallback": true
+      },
+      "request_payload": {
+        "type": "object",
+        "description": "",
+        "additionalProperties": false,
+        "properties": {
+          "principal_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "PIAC principal ID"
+          },
+          "resource_ref": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Resource ref"
+          },
+          "data_scope": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Data scope code"
+            },
+            "description": "Data scopes",
+            "uniqueItems": true
+          },
+          "processing_purpose": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Purpose code"
+          }
+        },
+        "required": [
+          "principal_id",
+          "resource_ref",
+          "data_scope",
+          "processing_purpose"
+        ]
+      },
+      "response_payload": {
+        "type": "object",
+        "description": "",
+        "additionalProperties": false,
+        "properties": {
+          "consent_grant_ref": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional ConsentGrant ref"
+          },
+          "grant_state": {
+            "type": "string",
+            "minLength": 1,
+            "description": "SM-SHC-03 state"
+          },
+          "data_scope": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Data scope code"
+            },
+            "description": "Decided scopes",
+            "uniqueItems": true
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "ALLOW",
+              "DENY"
+            ],
+            "description": ""
+          }
+        },
+        "required": [
+          "grant_state",
+          "data_scope",
+          "decision"
+        ]
+      },
+      "response_envelope_required": [
+        "contract_id",
+        "schema_version",
+        "producer",
+        "source_refs",
+        "as_of",
+        "freshness_state",
+        "projection_version",
+        "payload"
+      ],
+      "response_envelope_optional": [
+        "completeness",
+        "limitations",
+        "next_cursor",
+        "projection_id",
+        "resource_ref",
+        "valid_until"
+      ]
+    },
+    {
+      "contract_id": "CT-SHC-005",
+      "source_status": "VERIFIED_BYTES_AND_MANIFEST_ONLY",
+      "producer_authority_status": "UNVERIFIED_FOR_ARCAVA",
+      "manifest_entry": {
+        "logical_id": "CT-SHC-005",
+        "title": "EntitlementAccessDecision",
+        "kind": "CONTRACT",
+        "producer": "PIAC",
+        "schema_version": "1.0",
+        "path": "contracts/shared-core/ct-shc-005.entitlement-access-decision.v1.schema.json",
+        "sha256": "8ffd258108bf1f92ef457130c6144b98850becccbaa5e28de86d0fe1ac0f47a4"
+      },
+      "git_blob_sha": "f8ba0a3f71682f9ab52a2cea0d3c1ed1ad5dead9",
+      "url": "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-005.entitlement-access-decision.v1.schema.json",
+      "schema_metadata": {
+        "logical_id": "CT-SHC-005",
+        "schema_version": "1.0",
+        "producer": "PIAC",
+        "interaction": "QUERY_READ_MODEL",
+        "source_authority": "ATC-05",
+        "compatibility_model": "MAJOR.MINOR",
+        "no_silent_major_fallback": true
+      },
+      "request_payload": {
+        "type": "object",
+        "description": "",
+        "additionalProperties": false,
+        "properties": {
+          "principal_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "PIAC principal ID"
+          },
+          "capability_code": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Capability code"
+          },
+          "resource_ref": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Resource ref"
+          }
+        },
+        "required": [
+          "principal_id",
+          "capability_code",
+          "resource_ref"
+        ]
+      },
+      "response_payload": {
+        "type": "object",
+        "description": "",
+        "additionalProperties": false,
+        "properties": {
+          "entitlement_ref": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional EntitlementGrant ref"
+          },
+          "grant_state": {
+            "type": "string",
+            "minLength": 1,
+            "description": "SM-SHC-04 state"
+          },
+          "capability_code": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Capability code"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "ALLOW",
+              "DENY"
+            ],
+            "description": ""
+          }
+        },
+        "required": [
+          "grant_state",
+          "capability_code",
+          "decision"
+        ]
+      },
+      "response_envelope_required": [
+        "contract_id",
+        "schema_version",
+        "producer",
+        "source_refs",
+        "as_of",
+        "freshness_state",
+        "projection_version",
+        "payload"
+      ],
+      "response_envelope_optional": [
+        "completeness",
+        "limitations",
+        "next_cursor",
+        "projection_id",
+        "resource_ref",
+        "valid_until"
+      ]
+    }
+  ],
+  "gates": [
+    {
+      "gate": "SESSION",
+      "readiness": "UNVERIFIED",
+      "owner_boundary": "PIAC producer authority (SOV lane)",
+      "producer_contract_ids": [
+        "CT-SHC-001",
+        "CT-SHC-002"
+      ],
+      "available_source_fields": [
+        "CT-SHC-002 request.payload.auth_session_id",
+        "CT-SHC-002 response.payload principal_id/session_state/session_revision/validity/decision"
+      ],
+      "independent_obligation": "CT-SHC-002 validity has required state only; effective_from/effective_until not universally required. Session identity/revocation must be separately current.",
+      "field_obligations": {
+        "issuer": {
+          "status": "UNVERIFIED",
+          "observation": "Schema producer=PIAC is a declared owner constant, not authenticated issuer. Producer TrustedActorContext has issuer/realm but no Arcava-admitted verifier/custody evidence."
+        },
+        "audience": {
+          "status": "UNVERIFIED",
+          "observation": "Producer TrustedActorContext has audience; CT-SHC responses do not require an audience binding. No admitted Arcava audience/workload route."
+        },
+        "principal": {
+          "status": "UNVERIFIED",
+          "observation": "CT-SHC-001/002 expose principal IDs and revisions; other queries select principal. Exact authenticated actor/subject correlation is not wired to Arcava."
+        },
+        "tenant": {
+          "status": "UNVERIFIED",
+          "observation": "Request tenant_scope is optional; CT-SHC-003 selects requested_scope. No admitted tenant/resource decision correlation into local context."
+        },
+        "client_subject": {
+          "status": "UNVERIFIED",
+          "observation": "ATC-04 N1 separates ClientProfileId from PIAC PrincipalId. Neither UUID equality nor body subject is an admitted mapping."
+        },
+        "resource": {
+          "status": "UNVERIFIED",
+          "observation": "Request projection_or_resource; response resource_ref optional. Local enrollment identity must bind exactly; no admitted authenticated composition."
+        },
+        "purpose": {
+          "status": "UNVERIFIED",
+          "observation": "Required request purpose and CT-SHC-004 processing_purpose; no agreed COACHING_SUPPORT/SELF_ACCESS translation or current signed consumer correlation."
+        },
+        "operation": {
+          "status": "UNVERIFIED",
+          "observation": "Producer operations cover five CT-SHC reads and KDB_SOURCE_INTAKE. No admitted SENSITIVE_CLIENT_READ operation profile/proof mapping."
+        },
+        "revision": {
+          "status": "UNVERIFIED",
+          "observation": "Identity/session/grant revisions are distinct; local Request.revision is one long. No admitted combination/freshness policy; do not collapse them."
+        },
+        "effectiveAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope as_of is not necessarily evidence effectiveAt. Session validity effective_from optional; domain records have times but no uniform consumer binding."
+        },
+        "expiresAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope valid_until optional; session effective_until nullable/optional. OwnerGuard requires finite nonnull expiresAt; no expiry may be fabricated."
+        },
+        "revokedAt": {
+          "status": "ABSENT",
+          "observation": "No revokedAt/revoked_at field in the five inspected response payloads. Producer domain has revocation state/epochs; no admitted Arcava current revocation channel."
+        },
+        "policy_decision_refs": {
+          "status": "UNVERIFIED",
+          "observation": "Generic source_refs/freshness are not authenticated policyRef/decisionRef. Producer domain policy/evidence exist but their consumer wire/attestation mapping is unadmitted."
+        },
+        "contract_version_checksum": {
+          "status": "VERIFIED",
+          "observation": "Five source v1.0 schema byte hashes match producer manifest at the pinned branch. This verifies source availability only, not consumer adoption or authority."
+        },
+        "backend_context_source": {
+          "status": "ABSENT",
+          "observation": "OwnerGuard.ContextSource is package-private; public OwnerGuard(Clock) resolves null. No live ContextSource adapter is connected."
+        }
+      },
+      "source_links": [
+        "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-001.actor-identity-context.v1.schema.json",
+        "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-002.auth-session-context.v1.schema.json",
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java",
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java"
+      ]
+    },
+    {
+      "gate": "TENANT_MEMBERSHIP",
+      "readiness": "UNVERIFIED",
+      "owner_boundary": "PIAC tenant access plus independent ARCAVA membership owner",
+      "producer_contract_ids": [
+        "CT-SHC-003"
+      ],
+      "available_source_fields": [
+        "CT-SHC-003 request.payload principal_id/requested_scope",
+        "CT-SHC-003 response.payload grant_ref/grant_revision/grant_state/decision"
+      ],
+      "independent_obligation": "TenantAccessGrant is not Arcava TenantMembership/business lifecycle; required independent local membership provenance remains open.",
+      "field_obligations": {
+        "issuer": {
+          "status": "UNVERIFIED",
+          "observation": "Schema producer=PIAC is a declared owner constant, not authenticated issuer. Producer TrustedActorContext has issuer/realm but no Arcava-admitted verifier/custody evidence."
+        },
+        "audience": {
+          "status": "UNVERIFIED",
+          "observation": "Producer TrustedActorContext has audience; CT-SHC responses do not require an audience binding. No admitted Arcava audience/workload route."
+        },
+        "principal": {
+          "status": "UNVERIFIED",
+          "observation": "CT-SHC-001/002 expose principal IDs and revisions; other queries select principal. Exact authenticated actor/subject correlation is not wired to Arcava."
+        },
+        "tenant": {
+          "status": "UNVERIFIED",
+          "observation": "Request tenant_scope is optional; CT-SHC-003 selects requested_scope. No admitted tenant/resource decision correlation into local context."
+        },
+        "client_subject": {
+          "status": "UNVERIFIED",
+          "observation": "ATC-04 N1 separates ClientProfileId from PIAC PrincipalId. Neither UUID equality nor body subject is an admitted mapping."
+        },
+        "resource": {
+          "status": "UNVERIFIED",
+          "observation": "Request projection_or_resource; response resource_ref optional. Local enrollment identity must bind exactly; no admitted authenticated composition."
+        },
+        "purpose": {
+          "status": "UNVERIFIED",
+          "observation": "Required request purpose and CT-SHC-004 processing_purpose; no agreed COACHING_SUPPORT/SELF_ACCESS translation or current signed consumer correlation."
+        },
+        "operation": {
+          "status": "UNVERIFIED",
+          "observation": "Producer operations cover five CT-SHC reads and KDB_SOURCE_INTAKE. No admitted SENSITIVE_CLIENT_READ operation profile/proof mapping."
+        },
+        "revision": {
+          "status": "UNVERIFIED",
+          "observation": "Identity/session/grant revisions are distinct; local Request.revision is one long. No admitted combination/freshness policy; do not collapse them."
+        },
+        "effectiveAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope as_of is not necessarily evidence effectiveAt. Session validity effective_from optional; domain records have times but no uniform consumer binding."
+        },
+        "expiresAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope valid_until optional; session effective_until nullable/optional. OwnerGuard requires finite nonnull expiresAt; no expiry may be fabricated."
+        },
+        "revokedAt": {
+          "status": "ABSENT",
+          "observation": "No revokedAt/revoked_at field in the five inspected response payloads. Producer domain has revocation state/epochs; no admitted Arcava current revocation channel."
+        },
+        "policy_decision_refs": {
+          "status": "UNVERIFIED",
+          "observation": "Generic source_refs/freshness are not authenticated policyRef/decisionRef. Producer domain policy/evidence exist but their consumer wire/attestation mapping is unadmitted."
+        },
+        "contract_version_checksum": {
+          "status": "VERIFIED",
+          "observation": "Five source v1.0 schema byte hashes match producer manifest at the pinned branch. This verifies source availability only, not consumer adoption or authority."
+        },
+        "backend_context_source": {
+          "status": "ABSENT",
+          "observation": "OwnerGuard.ContextSource is package-private; public OwnerGuard(Clock) resolves null. No live ContextSource adapter is connected."
+        }
+      },
+      "source_links": [
+        "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-003.tenant-access-context.v1.schema.json",
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java",
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java"
+      ]
+    },
+    {
+      "gate": "ACCESS",
+      "readiness": "UNVERIFIED",
+      "owner_boundary": "PIAC composed access plus ARCAVA operation/resource guard",
+      "producer_contract_ids": [
+        "CT-SHC-001",
+        "CT-SHC-002",
+        "CT-SHC-003",
+        "CT-SHC-004",
+        "CT-SHC-005"
+      ],
+      "available_source_fields": [
+        "PiacDomain.AccessDecision",
+        "PiacAccessDecisionComposer.compose(...)"
+      ],
+      "independent_obligation": "Five query ALLOWs are not an Arcava execute grant. Existing signed verifier accepts KDB_SOURCE_INTAKE only; cannot be reused as SENSITIVE_CLIENT_READ proof.",
+      "field_obligations": {
+        "issuer": {
+          "status": "UNVERIFIED",
+          "observation": "Schema producer=PIAC is a declared owner constant, not authenticated issuer. Producer TrustedActorContext has issuer/realm but no Arcava-admitted verifier/custody evidence."
+        },
+        "audience": {
+          "status": "UNVERIFIED",
+          "observation": "Producer TrustedActorContext has audience; CT-SHC responses do not require an audience binding. No admitted Arcava audience/workload route."
+        },
+        "principal": {
+          "status": "UNVERIFIED",
+          "observation": "CT-SHC-001/002 expose principal IDs and revisions; other queries select principal. Exact authenticated actor/subject correlation is not wired to Arcava."
+        },
+        "tenant": {
+          "status": "UNVERIFIED",
+          "observation": "Request tenant_scope is optional; CT-SHC-003 selects requested_scope. No admitted tenant/resource decision correlation into local context."
+        },
+        "client_subject": {
+          "status": "UNVERIFIED",
+          "observation": "ATC-04 N1 separates ClientProfileId from PIAC PrincipalId. Neither UUID equality nor body subject is an admitted mapping."
+        },
+        "resource": {
+          "status": "UNVERIFIED",
+          "observation": "Request projection_or_resource; response resource_ref optional. Local enrollment identity must bind exactly; no admitted authenticated composition."
+        },
+        "purpose": {
+          "status": "UNVERIFIED",
+          "observation": "Required request purpose and CT-SHC-004 processing_purpose; no agreed COACHING_SUPPORT/SELF_ACCESS translation or current signed consumer correlation."
+        },
+        "operation": {
+          "status": "UNVERIFIED",
+          "observation": "Producer operations cover five CT-SHC reads and KDB_SOURCE_INTAKE. No admitted SENSITIVE_CLIENT_READ operation profile/proof mapping."
+        },
+        "revision": {
+          "status": "UNVERIFIED",
+          "observation": "Identity/session/grant revisions are distinct; local Request.revision is one long. No admitted combination/freshness policy; do not collapse them."
+        },
+        "effectiveAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope as_of is not necessarily evidence effectiveAt. Session validity effective_from optional; domain records have times but no uniform consumer binding."
+        },
+        "expiresAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope valid_until optional; session effective_until nullable/optional. OwnerGuard requires finite nonnull expiresAt; no expiry may be fabricated."
+        },
+        "revokedAt": {
+          "status": "ABSENT",
+          "observation": "No revokedAt/revoked_at field in the five inspected response payloads. Producer domain has revocation state/epochs; no admitted Arcava current revocation channel."
+        },
+        "policy_decision_refs": {
+          "status": "UNVERIFIED",
+          "observation": "Generic source_refs/freshness are not authenticated policyRef/decisionRef. Producer domain policy/evidence exist but their consumer wire/attestation mapping is unadmitted."
+        },
+        "contract_version_checksum": {
+          "status": "VERIFIED",
+          "observation": "Five source v1.0 schema byte hashes match producer manifest at the pinned branch. This verifies source availability only, not consumer adoption or authority."
+        },
+        "backend_context_source": {
+          "status": "ABSENT",
+          "observation": "OwnerGuard.ContextSource is package-private; public OwnerGuard(Clock) resolves null. No live ContextSource adapter is connected."
+        }
+      },
+      "source_links": [
+        "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-001.actor-identity-context.v1.schema.json",
+        "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-002.auth-session-context.v1.schema.json",
+        "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-003.tenant-access-context.v1.schema.json",
+        "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-004.consent-decision.v1.schema.json",
+        "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-005.entitlement-access-decision.v1.schema.json",
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java",
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java"
+      ]
+    },
+    {
+      "gate": "ASSIGNMENT",
+      "readiness": "UNVERIFIED",
+      "owner_boundary": "ARCAVA owner-domain authority; PIAC only authenticates referenced coach",
+      "producer_contract_ids": [],
+      "available_source_fields": [
+        "ATC-04 AG-ARC-004",
+        "JourneyKernel.AssignmentView and local journal linkage",
+        "TrustedRequestContext.Evidence Gate.ASSIGNMENT"
+      ],
+      "independent_obligation": "No CT-SHC assignment producer contract: this is a separate owner gate. Local assignment active/IDs do not provide trusted coach principal, role, validity or activation attestation.",
+      "field_obligations": {
+        "issuer": {
+          "status": "UNVERIFIED",
+          "observation": "Schema producer=PIAC is a declared owner constant, not authenticated issuer. Producer TrustedActorContext has issuer/realm but no Arcava-admitted verifier/custody evidence."
+        },
+        "audience": {
+          "status": "UNVERIFIED",
+          "observation": "Producer TrustedActorContext has audience; CT-SHC responses do not require an audience binding. No admitted Arcava audience/workload route."
+        },
+        "principal": {
+          "status": "UNVERIFIED",
+          "observation": "CT-SHC-001/002 expose principal IDs and revisions; other queries select principal. Exact authenticated actor/subject correlation is not wired to Arcava."
+        },
+        "tenant": {
+          "status": "UNVERIFIED",
+          "observation": "Request tenant_scope is optional; CT-SHC-003 selects requested_scope. No admitted tenant/resource decision correlation into local context."
+        },
+        "client_subject": {
+          "status": "UNVERIFIED",
+          "observation": "ATC-04 N1 separates ClientProfileId from PIAC PrincipalId. Neither UUID equality nor body subject is an admitted mapping."
+        },
+        "resource": {
+          "status": "UNVERIFIED",
+          "observation": "Request projection_or_resource; response resource_ref optional. Local enrollment identity must bind exactly; no admitted authenticated composition."
+        },
+        "purpose": {
+          "status": "UNVERIFIED",
+          "observation": "Required request purpose and CT-SHC-004 processing_purpose; no agreed COACHING_SUPPORT/SELF_ACCESS translation or current signed consumer correlation."
+        },
+        "operation": {
+          "status": "UNVERIFIED",
+          "observation": "Producer operations cover five CT-SHC reads and KDB_SOURCE_INTAKE. No admitted SENSITIVE_CLIENT_READ operation profile/proof mapping."
+        },
+        "revision": {
+          "status": "UNVERIFIED",
+          "observation": "Identity/session/grant revisions are distinct; local Request.revision is one long. No admitted combination/freshness policy; do not collapse them."
+        },
+        "effectiveAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope as_of is not necessarily evidence effectiveAt. Session validity effective_from optional; domain records have times but no uniform consumer binding."
+        },
+        "expiresAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope valid_until optional; session effective_until nullable/optional. OwnerGuard requires finite nonnull expiresAt; no expiry may be fabricated."
+        },
+        "revokedAt": {
+          "status": "ABSENT",
+          "observation": "No revokedAt/revoked_at field in the five inspected response payloads. Producer domain has revocation state/epochs; no admitted Arcava current revocation channel."
+        },
+        "policy_decision_refs": {
+          "status": "UNVERIFIED",
+          "observation": "Generic source_refs/freshness are not authenticated policyRef/decisionRef. Producer domain policy/evidence exist but their consumer wire/attestation mapping is unadmitted."
+        },
+        "contract_version_checksum": {
+          "status": "ABSENT",
+          "observation": "No corresponding CT-SHC producer schema by design; source-owned ARCAVA grant authority/version/evidence not admitted."
+        },
+        "backend_context_source": {
+          "status": "ABSENT",
+          "observation": "OwnerGuard.ContextSource is package-private; public OwnerGuard(Clock) resolves null. No live ContextSource adapter is connected."
+        }
+      },
+      "source_links": [
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java",
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java"
+      ]
+    },
+    {
+      "gate": "CONSENT",
+      "readiness": "UNVERIFIED",
+      "owner_boundary": "PIAC consent authority plus exact ARCAVA client/resource/purpose scope",
+      "producer_contract_ids": [
+        "CT-SHC-004"
+      ],
+      "available_source_fields": [
+        "CT-SHC-004 request.payload principal_id/resource_ref/data_scope/processing_purpose",
+        "CT-SHC-004 response.payload consent_grant_ref(optional)/grant_state/data_scope/decision"
+      ],
+      "independent_obligation": "Response has no consent grant revision or mandatory subject/resource/purpose correlation of its own; DENY may omit grant ref. Never infer SHARE/ASSIGNMENT from consent.",
+      "field_obligations": {
+        "issuer": {
+          "status": "UNVERIFIED",
+          "observation": "Schema producer=PIAC is a declared owner constant, not authenticated issuer. Producer TrustedActorContext has issuer/realm but no Arcava-admitted verifier/custody evidence."
+        },
+        "audience": {
+          "status": "UNVERIFIED",
+          "observation": "Producer TrustedActorContext has audience; CT-SHC responses do not require an audience binding. No admitted Arcava audience/workload route."
+        },
+        "principal": {
+          "status": "UNVERIFIED",
+          "observation": "CT-SHC-001/002 expose principal IDs and revisions; other queries select principal. Exact authenticated actor/subject correlation is not wired to Arcava."
+        },
+        "tenant": {
+          "status": "UNVERIFIED",
+          "observation": "Request tenant_scope is optional; CT-SHC-003 selects requested_scope. No admitted tenant/resource decision correlation into local context."
+        },
+        "client_subject": {
+          "status": "UNVERIFIED",
+          "observation": "ATC-04 N1 separates ClientProfileId from PIAC PrincipalId. Neither UUID equality nor body subject is an admitted mapping."
+        },
+        "resource": {
+          "status": "UNVERIFIED",
+          "observation": "Request projection_or_resource; response resource_ref optional. Local enrollment identity must bind exactly; no admitted authenticated composition."
+        },
+        "purpose": {
+          "status": "UNVERIFIED",
+          "observation": "Required request purpose and CT-SHC-004 processing_purpose; no agreed COACHING_SUPPORT/SELF_ACCESS translation or current signed consumer correlation."
+        },
+        "operation": {
+          "status": "UNVERIFIED",
+          "observation": "Producer operations cover five CT-SHC reads and KDB_SOURCE_INTAKE. No admitted SENSITIVE_CLIENT_READ operation profile/proof mapping."
+        },
+        "revision": {
+          "status": "UNVERIFIED",
+          "observation": "Identity/session/grant revisions are distinct; local Request.revision is one long. No admitted combination/freshness policy; do not collapse them."
+        },
+        "effectiveAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope as_of is not necessarily evidence effectiveAt. Session validity effective_from optional; domain records have times but no uniform consumer binding."
+        },
+        "expiresAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope valid_until optional; session effective_until nullable/optional. OwnerGuard requires finite nonnull expiresAt; no expiry may be fabricated."
+        },
+        "revokedAt": {
+          "status": "ABSENT",
+          "observation": "No revokedAt/revoked_at field in the five inspected response payloads. Producer domain has revocation state/epochs; no admitted Arcava current revocation channel."
+        },
+        "policy_decision_refs": {
+          "status": "UNVERIFIED",
+          "observation": "Generic source_refs/freshness are not authenticated policyRef/decisionRef. Producer domain policy/evidence exist but their consumer wire/attestation mapping is unadmitted."
+        },
+        "contract_version_checksum": {
+          "status": "VERIFIED",
+          "observation": "Five source v1.0 schema byte hashes match producer manifest at the pinned branch. This verifies source availability only, not consumer adoption or authority."
+        },
+        "backend_context_source": {
+          "status": "ABSENT",
+          "observation": "OwnerGuard.ContextSource is package-private; public OwnerGuard(Clock) resolves null. No live ContextSource adapter is connected."
+        }
+      },
+      "source_links": [
+        "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-004.consent-decision.v1.schema.json",
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java",
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java"
+      ]
+    },
+    {
+      "gate": "SHARE",
+      "readiness": "UNVERIFIED",
+      "owner_boundary": "ARCAVA ActivityShareGrant owner plus current PIAC consent",
+      "producer_contract_ids": [],
+      "available_source_fields": [
+        "ATC-04 AG-ARC-113",
+        "TrustedRequestContext.Evidence Gate.SHARE"
+      ],
+      "independent_obligation": "No CT-SHC share producer contract: independent Arcava domain grant with client/coach-assignment/purpose/data scope/consent/validity must be materialized and admitted. Gate enum is not grant evidence.",
+      "field_obligations": {
+        "issuer": {
+          "status": "UNVERIFIED",
+          "observation": "Schema producer=PIAC is a declared owner constant, not authenticated issuer. Producer TrustedActorContext has issuer/realm but no Arcava-admitted verifier/custody evidence."
+        },
+        "audience": {
+          "status": "UNVERIFIED",
+          "observation": "Producer TrustedActorContext has audience; CT-SHC responses do not require an audience binding. No admitted Arcava audience/workload route."
+        },
+        "principal": {
+          "status": "UNVERIFIED",
+          "observation": "CT-SHC-001/002 expose principal IDs and revisions; other queries select principal. Exact authenticated actor/subject correlation is not wired to Arcava."
+        },
+        "tenant": {
+          "status": "UNVERIFIED",
+          "observation": "Request tenant_scope is optional; CT-SHC-003 selects requested_scope. No admitted tenant/resource decision correlation into local context."
+        },
+        "client_subject": {
+          "status": "UNVERIFIED",
+          "observation": "ATC-04 N1 separates ClientProfileId from PIAC PrincipalId. Neither UUID equality nor body subject is an admitted mapping."
+        },
+        "resource": {
+          "status": "UNVERIFIED",
+          "observation": "Request projection_or_resource; response resource_ref optional. Local enrollment identity must bind exactly; no admitted authenticated composition."
+        },
+        "purpose": {
+          "status": "UNVERIFIED",
+          "observation": "Required request purpose and CT-SHC-004 processing_purpose; no agreed COACHING_SUPPORT/SELF_ACCESS translation or current signed consumer correlation."
+        },
+        "operation": {
+          "status": "UNVERIFIED",
+          "observation": "Producer operations cover five CT-SHC reads and KDB_SOURCE_INTAKE. No admitted SENSITIVE_CLIENT_READ operation profile/proof mapping."
+        },
+        "revision": {
+          "status": "UNVERIFIED",
+          "observation": "Identity/session/grant revisions are distinct; local Request.revision is one long. No admitted combination/freshness policy; do not collapse them."
+        },
+        "effectiveAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope as_of is not necessarily evidence effectiveAt. Session validity effective_from optional; domain records have times but no uniform consumer binding."
+        },
+        "expiresAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope valid_until optional; session effective_until nullable/optional. OwnerGuard requires finite nonnull expiresAt; no expiry may be fabricated."
+        },
+        "revokedAt": {
+          "status": "ABSENT",
+          "observation": "No revokedAt/revoked_at field in the five inspected response payloads. Producer domain has revocation state/epochs; no admitted Arcava current revocation channel."
+        },
+        "policy_decision_refs": {
+          "status": "UNVERIFIED",
+          "observation": "Generic source_refs/freshness are not authenticated policyRef/decisionRef. Producer domain policy/evidence exist but their consumer wire/attestation mapping is unadmitted."
+        },
+        "contract_version_checksum": {
+          "status": "ABSENT",
+          "observation": "No corresponding CT-SHC producer schema by design; source-owned ARCAVA grant authority/version/evidence not admitted."
+        },
+        "backend_context_source": {
+          "status": "ABSENT",
+          "observation": "OwnerGuard.ContextSource is package-private; public OwnerGuard(Clock) resolves null. No live ContextSource adapter is connected."
+        }
+      },
+      "source_links": [
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java",
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java"
+      ]
+    },
+    {
+      "gate": "ENTITLEMENT",
+      "readiness": "UNVERIFIED",
+      "owner_boundary": "PIAC entitlement authority plus ARCAVA resource/business guard",
+      "producer_contract_ids": [
+        "CT-SHC-005"
+      ],
+      "available_source_fields": [
+        "CT-SHC-005 request.payload principal_id/capability_code/resource_ref",
+        "CT-SHC-005 response.payload entitlement_ref(optional)/grant_state/capability_code/decision"
+      ],
+      "independent_obligation": "No required entitlement revision/subject/tenant/purpose validity proof in response payload. DENY may omit grant ref. Enrollment is not entitlement.",
+      "field_obligations": {
+        "issuer": {
+          "status": "UNVERIFIED",
+          "observation": "Schema producer=PIAC is a declared owner constant, not authenticated issuer. Producer TrustedActorContext has issuer/realm but no Arcava-admitted verifier/custody evidence."
+        },
+        "audience": {
+          "status": "UNVERIFIED",
+          "observation": "Producer TrustedActorContext has audience; CT-SHC responses do not require an audience binding. No admitted Arcava audience/workload route."
+        },
+        "principal": {
+          "status": "UNVERIFIED",
+          "observation": "CT-SHC-001/002 expose principal IDs and revisions; other queries select principal. Exact authenticated actor/subject correlation is not wired to Arcava."
+        },
+        "tenant": {
+          "status": "UNVERIFIED",
+          "observation": "Request tenant_scope is optional; CT-SHC-003 selects requested_scope. No admitted tenant/resource decision correlation into local context."
+        },
+        "client_subject": {
+          "status": "UNVERIFIED",
+          "observation": "ATC-04 N1 separates ClientProfileId from PIAC PrincipalId. Neither UUID equality nor body subject is an admitted mapping."
+        },
+        "resource": {
+          "status": "UNVERIFIED",
+          "observation": "Request projection_or_resource; response resource_ref optional. Local enrollment identity must bind exactly; no admitted authenticated composition."
+        },
+        "purpose": {
+          "status": "UNVERIFIED",
+          "observation": "Required request purpose and CT-SHC-004 processing_purpose; no agreed COACHING_SUPPORT/SELF_ACCESS translation or current signed consumer correlation."
+        },
+        "operation": {
+          "status": "UNVERIFIED",
+          "observation": "Producer operations cover five CT-SHC reads and KDB_SOURCE_INTAKE. No admitted SENSITIVE_CLIENT_READ operation profile/proof mapping."
+        },
+        "revision": {
+          "status": "UNVERIFIED",
+          "observation": "Identity/session/grant revisions are distinct; local Request.revision is one long. No admitted combination/freshness policy; do not collapse them."
+        },
+        "effectiveAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope as_of is not necessarily evidence effectiveAt. Session validity effective_from optional; domain records have times but no uniform consumer binding."
+        },
+        "expiresAt": {
+          "status": "UNVERIFIED",
+          "observation": "Envelope valid_until optional; session effective_until nullable/optional. OwnerGuard requires finite nonnull expiresAt; no expiry may be fabricated."
+        },
+        "revokedAt": {
+          "status": "ABSENT",
+          "observation": "No revokedAt/revoked_at field in the five inspected response payloads. Producer domain has revocation state/epochs; no admitted Arcava current revocation channel."
+        },
+        "policy_decision_refs": {
+          "status": "UNVERIFIED",
+          "observation": "Generic source_refs/freshness are not authenticated policyRef/decisionRef. Producer domain policy/evidence exist but their consumer wire/attestation mapping is unadmitted."
+        },
+        "contract_version_checksum": {
+          "status": "VERIFIED",
+          "observation": "Five source v1.0 schema byte hashes match producer manifest at the pinned branch. This verifies source availability only, not consumer adoption or authority."
+        },
+        "backend_context_source": {
+          "status": "ABSENT",
+          "observation": "OwnerGuard.ContextSource is package-private; public OwnerGuard(Clock) resolves null. No live ContextSource adapter is connected."
+        }
+      },
+      "source_links": [
+        "https://github.com/wordualReality/souvereign-os/blob/9ae5950ed2e556b6d6301f3d19d81a14992d6be7/contracts/shared-core/ct-shc-005.entitlement-access-decision.v1.schema.json",
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java",
+        "https://github.com/wordualReality/souvereign-os-coaching-platform/blob/154a5914730eb9d53ced813f000e844c87072652/services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java"
+      ]
+    }
+  ],
+  "gate_record": {
+    "GATE_ID": "Q2",
+    "PARENT_PLAN_ID": "ARC-36/P25 (ARC10)",
+    "PARENT_STEP": "ARC10-T020",
+    "OWNER": "GPT_BUILDER_ARCAVA",
+    "GATE_TYPE": "EXTERNAL_PIAC_PRODUCER_AUTHORITY_AND_TRUSTED_CONSUMER_BINDING",
+    "BLOCKED_SCOPE": "live identity/session/tenant/access/consent/share/entitlement authorization and dependent full T020/T110 security/integration admission only",
+    "MISSING_CRITERION": "Arcava owner-admitted producer source selection, authenticated issuer/audience/custody and current binding of each independent gate to principal/client/tenant/resource/purpose/operation/revisions/validity; actual reviewed ContextSource and independent admission evidence",
+    "CLOSURE_CRITERIA": [
+      "owner-reviewed producer source/version/checksum and exact Arcava operation/role/identity contract",
+      "real authenticated backend binding with current revocation/freshness and independent domain gates",
+      "positive/negative current/expired/revoked/stale/unbound tests on actual binding",
+      "required independent security and operational evidence"
+    ],
+    "EVIDENCE_REQUIRED": [
+      "producer manifests and source hashes",
+      "issuer/audience/workload/custody and revocation evidence",
+      "consumer contract/CI/runtime tests",
+      "required independent security QS"
+    ],
+    "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+    "NEXT_ACTION": "request existing SOV/PIAC producer owner review of the pinned CT-SHC bundle and the precise Arcava operation/binding gaps (R01); keep live path closed",
+    "REVIEW_TRIGGER": "this E0 return or newly verified producer authority artifact",
+    "STATUS": "OPEN_UNVERIFIED",
+    "BLOCKER_ID": "BL-ARC-01"
+  },
+  "owner_requests": [
+    {
+      "id": "R01",
+      "requested_resolver": "existing SOV/PIAC producer owner",
+      "assignment_status": "UNASSIGNED_UNVERIFIED; architecture owner identified, no dispatch claimed",
+      "missing_capability": "owner-approved Arcava-consumable CT-SHC source bundle and exact operation/role/identity binding contract",
+      "request": "Confirm or supersede the pinned five v1.0 hashes; identify supported authenticated Arcava sensitive-read producer/profile and ClientProfile/principal mapping, independent revision/validity/revocation correlation. Existing KDB-only proof is not an Arcava grant.",
+      "acceptance": "source/version/hash and reviewed operation/field mapping with explicit issuer/audience/currentness obligations; no secrets",
+      "return_to": "GPT_BUILDER_ARCAVA / Q2 / ARC10-T020"
+    },
+    {
+      "id": "R02",
+      "requested_resolver": "existing PIAC workload/key-custody operator",
+      "assignment_status": "UNASSIGNED_UNVERIFIED",
+      "missing_capability": "admitted issuer/audience/workload authentication, custody/rotation and current revocation evidence",
+      "request": "Provide non-secret operational authority and freshness binding evidence for the reviewed source/profile; do not send credentials or start hosted operations under this E0 packet.",
+      "acceptance": "verifiable non-secret issuer/audience/custody/revocation evidence and actual accountable operator",
+      "return_to": "GPT_BUILDER_ARCAVA / Q2 / ARC10-T020"
+    },
+    {
+      "id": "R03",
+      "requested_resolver": "GPT_BUILDER_ARCAVA",
+      "assignment_status": "EXISTING_LANE_OWNER",
+      "missing_capability": "reviewed consumer mapping including independent Assignment/Share and role/client identity semantics",
+      "request": "Consume E0 once, obtain R01 source decision, then select one already authorized closure delta; only admit a backend ContextSource implementation after exact required contracts and mandate exist.",
+      "acceptance": "bounded consumer binding specification; default-closed path preserved until actual tests/admission",
+      "return_to": "ARC10-T020"
+    },
+    {
+      "id": "R04",
+      "requested_resolver": "existing independent security/admission authority",
+      "assignment_status": "UNASSIGNED_UNVERIFIED; no new reviewer appointed",
+      "missing_capability": "required independent security and operational admission of actual binding",
+      "request": "After material implementation, review actual positive/negative current/expired/revoked/stale/unbound and cross-tenant/subject/resource tests; static schemas and synthetic tests are insufficient.",
+      "acceptance": "qualified source-bound independent return for the appropriate scope",
+      "return_to": "GPT_BUILDER_ARCAVA / Q2 / ARC10-T020"
+    }
+  ],
+  "proof_boundary": {
+    "schema_path": "contracts/piac-decision-proof/v1/proof-envelope.schema.json",
+    "schema_sha256": "4111bc551d68af9ebc3e8f36377ea7e051f323053d4053451306371b3a2a04ca",
+    "sidecar_match": true,
+    "operation": "KDB_SOURCE_INTAKE only in inspected verifier",
+    "authority": "UnconfiguredProofAuthority throws AUTHORITY_NOT_CONFIGURED; SyntheticEphemeralProofAuthority generates ephemeral test keys",
+    "arcava_adoption": "ABSENT; existing producer receipt explicitly says no adoption for KDB or Arcava",
+    "issuer_factory_limit": "TrustedActorContext.verifiedHuman supplies typed metadata; method naming/provenance labels alone are not an authenticated IdP proof"
+  },
+  "local_context_boundary": {
+    "context_source": "package-private interface and injection constructor; public OwnerGuard(Clock) resolves null",
+    "production_result": "PIAC_NOT_CONNECTED",
+    "evidence_fields": [
+      "gate",
+      "principal",
+      "tenant",
+      "subject",
+      "resource",
+      "purpose",
+      "operation",
+      "policyRef",
+      "decisionRef",
+      "revision",
+      "state",
+      "effectiveAt",
+      "expiresAt",
+      "revokedAt"
+    ],
+    "consumer_identity": "principal/tenant/subject/resource/authSession/role/purpose/operation/revision",
+    "adapters": "ABSENT; no admitted producer issuer/audience verification path",
+    "other_ports": "TrustedPiacVerifier.NONE false; DenyByDefaultPiacConsumer denies all queries; neither is a live ContextSource"
+  },
+  "test_disposition": {
+    "java_changed": false,
+    "new_negative_tests": "NONE; missing/expired/revoked/stale/unbound/provider-error/default closure already covered by accepted OwnerGuard suite; no concrete new untested local fail-closed case evidenced",
+    "maven_runtime": "NOT_EXECUTED in this packet",
+    "prior_75": "preserved unchanged, previously accepted at b2f28610d879d8dac4adc7a171053ee981df0f04; not a fresh test claim",
+    "validation": "mechanical pinned source/manifest/field coverage self-check only; not a security test or admission"
+  },
+  "execution_stack": {
+    "parent": "ARC10-T020 ACTIVE_LOCAL_WITH_Q2_OPEN",
+    "active_leaf": "this bounded E0 inventory",
+    "child_plan": "NOT_CREATED; no child plan required for one completed inventory leaf",
+    "live_path": "WAITING_EXTERNAL only for Q2-dependent operations",
+    "return_to": "ARC10-T020",
+    "next_action": "R01: existing PIAC producer owner source/adoption and Arcava operation/binding decision; no message dispatched"
+  },
+  "blocker": {
+    "id": "BL-ARC-01",
+    "status": "OPEN",
+    "blocked_operations": [
+      "full T150/T020/T110 admission",
+      "Q2 live authorization/integration",
+      "original A09/T48 and independent security/hosted/release acceptance"
+    ],
+    "independent_allowed_work": [
+      "source-pinned local E0 ledger",
+      "previously authorized local Arcava implementation without live authority"
+    ],
+    "board_write": "NONE; Builder handles existing row 8"
+  },
+  "Q1_Q4": "OPEN / PROPOSED_NOT_ADMITTED",
+  "formal_gates_closed": [],
+  "security_acceptance": "NOT_GRANTED",
+  "SQL_HOSTED_FOREIGN_WRITES": "NONE",
+  "next_executor": "GPT_BUILDER_ARCAVA"
+}

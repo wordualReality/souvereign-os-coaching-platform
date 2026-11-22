@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:arcava:CT-ARC-004:1.0:result",
+  "title": "CT-ARC-004 result v1.0",
+  "allOf": [
+    {
+      "$ref": "urn:arcava:types:1.0:ResponseEnvelope#/$defs/responseEnvelopeBase"
+    },
+    {
+      "type": "object",
+      "required": [
+        "payload"
+      ],
+      "properties": {
+        "contract_id": {
+          "const": "CT-ARC-004"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "outcome": {
+          "const": "OK"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "correlation_binding_id",
+            "journey_session_id",
+            "journey_version_id",
+            "journey_step_id",
+            "runtime_session_refs"
+          ],
+          "properties": {
+            "correlation_binding_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "journey_session_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "journey_version_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "journey_step_id": {
+              "type": "string",
+              "minLength": 1,
+              "not": {
+                "const": "latest"
+              }
+            },
+            "journey_step_version": {
+              "type": "string"
+            },
+            "runtime_session_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "producer_namespace",
+                  "object_type",
+                  "stable_id"
+                ],
+                "properties": {
+                  "producer_namespace": {
+                    "const": "SOV"
+                  },
+                  "object_type": {
+                    "const": "RuntimeExecutionSession"
+                  },
+                  "stable_id": {
+                    "$ref": "urn:arcava:types:1.0:QueryEnvelope#/$defs/ID"
+                  }
+                }
+              }
+            },
+            "source_ref": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "schema_version",
+                    "variant",
+                    "protocol_id",
+                    "protocol_version_id",
+                    "owning_module_id",
+                    "taxonomy_version_id",
+                    "relation_ids"
+                  ],
+                  "properties": {
+                    "schema_version": {
+                      "const": 1
+                    },
+                    "variant": {
+                      "const": "KDB_PROTOCOL_VERSION"
+                    },
+                    "protocol_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "not": {
+                        "const": "latest"
+                      }
+                    },
+                    "protocol_version_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "not": {
+                        "const": "latest"
+                      }
+                    },
+                    "owning_module_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "not": {
+                        "const": "latest"
+                      }
+                    },
+                    "taxonomy_version_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "not": {
+                        "const": "latest"
+                      }
+                    },
+                    "relation_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "not": {
+                          "const": "latest"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "schema_version",
+                    "variant",
+                    "journey_version_id",
+                    "journey_step_id"
+                  ],
+                  "properties": {
+                    "schema_version": {
+                      "const": 1
+                    },
+                    "variant": {
+                      "const": "ARCAVA_DELIVERY_BINDING"
+                    },
+                    "journey_version_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "not": {
+                        "const": "latest"
+                      }
+                    },
+                    "journey_step_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "not": {
+                        "const": "latest"
+                      }
+                    },
+                    "journey_step_version": {
+                      "type": "string"
+                    },
+                    "programme_module_binding_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "not": {
+                        "const": "latest"
+                      }
+                    },
+                    "programme_binding_revision": {
+                      "type": "string",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "programme_binding_hash": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "required": [
+                          "programme_module_binding_id"
+                        ]
+                      },
+                      "then": {
+                        "required": [
+                          "programme_binding_revision",
+                          "programme_binding_hash"
+                        ]
+                      }
+                    },
+                    {
+                      "if": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "programme_binding_revision"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "programme_binding_hash"
+                            ]
+                          }
+                        ]
+                      },
+                      "then": {
+                        "required": [
+                          "programme_module_binding_id",
+                          "programme_binding_revision",
+                          "programme_binding_hash"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "error": false
+      }
+    }
+  ],
+  "unevaluatedProperties": false
+}

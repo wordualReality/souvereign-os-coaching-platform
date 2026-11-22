@@ -1,0 +1,238 @@
+{
+  "RETURN_ID": "ARC36P25-T150-ARCAVA-OWNER-GUARD-ROLE-CONTRACT-BUILD-01",
+  "LANE": "ARCAVA",
+  "STATUS": "IMPLEMENTED_LOCAL_AND_CI_VERIFIED_PENDING_OWNER_QS",
+  "BASE_SHA": "c07d7e671ef5018fb28751fd0f53493f6e6ed428",
+  "EXECUTION_SOURCE_SHA": "157819933abb1c3830f153448a67787544fc9b60",
+  "EVIDENCE_COMMIT_PARENT_SHA": "157819933abb1c3830f153448a67787544fc9b60",
+  "CHANGED_FILES": [
+    "services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java",
+    "services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java",
+    "services/api/src/main/java/com/projectb/api/arcava/security/RoleScopePolicy.java",
+    "services/api/src/main/java/com/projectb/api/arcava/services/CoachClientAccessService.java",
+    "services/api/src/test/java/com/projectb/api/arcava/security/OwnerGuardContractTest.java",
+    "docs/arcava/security/owner-guard-rls-binding-contract-draft.md",
+    "docs/arcava/security/control-manifest.json",
+    "docs/arcava/operations/evidence/ARC36P25-T150-ARCAVA-OWNER-GUARD-ROLE-CONTRACT-BUILD-01/EXECUTOR_RETURN.json"
+  ],
+  "SHA256": {
+    "services/api/src/main/java/com/projectb/api/arcava/security/TrustedRequestContext.java": "0930589e3ebd1f6ae069d73f24e99a82687d2b2d73eadda5a991aab4be708a96",
+    "services/api/src/main/java/com/projectb/api/arcava/security/OwnerGuard.java": "44d528f7f3e2d28b484ae41d4ebe8adf3e9f006fd51bce0834b06607d90c4223",
+    "services/api/src/main/java/com/projectb/api/arcava/security/RoleScopePolicy.java": "85d60f7c99d305e0e1fa5a955ad8920fb4d8cfc184f74cf6c07379b41c246057",
+    "services/api/src/main/java/com/projectb/api/arcava/services/CoachClientAccessService.java": "8697aa6b342bf806824c98bc6c9f7f5a57a1c5c950380661f0bc698cea01096e",
+    "services/api/src/test/java/com/projectb/api/arcava/security/OwnerGuardContractTest.java": "205db8501abc80f03a53d7942e56f0bb029e18106f46405fbfc10ee10a1e75a7",
+    "docs/arcava/security/owner-guard-rls-binding-contract-draft.md": "15108a581861d136d43ae68d279ef7684247209b7c5862687c4f1e1c25364a77",
+    "docs/arcava/security/control-manifest.json": "41b6ad927db118e1db0a9a9b8337d38100c814372255429f01117d2065f0ddba"
+  },
+  "LOCAL_MAVEN": {
+    "toolchain": "Temurin 25.0.3 / Maven 3.9.16 / Spring Boot 4.1.1",
+    "commands": [
+      {
+        "command": "mvn -B -f services/api/pom.xml test",
+        "exit": 0,
+        "note": "initial 19 guard tests / 29 total before final added boundary cases"
+      },
+      {
+        "command": "mvn -B -f services/api/pom.xml package",
+        "exit": 0,
+        "tests": 31,
+        "owner_guard": 21,
+        "failures": 0,
+        "errors": 0,
+        "note": "final source commit tested with temporary pinned Maven binary"
+      }
+    ],
+    "junit_suites": [
+      {
+        "suite": "com.projectb.api.ApplicationBootstrapTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "names": [
+          "liveProfileStaysClosedWithoutVerifiedAuthorities",
+          "inactiveBootstrapStaysNonWeb"
+        ]
+      },
+      {
+        "suite": "com.projectb.api.active.ActiveDevHttpLifecycleTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "names": [
+          "withdrawnJournalProjectionStaysWithdrawn",
+          "listenerStartsReportsClosedReadinessAndStopsCleanly",
+          "nonLoopbackBindFailsBeforeListening"
+        ]
+      },
+      {
+        "suite": "com.projectb.api.active.EffectiveConfigReadbackTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "names": [
+          "effectiveReadbackMatchesTheRunningBindAndRedactsTheJournalPath",
+          "blankJournalPathFailsClosed"
+        ]
+      },
+      {
+        "suite": "com.projectb.api.active.TrustedPortDenyTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "names": [
+          "positiveDummyVerdictStillCannotAdmitProtectedTraffic",
+          "callerSuppliedPublicationDoesNotVerify",
+          "missingAndFailedPiacQueriesStayDenied"
+        ]
+      },
+      {
+        "suite": "com.projectb.api.arcava.security.OwnerGuardContractTest",
+        "tests": "21",
+        "failures": "0",
+        "errors": "0",
+        "names": [
+          "noLivePiacDefaultDeniesEvenPlausibleCallerFields",
+          "injectedCallerIdentityCannotBecomeTrusted",
+          "entitlementAbsentDenies",
+          "crossTenantIsDenied",
+          "consentWithoutShareDenies",
+          "noHttpOrJarLiveReadinessChange",
+          "futureDatedAndUnboundEvidenceDeny",
+          "assignedCoachWithAllIndependentGatesAllowsSyntheticScope",
+          "shareWithoutConsentDenies",
+          "wrongSubjectIsDenied",
+          "eachMissingGateDeniesIndependently",
+          "nullRequestAndMissingSessionDeny",
+          "unknownPurposeAndOperationDeny",
+          "tenantAdminAndServiceRolesCannotBypassSensitiveScope",
+          "allExpiredRevokedStaleUnknownAndDeniedGatesDenyIndependently",
+          "wrongResourceIsDenied",
+          "expiryAndRevocationAtExactClockDenyEveryGate",
+          "staleEvidenceRevisionDenies",
+          "clientOwnResourceAllowsSyntheticScopeWithoutCoachAssignment",
+          "assignmentCannotBeInferredFromOtherGates",
+          "trustSourceErrorsDenyWithoutLeakingErrorPayload"
+        ]
+      }
+    ]
+  },
+  "CI": [
+    {
+      "run": 41724237446,
+      "head": "157819933abb1c3830f153448a67787544fc9b60",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "run": 41724246298,
+      "head": "157819933abb1c3830f153448a67787544fc9b60",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "run": 41724246218,
+      "head": "157819933abb1c3830f153448a67787544fc9b60",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "run": 41724237411,
+      "head": "157819933abb1c3830f153448a67787544fc9b60",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "run": 41724246432,
+      "head": "157819933abb1c3830f153448a67787544fc9b60",
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "RELEVANT_CI_JOBS": [
+    {
+      "job": 126224725880,
+      "name": "Persisted loopback journey path / JDK 25",
+      "conclusion": "success"
+    },
+    {
+      "job": 126224726157,
+      "name": "Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16",
+      "conclusion": "success"
+    },
+    {
+      "job": 126224726192,
+      "name": "JourneyKernel fixture / JDK 21",
+      "conclusion": "success"
+    },
+    {
+      "job": 126224726206,
+      "name": "Persisted loopback journey path / JDK 21",
+      "conclusion": "success"
+    },
+    {
+      "job": 126224726508,
+      "name": "JourneyKernel fixture / JDK 25",
+      "conclusion": "success"
+    }
+  ],
+  "VERIFIED_MAVEN_CI_LOG": {
+    "job": 126224726157,
+    "owner_guard_tests": 21,
+    "total": 31,
+    "failures": 0,
+    "errors": 0,
+    "build": "SUCCESS",
+    "verified": true
+  },
+  "OWNER_GUARD_DECISIONS": {
+    "positive": [
+      "synthetic same-tenant assigned coach with seven independent gates",
+      "synthetic client own subject with six applicable gates"
+    ],
+    "negative": [
+      "wrong tenant/subject/resource",
+      "missing assignment or any other required gate",
+      "consent without share / share without consent / no entitlement",
+      "each UNKNOWN/DENIED/REVOKED/STALE gate",
+      "each expiry/revocation at exact fixed clock",
+      "future effective time / wrong revision / foreign evidence / missing policy reference",
+      "tenant admin and all service roles sensitive-read bypass",
+      "unknown purpose/operation",
+      "caller-injected principal",
+      "null request / missing AuthSession",
+      "trust-source exception without payload leak",
+      "no-live-PIAC default denies"
+    ],
+    "positive_reason": "ALLOW_SYNTHETIC_DOMAIN_SCOPE",
+    "production_reason": "PIAC_NOT_CONNECTED"
+  },
+  "TRUST_BOUNDARIES": {
+    "context_constructor": "package-private; no public issuer",
+    "source_injection": "package-private; test source factory only",
+    "synthetic_fixture": "SYNTHETIC_TEST_ONLY fixed clock/IDs in test sources",
+    "production": "public OwnerGuard(Clock) has no live adapter; no bean/route/HTTP/JWT parser added",
+    "limitations": "package access is not cryptographic authority; future adapter needs separate reviewed provenance and complete CT-SHC bindings",
+    "PIAC_KDB": "existing NONE implementations unchanged",
+    "resource_payload": "not returned; typed denial reasons and allowed decision references only"
+  },
+  "CONTRACT_DRAFT": {
+    "decision_id": "ARC36P25-ARCAVA-RLS-BINDING-CONTRACT-DRAFT-01",
+    "status": "PROPOSED_NOT_ADMITTED",
+    "unresolved": {
+      "Q1": "owner-approved exact schema/table/migration allocation",
+      "Q2": "trusted PIAC envelope/audience/expiry/revocation and backend-only binding",
+      "Q3": "DB login/scoped-role/ACL and non-spoofable session boundary",
+      "Q4": "separate source-pinned policy and real SQL-test authority after Q1-Q3"
+    }
+  },
+  "SQL_EXECUTION": "NONE",
+  "HOSTED_PRODUCTION_FOREIGN_PERMISSIONS_MERGE_DEPLOY": "NONE",
+  "OPEN_GATES": [
+    "ARC10-T110 foundation only, not complete",
+    "T150 PARTIAL",
+    "T01 PARTIAL_NOT_ADMITTED",
+    "T04/T44/T48 NOT_EXECUTED",
+    "T48 admitted 0/86",
+    "live PIAC/KDB and actual RLS/role grants not admitted",
+    "full FX-v1 owner approval / 48-contract registry / crash-restore open",
+    "Security Acceptance NOT_GRANTED"
+  ],
+  "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+  "BLOCKER": "NONE_FOR_OWNER_DOMAIN_BUILD; Q1-Q4 remain explicit future binding decisions",
+  "WORKFLOW": "CL-WORKFLOW-COMPACT-20261102-01"
+}

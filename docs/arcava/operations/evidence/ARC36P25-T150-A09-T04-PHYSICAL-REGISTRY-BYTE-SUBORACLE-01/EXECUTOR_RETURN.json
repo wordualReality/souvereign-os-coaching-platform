@@ -1,0 +1,312 @@
+{
+  "RETURN_ID": "ARC36P25-T150-A09-T04-PHYSICAL-REGISTRY-BYTE-SUBORACLE-01",
+  "LANE": "ARCAVA",
+  "STATUS": "PHYSICAL_SUBORACLE_PASS_PENDING_OWNER_QS",
+  "BASE_SHA": "89813f68addd470088430d6ae96a5d0789976362",
+  "EXECUTION_SOURCE_SHA": "594e2249e8d7a4a4aec6f164764ad528a9d58f95",
+  "EVIDENCE_ONLY_COMMIT_PARENT": "594e2249e8d7a4a4aec6f164764ad528a9d58f95",
+  "CODE_AND_PIN_SHA256": {
+    "runner": "9b15d4accfa4a340d2f51e3f850b45e432becdcf1f64aca148bda99de1486eea",
+    "reused_binding_checker": "d713cfceb3754a768d4f20f3b35851c8977c2bf951ec0b3efb46667a68858951",
+    "tests": "3a2cea3aac10af968689d3cd8fc76e294a9782324018d17c8b5e5559f74f0fcd",
+    "pins": "d1b3d4589b68ca9a7315e01be03cea947e7efbb2866c452d41399ee3ddea4b62"
+  },
+  "CHANGED_FILES": [
+    "scripts/arcava/validate_a09_t04_physical.py",
+    "tests/arcava/contracts/test_a09_t04_physical.py",
+    "docs/arcava/operations/evidence/ARC36P25-T150-A09-T04-PHYSICAL-REGISTRY-BYTE-SUBORACLE-01/EXECUTOR_RETURN.json"
+  ],
+  "PHYSICAL_EVIDENCE": {
+    "admission": "NOT_ADMITTED",
+    "contract_ids": [
+      "CT-ARC-002",
+      "CT-ARC-003",
+      "CT-ARC-004",
+      "CT-ARC-R03-REM-001"
+    ],
+    "family_16_compatibility": "UNVERIFIED",
+    "inventory": [
+      {
+        "actual_sha256": "5995eaa5cafcd91e73e96ad05bba05d6bb5df2cae5ece3b528281cf444033f21",
+        "path": "contracts/arcava/types/1.0/QueryEnvelope.schema.json",
+        "set": "common",
+        "sha256": "5995eaa5cafcd91e73e96ad05bba05d6bb5df2cae5ece3b528281cf444033f21",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "01e03e2155747ebfc996f09fc8cfd109b79402c7684f47f8a293e5a802488944",
+        "path": "contracts/arcava/types/1.0/ResponseEnvelope.schema.json",
+        "set": "common",
+        "sha256": "01e03e2155747ebfc996f09fc8cfd109b79402c7684f47f8a293e5a802488944",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "42e2afd366c234cc102c22a528fc5e0848e00b9dfa7f7cff2aa593b16e85baaa",
+        "path": "contracts/arcava/types/1.0/EventEnvelope.schema.json",
+        "set": "common",
+        "sha256": "42e2afd366c234cc102c22a528fc5e0848e00b9dfa7f7cff2aa593b16e85baaa",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "23b388323182cac055da79f9a2ef5941c2760e82ee5bc742d5e9ad2f945c7cc8",
+        "contract_id": "CT-ARC-002",
+        "kind": "request",
+        "path": "contracts/arcava/CT-ARC-002/1.0/request.schema.json",
+        "set": "contract",
+        "sha256": "23b388323182cac055da79f9a2ef5941c2760e82ee5bc742d5e9ad2f945c7cc8",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "58df835bef388bed435be4410610afa64c9a9f20e612ce54a9e9d95ec7b83595",
+        "contract_id": "CT-ARC-002",
+        "kind": "result",
+        "path": "contracts/arcava/CT-ARC-002/1.0/result.schema.json",
+        "set": "contract",
+        "sha256": "58df835bef388bed435be4410610afa64c9a9f20e612ce54a9e9d95ec7b83595",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "1c19a0ef3ba552c564320aa44563feaab5968b4f8fcb7e152d5148c24d614eeb",
+        "contract_id": "CT-ARC-002",
+        "kind": "error",
+        "path": "contracts/arcava/CT-ARC-002/1.0/error.schema.json",
+        "set": "contract",
+        "sha256": "1c19a0ef3ba552c564320aa44563feaab5968b4f8fcb7e152d5148c24d614eeb",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "4cee43f582d99b8d15e07eefc93090b2a4d2ea6f3bfdf5472226185116b9866c",
+        "contract_id": "CT-ARC-003",
+        "kind": "request",
+        "path": "contracts/arcava/CT-ARC-003/1.0/request.schema.json",
+        "set": "contract",
+        "sha256": "4cee43f582d99b8d15e07eefc93090b2a4d2ea6f3bfdf5472226185116b9866c",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "d4ad8de0747e1a3f546eb2835bc3454d560bcaa300a4fb2817eaa8ef5859699c",
+        "contract_id": "CT-ARC-003",
+        "kind": "result",
+        "path": "contracts/arcava/CT-ARC-003/1.0/result.schema.json",
+        "set": "contract",
+        "sha256": "d4ad8de0747e1a3f546eb2835bc3454d560bcaa300a4fb2817eaa8ef5859699c",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "d0bb1c8774a0efc8de46e90e053b661c0a3b25b272320b9069e6b67bd4e2caf1",
+        "contract_id": "CT-ARC-003",
+        "kind": "error",
+        "path": "contracts/arcava/CT-ARC-003/1.0/error.schema.json",
+        "set": "contract",
+        "sha256": "d0bb1c8774a0efc8de46e90e053b661c0a3b25b272320b9069e6b67bd4e2caf1",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "622ec3f7f683246530ac268ec1b93a7466f2c295d590974883134722ad5739e6",
+        "contract_id": "CT-ARC-004",
+        "kind": "request",
+        "path": "contracts/arcava/CT-ARC-004/1.0/request.schema.json",
+        "set": "contract",
+        "sha256": "622ec3f7f683246530ac268ec1b93a7466f2c295d590974883134722ad5739e6",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "7d58687bb732643a31b4f3b099180f3d823a41d7e1f1b800e4af606e553a9265",
+        "contract_id": "CT-ARC-004",
+        "kind": "result",
+        "path": "contracts/arcava/CT-ARC-004/1.0/result.schema.json",
+        "set": "contract",
+        "sha256": "7d58687bb732643a31b4f3b099180f3d823a41d7e1f1b800e4af606e553a9265",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "6a927120dcaf3d9c9f39f81a04c7199496ceea251b7e03564568c7e0bd20e830",
+        "contract_id": "CT-ARC-004",
+        "kind": "error",
+        "path": "contracts/arcava/CT-ARC-004/1.0/error.schema.json",
+        "set": "contract",
+        "sha256": "6a927120dcaf3d9c9f39f81a04c7199496ceea251b7e03564568c7e0bd20e830",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "fa572d44d19a7bd1cf56c7a7f230f5add1e89f8d53e9ff02251d0c353f8367f1",
+        "contract_id": "CT-ARC-R03-REM-001",
+        "kind": "request",
+        "path": "contracts/arcava/CT-ARC-R03-REM-001/1.0/request.schema.json",
+        "set": "contract",
+        "sha256": "fa572d44d19a7bd1cf56c7a7f230f5add1e89f8d53e9ff02251d0c353f8367f1",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "42b08029205dcf4eb24fc3815669ee20cee61dd4b396937cb1c1f166d96fabd2",
+        "contract_id": "CT-ARC-R03-REM-001",
+        "kind": "result",
+        "path": "contracts/arcava/CT-ARC-R03-REM-001/1.0/result.schema.json",
+        "set": "contract",
+        "sha256": "42b08029205dcf4eb24fc3815669ee20cee61dd4b396937cb1c1f166d96fabd2",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "13aae6b52adb1da71624472ae382522e3516745fb58acda2104ef7c0604e6db1",
+        "contract_id": "CT-ARC-R03-REM-001",
+        "kind": "event",
+        "path": "contracts/arcava/CT-ARC-R03-REM-001/1.0/event.schema.json",
+        "set": "contract",
+        "sha256": "13aae6b52adb1da71624472ae382522e3516745fb58acda2104ef7c0604e6db1",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "f2c61f8cbbeafb8f5a906aee8a41bc0e7e2cf69c54b1ce0274d97bcbd5e565d0",
+        "contract_id": "CT-ARC-R03-REM-001",
+        "kind": "error",
+        "path": "contracts/arcava/CT-ARC-R03-REM-001/1.0/error.schema.json",
+        "set": "contract",
+        "sha256": "f2c61f8cbbeafb8f5a906aee8a41bc0e7e2cf69c54b1ce0274d97bcbd5e565d0",
+        "version": "1.0"
+      },
+      {
+        "actual_sha256": "e0dfef2598eef6885221521a768a46d85f46beac8c47b17fd9447a90bcba88d8",
+        "path": "contracts/arcava/contract-manifest.json",
+        "set": "manifest",
+        "sha256": "e0dfef2598eef6885221521a768a46d85f46beac8c47b17fd9447a90bcba88d8",
+        "version": "1.0"
+      }
+    ],
+    "original_T04": "NOT_EXECUTED",
+    "pin_file_sha256": "d1b3d4589b68ca9a7315e01be03cea947e7efbb2866c452d41399ee3ddea4b62",
+    "registry_48": "NOT_MATERIALIZED",
+    "schema_count": 16,
+    "status": "PHYSICAL_SUBORACLE_PASS"
+  },
+  "TESTS": [
+    {
+      "command": "python3 scripts/arcava/validate_a09_t04_physical.py",
+      "exit": 0
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/arcava/contracts -p test_a09_t04_physical.py -v",
+      "exit": 0,
+      "tests": 2,
+      "negative_cli_subcases": 14
+    }
+  ],
+  "NEGATIVE_CASES": [
+    {
+      "name": "missing_schema",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    },
+    {
+      "name": "missing_manifest",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    },
+    {
+      "name": "missing_pins",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    },
+    {
+      "name": "tamper",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    },
+    {
+      "name": "swap",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    },
+    {
+      "name": "extra_schema",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    },
+    {
+      "name": "duplicate_pin",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    },
+    {
+      "name": "extra_pin",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    },
+    {
+      "name": "version",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    },
+    {
+      "name": "kind",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    },
+    {
+      "name": "path",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    },
+    {
+      "name": "escape",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    },
+    {
+      "name": "symlink",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    },
+    {
+      "name": "hash",
+      "exit": 1,
+      "result": "FAIL_EXPECTED",
+      "isolation": "temporary synthetic copy"
+    }
+  ],
+  "CI": [
+    {
+      "id": 41486710832,
+      "conclusion": "SUCCESS"
+    },
+    {
+      "id": 41486724761,
+      "conclusion": "SUCCESS"
+    },
+    {
+      "id": 41486724778,
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "CI_SCOPE": "existing regression workflows; new physical runner and tests executed locally; no SQL",
+  "EVIDENCE_PATHS": [
+    "docs/arcava/operations/evidence/ARC36P25-T150-A09-T04-PHYSICAL-REGISTRY-BYTE-SUBORACLE-01/EXECUTOR_RETURN.json"
+  ],
+  "OPEN_GATES": [
+    "original T04 NOT_EXECUTED",
+    "48 registry NOT_MATERIALIZED",
+    "16 family compatibility UNVERIFIED",
+    "approved whole-suite A09-FX-v1 absent",
+    "T01 PARTIAL_NOT_ADMITTED",
+    "T44/T48 NOT_EXECUTED",
+    "T48 0/86",
+    "T150 PARTIAL",
+    "Security NOT_GRANTED"
+  ],
+  "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+  "BLOCKER": "NONE_FOR_PHYSICAL_SUBORACLE; full original admission remains open",
+  "SQL_HOSTED_MERGE_DEPLOY": "NONE",
+  "WORKFLOW": "CL-WORKFLOW-COMPACT-20261102-01"
+}

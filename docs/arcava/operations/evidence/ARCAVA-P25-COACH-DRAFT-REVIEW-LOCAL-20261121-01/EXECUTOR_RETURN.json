@@ -1,0 +1,270 @@
+{
+  "RETURN_ID": "ARCAVA-P25-COACH-DRAFT-REVIEW-LOCAL-20261121-01",
+  "PACKET_ID": "ARCAVA-P25-COACH-DRAFT-REVIEW-LOCAL-20261121-01",
+  "LANE": "ARCAVA",
+  "EXECUTOR": "EXISTING_LOCAL_ARCAVA_CURSOR_WORK_CHAT",
+  "CONTROLLER_RETURN": "ARCAVA-P25-COACH-DRAFT-REVIEW-LOCAL-20261121-01",
+  "POLICY_ID": "CL-UNIFIED-EXECUTOR-RETURN-CURSOR-CODEX-20261115-01",
+  "CHAT_RETURN_POLICY": "Kurzreturn ab 2026-11-17; Volltext nur in dieser Ablage",
+  "STATUS": "LOCAL_COACH_DRAFT_REVIEW_PASS_OWNER_QS_PENDING",
+  "PLAN_POSITION": "ARC-36/P25 7/10 ACTIVE; ARC10-T050 LOCAL_PREPARATION_ONLY / NOT_FORMALLY_ADMITTED",
+  "GATE": "TEST_LOOPBACK_ONLY / OWNER_QS_PENDING",
+  "MANDATE": "TEST_LOOPBACK_ONLY",
+  "SKILLS_USED": [
+    {
+      "skill": "tdd",
+      "purpose": "R01–R08 acceptance through public C19 HTTP/journal and Chrome seams; no kernel rewrite",
+      "path": "/Users/aydin/.claude/skills/tdd/SKILL.md",
+      "sha256": "5505d25bbaa8fc14a79e4d20163936958992a2995b7f1dd1d6197edc9ed722e0"
+    }
+  ],
+  "ERGEBNIS": "Coach bestätigt einen gespeicherten C19-Entwurf lokal. Die Bestätigung ist an Revision und serverseitigen SHA-256-Digest gebunden, überlebt Java+Web-Neustart und wird nach gespeicherter Änderung unwirksam. Direct Java-Publish für C19-markierte Entwürfe bleibt vor und nach Review DENY. Keine Publikation, keine Zuweisung.",
+  "DIGEST_CANONICALIZATION": {
+    "domain": "c19-local-review-v1",
+    "encoding": "UTF-8",
+    "separators": "LF between fields, no trailing newline",
+    "strings": "JsonMini JSON quoting for title and step titles",
+    "order": "draft_id, revision, title, then steps in persisted ordinal with id, title, candidate_id, version, content_hash",
+    "normalization": "draft UUID lowercase, content_hash lowercase hex; candidate_id@version from stored pin",
+    "client_digest": "rejected"
+  },
+  "BASE_SHA": "1d07f6658865d1b19494254bc25ce7f520bece68",
+  "TESTED_SOURCE_SHA": "584491b537b17d3cd82a63a761fdb9080eb58dfa",
+  "SOURCE_SHA": "584491b537b17d3cd82a63a761fdb9080eb58dfa",
+  "EVIDENCE_COMMIT_PARENT_SHA": "584491b537b17d3cd82a63a761fdb9080eb58dfa",
+  "EVIDENCE_HEAD": "Verified GitHub commit containing this receipt, resolved externally after push.",
+  "FULL_HEAD_AT_SOURCE": "584491b537b17d3cd82a63a761fdb9080eb58dfa",
+  "REPO": "https://github.com/wordualReality/souvereign-os-coaching-platform.git",
+  "BRANCH": "feat/arc36p25-journey-service-integration",
+  "WORKTREE": "/Users/aydin/Documents/GitHub/CoachingStudios/Arcava",
+  "GIT_DIR": "/Users/aydin/Documents/GitHub/souvereign-os-coaching-platform/.git/worktrees/arcava-journey-worktree",
+  "ORIGIN": "https://github.com/wordualReality/souvereign-os-coaching-platform.git",
+  "PR": 12,
+  "CHANGED_FILES": [
+    ".github/workflows/arcava-journey-kernel.yml",
+    "apps/web/app/api/arcava-c19/route.ts",
+    "apps/web/app/c19-fixture.tsx",
+    "apps/web/scripts/arcava-c19-smoke.mjs",
+    "apps/web/scripts/arcava-ui01-smoke.mjs",
+    "services/api/src/main/java/com/projectb/api/domain/C19LocalReview.java",
+    "services/api/src/main/java/com/projectb/api/domain/GoalProposalAdapter.java",
+    "services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java",
+    "services/api/src/main/java/com/projectb/api/http/JourneyHttpServer.java",
+    "services/api/src/test/java/com/projectb/api/http/JourneyGoalDraftTest.java"
+  ],
+  "SHA256": {
+    ".github/workflows/arcava-journey-kernel.yml": "4334dbc64c383ac90fe46311f5c3e71b4f7b4354b6cac3cf9a07c974af191e21",
+    "apps/web/app/api/arcava-c19/route.ts": "16c0488483c539a6769114dae8b745ad0faa45c082face07f4240dcfc1507879",
+    "apps/web/app/c19-fixture.tsx": "247c99d12bb62c91f67afd7c49db662e6d07922fed65928e9a28005312711011",
+    "apps/web/scripts/arcava-c19-smoke.mjs": "a088da889d558b8f19f072c1c71e13ef057554797c64ed32da30870fb7093a74",
+    "apps/web/scripts/arcava-ui01-smoke.mjs": "e0c0e479704ed9feeb66d461d8d87ceacb194d81bc10452b1381ed5cdc7cfcb3",
+    "services/api/src/main/java/com/projectb/api/domain/C19LocalReview.java": "fa7e0e475a9cc21dfa7173ef8446437d9d7862b9ad1281cd73ea5a6123367a64",
+    "services/api/src/main/java/com/projectb/api/domain/GoalProposalAdapter.java": "9e9d84223c3c1cbc764669c84975aa338e0cae3d1b6ee0bcf5144ec8bfa2c1cd",
+    "services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java": "eeced46073630d2474ec60cc29809a36b5339a97f67ff638fc1547bc4e78a91f",
+    "services/api/src/main/java/com/projectb/api/http/JourneyHttpServer.java": "4e0d44b697829e67c98c1e9082722357b011c9db4506b7f8c344a9cdb289173c",
+    "services/api/src/test/java/com/projectb/api/http/JourneyGoalDraftTest.java": "714d2d1a9060c6f26f349810cc2be0273b57d4d07e7b74663ed4a52b988aa418"
+  },
+  "BLOB_SHA": {
+    ".github/workflows/arcava-journey-kernel.yml": "af88599e96ed0392c08b19a5c70b32e7f7b8154b",
+    "apps/web/app/api/arcava-c19/route.ts": "b6d245b43b383378dbd009ea2af40399fee59593",
+    "apps/web/app/c19-fixture.tsx": "2036e0516cb3a05ad9b410da4d12e2d7837f8a77",
+    "apps/web/scripts/arcava-c19-smoke.mjs": "11e6953329f02f0229144563f143663ab1fae253",
+    "apps/web/scripts/arcava-ui01-smoke.mjs": "641edc7a89b7bb5709172cb8a76d27809d55afbe",
+    "services/api/src/main/java/com/projectb/api/domain/C19LocalReview.java": "a4f9ecd9ed3072ed3e55af7d4b4781e0b12b4dfd",
+    "services/api/src/main/java/com/projectb/api/domain/GoalProposalAdapter.java": "b7295c386dcf283095b51b80c3275239ef6e309f",
+    "services/api/src/main/java/com/projectb/api/domain/JourneyJournal.java": "6596e4ebc2f294d581b5db50b2dab27ae4d39c52",
+    "services/api/src/main/java/com/projectb/api/http/JourneyHttpServer.java": "1b8189c5a42c155b80f7ff29b107dfc6f439c1d4",
+    "services/api/src/test/java/com/projectb/api/http/JourneyGoalDraftTest.java": "bac54e4aee432758a1c2d35a2ee515dd46e3f615"
+  },
+  "ACCEPTANCE": {
+    "R01": "PASS — propose/edit/save/reload/review stores c19_local_review with digest, revision, server actor; no publish/assign journal event; publication_state DRAFT",
+    "R02": "PASS — Java+Next restart reloads ACCEPTED receipt and same digest and source pins",
+    "R03": "PASS — unsaved title edit is HTTP 422 without fetch; saved title change makes review INEFFECTIVE and changes digest",
+    "R04": "PASS — stale expected_revision 409; same key idempotent without extra journal line; same key altered body 409",
+    "R05": "PASS — client/wrong tenant 403, missing bearer 401, client-supplied digest 422; journal unchanged",
+    "R06": "PASS — C19 POST publish 403 before and after review and after invalidating edit; legacy non-C19 publish/assign still PASS in JourneyPathTest",
+    "R07": "PASS — CDP-blocked review fetch shows HTTP 0 FETCH_REJECTED, notice, ACCEPTED state and title unchanged",
+    "R08": "PASS — JourneyGoalDraftTest A1–A7 plus R01–R06; JourneyPathTest/Kernel/Producer/Atomicity/Authority; renderer-smoke; arcava-c19-smoke; arcava-ui01-smoke; GitHub CI on 584491b"
+  },
+  "TESTS_CI": {
+    "source_binding": "Changed blobs at SOURCE_SHA 584491b matched the tested working-tree bytes.",
+    "maven_local": "NOT_RUN — Maven absent locally; Java coverage via javac -Xlint:all -Werror",
+    "commands": [
+      {
+        "command": "javac -Xlint:all -Werror && java JourneyKernelTest, JourneyPathTest, JourneyGoalDraftTest, JourneyProducerTest, JournalAtomicityTest, AuthorityBoundaryTest",
+        "exit": 0,
+        "result": "ALL_JAVA_PASS including r01_review through r06_c19_publish_denied; legacy publish/assign green"
+      },
+      {
+        "command": "apps/web/scripts/renderer-smoke.sh",
+        "exit": 0,
+        "result": "Next 16.4.3, four HTTP 200 routes, STOP_EXIT 143."
+      },
+      {
+        "command": "node apps/web/scripts/arcava-c19-smoke.mjs",
+        "exit": 0,
+        "result": "r01_review=true r02_restart=true r03_unsaved_and_invalidate=true r07_review_fetch_rejected=true a1–a7 remain true; draft 5501157a-f3a4-47a5-a561-0245f0bceb9f revision 3 title Edited calm draft"
+      },
+      {
+        "command": "node apps/web/scripts/arcava-ui01-smoke.mjs",
+        "exit": 0,
+        "result": "ARCAVA08 regression PASS with C19 review panel present"
+      }
+    ]
+  },
+  "GATE_RECORD": "ARCAVA_P25_COACH_DRAFT_REVIEW_LOCAL IMPLEMENTED_LOCAL_BY_EXECUTOR / OWNER_QS_PENDING",
+  "OPEN_GATES": [
+    "T000 OPEN",
+    "G00 NOT_COMPLETE",
+    "T150 PARTIAL",
+    "T050 LOCAL_PREPARATION_ONLY / NOT_FORMALLY_ADMITTED",
+    "Q2 OPEN_UNVERIFIED",
+    "PIAC, Hosted, Security, Merge, Deployment and Release NOT_ADMITTED"
+  ],
+  "BLOCKER": "NONE for this isolated TEST_LOOPBACK_ONLY coach review packet. Direct C19 publish remains DENY. Owner-QS is the next gate.",
+  "NEXT_EXECUTOR": "GPT_BUILDER_ARCAVA",
+  "NEXT_ACTION": "Perform one scoped Owner-QS of this coach draft-review GitHub return. Do not rebuild ARCAVA08 or C19.",
+  "RETURN_TO": "CROSS_LANE_CONTROLLER after Owner-QS. No merge or release.",
+  "USER_ACTION": "NONE",
+  "CI": [
+    {
+      "conclusion": "success",
+      "databaseId": 44957269295,
+      "event": "pull_request",
+      "headSha": "584491b537b17d3cd82a63a761fdb9080eb58dfa",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 137008037205,
+          "name": "Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 137008037405,
+          "name": "Persisted loopback journey path / JDK 21",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 137008037473,
+          "name": "JourneyKernel fixture / JDK 21",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 137008037486,
+          "name": "JourneyKernel fixture / JDK 25",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 137008037603,
+          "name": "Persisted loopback journey path / JDK 25",
+          "status": "completed"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/44957269295",
+      "workflowName": "arcava-journey-kernel"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44957269348,
+      "event": "pull_request",
+      "headSha": "584491b537b17d3cd82a63a761fdb9080eb58dfa",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 137008037208,
+          "name": "validate-contracts",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 137008037575,
+          "name": "web-renderer-smoke",
+          "status": "completed"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/44957269348",
+      "workflowName": "project-b-contract-validation"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44957269208,
+      "event": "pull_request",
+      "headSha": "584491b537b17d3cd82a63a761fdb9080eb58dfa",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 137008036847,
+          "name": "Arcava A09 offline suboracles / Python 3.12.3",
+          "status": "completed"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/44957269208",
+      "workflowName": "arcava-a09-offline-assurance"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44957262890,
+      "event": "push",
+      "headSha": "584491b537b17d3cd82a63a761fdb9080eb58dfa",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 137008017880,
+          "name": "Active dev HTTP lifecycle / JDK 25 / Maven 3.9.16",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 137008018072,
+          "name": "JourneyKernel fixture / JDK 21",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 137008018081,
+          "name": "Persisted loopback journey path / JDK 25",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 137008018098,
+          "name": "JourneyKernel fixture / JDK 25",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "databaseId": 137008018119,
+          "name": "Persisted loopback journey path / JDK 21",
+          "status": "completed"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/44957262890",
+      "workflowName": "arcava-journey-kernel"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44957262838,
+      "event": "push",
+      "headSha": "584491b537b17d3cd82a63a761fdb9080eb58dfa",
+      "jobs": [
+        {
+          "conclusion": "success",
+          "databaseId": 137008017691,
+          "name": "Arcava A09 offline suboracles / Python 3.12.3",
+          "status": "completed"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/wordualReality/souvereign-os-coaching-platform/actions/runs/44957262838",
+      "workflowName": "arcava-a09-offline-assurance"
+    }
+  ]
+}

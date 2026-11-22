@@ -1,0 +1,213 @@
+{
+  "fixture_id": "A09-FX-v1",
+  "version": "candidate-1.0",
+  "status": "CANDIDATE",
+  "approval": "NOT_APPROVED",
+  "authority": "NONE",
+  "clock": "2026-11-02T00:00:00Z",
+  "seed": 0,
+  "timezone": "Europe/Berlin",
+  "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+  "source_base_sha": "96c80d97878185d2f1aa62bfa545aebe37d1c67d",
+  "slots": [
+    {
+      "id": "tenant_client_coach",
+      "variants": [
+        "tenant1",
+        "tenant2",
+        "client1",
+        "client2",
+        "coach1",
+        "coach2",
+        "assigned",
+        "unassigned",
+        "revoked"
+      ],
+      "status": "IMPLEMENTED_SYNTHETIC",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "synthetic identifiers only; no trusted authorization",
+      "values": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ],
+      "missing_evidence": "business guard execution not claimed"
+    },
+    {
+      "id": "consent_share_provider_entitlement",
+      "variants": [
+        "valid",
+        "denied",
+        "expired"
+      ],
+      "status": "DEPENDS_ON_NONOWNER",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "OPEN",
+      "values": [],
+      "missing_evidence": "owner-approved payload and runtime evidence absent"
+    },
+    {
+      "id": "kdb_versions",
+      "variants": [
+        "T1",
+        "T2",
+        "PV1",
+        "PV2",
+        "lifecycle_revision"
+      ],
+      "status": "DEPENDS_ON_NONOWNER",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "OPEN",
+      "values": [],
+      "missing_evidence": "owner-approved payload and runtime evidence absent"
+    },
+    {
+      "id": "journey_versions",
+      "variants": [
+        "JV1",
+        "JV2",
+        "exact_steps",
+        "binding_hash"
+      ],
+      "status": "NOT_MATERIALIZED",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "OPEN",
+      "values": [],
+      "missing_evidence": "owner-approved payload and runtime evidence absent"
+    },
+    {
+      "id": "drafts",
+      "variants": [
+        "approved",
+        "changed_after_approval"
+      ],
+      "status": "NOT_MATERIALIZED",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "OPEN",
+      "values": [],
+      "missing_evidence": "owner-approved payload and runtime evidence absent"
+    },
+    {
+      "id": "booking_races",
+      "variants": [
+        "exclusive_overlap",
+        "racing_command1",
+        "racing_command2"
+      ],
+      "status": "NOT_MATERIALIZED",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "OPEN",
+      "values": [],
+      "missing_evidence": "owner-approved payload and runtime evidence absent"
+    },
+    {
+      "id": "reminders",
+      "variants": [
+        "ARCAVA_LOCAL",
+        "SOV_DELEGATED"
+      ],
+      "status": "DEPENDS_ON_NONOWNER",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "OPEN",
+      "values": [],
+      "missing_evidence": "owner-approved payload and runtime evidence absent"
+    },
+    {
+      "id": "provider_outcomes",
+      "variants": [
+        "UNKNOWN",
+        "REJECTED",
+        "DELIVERED"
+      ],
+      "status": "DEPENDS_ON_NONOWNER",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "OPEN",
+      "values": [],
+      "missing_evidence": "owner-approved payload and runtime evidence absent"
+    },
+    {
+      "id": "dst",
+      "variants": [
+        "spring_Europe_Berlin",
+        "autumn_Europe_Berlin",
+        "explicit_resolution"
+      ],
+      "status": "NOT_MATERIALIZED",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "OPEN",
+      "values": [],
+      "missing_evidence": "owner-approved payload and runtime evidence absent"
+    },
+    {
+      "id": "event_replay",
+      "variants": [
+        "event",
+        "correction",
+        "retraction",
+        "duplicate",
+        "conflicting_envelope",
+        "repeated_RuntimeOutcome"
+      ],
+      "status": "NOT_MATERIALIZED",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "OPEN",
+      "values": [],
+      "missing_evidence": "owner-approved payload and runtime evidence absent"
+    },
+    {
+      "id": "media_activity",
+      "variants": [
+        "scoped_media",
+        "erased_body_tombstone",
+        "PARTIAL",
+        "UNKNOWN"
+      ],
+      "status": "NOT_MATERIALIZED",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "OPEN",
+      "values": [],
+      "missing_evidence": "owner-approved payload and runtime evidence absent"
+    },
+    {
+      "id": "packs",
+      "variants": [
+        "core",
+        "admitted",
+        "unadmitted"
+      ],
+      "status": "NOT_MATERIALIZED",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "OPEN",
+      "values": [],
+      "missing_evidence": "owner-approved payload and runtime evidence absent"
+    },
+    {
+      "id": "crashes",
+      "variants": [
+        "before_commit",
+        "after_commit",
+        "before_publish",
+        "after_publish",
+        "before_ACK",
+        "after_ACK"
+      ],
+      "status": "NOT_MATERIALIZED",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "OPEN",
+      "values": [],
+      "missing_evidence": "owner-approved payload and runtime evidence absent"
+    },
+    {
+      "id": "restore",
+      "variants": [
+        "backup_checkpoint",
+        "restore_checkpoint",
+        "post_snapshot_attempt"
+      ],
+      "status": "NOT_MATERIALIZED",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit#DETERMINISTIC_FIXTURES",
+      "binding": "OPEN",
+      "values": [],
+      "missing_evidence": "owner-approved payload and runtime evidence absent"
+    }
+  ]
+}

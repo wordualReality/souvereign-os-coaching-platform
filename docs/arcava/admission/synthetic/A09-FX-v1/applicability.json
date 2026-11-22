@@ -1,0 +1,743 @@
+{
+  "status": "CANDIDATE",
+  "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+  "tests": [
+    {
+      "id": "A09-T01",
+      "type": "migration",
+      "units": [
+        "ARC09-U00",
+        "ARC09-U12"
+      ],
+      "oracle": "Clean-create and compatible-existing paths preserve ledger/checksums; CONFLICTING/UNKNOWN blocks mutation.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "restore"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "LOCAL_SUBORACLE / ORIGINAL_PARTIAL_NOT_ADMITTED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T02",
+      "type": "migration",
+      "units": [
+        "ARC09-U00",
+        "ARC09-U12"
+      ],
+      "oracle": "Dry-run identifies every source row as accepted, duplicate, quarantined or rejected; counts/hashes/refs reconcile.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "restore"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T03",
+      "type": "ownership",
+      "units": [
+        "ARC09-U00"
+      ],
+      "oracle": "Catalog diff contains Arcava objects only; no KDB/PIAC/SOV DDL, grants, foreign FKs or cascades.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "tenant_client_coach"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T04",
+      "type": "contract",
+      "units": [
+        "ARC09-U01",
+        "ARC09-U14"
+      ],
+      "oracle": "All applicable 48-registry producer/consumer schemas and canonical-byte checksums agree; active 16-family registry preserved, E16 inactive.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "journey_versions"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T05",
+      "type": "contract",
+      "units": [
+        "ARC09-U01"
+      ],
+      "oracle": "Missing/null/unknown authority fields, wrong namespace, unknown enum/major and unversioned refs reject without mutation.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "consent_share_provider_entitlement"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T06",
+      "type": "contract",
+      "units": [
+        "ARC09-U01"
+      ],
+      "oracle": "Same source event through compatible upcast retains namespace/event_id/source hash and produces one effect; divergent identity hash quarantines.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "event_replay"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T07",
+      "type": "security",
+      "units": [
+        "ARC09-U02",
+        "ARC09-U11"
+      ],
+      "oracle": "Wrong-tenant client and cross-tenant role/ID denial; valid same-owner path succeeds.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "tenant_client_coach"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T08",
+      "type": "security",
+      "units": [
+        "ARC09-U02",
+        "ARC09-U11"
+      ],
+      "oracle": "Unassigned/revoked coach and tenant-admin sensitive overreach denied; current permitted assignment succeeds.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "tenant_client_coach"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T09",
+      "type": "security",
+      "units": [
+        "ARC09-U02",
+        "ARC09-U11"
+      ],
+      "oracle": "ProviderPermission, consent, share, assignment, tenant membership and entitlement are independent; revoked/expired/stale fails closed.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "consent_share_provider_entitlement"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T10",
+      "type": "unit/idempotency",
+      "units": [
+        "ARC09-U03"
+      ],
+      "oracle": "Same command scope/key/hash returns authorized original receipt; changed payload conflicts; revoked retry leaks no payload.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "event_replay"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T11",
+      "type": "integration/crash",
+      "units": [
+        "ARC09-U03",
+        "ARC09-U13"
+      ],
+      "oracle": "Crash after state/outbox commit before publish republishes same event without second domain mutation.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "crashes"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T12",
+      "type": "integration/crash",
+      "units": [
+        "ARC09-U03",
+        "ARC09-U13"
+      ],
+      "oracle": "Inbox claim + mutation + semantic receipt atomic; after commit before ACK returns duplicate ACK; quarantined record never applied.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "crashes"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T13",
+      "type": "replay",
+      "units": [
+        "ARC09-U03",
+        "ARC09-U13"
+      ],
+      "oracle": "Revision gap holds/reconciles producer state; older event cannot roll back newer state; unsupported schema enters DLQ.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "event_replay"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T14",
+      "type": "component",
+      "units": [
+        "ARC09-U04"
+      ],
+      "oracle": "Programme != Module; exact ModuleBinding revision/hash/taxonomy checked; unknown/stale binding blocks activation.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "kdb_versions"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T15",
+      "type": "state",
+      "units": [
+        "ARC09-U04"
+      ],
+      "oracle": "Only legal Programme transitions; optimistic revision conflict produces no partial mutation; commercial projection not PIAC authority.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "journey_versions"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T16",
+      "type": "state",
+      "units": [
+        "ARC09-U05"
+      ],
+      "oracle": "Published JourneyVersion content immutable; newer publication cannot rewrite exact historical reconstruction.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "journey_versions"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T17",
+      "type": "contract",
+      "units": [
+        "ARC09-U05"
+      ],
+      "oracle": "Exactly two TrackingSource variants; programme-only/mixed/latest references rejected.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "journey_versions"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T18",
+      "type": "AI/security",
+      "units": [
+        "ARC09-U05"
+      ],
+      "oracle": "Generated draft cannot publish without human approval of exact digest/bindings; changed draft invalidates approval; injection cannot authorize tools/publication.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "drafts"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T19",
+      "type": "integration/lifecycle",
+      "units": [
+        "ARC09-U05"
+      ],
+      "oracle": "KDB withdrawn/revalidation event blocks new publication/delivery and queues local review/recompose; preserves history, no foreign write.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "kdb_versions"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T20",
+      "type": "component",
+      "units": [
+        "ARC09-U05"
+      ],
+      "oracle": "JourneySession, Enrollment, RuntimeExecutionSession, Appointment and WorkoutSession remain distinct; correlation validated.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "journey_versions"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T21",
+      "type": "concurrency",
+      "units": [
+        "ARC09-U06"
+      ],
+      "oracle": "Two concurrent BOOK requests for same resource/slot revision or overlapping exclusive interval yield one appointment and one typed CONFLICT.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "booking_races"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T22",
+      "type": "concurrency/state",
+      "units": [
+        "ARC09-U06"
+      ],
+      "oracle": "Atomic reschedule releases old slot only with successful new reservation; failed/conflicting reschedule keeps old booking; cancel/no-show legal transitions only.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "booking_races"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T23",
+      "type": "idempotency",
+      "units": [
+        "ARC09-U06"
+      ],
+      "oracle": "Same booking key cannot consume twice; stale slot/appointment revision denied; current cancellation/commercial rules reevaluated.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "booking_races"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T24",
+      "type": "reminder/recovery",
+      "units": [
+        "ARC09-U06",
+        "ARC09-U13"
+      ],
+      "oracle": "One immutable mode per due_intent_id; ARCAVA_LOCAL never delegates; SOV_DELEGATED never Arcava-dispatches. UNKNOWN transport reconciled with same provider key, no blind resend.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "reminders"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T25",
+      "type": "reminder/security",
+      "units": [
+        "ARC09-U06"
+      ],
+      "oracle": "Cancel/reschedule/revocation or stale intent suppresses obsolete send; unresolved old dispatch cannot be bypassed by new intent.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "reminders"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T26",
+      "type": "failure/provider",
+      "units": [
+        "ARC09-U06"
+      ],
+      "oracle": "Calendar outage/rate-limit/conflicting revision leaves Appointment authoritative and produces degraded/conflict state, bounded retry and reason.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "provider_outcomes"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T27",
+      "type": "provider/replay",
+      "units": [
+        "ARC09-U06",
+        "ARC09-U13"
+      ],
+      "oracle": "Authenticated callback duplicates/revisions deduped; forged/replayed callback quarantined; late outcome affects delivery projection, never SOV Appointment truth.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "provider_outcomes"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T28",
+      "type": "unit/cadence",
+      "units": [
+        "ARC09-U07"
+      ],
+      "oracle": "Frozen clock/timezone/DST choice and schedule version give same occurrence key across retries; schedule edits affect future only.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "dst"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T29",
+      "type": "idempotency",
+      "units": [
+        "ARC09-U07"
+      ],
+      "oracle": "ClientTrackingEvent append-only; duplicate same hash acknowledged; conflicting hash rejected; correction/retraction lineage cannot cross subject or cycle.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "event_replay"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T30",
+      "type": "integration",
+      "units": [
+        "ARC09-U07"
+      ],
+      "oracle": "Different envelopes for same RuntimeOutcome create at most one accepted owner effect after exact source/occurrence/current guards/completion policy match.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "event_replay"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T31",
+      "type": "negative/state",
+      "units": [
+        "ARC09-U07"
+      ],
+      "oracle": "FAILED/BLOCKED/CANCELLED RuntimeOutcome never fabricated completion; Arcava cannot write personal SOV events; HabitParticipation cannot enter KDB.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "event_replay"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T32",
+      "type": "lifecycle",
+      "units": [
+        "ARC09-U07"
+      ],
+      "oracle": "Source invalidation suspends affected prescription/future occurrence actions, preserves prior refs/events; explicit replacement creates new revision/version.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "kdb_versions"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T33",
+      "type": "privacy/component",
+      "units": [
+        "ARC09-U08"
+      ],
+      "oracle": "Private reflection/chat/intake/media excluded from generic events, nomination and model evidence; authorized source nomination rights verified.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "media_activity"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T34",
+      "type": "security/media",
+      "units": [
+        "ARC09-U08"
+      ],
+      "oracle": "Signed authorized media access, quarantine/malware status and derivative lineage enforced; revoked link cannot bypass current client guard.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "media_activity"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T35",
+      "type": "provider",
+      "units": [
+        "ARC09-U08"
+      ],
+      "oracle": "Missing/partial/stale/denied/not-synced activity remains explicit UNKNOWN/partial, never zero; typed units/time/source/quality retained.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "media_activity"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T36",
+      "type": "privacy/recovery",
+      "units": [
+        "ARC09-U08"
+      ],
+      "oracle": "Erasure/redaction/correction and current restrictions remain effective after replay/restore; no erased private body reconstructed.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "media_activity"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T37",
+      "type": "pack/component",
+      "units": [
+        "ARC09-U09"
+      ],
+      "oracle": "Disabled/unadmitted/stale pack blocks activation; admitted pack extends same Journey engine; core regression unchanged.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "packs"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T38",
+      "type": "pack/unit",
+      "units": [
+        "ARC09-U09"
+      ],
+      "oracle": "Training performance typed measurements and Nutrition provider/estimate metadata retain units/time/source/confidence/correction, no diagnosis or KDB publication.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "packs"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T39",
+      "type": "provider/commercial",
+      "units": [
+        "ARC09-U09"
+      ],
+      "oracle": "Payment callback authenticity/idempotency and provider transaction ID preserved; operational credit/package update atomic, no PIAC/accounting ownership transfer.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "provider_outcomes"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T40",
+      "type": "rebuild",
+      "units": [
+        "ARC09-U10",
+        "ARC09-U13"
+      ],
+      "oracle": "Shadow rebuild equals authorized original projection at same watermark/policy; applied receipts untouched, no sends/bookings/new completions.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "restore"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T41",
+      "type": "unit/progress",
+      "units": [
+        "ARC09-U10"
+      ],
+      "oracle": "Journey progress != adherence; denominator exclusions explainable; zero eligible opportunities yields no eligible opportunity.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "journey_versions"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T42",
+      "type": "privacy/projection",
+      "units": [
+        "ARC09-U10"
+      ],
+      "oracle": "Timeline explicit event allowlist and current visibility/redaction enforced; raw audit/private events excluded; deterministic ordering.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "event_replay"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T43",
+      "type": "component/operations",
+      "units": [
+        "ARC09-U10"
+      ],
+      "oracle": "Attention derived once per stable trigger/policy with reason/action/evidence/freshness; manual CoachTask retained separately.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "event_replay"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T44",
+      "type": "security/observability",
+      "units": [
+        "ARC09-U11",
+        "ARC09-U14"
+      ],
+      "oracle": "Real SQL apply/roles/RLS/function positive-negative tests, public grants/default ACL and direct foreign access denial; sanitized audit/trace chain intact.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "consent_share_provider_entitlement"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T45",
+      "type": "migration/concurrency",
+      "units": [
+        "ARC09-U12",
+        "ARC09-U14"
+      ],
+      "oracle": "Chunk replay after failure reuses same map/input hash/checkpoint; concurrent source revision stops chunk; no silent row drop.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "crashes"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T46",
+      "type": "acceptance/accessibility",
+      "units": [
+        "ARC09-U12"
+      ],
+      "oracle": "Critical pending/conflict/degraded/recovered coach/client/admin states expose status/reason, keyboard navigation and screen-reader announcement; no sensitive disclosure.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "tenant_client_coach"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T47",
+      "type": "recovery",
+      "units": [
+        "ARC09-U13",
+        "ARC09-U14"
+      ],
+      "oracle": "Isolated DB/assets restore checks exact versions/counts/hashes/receipts/tombstones and fences restored attempts; shared DB restoration reconciles all affected owners.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "restore"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    },
+    {
+      "id": "A09-T48",
+      "type": "acceptance",
+      "units": [
+        "ARC09-U14"
+      ],
+      "oracle": "Evidence bundle links all 86 IDs to owner disposition/unit/profile/security/fixture/test; UNKNOWN admissions blocked; no test execution or production readiness falsely asserted.",
+      "source": "https://docs.google.com/document/d/1UkD8wxgmH18wa0JNwfY_Iopnsq22idvm72PexrKeoj4/edit",
+      "fixture_slots": [
+        "restore"
+      ],
+      "applicability": "OWNER_SCOPED_CANDIDATE",
+      "physical_evidence": "NOT_MATERIALIZED",
+      "missing": "original case acceptance and approved whole-suite fixture"
+    }
+  ],
+  "admission": "NOT_ADMITTED",
+  "real_evidence": "0/86"
+}

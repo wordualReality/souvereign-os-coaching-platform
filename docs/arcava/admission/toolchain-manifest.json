@@ -1,0 +1,91 @@
+{
+  "package": "ARC36P25-T150-EXIT-STATUS-AND-A09-REVISION-GUARD-FIX-01",
+  "parent": "698518e4e3876c0eae16983eec741aea8ec23b9a",
+  "pointer": "ARC-36/P25 step 7/10",
+  "t150": "PARTIAL",
+  "toolchain": {
+    "java": "Temurin 25.0.3",
+    "java_build": "25.0.3+9-LTS",
+    "maven": "3.9.16",
+    "spring_boot": "4.1.1",
+    "verified_utc": "2026-10-27T12:12:53Z"
+  },
+  "artifact": {
+    "path": "services/api/target/projectb-api-0.1.0-SNAPSHOT.jar",
+    "main_class": "org.springframework.boot.loader.launch.JarLauncher",
+    "start_class": "com.projectb.api.Application",
+    "spring_boot_version": "4.1.1",
+    "local_sha256": "07c3e79b6b23c7d4c9be976e914587ad1c3eaa098139a084a818eef451ee9e0c",
+    "prior_ci_sha256_ab20302": "e7e2a2f837f0e7f5aab47be3d67c39114d4ca0465bbfb42db89971e5f054ca5f",
+    "byte_parity_across_builds": false,
+    "provenance": "Archive timestamps differ between machines. The smoke checks Main-Class, Start-Class and Spring-Boot-Version. Equal SHA-256 is not required."
+  },
+  "commands": {
+    "package": "mvn -B -f services/api/pom.xml package",
+    "package_exit": 0,
+    "maven_tests": "10 tests, 0 failures",
+    "maven_tests_note": "The executable JAR packet observed 8 tests. EffectiveConfigReadbackTest raised the current suite to 10.",
+    "start": "java -jar services/api/target/projectb-api-0.1.0-SNAPSHOT.jar --spring.profiles.active=dev --server.address=127.0.0.1 --server.port=<free> --arcava.journal.path=<temp>/journal.ndjson",
+    "smoke": "services/api/scripts/jar-lifecycle-smoke.sh services/api/target/projectb-api-0.1.0-SNAPSHOT.jar",
+    "smoke_exit": 0,
+    "stop": "SIGTERM",
+    "stop_exit": 143
+  },
+  "runtime": {
+    "role": "ACTIVE_DEV_HTTP",
+    "operator_classification": "ACTIVE_HTTP_LISTENER",
+    "bind": "127.0.0.1",
+    "health_live": 200,
+    "health_ready_while_authorities_absent": 503,
+    "piac": "not_connected",
+    "kdb": "not_connected",
+    "journal": "synthetic temporary ndjson, unchanged by denied HTTP",
+    "pids": [83824, 83906],
+    "unknown_process": "UNKNOWN"
+  },
+  "operator": {
+    "OPERATOR_START": "EXERCISED_LOCAL",
+    "OPERATOR_STOP": "EXERCISED_LOCAL",
+    "OPERATOR_READY": "EXERCISED_LOCAL",
+    "OPERATOR_RESTART": "EXERCISED_LOCAL",
+    "UNKNOWN": "EXERCISED_LOCAL",
+    "RECOVERY": "EXERCISED_LOCAL",
+    "hosted_admission": "NOT_ADMITTED",
+    "reason": "Local procedures started, stopped, restarted and recovered the JAR and the Next shell on 127.0.0.1. This is not a hosted operator admission.",
+    "jar_receipt": "live 200, ready 503, effective schema pass, journal redacted and unchanged, SIGTERM 143, dead pid UNKNOWN, crash 137, recovery HTTP 200, non-loopback exit 1, blank journal exit 1",
+    "web_receipt": "forbidden env is refused before npm ci and next build. Four routes HTTP 200, SIGTERM 143, dead pid UNKNOWN, crash 137, recovery HTTP 200, telemetry disabled.",
+    "active_listener": "ACTIVE_DEV_HTTP uses the local JAR procedure. It does not inherit a NON_WEB exception."
+  },
+  "frontend": {
+    "package": "ARC36P25-T150-FRONTEND-RENDERER-RUNNER-LOCK-01",
+    "renderer": "next",
+    "renderer_version": "16.4.3",
+    "react": "19.3.1",
+    "react_dom": "19.3.1",
+    "typescript": "7.0.2",
+    "types_react": "19.3.0",
+    "types_node": "26.6.5",
+    "runner": "next start apps/web --hostname 127.0.0.1",
+    "lock": "package-lock.json",
+    "node_serving": "v20.12.2",
+    "bind": "127.0.0.1",
+    "routes_http_200": ["/", "/coach/journeys", "/client/member-home", "/admin/provisioning"],
+    "stop_signal": "SIGTERM",
+    "service_role_in_output": "absent",
+    "admission": "PROPOSAL_EXERCISED_NOT_ADMITTED",
+    "version_source": "No lock existed in this repository. next 16.4.3, react 19.3.1 and react-dom 19.3.1 are the npm registry versions resolved on 2026-10-27. typescript 7.0.2, @types/react 19.3.0 and @types/node 26.6.5 are the versions the Next.js build installed because the pages are TypeScript. This is not an ARC-10 source pin.",
+    "observed": "The four existing routes answered HTTP 200 on 127.0.0.1. The process was started without DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY."
+  },
+  "not_executed": {
+    "A09-T01": "NOT_EXECUTED",
+    "A09-T04": "NOT_EXECUTED",
+    "A09-T44": "NOT_EXECUTED",
+    "A09-T48": "NOT_EXECUTED",
+    "missing": "docs/arcava/admission/a09/A09-T01, A09-T04, A09-T44 and A09-T48 each lack case.json, owner-receipt.json and engine.json.",
+    "discovery": "scripts/a09_case_discovery.py",
+    "owner_pin": "docs/arcava/admission/toolchain-owner-pin.json is absent. A local file or owner_admitted boolean is rejected. Registry and workflow pins stay PROPOSAL_EXERCISED_NOT_ADMITTED.",
+    "runtime_check": "scripts/toolchain_receipt.py --runtime checks Java major 25, Maven 3.9.16 and Node 20.12.2 on jobs that install those binaries. A nonzero exit, a timeout, invalid output or a missing binary fails. Inventory mode does not treat an absent binary as a runtime pass.",
+    "e1_authority": "NOT_ADMITTED",
+    "e1_missing": "No E1 issuer credential, transport engine or owner receipt is present in this worktree. The running listener reports piac_transport not_connected, kdb_transport not_connected and e1_reason LIVE_AUTHORITY_CLOSED. SOV issue 14 is not connected."
+  }
+}
