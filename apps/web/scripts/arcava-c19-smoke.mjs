@@ -133,6 +133,8 @@ try {
     await cdp("Page.navigate", { url: origin + "/coach/journeys" });
     await until(() => evaluate("location.pathname === '/coach/journeys' && document.querySelector('[data-c19-goal]') !== null"),
       "/coach/journeys");
+    await until(() => evaluate("document.querySelector('[data-c19-status]')?.textContent?.startsWith('HTTP ')"),
+      "initial workspace list");
   }
   const c19 = "[aria-label='C19 local goal draft fixture']";
   async function click(label, status) {
@@ -319,6 +321,101 @@ try {
   assert.equal(recovered.data.revision, liveRevision);
   assert.equal(recovered.data.title, "Edited calm draft");
   assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Edited calm draft");
+
+  async function idle(label) {
+    await until(() => evaluate(`!!Array.from(document.querySelectorAll(${JSON.stringify(c19 + " button")}))
+      .find(button => button.textContent.trim() === "New draft" && !button.disabled)`), label);
+  }
+  async function title(value) {
+    await evaluate(`(() => {
+      const input = document.querySelector("[data-c19-title]");
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+      setter.call(input, ${JSON.stringify(value)});
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    })()`);
+  }
+  await idle("after recovered");
+  await press("New draft");
+  await click("Propose sourced outline", 200);
+  await title("Workspace two");
+  const secondSaved = await click("Save draft", 201);
+  assert.equal(secondSaved.data.title, "Workspace two");
+  assert.notEqual(secondSaved.data.draft_id, draftId);
+  await idle("after second save");
+  await press("New draft");
+  await click("Propose sourced outline", 200);
+  await title("Workspace three");
+  const thirdSaved = await click("Save draft", 201);
+  assert.equal(thirdSaved.data.title, "Workspace three");
+  assert.notEqual(thirdSaved.data.draft_id, secondSaved.data.draft_id);
+  await idle("after third save");
+  const listed = await click("Apply filters", 200);
+  assert.ok(listed.data.items.length >= 3, "workspace list has three drafts");
+  assert.equal(await evaluate("document.querySelector('[data-c19-drafts]').getAttribute('data-c19-drafts')"),
+    String(listed.data.items.length));
+  await evaluate(`(() => {
+    const input = document.querySelector("[data-c19-search]");
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+    setter.call(input, "calm");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  })()`);
+  const searched = await click("Apply filters", 200);
+  assert.ok(searched.data.items.length >= 1
+    && searched.data.items.every(item => String(item.title).toLowerCase().includes("calm")),
+    "W02 search titles");
+  await evaluate(`(() => {
+    const input = document.querySelector("[data-c19-search]");
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+    setter.call(input, "");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  })()`);
+  const visible = await click("Apply filters", 200);
+  assert.ok(visible.data.items.length >= 3, "workspace list restored after search");
+
+  await title("Dirty workspace title");
+  assert.equal(await evaluate("document.querySelector('[data-c19-dirty]').getAttribute('data-c19-dirty')"), "true");
+  const otherOpen = visible.data.items.find(item => item.draft_id !== thirdSaved.data.draft_id);
+  const openedDirty = await evaluate(`(() => {
+    const button = document.querySelector('[data-c19-row="' + ${JSON.stringify(otherOpen.draft_id)} + '"] button');
+    if (!button || button.disabled) return false;
+    button.click();
+    return true;
+  })()`);
+  assert.equal(openedDirty, true);
+  await until(() => evaluate("document.querySelector('[data-c19-switch]') !== null"), "dirty switch");
+  await evaluate(`Array.from(document.querySelectorAll("[data-c19-switch] button"))
+    .find(button => button.textContent.trim() === "Stay on this draft").click()`);
+  await until(() => evaluate("document.querySelector('[data-c19-switch]') === null"), "stay on draft");
+  assert.equal(await evaluate("document.querySelector('[data-c19-title]').value"), "Dirty workspace title");
+  const openedAgain = await evaluate(`(() => {
+    const button = document.querySelector('[data-c19-row="' + ${JSON.stringify(otherOpen.draft_id)} + '"] button');
+    if (!button || button.disabled) return false;
+    button.click();
+    return true;
+  })()`);
+  assert.equal(openedAgain, true);
+  await until(() => evaluate("document.querySelector('[data-c19-switch]') !== null"), "dirty switch again");
+  const switchStart = events.length;
+  await evaluate(`Array.from(document.querySelectorAll("[data-c19-switch] button"))
+    .find(button => button.textContent.trim() === "Discard and switch").click()`);
+  const switched = await until(() => events.slice(switchStart).find(event => event.response.url === endpoint),
+    "discard load");
+  assert.equal(switched.response.status, 200);
+  await until(() => evaluate("document.querySelector('[data-c19-title]').value === "
+    + JSON.stringify(otherOpen.title)), "discarded to selected draft");
+  assert.equal(await evaluate("document.querySelector('[data-c19-dirty]').getAttribute('data-c19-dirty')"), "false");
+
+  await stop(next);
+  await stop(backend.child);
+  backend = await service("replay");
+  next = await web(backend.port, version);
+  await navigate();
+  await cdp("Network.deleteCookies", { name: "arcava_c19_draft", url: origin + "/" });
+  const resumed = await click("Apply filters", 200);
+  assert.ok(resumed.data.items.length >= 3, "W01 list without cookie");
+  assert.equal(await evaluate("document.querySelector('[data-c19-workspace]') !== null"), true);
+  assert.equal(await evaluate("document.querySelector('h3')?.textContent"), "Meine Kursentwürfe");
+
   console.log(JSON.stringify({
     result: "PASS",
     draft_id: draftId,
@@ -330,6 +427,7 @@ try {
     a7_adapter_error: true, a7_fetch_timeout: true,
     a7_browser_fetch_rejected: true,
     r01_review: true, r02_restart: true, r03_unsaved_and_invalidate: true, r07_review_fetch_rejected: true,
+    w01_list: true, w02_search: true, w08_dirty_switch: true, w09_restart: true, w10_workspace_ui: true,
     loading_failed: rejected.errorText || rejected.blockedReason,
     test_only: true, no_live_kdb: true,
   }));

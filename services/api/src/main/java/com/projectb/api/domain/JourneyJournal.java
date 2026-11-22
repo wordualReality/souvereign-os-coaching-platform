@@ -78,6 +78,9 @@ public final class JourneyJournal {
                           String url, String title, boolean withdrawn) {}
   public record MediaLinkEvent(UUID eventId, String action, MediaLink link) {}
   private record MediaRetry(Actor actor, String key) {}
+  public record DraftSummary(String draftId, String title, long revision, int stepCount,
+                             String reviewState, boolean testOnly) {}
+  public record DraftPage(List<DraftSummary> items, String nextCursor, boolean testOnly) {}
 
   private final Map<UUID, MediaLink> mediaLinks = new LinkedHashMap<>();
   private final Map<MessageScope, UUID> activeMedia = new LinkedHashMap<>();
@@ -91,6 +94,8 @@ public final class JourneyJournal {
   private final Map<UUID, EnrollmentLink> enrollments = new LinkedHashMap<>();
   private final Map<UUID, String> draftOrigins = new LinkedHashMap<>();
   private final Set<UUID> c19PinHistory = new java.util.LinkedHashSet<>();
+  private final Map<UUID, Actor> draftOwners = new LinkedHashMap<>();
+  private final List<UUID> draftCreateOrder = new ArrayList<>();
   private final Map<UUID, C19LocalReview.Receipt> reviews = new LinkedHashMap<>();
   private record ReviewRetry(String tenantId, String subjectId, String key) {}
   private final Map<ReviewRetry, C19LocalReview.Receipt> reviewRetries = new LinkedHashMap<>();
@@ -147,6 +152,7 @@ public final class JourneyJournal {
   public synchronized DraftView updateDraft(Actor actor, UUID draftId, long expectedRevision,
                                             String title, List<Step> steps, String phasesJson,
                                             String origin) throws IOException {
+    requireC19Owner(actor, draftId);
     kernel.validateUpdateDraft(actor, actor.tenantId(), draftId, expectedRevision, title, steps);
     commit(command("update", actor, null)
         + ",\"draft_id\":" + JsonMini.quote(draftId.toString())
@@ -160,6 +166,7 @@ public final class JourneyJournal {
 
   public synchronized C19LocalReview.Receipt localReview(Actor actor, UUID draftId, long expectedRevision,
                                                          String key) throws IOException {
+    requireC19Owner(actor, draftId);
     ReviewRetry retry = new ReviewRetry(actor.tenantId(), actor.subjectId(), key);
     C19LocalReview.Receipt prior = reviewRetries.get(retry);
     if (prior != null) {
@@ -200,8 +207,57 @@ public final class JourneyJournal {
     return reviews.containsKey(draftId) ? C19LocalReview.STATE_INEFFECTIVE : C19LocalReview.STATE_NONE;
   }
 
+  public synchronized DraftView readDraft(Actor actor, UUID draftId) {
+    requireC19Owner(actor, draftId);
+    return kernel.readDraft(actor, draftId);
+  }
+
+  public synchronized DraftPage listC19Drafts(Actor actor, String query, String reviewFilter,
+                                              String cursor, int limit) {
+    if (actor.role() != Role.COACH)
+      throw new DomainException(ErrorCode.FORBIDDEN, "coach access required");
+    String normalized = normalizeQuery(query);
+    String filter = normalizeReviewFilter(reviewFilter);
+    if (limit < 1 || limit > 25) throw new DomainException(ErrorCode.INVALID, "page limit out of bounds");
+    List<DraftSummary> matched = new ArrayList<>();
+    for (UUID draftId : draftCreateOrder) {
+      if (!isC19Protected(draftId)) continue;
+      Actor owner = draftOwners.get(draftId);
+      if (owner == null) continue;
+      if (!owner.tenantId().equals(actor.tenantId()) || !owner.subjectId().equals(actor.subjectId())) continue;
+      DraftView view = kernel.readDraft(actor, draftId);
+      String state = reviewState(actor, draftId);
+      if (!filter.isEmpty() && !filter.equals(state)) continue;
+      if (!normalized.isEmpty() && !foldText(view.title()).contains(normalized)) continue;
+      matched.add(new DraftSummary(draftId.toString(), view.title(), view.revision(), view.steps().size(),
+          state, true));
+    }
+    int start = 0;
+    if (cursor != null && !cursor.isBlank()) {
+      String expectedPrefix = actor.tenantId() + "\n" + actor.subjectId() + "\n" + normalized + "\n" + filter + "\n";
+      String decoded = decodeCursor(cursor);
+      if (!decoded.startsWith(expectedPrefix))
+        throw new DomainException(ErrorCode.INVALID, "cursor does not match current list");
+      String[] parts = decoded.split("\n", -1);
+      if (parts.length != 6) throw new DomainException(ErrorCode.INVALID, "cursor is malformed");
+      String lastId = parts[5];
+      int index = -1;
+      for (int i = 0; i < matched.size(); i++) {
+        if (matched.get(i).draftId().equals(lastId)) { index = i; break; }
+      }
+      if (index < 0) throw new DomainException(ErrorCode.INVALID, "cursor is not current");
+      start = index + 1;
+    }
+    int end = Math.min(matched.size(), start + limit);
+    List<DraftSummary> page = List.copyOf(matched.subList(start, end));
+    String next = end < matched.size()
+        ? encodeCursor(actor, normalized, filter, page.get(page.size() - 1).draftId()) : null;
+    return new DraftPage(page, next, true);
+  }
+
   public synchronized PublishedView publish(Actor actor, UUID draftId, long expectedRevision,
                                             String key) throws IOException {
+    requireC19Owner(actor, draftId);
     if (c19PublishDenied(actor, draftId))
       throw new DomainException(ErrorCode.FORBIDDEN, "C19 local review is not publication");
     PublishedView existing = kernel.peekPublish(actor, actor.tenantId(), draftId, expectedRevision, key);
@@ -611,6 +667,7 @@ public final class JourneyJournal {
         kernel.createDraft(actor, actor.tenantId(),
             JsonMini.text(command.get("title")), JsonMini.text(command.get("key")), draftId);
         rememberOrigin(draftId, command.get("origin"));
+        rememberOwner(draftId, actor);
       }
       case "update" -> {
         UUID draftId = UUID.fromString(JsonMini.text(command.get("draft_id")));
@@ -706,6 +763,60 @@ public final class JourneyJournal {
          .append('}');
     }
     return out.append(']').toString();
+  }
+
+  public synchronized void requireC19Owner(Actor actor, UUID draftId) {
+    if (!isC19Protected(draftId)) return;
+    Actor owner = draftOwners.get(draftId);
+    if (owner == null)
+      throw new DomainException(ErrorCode.FORBIDDEN, "C19 draft owner required");
+    if (!owner.tenantId().equals(actor.tenantId()) || !owner.subjectId().equals(actor.subjectId()))
+      throw new DomainException(ErrorCode.FORBIDDEN, "C19 draft owner mismatch");
+  }
+
+  private boolean isC19Protected(UUID draftId) {
+    return C19LocalReview.ORIGIN.equals(draftOrigins.get(draftId)) || c19PinHistory.contains(draftId);
+  }
+
+  private void rememberOwner(UUID draftId, Actor actor) {
+    Actor existing = draftOwners.putIfAbsent(draftId, actor);
+    if (existing != null && (!existing.tenantId().equals(actor.tenantId())
+        || !existing.subjectId().equals(actor.subjectId())))
+      throw new IllegalArgumentException("conflicting draft owner");
+    if (!draftCreateOrder.contains(draftId)) draftCreateOrder.add(draftId);
+  }
+
+  static String normalizeQuery(String raw) {
+    if (raw == null || raw.isBlank()) return "";
+    if (raw.length() > 80) throw new DomainException(ErrorCode.INVALID, "query too long");
+    return foldText(raw);
+  }
+
+  private static String foldText(String raw) {
+    if (raw == null) return "";
+    return raw.toLowerCase(Locale.ROOT).trim().replaceAll("\\s+", " ");
+  }
+
+  static String normalizeReviewFilter(String raw) {
+    if (raw == null || raw.isBlank()) return "";
+    if (C19LocalReview.STATE_NONE.equals(raw) || C19LocalReview.STATE_ACCEPTED.equals(raw)
+        || C19LocalReview.STATE_INEFFECTIVE.equals(raw)) return raw;
+    throw new DomainException(ErrorCode.INVALID, "review filter is invalid");
+  }
+
+  private static String encodeCursor(Actor actor, String query, String filter, String draftId) {
+    String payload = actor.tenantId() + "\n" + actor.subjectId() + "\n" + query + "\n" + filter + "\n"
+        + "id\n" + draftId;
+    return HexFormat.of().formatHex(payload.getBytes(StandardCharsets.UTF_8));
+  }
+
+  private static String decodeCursor(String cursor) {
+    try {
+      byte[] bytes = HexFormat.of().parseHex(cursor);
+      return new String(bytes, StandardCharsets.UTF_8);
+    } catch (RuntimeException ex) {
+      throw new DomainException(ErrorCode.INVALID, "cursor is malformed");
+    }
   }
 
   private boolean c19PublishDenied(Actor actor, UUID draftId) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const endpoint = "/api/arcava-c19";
 
@@ -27,6 +27,13 @@ type Draft = {
   steps?: Step[];
   learning_goal?: string;
 };
+type DraftRow = {
+  draft_id: string;
+  title: string;
+  revision: number;
+  step_count: number;
+  review_state: string;
+};
 
 function snapshot(title: string, steps: Step[]) {
   return JSON.stringify({
@@ -47,12 +54,63 @@ export function C19GoalDraftFixture() {
   const [steps, setSteps] = useState<Step[]>([]);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [pending, setPending] = useState(false);
+  const [listing, setListing] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [saveKey, setSaveKey] = useState<string | null>(null);
   const [reviewKey, setReviewKey] = useState<string | null>(null);
   const [persisted, setPersisted] = useState<string>(snapshot("Calm practice draft", []));
+  const [rows, setRows] = useState<DraftRow[]>([]);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("");
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [pendingSwitch, setPendingSwitch] = useState<string | null>(null);
   const dirty = snapshot(title, steps) !== persisted;
+
+  async function listDrafts(cursor?: string | null, silent = false) {
+    setListing(true);
+    if (!silent) {
+      setStatus(null);
+      setNotice(null);
+    }
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        signal: AbortSignal.timeout(4000),
+        body: JSON.stringify({
+          action: "list",
+          q: search || undefined,
+          review_state: filter || undefined,
+          cursor: cursor || undefined,
+          limit: 25,
+        }),
+      });
+      const payload = await response.json();
+      if (response.ok && Array.isArray(payload.data?.items)) {
+        setRows(cursor ? current => current.concat(payload.data.items) : payload.data.items);
+        setNextCursor(payload.data.next_cursor ?? null);
+        if (!silent) {
+          setStatus(`HTTP ${response.status}${payload.error?.code ? " " + payload.error.code : ""}`);
+          setNotice(null);
+        }
+      } else {
+        if (!cursor) setRows([]);
+        setStatus(`HTTP ${response.status}${payload.error?.code ? " " + payload.error.code : ""}`);
+        setNotice(payload.error?.retryable
+          ? "Proposal adapter is temporarily unavailable. The saved draft was not changed."
+          : "Draft list is not available.");
+      }
+    } catch {
+      if (!cursor) setRows([]);
+      setStatus("HTTP 0 FETCH_REJECTED");
+      setNotice("Proposal adapter is temporarily unavailable. The saved draft was not changed.");
+    } finally {
+      setListing(false);
+    }
+  }
+
+  useEffect(() => { void listDrafts(); }, []);
 
   async function run(action: "propose" | "save" | "load" | "review", extra: Record<string, unknown> = {}) {
     if (action === "review" && dirty) {
@@ -99,7 +157,10 @@ export function C19GoalDraftFixture() {
           const nextSteps = payload.data.steps ?? steps;
           setPersisted(snapshot(nextTitle, nextSteps));
         }
-        if (action === "save") setReviewKey(null);
+        if (action === "save") {
+          setReviewKey(null);
+          void listDrafts(undefined, true);
+        }
         setNotice(null);
       } else {
         setNotice(payload.error?.retryable
@@ -114,12 +175,87 @@ export function C19GoalDraftFixture() {
     }
   }
 
-  async function load() { await run("load"); }
+  function resetEditor() {
+    setGoal("Build a calm two-source practice");
+    setTitle("Calm practice draft");
+    setSteps([]);
+    setDraft(null);
+    setSaveKey(null);
+    setReviewKey(null);
+    setPersisted(snapshot("Calm practice draft", []));
+    setPendingSwitch(null);
+  }
+
+  async function load(draftId?: string) { await run("load", draftId ? { draft_id: draftId } : {}); }
+
+  async function openDraft(draftId: string) {
+    if (dirty) {
+      setPendingSwitch(draftId);
+      return;
+    }
+    await load(draftId);
+  }
+
+  function startNewDraft() {
+    if (dirty) {
+      setPendingSwitch("new");
+      return;
+    }
+    resetEditor();
+  }
 
   return (
     <section aria-label="C19 local goal draft fixture">
       <h2>TEST_ONLY goal to sourced draft</h2>
       <p>NO_LIVE_KDB. TrustedKdbVerifier=NONE. Two synthetic course candidates only.</p>
+      <section aria-label="Meine Kursentwürfe" data-c19-workspace="true">
+        <h3>Meine Kursentwürfe</h3>
+        <form onSubmit={event => { event.preventDefault(); void listDrafts(); }}>
+          <p>
+            <label>Search drafts <input data-c19-search value={search} maxLength={80}
+              onChange={event => setSearch(event.target.value)} /></label>
+          </p>
+          <p>
+            <label>Review status <select data-c19-filter value={filter}
+              onChange={event => setFilter(event.target.value)}>
+              <option value="">All</option>
+              <option value="NONE">NONE</option>
+              <option value="ACCEPTED">ACCEPTED</option>
+              <option value="INEFFECTIVE">INEFFECTIVE</option>
+            </select></label>
+          </p>
+          <p>
+            <button type="submit" disabled={listing}>Apply filters</button>
+            <button type="button" data-c19-new disabled={pending} onClick={startNewDraft}>New draft</button>
+          </p>
+        </form>
+        <ul data-c19-drafts={String(rows.length)}>
+          {rows.map(row => (
+            <li key={row.draft_id} data-c19-row={row.draft_id} data-c19-row-state={row.review_state}>
+              <button type="button" disabled={pending} onClick={() => void openDraft(row.draft_id)}>
+                Open {row.title}
+              </button>
+              <span> revision {row.revision} · {row.step_count} steps · {row.review_state}</span>
+            </li>
+          ))}
+        </ul>
+        {nextCursor ? (
+          <p><button type="button" data-c19-next disabled={listing}
+            onClick={() => void listDrafts(nextCursor)}>Next page</button></p>
+        ) : null}
+        {pendingSwitch ? (
+          <div role="alertdialog" aria-label="Unsaved draft changes" data-c19-switch="true">
+            <p>Unsaved changes. Discard them to open another draft?</p>
+            <button type="button" onClick={() => {
+              const target = pendingSwitch;
+              setPendingSwitch(null);
+              if (target === "new") resetEditor();
+              else void load(target);
+            }}>Discard and switch</button>
+            <button type="button" onClick={() => setPendingSwitch(null)}>Stay on this draft</button>
+          </div>
+        ) : null}
+      </section>
       <p>
         <label>Learning goal <input data-c19-goal value={goal} maxLength={200}
           onChange={event => setGoal(event.target.value)} /></label>
@@ -131,7 +267,7 @@ export function C19GoalDraftFixture() {
       <p>
         <button type="button" disabled={pending} onClick={() => run("propose")}>Propose sourced outline</button>
         <button type="button" disabled={pending || steps.length === 0} onClick={() => run("save")}>Save draft</button>
-        <button type="button" disabled={pending} onClick={load}>Reload saved draft</button>
+        <button type="button" disabled={pending} onClick={() => void load()}>Reload saved draft</button>
         <button type="button" disabled={pending || !draft?.draft_id}
           onClick={() => run("review")}>Confirm local review</button>
         <button type="button" disabled={pending} onClick={() => run("propose", { force_adapter_error: true })}>

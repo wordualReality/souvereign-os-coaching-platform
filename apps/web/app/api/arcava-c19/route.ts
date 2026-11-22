@@ -91,6 +91,10 @@ export async function POST(request: NextRequest) {
     force_fetch_timeout?: boolean;
     key?: string;
     digest?: unknown;
+    q?: string;
+    review_state?: string;
+    cursor?: string;
+    limit?: number;
   };
   try { input = JSON.parse(raw); }
   catch { return deny(422, "INVALID"); }
@@ -103,6 +107,31 @@ export async function POST(request: NextRequest) {
       const error = new Error("timeout");
       error.name = "TimeoutError";
       throw error;
+    }
+    if (action === "list") {
+      const allowed = new Set(["action", "q", "review_state", "cursor", "limit", "force_fetch_timeout"]);
+      if (Object.keys(input).some(field => !allowed.has(field))) return deny(422, "INVALID");
+      if (input.q !== undefined && (typeof input.q !== "string" || input.q.length > 80)) return deny(422, "INVALID");
+      if (input.review_state !== undefined && !["NONE", "ACCEPTED", "INEFFECTIVE"].includes(input.review_state))
+        return deny(422, "INVALID");
+      if (input.cursor !== undefined && (typeof input.cursor !== "string" || input.cursor.length > 4096))
+        return deny(422, "INVALID");
+      if (input.limit !== undefined && (typeof input.limit !== "number" || input.limit < 1 || input.limit > 25
+          || !Number.isInteger(input.limit)))
+        return deny(422, "INVALID");
+      const params = new URLSearchParams();
+      if (input.q) params.set("q", input.q);
+      if (input.review_state) params.set("review_state", input.review_state);
+      if (input.cursor) params.set("cursor", input.cursor);
+      if (input.limit) params.set("limit", String(input.limit));
+      const upstream = await fetch(context.service + "/journeys/drafts"
+          + (params.toString() ? "?" + params.toString() : ""), {
+        ...options, headers: { Authorization: "Bearer " + context.coach },
+      });
+      const body = await upstream.json();
+      if (!upstream.ok) return NextResponse.json({ error: body.error }, { status: upstream.status, headers: { "Cache-Control": "no-store" } });
+      if (!Array.isArray(body.data?.items)) return deny(503, "FIXTURE_UNAVAILABLE", true);
+      return NextResponse.json({ data: body.data }, { headers: { "Cache-Control": "no-store" } });
     }
     if (action === "review") {
       const allowed = new Set(["action", "draft_id", "expected_revision", "key", "force_fetch_timeout"]);

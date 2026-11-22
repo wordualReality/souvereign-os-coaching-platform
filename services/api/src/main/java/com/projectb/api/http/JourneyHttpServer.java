@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -126,6 +127,11 @@ public final class JourneyHttpServer {
     if (!tenant.equals(actor.tenantId()))
       throw new DomainException(ErrorCode.FORBIDDEN, "tenant mismatch");
 
+    if (path.length == 7 && "journeys".equals(path[5]) && "drafts".equals(path[6]) && "GET".equals(method)) {
+      requireCoach(actor);
+      send(exchange, 200, listDrafts(actor, exchange));
+      return;
+    }
     if (path.length == 7 && "journeys".equals(path[5]) && "drafts".equals(path[6]) && "POST".equals(method)) {
       requireCoach(actor);
       Map<String, Object> body = body(exchange);
@@ -144,7 +150,7 @@ public final class JourneyHttpServer {
     }
     if (path.length == 8 && "journeys".equals(path[5]) && "drafts".equals(path[6]) && "GET".equals(method)) {
       requireCoach(actor);
-      DraftView view = journal.kernel().readDraft(actor, UUID.fromString(path[7]));
+      DraftView view = journal.readDraft(actor, UUID.fromString(path[7]));
       send(exchange, 200, draftDetailJson(actor, view));
       return;
     }
@@ -507,7 +513,7 @@ public final class JourneyHttpServer {
     if (!pathDraftId.equals(draftId))
       throw new DomainException(ErrorCode.INVALID, "draft id mismatch");
     journal.localReview(actor, draftId, JsonMini.integer(body.get("expected_revision")), key);
-    DraftView view = journal.kernel().readDraft(actor, draftId);
+    DraftView view = journal.readDraft(actor, draftId);
     if (journal.currentReview(actor, draftId) == null)
       throw new DomainException(ErrorCode.STALE_REVISION, "review receipt is no longer current");
     Map<String, Object> data = new LinkedHashMap<>();
@@ -583,6 +589,52 @@ public final class JourneyHttpServer {
         + ",\"message\":" + JsonMini.quote(message)
         + ",\"correlation_id\":" + JsonMini.quote(correlation)
         + ",\"retryable\":" + retryable + "}}";
+  }
+
+  private String listDrafts(Actor actor, HttpExchange exchange) {
+    Map<String, String> query = query(exchange);
+    java.util.HashSet<String> allowed = new java.util.HashSet<>(Set.of("q", "review_state", "cursor", "limit"));
+    if (!allowed.containsAll(query.keySet()))
+      throw new IllegalArgumentException("unknown list field");
+    int limit = 25;
+    if (query.containsKey("limit")) {
+      try { limit = Integer.parseInt(query.get("limit")); }
+      catch (NumberFormatException ex) { throw new IllegalArgumentException("limit is invalid"); }
+    }
+    JourneyJournal.DraftPage page = journal.listC19Drafts(actor, query.get("q"), query.get("review_state"),
+        query.get("cursor"), limit);
+    List<Map<String, Object>> items = new ArrayList<>();
+    for (JourneyJournal.DraftSummary row : page.items()) {
+      Map<String, Object> item = new LinkedHashMap<>();
+      item.put("draft_id", row.draftId());
+      item.put("title", row.title());
+      item.put("revision", row.revision());
+      item.put("step_count", row.stepCount());
+      item.put("review_state", row.reviewState());
+      item.put("test_only", true);
+      items.add(item);
+    }
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("items", items);
+    data.put("next_cursor", page.nextCursor());
+    data.put("test_only", true);
+    data.put("profile", LOOPBACK_PROFILE);
+    data.put("no_live_kdb", true);
+    return JsonMini.write(Map.of("data", data));
+  }
+
+  private static Map<String, String> query(HttpExchange exchange) {
+    String raw = exchange.getRequestURI().getRawQuery();
+    Map<String, String> out = new LinkedHashMap<>();
+    if (raw == null || raw.isBlank()) return out;
+    for (String pair : raw.split("&")) {
+      if (pair.isBlank()) continue;
+      int eq = pair.indexOf('=');
+      String key = URLDecoder.decode(eq < 0 ? pair : pair.substring(0, eq), StandardCharsets.UTF_8);
+      String value = URLDecoder.decode(eq < 0 ? "" : pair.substring(eq + 1), StandardCharsets.UTF_8);
+      if (out.put(key, value) != null) throw new IllegalArgumentException("duplicate query field");
+    }
+    return out;
   }
 
   private static String draftJson(DraftView view) {
