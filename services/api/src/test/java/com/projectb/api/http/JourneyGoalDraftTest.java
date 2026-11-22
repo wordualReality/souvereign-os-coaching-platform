@@ -297,11 +297,12 @@ public final class JourneyGoalDraftTest {
       server.stop();
     }
     checkLegacyC19PublishFence(tokens, consent);
+    checkLegacyC19PatchCannotLiftFence(tokens, consent);
     System.out.println("PASS JourneyGoalDraftTest a1_two_candidates=true a2_edit_save=true a3_restart=true"
         + " a4_source_denials=true a5_revision=true a6_no_publish_assign=true a7_adapter_error=true"
         + " r01_review=true r02_restart=true r03_invalidate=true r04_idempotency=true r05_auth=true"
-        + " r06_c19_publish_denied=true b1_legacy_c19_publish_denied=true b2_stale_retry=true"
-        + " r04_parallel=true test_only=true");
+        + " r06_c19_publish_denied=true b1_legacy_c19_publish_denied=true b1_historical_patch_denied=true"
+        + " b2_stale_retry=true r04_parallel=true test_only=true");
   }
 
   private static void checkLegacyC19PublishFence(Map<String, Actor> tokens, Set<String> consent) throws Exception {
@@ -359,6 +360,72 @@ public final class JourneyGoalDraftTest {
           "coach-a", "legacy-c19-review-after-resave", reviewBody(draftId.toString(), stampedRevision));
       check(nowReviewable.statusCode() == 201 && "ACCEPTED".equals(data(nowReviewable.body()).get("review_state")),
           "B1 resave makes review possible " + nowReviewable.body());
+    } finally {
+      server.stop();
+    }
+  }
+
+  private static void checkLegacyC19PatchCannotLiftFence(Map<String, Actor> tokens, Set<String> consent)
+      throws Exception {
+    Path journal = Files.createTempDirectory("arcava-c19-legacy-patch").resolve("journal.ndjson");
+    UUID draftId = UUID.fromString("c19c19c1-0000-4000-8000-000000000002");
+    String calmRef = GoalProposalAdapter.CALM_ID + "@" + GoalProposalAdapter.CALM_VERSION;
+    String focusRef = GoalProposalAdapter.FOCUS_ID + "@" + GoalProposalAdapter.FOCUS_VERSION;
+    String stepsJson = "[{\"step_id\":\"step.c19.settle\",\"title\":\"Settle\","
+        + "\"published_version_ref\":" + JsonMini.quote(calmRef)
+        + ",\"receipt_sha256\":" + JsonMini.quote(GoalProposalAdapter.CALM_HASH)
+        + ",\"approved\":true,\"rights_granted\":true},"
+        + "{\"step_id\":\"step.c19.focus\",\"title\":\"Focus\","
+        + "\"published_version_ref\":" + JsonMini.quote(focusRef)
+        + ",\"receipt_sha256\":" + JsonMini.quote(GoalProposalAdapter.FOCUS_HASH)
+        + ",\"approved\":true,\"rights_granted\":true}]";
+    Files.writeString(journal, "{\"op\":\"create\",\"tenant_id\":" + JsonMini.quote(TENANT)
+        + ",\"subject_id\":" + JsonMini.quote(JourneyPathTest.COACH_A)
+        + ",\"key\":\"legacy-c19-patch-create\",\"title\":\"Legacy unmarked C19\",\"draft_id\":"
+        + JsonMini.quote(draftId.toString()) + "}\n"
+        + "{\"op\":\"update\",\"tenant_id\":" + JsonMini.quote(TENANT)
+        + ",\"subject_id\":" + JsonMini.quote(JourneyPathTest.COACH_A)
+        + ",\"draft_id\":" + JsonMini.quote(draftId.toString())
+        + ",\"expected_revision\":1,\"title\":\"Legacy unmarked C19\",\"steps\":" + stepsJson + "}\n");
+    JourneyHttpServer server = JourneyHttpServer.start(journal, tokens, consent);
+    try {
+      int port = server.port();
+      HttpResponse<String> loaded = request(port, "GET", drafts(TENANT) + "/" + draftId, "coach-a", null, null);
+      check(loaded.statusCode() == 200 && data(loaded.body()).get("origin") == null
+          && "NONE".equals(data(loaded.body()).get("review_state")), "B1 patch path starts unmarked");
+      HttpResponse<String> patched = request(port, "PATCH", drafts(TENANT) + "/" + draftId, "coach-a", null,
+          updateBody(2));
+      check(patched.statusCode() == 200, "B1 generic PATCH replaces pins " + patched.body());
+      long patchedRevision = JsonMini.integer(data(patched.body()).get("revision"));
+      HttpResponse<String> afterPatch = request(port, "GET", drafts(TENANT) + "/" + draftId, "coach-a", null, null);
+      check(afterPatch.statusCode() == 200 && data(afterPatch.body()).get("origin") == null
+          && !"ACCEPTED".equals(data(afterPatch.body()).get("review_state")),
+          "B1 PATCH does not stamp origin or accept review");
+      check(request(port, "POST", localReview(TENANT, draftId.toString()), "coach-a", "legacy-c19-patch-review",
+          reviewBody(draftId.toString(), patchedRevision)).statusCode() == 422,
+          "B1 unmarked C19 stays unreviewable after PATCH");
+      String beforePublish = Files.readString(journal);
+      HttpResponse<String> publish = request(port, "POST", drafts(TENANT) + "/" + draftId + "/publish",
+          "coach-a", "legacy-c19-patch-publish", "{\"expected_draft_version\":" + patchedRevision + "}");
+      check(publish.statusCode() == 403 && publish.body().contains("FORBIDDEN")
+          && !publish.body().contains("\"data\""), "B1 publish denied after PATCH " + publish.body());
+      check(beforePublish.equals(Files.readString(journal)) && !beforePublish.contains("\"op\":\"publish\"")
+          && !beforePublish.contains("\"op\":\"assign\""), "B1 PATCH publish writes no version");
+      server.stop();
+      server = JourneyHttpServer.start(journal, tokens, consent);
+      port = server.port();
+      HttpResponse<String> restored = request(port, "GET", drafts(TENANT) + "/" + draftId, "coach-a", null, null);
+      check(restored.statusCode() == 200 && data(restored.body()).get("origin") == null
+          && !"ACCEPTED".equals(data(restored.body()).get("review_state")),
+          "B1 restart keeps unmarked C19 provenance");
+      String afterRestart = Files.readString(journal);
+      HttpResponse<String> publishAgain = request(port, "POST", drafts(TENANT) + "/" + draftId + "/publish",
+          "coach-a", "legacy-c19-patch-publish-restart",
+          "{\"expected_draft_version\":" + patchedRevision + "}");
+      check(publishAgain.statusCode() == 403 && publishAgain.body().contains("FORBIDDEN"),
+          "B1 publish denied after PATCH restart " + publishAgain.body());
+      check(afterRestart.equals(Files.readString(journal)) && !afterRestart.contains("\"op\":\"publish\"")
+          && !afterRestart.contains("\"op\":\"assign\""), "B1 restart publish writes no version");
     } finally {
       server.stop();
     }

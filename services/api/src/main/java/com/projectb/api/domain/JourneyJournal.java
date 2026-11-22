@@ -90,6 +90,7 @@ public final class JourneyJournal {
   private final Map<UUID, Projection> projections = new LinkedHashMap<>();
   private final Map<UUID, EnrollmentLink> enrollments = new LinkedHashMap<>();
   private final Map<UUID, String> draftOrigins = new LinkedHashMap<>();
+  private final Set<UUID> c19PinHistory = new java.util.LinkedHashSet<>();
   private final Map<UUID, C19LocalReview.Receipt> reviews = new LinkedHashMap<>();
   private record ReviewRetry(String tenantId, String subjectId, String key) {}
   private final Map<ReviewRetry, C19LocalReview.Receipt> reviewRetries = new LinkedHashMap<>();
@@ -613,11 +614,13 @@ public final class JourneyJournal {
       }
       case "update" -> {
         UUID draftId = UUID.fromString(JsonMini.text(command.get("draft_id")));
+        List<Step> steps = readSteps(command.get("steps"));
         kernel.updateDraft(actor, actor.tenantId(), draftId,
             JsonMini.integer(command.get("expected_revision")),
-            JsonMini.text(command.get("title")), readSteps(command.get("steps")));
+            JsonMini.text(command.get("title")), steps);
         if (command.get("phases_json") instanceof String phases) draftPhases.put(draftId, phases);
         rememberOrigin(draftId, command.get("origin"));
+        rememberC19History(draftId, steps);
       }
       case "c19_local_review" -> replayLocalReview(command, actor);
       case "publish" -> {
@@ -707,6 +710,7 @@ public final class JourneyJournal {
 
   private boolean c19PublishDenied(Actor actor, UUID draftId) {
     if (C19LocalReview.ORIGIN.equals(draftOrigins.get(draftId))) return true;
+    if (c19PinHistory.contains(draftId)) return true;
     DraftView draft = kernel.readDraft(actor, draftId);
     if (draft.steps().isEmpty()) return false;
     GoalProposalAdapter adapter = new GoalProposalAdapter();
@@ -714,6 +718,17 @@ public final class JourneyJournal {
       if (adapter.isAdmittedC19Pin(step.canonicalPin())) return true;
     }
     return false;
+  }
+
+  private void rememberC19History(UUID draftId, List<Step> steps) {
+    if (c19PinHistory.contains(draftId) || steps == null) return;
+    GoalProposalAdapter adapter = new GoalProposalAdapter();
+    for (Step step : steps) {
+      if (adapter.isAdmittedC19Pin(step.canonicalPin())) {
+        c19PinHistory.add(draftId);
+        return;
+      }
+    }
   }
 
   private DraftView requireC19Draft(Actor actor, UUID draftId, long expectedRevision) {
